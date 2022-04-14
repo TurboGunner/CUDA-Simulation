@@ -35,11 +35,22 @@ void CudaMemoryFreer(vector<reference_wrapper<int*>>& ptrs) {
     }
 }
 
-void CudaMemoryAllocator(vector<reference_wrapper<int*>>& ptrs, size_t size_alloc) {
+void CudaMemoryAllocator(vector<reference_wrapper<int*>>& ptrs, size_t size_alloc, size_t element_alloc) { //0 if used combined alloc
     for (size_t i = 0; i < ptrs.size(); i++) {
         if (ptrs.at(i).get() == nullptr) {
-            cudaError_t output_status = cudaMalloc((void**)&ptrs.at(i).get(), size_alloc * sizeof(int));
+            cudaError_t output_status = cudaMalloc((void**)&ptrs.at(i).get(), size_alloc * element_alloc);
             CudaExceptionHandler(output_status, "cudaMalloc failed!");
         }
     }
+}
+
+cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type, 
+    cudaError_t error, size_t size_alloc, size_t element_alloc) {
+    if (error == cudaSuccess) {
+        error = cudaMemcpy(tgt, src, size_alloc * element_alloc, mem_copy_type);
+        if (error != cudaSuccess) {
+            fprintf(stderr, "cudaMemcpy failed!");
+        }
+    }
+    return error;
 }
