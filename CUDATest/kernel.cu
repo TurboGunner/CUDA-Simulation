@@ -1,20 +1,13 @@
 ﻿
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-
-#include <stdexcept>
-#include <string>
-#include <vector>
-#include <functional>
+#include "handler_methods.hpp"
 
 #include <stdio.h>
 
-using std::vector;
-using std::reference_wrapper;
+cudaError_t AddWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
-
-__global__ void addKernel(int *c, const int *a, const int *b)
+__global__ void AddKernel(int *c, const int *a, const int *b)
 {
     int i = threadIdx.x;
     c[i] = a[i] + b[i];
@@ -28,34 +21,25 @@ int main()
     int c[arraySize] = { 0 };
 
     // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addWithCuda failed!");
-        return 1;
-    }
+    cudaError_t cudaStatus = AddWithCuda(c, a, b, arraySize);
+    CudaExceptionHandler(cudaStatus, "addWithCuda failed!");
 
     printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
         c[0], c[1], c[2], c[3], c[4]);
 
-    // cudaDeviceReset must be called before exiting in order for profiling and
-    // tracing tools such as Nsight and Visual Profiler to show complete traces.
     cudaStatus = cudaDeviceReset();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceReset failed!");
-        return 1;
-    }
+
+    CudaExceptionHandler(cudaStatus, "cudaDeviceReset failed!");
 
     return 0;
 }
 
-// Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
+cudaError_t AddWithCuda(int *c, const int *a, const int *b, unsigned int size)
 {
-    int* dev_a = 0, * dev_b = 0, * dev_c = 0;
+    int* dev_a = 0, *dev_b = 0, *dev_c = 0;
     cudaError_t cudaStatus;
 
-    // Choose which GPU to run on, change this on a multi-GPU system.
-    cudaStatus = cudaSetDevice(0);
+    cudaStatus = cudaSetDevice(0); //Assumes no multi-GPU
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
         goto Error;
@@ -94,7 +78,7 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
     }
 
     // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
+    AddKernel<<<1, size>>>(dev_c, dev_a, dev_b);
 
     // Check for any errors launching the kernel
     cudaStatus = cudaGetLastError();
@@ -118,22 +102,8 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
         goto Error;
     }
 
-Error:
-    vector<int*> ptrs({dev_a, dev_b, dev_c});
-    CudaMemoryManager(ptrs);
-    
+    Error:
+        void* ptrs[] = { dev_a, dev_b, dev_c };
+        CudaMemoryFreer(ptrs);
     return cudaStatus;
-}
-
-void CudaExceptionHandler(cudaError_t cuda_status, std::string error_message) {
-    if (cuda_status != cudaSuccess) {
-        throw std::invalid_argument(error_message);
-    }
-}
-
-template <typename T>
-void CudaMemoryManager(vector<T>& ptrs) {
-    for (auto const ptr : ptrs) {
-        cudaFree(ptr);
-    }
 }

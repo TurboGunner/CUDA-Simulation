@@ -79,6 +79,12 @@
   <ItemGroup>
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="handler_methods.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="handler_methods.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.6.targets" />
