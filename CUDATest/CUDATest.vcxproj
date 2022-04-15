@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F4E9BE34-26A5-4B4E-AAEA-E046456E6B07}</ProjectGuid>
     <RootNamespace>CUDATest</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -47,6 +48,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -81,9 +83,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="handler_methods.cpp" />
+    <ClCompile Include="vector_field.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handler_methods.hpp" />
+    <ClInclude Include="vector_field.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

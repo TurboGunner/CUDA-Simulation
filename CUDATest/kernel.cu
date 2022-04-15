@@ -53,11 +53,12 @@ cudaError_t AddWithCuda(int *c, const int *a, const int *b, unsigned int size)
     }
 
     CudaMemoryAllocator(bidoof, (size_t) size, sizeof(int));
-    // Copy input vectors from host memory to GPU buffers
+    // Copy input vectors from host memory to GPU buffers.
     cudaStatus = CopyFunction("cudaMemcpy failed!", dev_a, a, cudaMemcpyHostToDevice, cudaStatus, (size_t)size, sizeof(int));
     cudaStatus = CopyFunction("cudaMemcpy failed!", dev_b, b, cudaMemcpyHostToDevice, cudaStatus, (size_t)size, sizeof(int));
 
-    AddKernel<<<1, size>>>(dev_c, dev_a, dev_b);     // Launch a kernel on the GPU with one thread for each element.
+    // Launch a kernel on the GPU with one thread for each element.
+    AddKernel<<<1, size>>>(dev_c, dev_a, dev_b);
 
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
