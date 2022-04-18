@@ -1,6 +1,7 @@
 #include "vector_field.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 using std::string;
 using std::set;
@@ -38,14 +39,22 @@ VectorField::VectorField(unsigned int x, unsigned int y, const set<F_Vector>& se
 
 set<F_Vector> VectorField::LoadDefaultVectorSet() {
 	set<F_Vector> output;
-	unsigned int xCurrent = 0, yCurrent = 0;
-	for (F_Vector vector(0, 0); yCurrent == size_y_ && xCurrent == size_x_; xCurrent++) {
-		if (xCurrent == size_x_) {
-			xCurrent = 0;
-			yCurrent++;
+	unsigned int yCurrent = 0;
+	for (F_Vector vector(0, 0); yCurrent < size_y_; yCurrent++) {
+		for (unsigned int i = 0; i < size_x_; i++) {
+			std::cout << "yes" << std::endl;
+			IndexPair pair(i, yCurrent);
+			map_.emplace(pair, vector);
 		}
-		IndexPair pair(xCurrent, yCurrent);
-		map_.emplace(pair, vector);
+	}
+	return output;
+}
+
+string VectorField::ToString() {
+	string output;
+	std::cout << map_.size() << std::endl;
+	for (auto const& entry : map_) {
+		output += entry.first.ToString() + "\n" + entry.second.ToString() + "\n\n";
 	}
 	return output;
 }

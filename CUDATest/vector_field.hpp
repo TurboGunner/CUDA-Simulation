@@ -11,7 +11,6 @@ using std::set;
 using std::map;
 
 struct F_Vector {
-	F_Vector() = default;
 	F_Vector(float x_in = 0, float y_in = 0) { //Loaded Constructor
 		vx = x_in;
 		vy = y_in;
@@ -28,7 +27,7 @@ struct F_Vector {
 	}
 
 	bool operator==(const F_Vector& v1) const {
-		return (vx == v1.vx) && (vx == v1.vy);
+		return vx == v1.vx && vy == v1.vy;
 	}
 
 	size_t operator()(const F_Vector& v1) const noexcept {
@@ -42,22 +41,21 @@ struct F_Vector {
 		vy = copy.vy;
 	}
 
-	string ToString() {
-		return "X Component: " + std::to_string(vx) +  "\nYComponent: " + std::to_string(vy);
+	string ToString() const {
+		return "X Component: " + std::to_string(vx) +  " | Y Component: " + std::to_string(vy);
 	}
 
-	float vx, vy; //Components
+	float vx = 0, vy = 0; //Components
 };
 
 struct IndexPair {
-	IndexPair() = default;
-	IndexPair(unsigned int x_in = 0, unsigned int y_in = 0) { //Loaded Constructor
+	IndexPair(unsigned int x_in, unsigned int y_in) { //Loaded Constructor
 		x = x_in;
 		y = y_in;
 	}
 
 	bool operator==(const IndexPair& i1)  const {
-		return (x == i1.x) && (y == i1.y);
+		return x == i1.x && y == i1.y;
 	}
 
 	unsigned int operator()(const IndexPair& i1) const noexcept {
@@ -67,14 +65,17 @@ struct IndexPair {
 	}
 
 	bool operator<(const IndexPair& i1)  const {
-		return ((x * y) < (i1.x * i1.y));
+		if (y == i1.y) {
+			return x < i1.x;
+		}
+		return y < i1.y;
 	}
 
-	string ToString() {
-		return "X Component: " + std::to_string(x) + "\nYComponent: " + std::to_string(y);
+	string ToString() const {
+		return "X Component: " + std::to_string(x) + " | Y Component: " + std::to_string(y);
 	}
 
-	unsigned int x, y; //Spots
+	unsigned int x = 0, y = 0; //Spots
 };
 
 class VectorField {
@@ -101,6 +102,8 @@ class VectorField {
 		void SetSizeY(unsigned int y) {
 			size_y_ = y;
 		}
+
+		string ToString();
 
 	private:
 		map<IndexPair, F_Vector> map_;

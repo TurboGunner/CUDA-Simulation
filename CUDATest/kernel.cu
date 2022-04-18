@@ -2,6 +2,7 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "handler_methods.hpp"
+#include "vector_field.hpp"
 
 #include <iostream>
 
@@ -34,6 +35,10 @@ int main()
 
     cudaStatus = cudaDeviceReset();
     CudaExceptionHandler(cudaStatus, "cudaDeviceReset failed!");
+
+    VectorField field(3, 3);
+    field.GetVectorMap()[IndexPair(2, 2)] = F_Vector(2, 2);
+    std::cout << field.ToString() << std::endl;
 
     return 0;
 }
