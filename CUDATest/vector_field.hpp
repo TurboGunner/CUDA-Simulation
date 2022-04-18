@@ -30,6 +30,19 @@ struct F_Vector {
 		return vx == v1.vx && vy == v1.vy;
 	}
 
+	const F_Vector operator+(const F_Vector& v1) const {
+		F_Vector output = *this;
+		output.vx += v1.vx;
+		output.vy += v1.vy;
+		return output;
+	}
+
+	F_Vector operator*(float num) {
+		vx *= num;
+		vy *= num;
+		return *this;
+	}
+
 	size_t operator()(const F_Vector& v1) const noexcept {
 		size_t hash1 = std::hash<float>()(v1.vx);
 		size_t hash2 = std::hash<float>()(v1.vy);
@@ -94,6 +107,10 @@ class VectorField {
 		}
 		unsigned int GetSizeY() const {
 			return size_y_;
+		}
+
+		void operator=(const VectorField& copy) {
+			map_ = copy.map_;
 		}
 
 		void SetSizeX(unsigned int x) {

@@ -18,12 +18,18 @@
     <ClInclude Include="vector_field.hpp">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="fluid_sim.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="handler_methods.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="vector_field.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="fluid_sim.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
   </ItemGroup>
