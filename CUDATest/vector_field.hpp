@@ -37,7 +37,20 @@ struct F_Vector {
 		return output;
 	}
 
+	const F_Vector operator-(const F_Vector& v1) const {
+		F_Vector output = *this;
+		output.vx -= v1.vx;
+		output.vy -= v1.vy;
+		return output;
+	}
+
 	F_Vector operator*(float num) {
+		vx *= num;
+		vy *= num;
+		return *this;
+	}
+
+	F_Vector operator*(unsigned int num) {
 		vx *= num;
 		vy *= num;
 		return *this;

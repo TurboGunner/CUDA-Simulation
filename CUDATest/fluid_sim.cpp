@@ -28,15 +28,91 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
 	velocity_.GetVectorMap()[pair] = F_Vector(x, y);
 }
 
-VectorField FluidSim::Diffuse(int b, VectorField prev_field, float diff, float dt) {
-	VectorField current_field = prev_field;
+VectorField FluidSim::Diffuse(int b, VectorField& current, VectorField& previous, float diff, float dt) {
 	float a = dt * diff * (iterations_ - 2) * (iterations_ - 2);
 
-	LinearSolve(b, current_field, prev_field, a, 4 * a);
-	return current_field;
+	LinearSolve(b, current, previous, a, 4 * a);
+	return current;
 }
 
-void FluidSim::LinearSolve(int b, VectorField& current, VectorField previous, float a, float c) {
+void FluidSim::Project(VectorField& current, VectorField& previous, VectorField& velocity) {
+	unsigned int x, y, bound = size_x_ - 1;
+
+	for (y = 1; y < bound; y++) {
+		for (x = 1; x < bound; x++) {
+
+			map<IndexPair, F_Vector> c_map = current.GetVectorMap(),
+				p_map = previous.GetVectorMap(),
+				v_map = velocity.GetVectorMap();
+
+			map<FluidSim::Direction, IndexPair> pairs = GetAdjacentCoordinates(IndexPair(x, y));
+
+			F_Vector calc =
+				(v_map[pairs[Direction::Right]] - v_map[pairs[Direction::Left]]
+				+ v_map[pairs[Direction::Up]] - v_map[pairs[Direction::Down]]
+				);
+			calc = calc * (1 / iterations_) * -0.5f;
+
+			c_map[IndexPair(x, y)] = calc;
+			p_map[pairs[Direction::Origin]] = 0;
+		}
+	}
+	LinearSolve(0, current, previous, 1, 6);
+}
+
+void FluidSim::Advect(int b, VectorField& current, VectorField& previous, VectorField& velocity, float dt) {
+	unsigned int bound = size_x_ - 1;
+	float x_current, x_previous, y_current, y_previous;
+
+	float x_dt = dt * (iterations_ - 2);
+	float y_dt = dt * (iterations_ - 2);
+
+	float s0, s1, t0, t1;
+	float x, y;
+
+	int x_value, y_value;
+
+	map<IndexPair, F_Vector> c_map = current.GetVectorMap(),
+		p_map = previous.GetVectorMap(),
+		v_map = velocity.GetVectorMap();
+
+	for (y = 1; y < bound; y++) {
+		for (x = 1; x < bound; x++) {
+			x_value = x - (x_dt * v_map[IndexPair(x, y)].vx);
+			y_value = y - (y_dt * v_map[IndexPair(x, y)].vy);
+
+			if (x_value < 0.5f) {
+				x_value = 0.5f;
+			}
+			if (x_value > iterations_ + 0.5f) {
+				x_value = iterations_ + 0.5f;
+			}
+			x_current = floor(x_value);
+			x_previous = x_current + 1.0f;
+			if (y_value < 0.5f) {
+				y_value = 0.5f;
+			}
+			if (y_value > iterations_ + 0.5f) {
+				y_value = iterations_ + 0.5f;
+			}
+			y_current = floor(y_value);
+			x_previous = x_current + 1.0f;
+
+			s1 = x_value - x_current;
+			s0 = 1.0f - s1;
+			t1 = y_value - y_current;
+			t0 = 1.0f - t1;
+
+			c_map[IndexPair(x, y)] =
+				((p_map[IndexPair(int(x_current), int(y_current))] * t0) +
+				(p_map[IndexPair(int(x_current), int(y_previous))] * t1) * s0) +
+				((p_map[IndexPair(int(x_previous), int(y_current))] * t0) +
+				(p_map[IndexPair(int(x_previous), int(y_previous))] * t1) * s1);
+		}
+	}
+}
+
+void FluidSim::LinearSolve(int b, VectorField& current, VectorField& previous, float a_fac, float c_fac) {
 	unsigned int step, x, y, z,
 		bound = size_x_ - 1; //z is for later when we add 3 dimensions
 
@@ -47,12 +123,13 @@ void FluidSim::LinearSolve(int b, VectorField& current, VectorField previous, fl
 					p_map = previous.GetVectorMap();
 
 				map<FluidSim::Direction, IndexPair> pairs = GetAdjacentCoordinates(IndexPair(x, y));
-				c_map[pairs[Direction::Origin]] = p_map[pairs[Direction::Origin]] + (c_map[pairs[Direction::Right]] * a)
+
+				c_map[pairs[Direction::Origin]] = p_map[pairs[Direction::Origin]]
+					+ (c_map[pairs[Direction::Right]] * a_fac)
 					+ c_map[pairs[Direction::Left]]
 					+ c_map[pairs[Direction::Up]]
 					+ c_map[pairs[Direction::Down]]
-					* (1.0 / c);
-
+					* (1.0f / c_fac);
 			}
 		}
 	}
