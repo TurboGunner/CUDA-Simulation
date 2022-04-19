@@ -11,7 +11,7 @@ using std::set;
 using std::map;
 
 struct F_Vector {
-	F_Vector(float x_in = 0, float y_in = 0) { //Loaded Constructor
+	F_Vector(float x_in = 1, float y_in = 1) { //Loaded Constructor
 		vx = x_in;
 		vy = y_in;
 	}
@@ -71,10 +71,11 @@ struct F_Vector {
 		return "X Component: " + std::to_string(vx) +  " | Y Component: " + std::to_string(vy);
 	}
 
-	float vx = 0, vy = 0; //Components
+	float vx, vy; //Components
 };
 
 struct IndexPair {
+	IndexPair() = default;
 	IndexPair(unsigned int x_in, unsigned int y_in) { //Loaded Constructor
 		x = x_in;
 		y = y_in;

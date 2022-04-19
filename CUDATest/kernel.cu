@@ -1,8 +1,10 @@
 ﻿
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+
 #include "handler_methods.hpp"
 #include "vector_field.hpp"
+#include "fluid_sim.hpp"
 
 #include <iostream>
 
@@ -37,8 +39,19 @@ int main()
     CudaExceptionHandler(cudaStatus, "cudaDeviceReset failed!");
 
     VectorField field(3, 3);
-    field.GetVectorMap()[IndexPair(2, 2)] = F_Vector(2, 2);
-    std::cout << field.ToString() << std::endl;
+    FluidSim simulation(.1f, 1.0f, 1, 3, 3, 32);
+
+    simulation.AddVelocity(IndexPair(0, 0), 10, 10);
+    simulation.AddVelocity(IndexPair(1, 0), 2, 2);
+    simulation.AddVelocity(IndexPair(1, 1), 20, 20);
+    simulation.AddDensity(IndexPair(1, 1), 1.0f, 1.0f);
+    simulation.AddDensity(IndexPair(2, 2), 10.0f, 1.0f);
+
+    simulation.Diffuse(1, 1.0f, 1.0f);
+    simulation.Project();
+    simulation.Advect(0, 1.0f);
+    std::cout << simulation.density_.ToString() << std::endl;
+    std::cout << simulation.velocity_.ToString() << std::endl;
 
     return 0;
 }
