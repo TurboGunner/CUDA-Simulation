@@ -10,6 +10,9 @@
     <Filter Include="cuda">
       <UniqueIdentifier>{47916144-91fa-4a14-9fda-1a4b18cf6b58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cpp\data_structures">
+      <UniqueIdentifier>{96d073b8-ecfd-46b9-b0a2-340d26b2737b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handler_methods.hpp">
@@ -26,11 +29,17 @@
     <ClCompile Include="handler_methods.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="vector_field.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="fluid_sim.cpp">
       <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="index_pair.cpp">
+      <Filter>cpp\data_structures</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_field.cpp">
+      <Filter>cpp\data_structures</Filter>
+    </ClCompile>
+    <ClCompile Include="f_vector.cpp">
+      <Filter>cpp\data_structures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

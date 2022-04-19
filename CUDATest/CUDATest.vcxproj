@@ -82,6 +82,8 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="f_vector.cpp" />
+    <ClCompile Include="index_pair.cpp" />
     <ClCompile Include="fluid_sim.cpp" />
     <ClCompile Include="handler_methods.cpp" />
     <ClCompile Include="vector_field.cpp" />

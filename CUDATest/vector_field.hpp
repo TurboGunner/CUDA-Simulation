@@ -11,96 +11,40 @@ using std::set;
 using std::map;
 
 struct F_Vector {
-	F_Vector(float x_in = 1, float y_in = 1) { //Loaded Constructor
-		vx = x_in;
-		vy = y_in;
-	}
+	F_Vector(float x_in = 1, float y_in = 1);
 
-	float* AsArrPair() { //Output as float pointer
-		float output[2] = { vx, vy };
-		return output;
-	}
+	float* AsArrPair();
 
-	float Magnitude() const {
-		float combined = pow(vx, 2) + pow(vy, 2);
-		return sqrt(combined);
-	}
+	float Magnitude() const;
 
-	bool operator==(const F_Vector& v1) const {
-		return vx == v1.vx && vy == v1.vy;
-	}
+	bool operator==(const F_Vector& v1) const;
 
-	const F_Vector operator+(const F_Vector& v1) const {
-		F_Vector output = *this;
-		output.vx += v1.vx;
-		output.vy += v1.vy;
-		return output;
-	}
+	const F_Vector operator+(const F_Vector& v1) const;
+	const F_Vector operator-(const F_Vector& v1) const;
 
-	const F_Vector operator-(const F_Vector& v1) const {
-		F_Vector output = *this;
-		output.vx -= v1.vx;
-		output.vy -= v1.vy;
-		return output;
-	}
+	F_Vector operator*(float num);
+	F_Vector operator*(unsigned int num);
 
-	F_Vector operator*(float num) {
-		vx *= num;
-		vy *= num;
-		return *this;
-	}
+	size_t operator()(const F_Vector& v1) const noexcept;
 
-	F_Vector operator*(unsigned int num) {
-		vx *= num;
-		vy *= num;
-		return *this;
-	}
+	void operator=(const F_Vector& copy);
 
-	size_t operator()(const F_Vector& v1) const noexcept {
-		size_t hash1 = std::hash<float>()(v1.vx);
-		size_t hash2 = std::hash<float>()(v1.vy);
-		return hash1 ^ (hash2 << 1);
-	}
-
-	void operator=(const F_Vector& copy) {
-		vx = copy.vx;
-		vy = copy.vy;
-	}
-
-	string ToString() const {
-		return "X Component: " + std::to_string(vx) +  " | Y Component: " + std::to_string(vy);
-	}
+	string ToString() const;
 
 	float vx, vy; //Components
 };
 
 struct IndexPair {
 	IndexPair() = default;
-	IndexPair(unsigned int x_in, unsigned int y_in) { //Loaded Constructor
-		x = x_in;
-		y = y_in;
-	}
+	IndexPair(unsigned int x_in, unsigned int y_in);
 
-	bool operator==(const IndexPair& i1)  const {
-		return x == i1.x && y == i1.y;
-	}
+	bool operator==(const IndexPair& i1) const;
 
-	unsigned int operator()(const IndexPair& i1) const noexcept {
-		unsigned int hash1 = std::hash<unsigned int>()(i1.x);
-		unsigned int hash2 = std::hash<unsigned int>()(i1.y);
-		return hash1 ^ (hash2 << 1);
-	}
+	unsigned int operator()(const IndexPair& i1) const noexcept;
 
-	bool operator<(const IndexPair& i1)  const {
-		if (y == i1.y) {
-			return x < i1.x;
-		}
-		return y < i1.y;
-	}
+	bool operator<(const IndexPair& i1) const;
 
-	string ToString() const {
-		return "X Component: " + std::to_string(x) + " | Y Component: " + std::to_string(y);
-	}
+	string ToString() const;
 
 	unsigned int x = 0, y = 0; //Spots
 };
@@ -116,16 +60,10 @@ class VectorField {
 			return map_;
 		}
 
-		unsigned int GetSizeX() const {
-			return size_x_;
-		}
-		unsigned int GetSizeY() const {
-			return size_y_;
-		}
+		unsigned int GetSizeX() const;
+		unsigned int GetSizeY() const;
 
-		void operator=(const VectorField& copy) {
-			map_ = copy.map_;
-		}
+		void operator=(const VectorField& copy);
 
 		void SetSizeX(unsigned int x) {
 			size_x_ = x;

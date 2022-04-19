@@ -13,7 +13,7 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 	size_y_ = size_y;
 
 	if (iter == 0) {
-		throw std::invalid_argument("Error: Bounds must be at least greater than or equal to 1!");
+		throw std::invalid_argument("Error: The number of iterations must be at least greater than or equal to 1!");
 	}
 	iterations_ = iter;
 
@@ -30,24 +30,21 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
 	velocity_.GetVectorMap()[pair] = F_Vector(x, y);
 }
 
-VectorField FluidSim::Diffuse(int b, float diff, float dt) {
+VectorField FluidSim::Diffuse(int bounds, float diff, float dt) {
 	VectorField& current = density_;
 	VectorField& previous = density_prev_;
 	float a = dt * diff * (size_x_ - 2) * (size_x_ - 2);
 
-	LinearSolve(b, current, previous, a, 1 + 4 * a);
+	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
 	return current;
 }
 
 void FluidSim::Project() {
-	VectorField& current = density_;
-	VectorField& previous = density_prev_;
-	VectorField& velocity = velocity_;
 
 	unsigned int x, y, bound = size_x_ - 1;
-	map<IndexPair, F_Vector>& c_map = current.GetVectorMap(),
-		p_map = previous.GetVectorMap(),
-		v_map = velocity.GetVectorMap();
+	map<IndexPair, F_Vector>& c_map = density_.GetVectorMap(),
+		p_map = density_prev_.GetVectorMap(),
+		v_map = velocity_.GetVectorMap();
 
 	for (y = 1; y < bound; y++) {
 		for (x = 1; x < bound; x++) {
@@ -67,9 +64,9 @@ void FluidSim::Project() {
 			p_map[pairs[Direction::Origin]] = 0;
 		}
 	}
-	BoundaryConditions(0, current);
-	BoundaryConditions(0, previous);
-	LinearSolve(0, current, previous, 1, 4);
+	BoundaryConditions(0, density_);
+	BoundaryConditions(0, density_prev_);
+	LinearSolve(0, density_, density_prev_, 1, 4);
 
 	for (y = 1; y < bound; y++) {
 		for (x = 1; x < bound; x++) {
@@ -83,10 +80,10 @@ void FluidSim::Project() {
 	BoundaryConditions(1, velocity_);
 }
 
-void FluidSim::Advect(int b, float dt) {
-	VectorField& current = density_;
-	VectorField& previous = density_prev_;
-	VectorField& velocity = velocity_;
+void FluidSim::Advect(int bounds, float dt) {
+	VectorField& current = density_,
+		previous = density_prev_,
+		velocity = velocity_;
 
 	unsigned int bound = size_x_ - 1;
 	float x_current, x_previous, y_current, y_previous;
@@ -94,7 +91,7 @@ void FluidSim::Advect(int b, float dt) {
 	float x_dt = dt * (size_x_ - 2);
 	float y_dt = dt * (size_x_ - 2);
 
-	float s0, s1, t0, t1;
+	float velocity_x_curr, velocity_x_prev, velocity_y_curr, velocity_y_prev;
 	float x, y;
 
 	int x_value, y_value;
@@ -125,32 +122,32 @@ void FluidSim::Advect(int b, float dt) {
 			y_current = y_value;
 			y_previous = y_current + 1.0f;
 
-			s1 = x_value - x_current;
-			s0 = 1.0f - s1;
-			t1 = y_value - y_current;
-			t0 = 1.0f - t1;
+			velocity_x_prev = x_value - x_current;
+			velocity_x_curr = 1.0f - velocity_x_prev;
+			velocity_y_prev = y_value - y_current;
+			velocity_y_curr = 1.0f - velocity_y_prev;
 
 			c_map[IndexPair(x, y)] =
-				((p_map[IndexPair(int(x_current), int(y_current))] * t0) +
-				(p_map[IndexPair(int(x_current), int(y_previous))] * t1) * s0) +
-				((p_map[IndexPair(int(x_previous), int(y_current))] * t0) +
-				(p_map[IndexPair(int(x_previous), int(y_previous))] * t1) * s1);
+				((p_map[IndexPair(int(x_current), int(y_current))] * velocity_y_curr) +
+				(p_map[IndexPair(int(x_current), int(y_previous))] * velocity_y_prev) * velocity_x_curr) +
+				((p_map[IndexPair(int(x_previous), int(y_current))] * velocity_y_curr) +
+				(p_map[IndexPair(int(x_previous), int(y_previous))] * velocity_y_prev) * velocity_x_prev);
 		}
 	}
-	BoundaryConditions(b, current);
+	BoundaryConditions(bounds, current);
 }
 
-void FluidSim::BoundaryConditions(int b, VectorField& input) {
+void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 	unsigned int bound = size_x_ - 1;
 	map<IndexPair, F_Vector>& c_map = input.GetVectorMap();
 
 	for (int i = 1; i < bound; i++) {
-		c_map[IndexPair(i, 0)].vx = b == 1 ? c_map[IndexPair(i, 0)].vx * -1.0f : c_map[IndexPair(i, 1)].vx;
-		c_map[IndexPair(i, bound)].vx = b == 1 ? c_map[IndexPair(i, bound - 1)].vx * -1.0f : c_map[IndexPair(i, bound - 1)].vx;
+		c_map[IndexPair(i, 0)].vx = bounds == 1 ? c_map[IndexPair(i, 0)].vx * -1.0f : c_map[IndexPair(i, 1)].vx;
+		c_map[IndexPair(i, bound)].vx = bounds == 1 ? c_map[IndexPair(i, bound - 1)].vx * -1.0f : c_map[IndexPair(i, bound - 1)].vx;
 	}
 	for (int j = 1; j < bound; j++) {
-		c_map[IndexPair(0, j)].vy = b == 1 ? c_map[IndexPair(1, j)].vy * -1.0f : c_map[IndexPair(1, j)].vy;
-		c_map[IndexPair(bound, j)] = b == 1 ? c_map[IndexPair(bound - 1, j)] * -1.0f : c_map[IndexPair(bound - 1, j)].vy;
+		c_map[IndexPair(0, j)].vy = bounds == 1 ? c_map[IndexPair(1, j)].vy * -1.0f : c_map[IndexPair(1, j)].vy;
+		c_map[IndexPair(bound, j)] = bounds == 1 ? c_map[IndexPair(bound - 1, j)] * -1.0f : c_map[IndexPair(bound - 1, j)].vy;
 	}
 
 	c_map[IndexPair(0, 0)] = c_map[IndexPair(1, 0)] + c_map[IndexPair(0, 1)] * .5f;
@@ -159,7 +156,7 @@ void FluidSim::BoundaryConditions(int b, VectorField& input) {
 	c_map[IndexPair(bound, bound)] = c_map[IndexPair(bound - 1, bound)] + c_map[IndexPair(bound, bound - 1)] * .5f;
 }
 
-void FluidSim::LinearSolve(int b, VectorField& current, VectorField& previous, float a_fac, float c_fac) {
+void FluidSim::LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac) {
 	unsigned int step, x, y, z,
 		bound = size_x_ - 1; //z is for later when we add 3 dimensions
 	map<IndexPair, F_Vector>& c_map = current.GetVectorMap(),
@@ -179,11 +176,10 @@ void FluidSim::LinearSolve(int b, VectorField& current, VectorField& previous, f
 
 				calc = calc + p_map[pairs[Direction::Origin]];
 				c_map[pairs[Direction::Origin]] = calc * (1.0f / c_fac);
-				//std::cout << c_map[pairs[Direction::Origin]].ToString() << std::endl;
 			}
 		}
 	}
-	BoundaryConditions(b, current);
+	BoundaryConditions(bounds, current);
 }
 
 map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(IndexPair incident) {

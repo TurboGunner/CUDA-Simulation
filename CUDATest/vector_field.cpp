@@ -57,3 +57,15 @@ string VectorField::ToString() {
 	}
 	return output;
 }
+
+unsigned int VectorField::GetSizeX() const {
+	return size_x_;
+}
+
+unsigned int VectorField::GetSizeY() const {
+	return size_y_;
+}
+
+void VectorField::operator=(const VectorField& copy) {
+	map_ = copy.map_;
+}
