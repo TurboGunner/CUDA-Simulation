@@ -1,5 +1,7 @@
 #include "vector_field.hpp"
 
+#include <math.h>
+
 F_Vector::F_Vector(float x_in, float y_in) { //Loaded Constructor
 	vx = x_in;
 	vy = y_in;

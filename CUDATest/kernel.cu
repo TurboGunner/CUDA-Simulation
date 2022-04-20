@@ -1,6 +1,7 @@
-﻿
-#include "cuda_runtime.h"
+﻿#include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+
+#include "fluid_sim_cuda.cuh"
 
 #include "handler_methods.hpp"
 #include "vector_field.hpp"
@@ -13,55 +14,70 @@
 using std::vector;
 using std::reference_wrapper;
 
-cudaError_t AddWithCuda(int *c, const int *a, const int *b, unsigned int size);
+cudaError_t NavierStokesCuda(float* c, const float* a, const float* b, unsigned int size);
 
-__global__ void AddKernel(int *c, const int *a, const int *b)
+__global__ void VelocityKernel(float *c, const float *velocity_x, const float *velocity_y)
 {
-    int i = threadIdx.x;
-    c[i] = a[i] * b[i];
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < 5; i += blockDim.x * gridDim.x)
+    {
+        c[i] = velocity_x[i] * velocity_y[i];
+    }
 }
 
-int main()
-{
-    const int arraySize = 5;
-    const int a[arraySize] = { 1, 2, 3, 4, 5 },
-        b[arraySize] = { 10, 20, 30, 40, 50 };
-    int c[arraySize] = { 0 };
-
-    // Add vectors in parallel
-    cudaError_t cudaStatus = AddWithCuda(c, a, b, arraySize);
-    CudaExceptionHandler(cudaStatus, "addWithCuda failed!");
-
-    printf("{1,2,3,4,5} * {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
-        c[0], c[1], c[2], c[3], c[4]);
-
-    cudaStatus = cudaDeviceReset();
-    CudaExceptionHandler(cudaStatus, "cudaDeviceReset failed!");
-
-    VectorField field(3, 3);
-    FluidSim simulation(.1f, 1.0f, 1, 3, 3, 32);
-
+void SimulationOperations(FluidSim& simulation) {
     simulation.AddVelocity(IndexPair(0, 0), 10, 10);
     simulation.AddVelocity(IndexPair(1, 0), 2, 2);
     simulation.AddVelocity(IndexPair(1, 1), 20, 20);
+
     simulation.AddDensity(IndexPair(1, 1), 1.0f, 1.0f);
     simulation.AddDensity(IndexPair(2, 2), 10.0f, 1.0f);
 
     simulation.Diffuse(1, 1.0f, 1.0f);
     simulation.Project();
     simulation.Advect(0, 1.0f);
-    std::cout << simulation.density_.ToString() << std::endl;
-    std::cout << simulation.velocity_.ToString() << std::endl;
+    //std::cout << simulation.density_.ToString() << std::endl;
+    //std::cout << simulation.velocity_.ToString() << std::endl;
+}
+
+int main()
+{
+    const int arraySize = 5;
+    const float a[arraySize] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f },
+        b[arraySize] = { 10.0f, 20.0f, 30.0f, 40.0f, 50.0f };
+    float c[arraySize] = { 0.0f };
+
+    FluidSim simulation(.1f, 1.0f, 1, 4, 4, 32);
+    SimulationOperations(simulation);
+
+    // Add vectors in parallel
+    cudaError_t cudaStatus;//= NavierStokesCuda(c, a, b, arraySize);
+
+    float a_fac = simulation.dt_ * simulation.diffusion_ * (simulation.size_x_ - 2) * (simulation.size_x_ - 2);
+    float c_fac = 1.0f + (4.0f * a_fac);
+
+    float* results = LinearSolverCuda(0, simulation.density_, simulation.density_prev_, a_fac, c_fac);
+
+    //CudaExceptionHandler(cudaStatus, "addWithCuda failed!");
+    for (const float& result : c) {
+        //std::cout << result << std::endl;
+    }
+
+    for (int i = 0; i < sizeof(results) * 2; i++) {
+        std::cout << results[i] << std::endl;
+    }
+
+    cudaStatus = cudaDeviceReset();
+    CudaExceptionHandler(cudaStatus, "cudaDeviceReset failed!");
 
     return 0;
 }
 
-cudaError_t AddWithCuda(int *c, const int *a, const int *b, unsigned int size)
+cudaError_t NavierStokesCuda(float *c, const float *a, const float *b, unsigned int size)
 {
-    int* dev_a = nullptr, *dev_b = nullptr, *dev_c = nullptr;
+    float* dev_a = nullptr, *dev_b = nullptr, *dev_c = nullptr;
     cudaError_t cudaStatus;
 
-    vector<reference_wrapper<int*>> bidoof;
+    vector<reference_wrapper<float*>> bidoof;
     bidoof.insert(bidoof.end(), { dev_c, dev_a, dev_b });
 
     cudaStatus = cudaSetDevice(0); //Assumes no multi-GPU
@@ -70,13 +86,13 @@ cudaError_t AddWithCuda(int *c, const int *a, const int *b, unsigned int size)
         return cudaStatus;
     }
 
-    CudaMemoryAllocator(bidoof, (size_t) size, sizeof(int));
+    CudaMemoryAllocator(bidoof, (size_t) size, sizeof(float));
     // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = CopyFunction("cudaMemcpy failed!", dev_a, a, cudaMemcpyHostToDevice, cudaStatus, (size_t)size, sizeof(int));
-    cudaStatus = CopyFunction("cudaMemcpy failed!", dev_b, b, cudaMemcpyHostToDevice, cudaStatus, (size_t)size, sizeof(int));
+    cudaStatus = CopyFunction("cudaMemcpy failed!", dev_a, a, cudaMemcpyHostToDevice, cudaStatus, (size_t)size, sizeof(float));
+    cudaStatus = CopyFunction("cudaMemcpy failed!", dev_b, b, cudaMemcpyHostToDevice, cudaStatus, (size_t)size, sizeof(float));
 
     // Launch a kernel on the GPU with one thread for each element.
-    AddKernel<<<1, size>>>(dev_c, dev_a, dev_b);
+    VelocityKernel<<<1, size>>>(dev_c, dev_a, dev_b);
 
     cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
@@ -93,7 +109,7 @@ cudaError_t AddWithCuda(int *c, const int *a, const int *b, unsigned int size)
     }
 
     // Copy output vector from GPU buffer to host memory.
-    cudaStatus = CopyFunction("cudaMemcpy failed!", c, dev_c, cudaMemcpyDeviceToHost, cudaStatus, (size_t)size, sizeof(int));
+    cudaStatus = CopyFunction("cudaMemcpy failed!", c, dev_c, cudaMemcpyDeviceToHost, cudaStatus, (size_t)size, sizeof(float));
     if (cudaStatus != cudaSuccess) {
         CudaMemoryFreer(bidoof);
     }

@@ -13,6 +13,9 @@
     <Filter Include="cpp\data_structures">
       <UniqueIdentifier>{96d073b8-ecfd-46b9-b0a2-340d26b2737b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="includes\cuda">
+      <UniqueIdentifier>{38a54fdc-7192-45e1-8f79-d71f8a5d4094}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handler_methods.hpp">
@@ -23,6 +26,9 @@
     </ClInclude>
     <ClInclude Include="fluid_sim.hpp">
       <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid_sim_cuda.cuh">
+      <Filter>includes\cuda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu">
+      <Filter>cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="fluid_sim_cuda.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
   </ItemGroup>

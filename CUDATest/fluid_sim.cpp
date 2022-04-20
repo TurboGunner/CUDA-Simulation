@@ -51,14 +51,14 @@ void FluidSim::Project() {
 
 			map<FluidSim::Direction, IndexPair> pairs = GetAdjacentCoordinates(IndexPair(x, y));
 
-			std::cout << v_map[pairs[Direction::Right]].ToString() << std::endl;
+			//std::cout << v_map[pairs[Direction::Right]].ToString() << std::endl;
 
 			F_Vector calc =
 				(v_map[pairs[Direction::Right]] - v_map[pairs[Direction::Left]])
 				+ (v_map[pairs[Direction::Up]] - v_map[pairs[Direction::Down]]);
 			calc = calc * -0.5f * (1.0f / size_x_);
 
-			std::cout << calc.ToString() << std::endl;
+			//std::cout << calc.ToString() << std::endl;
 
 			c_map[IndexPair(x, y)] = calc;
 			p_map[pairs[Direction::Origin]] = 0;
@@ -161,6 +161,8 @@ void FluidSim::LinearSolve(int bounds, VectorField& current, VectorField& previo
 		bound = size_x_ - 1; //z is for later when we add 3 dimensions
 	map<IndexPair, F_Vector>& c_map = current.GetVectorMap(),
 		p_map = previous.GetVectorMap();
+
+	unsigned int array_size = bound * bound;
 
 	for (step = 0; step < iterations_; step++) {
 		for (y = 1; y < bound; y++) {

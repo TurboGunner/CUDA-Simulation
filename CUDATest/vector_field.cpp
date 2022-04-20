@@ -39,10 +39,10 @@ VectorField::VectorField(unsigned int x, unsigned int y, const set<F_Vector>& se
 
 set<F_Vector> VectorField::LoadDefaultVectorSet() {
 	set<F_Vector> output;
-	unsigned int yCurrent = 0;
-	for (F_Vector vector(1, 1); yCurrent < size_y_; yCurrent++) {
+	unsigned int y_current = 0;
+	for (F_Vector vector(1, 1); y_current < size_y_; y_current++) {
 		for (unsigned int i = 0; i < size_x_; i++) {
-			IndexPair pair(i, yCurrent);
+			IndexPair pair(i, y_current);
 			map_.emplace(pair, vector);
 		}
 	}
@@ -51,7 +51,6 @@ set<F_Vector> VectorField::LoadDefaultVectorSet() {
 
 string VectorField::ToString() {
 	string output;
-	std::cout << map_.size() << std::endl;
 	for (auto const& entry : map_) {
 		output += entry.first.ToString() + "\n" + entry.second.ToString() + "\n\n";
 	}
@@ -68,4 +67,30 @@ unsigned int VectorField::GetSizeY() const {
 
 void VectorField::operator=(const VectorField& copy) {
 	map_ = copy.map_;
+}
+
+map<IndexPair, F_Vector>& VectorField::GetVectorMap() {
+	return map_;
+}
+
+float* VectorField::FlattenMapX() {
+	float* arr = new float[map_.size()];
+	unsigned int count = 0;
+	for (const auto& entry : map_) {
+		arr[count] = entry.second.vx;
+		count++;
+	}
+	return arr;
+}
+
+float* VectorField::FlattenMapY() {
+	float* arr = new float[size_x_ * size_y_];
+	unsigned int y_current = 0, count = 0;
+
+	for (y_current; y_current < size_y_; y_current++) {
+		for (unsigned int i = 0; i < size_x_; i++) {
+			arr[i * (y_current + 1)] = map_[IndexPair(i, y_current)].vy;
+		}
+	}
+	return arr;
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <math.h>
-
 #include <string>
 #include <set>
 #include <map>
@@ -56,9 +54,7 @@ class VectorField {
 		VectorField(unsigned int x, unsigned int y, const set<F_Vector>& set);
 
 		//Accessor Methods
-		map<IndexPair, F_Vector>& GetVectorMap() { //Reference
-			return map_;
-		}
+		map<IndexPair, F_Vector>& GetVectorMap();
 
 		unsigned int GetSizeX() const;
 		unsigned int GetSizeY() const;
@@ -71,6 +67,9 @@ class VectorField {
 		void SetSizeY(unsigned int y) {
 			size_y_ = y;
 		}
+
+		float* FlattenMapX();
+		float* FlattenMapY();
 
 		string ToString();
 

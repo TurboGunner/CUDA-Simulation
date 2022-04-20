@@ -24,7 +24,7 @@ void CudaMemoryFreer(void* ptrs[]) {
     }
 }
 
-void CudaMemoryFreer(vector<reference_wrapper<int*>>& ptrs) {
+void CudaMemoryFreer(vector<reference_wrapper<float*>>& ptrs) {
     try {
         for (size_t i = 0; i < ptrs.size(); i++) {
             cudaFree(ptrs.at(i).get());
@@ -35,7 +35,7 @@ void CudaMemoryFreer(vector<reference_wrapper<int*>>& ptrs) {
     }
 }
 
-void CudaMemoryAllocator(vector<reference_wrapper<int*>>& ptrs, size_t size_alloc, size_t element_alloc) { //0 if used combined alloc
+void CudaMemoryAllocator(vector<reference_wrapper<float*>>& ptrs, size_t size_alloc, size_t element_alloc) { //0 if used combined alloc
     for (size_t i = 0; i < ptrs.size(); i++) {
         if (ptrs.at(i).get() == nullptr) {
             cudaError_t output_status = cudaMalloc((void**)&ptrs.at(i).get(), size_alloc * element_alloc);
