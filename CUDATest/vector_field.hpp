@@ -56,8 +56,6 @@ class VectorField {
 		//Accessor Methods
 		map<IndexPair, F_Vector>& GetVectorMap();
 
-		unsigned int GetSizeX() const;
-		unsigned int GetSizeY() const;
 
 		void operator=(const VectorField& copy);
 
@@ -70,6 +68,8 @@ class VectorField {
 
 		float* FlattenMapX();
 		float* FlattenMapY();
+
+		void RepackMap(float* x, float* y);
 
 		string ToString();
 

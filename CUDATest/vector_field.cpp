@@ -57,14 +57,6 @@ string VectorField::ToString() {
 	return output;
 }
 
-unsigned int VectorField::GetSizeX() const {
-	return size_x_;
-}
-
-unsigned int VectorField::GetSizeY() const {
-	return size_y_;
-}
-
 void VectorField::operator=(const VectorField& copy) {
 	map_ = copy.map_;
 }
@@ -83,14 +75,21 @@ float* VectorField::FlattenMapX() {
 	return arr;
 }
 
-float* VectorField::FlattenMapY() {
-	float* arr = new float[size_x_ * size_y_];
-	unsigned int y_current = 0, count = 0;
 
-	for (y_current; y_current < size_y_; y_current++) {
-		for (unsigned int i = 0; i < size_x_; i++) {
-			arr[i * (y_current + 1)] = map_[IndexPair(i, y_current)].vy;
-		}
+float* VectorField::FlattenMapY() {
+	float* arr = new float[map_.size()];
+	unsigned int count = 0;
+	for (const auto& entry : map_) {
+		arr[count] = entry.second.vy;
+		count++;
 	}
 	return arr;
+}
+
+void VectorField::RepackMap(float* x, float* y) {
+	unsigned int count = 0;
+	for (auto& entry : map_) {
+		entry.second = F_Vector(x[count], y[count]);
+		count++;
+	}
 }

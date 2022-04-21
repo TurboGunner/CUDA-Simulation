@@ -10,8 +10,10 @@ using std::map;
 struct FluidSim {
 	FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter);
 
-	void AddDensity(IndexPair pair, float amountX, float amountY);
+	void AddDensity(IndexPair pair, float amount);
 	void AddVelocity(IndexPair pair, float x, float y);
+
+	void BoundaryConditions(int bounds, VectorField& input);
 
 	VectorField Diffuse(int bounds, float diff, float dt);
 	void Project();
@@ -26,7 +28,6 @@ struct FluidSim {
 
 	private:
 		void LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac);
-		void BoundaryConditions(int bounds, VectorField& input);
 
 		map<Direction, IndexPair> GetAdjacentCoordinates(IndexPair incident); //Data Member
 };

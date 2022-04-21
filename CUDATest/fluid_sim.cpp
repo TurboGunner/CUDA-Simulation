@@ -1,3 +1,4 @@
+#include "fluid_sim_cuda.cuh"
 #include "fluid_sim.hpp"
 
 #include <stdexcept>
@@ -22,8 +23,8 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 	density_prev_ = VectorField(size_x, size_y);
 }
 
-void FluidSim::AddDensity(IndexPair pair, float x, float y) {
-	density_.GetVectorMap()[pair] = F_Vector(x, y);
+void FluidSim::AddDensity(IndexPair pair, float amount) {
+	density_.GetVectorMap()[pair] = F_Vector(amount, amount);
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
@@ -51,14 +52,10 @@ void FluidSim::Project() {
 
 			map<FluidSim::Direction, IndexPair> pairs = GetAdjacentCoordinates(IndexPair(x, y));
 
-			//std::cout << v_map[pairs[Direction::Right]].ToString() << std::endl;
-
 			F_Vector calc =
 				(v_map[pairs[Direction::Right]] - v_map[pairs[Direction::Left]])
 				+ (v_map[pairs[Direction::Up]] - v_map[pairs[Direction::Down]]);
 			calc = calc * -0.5f * (1.0f / size_x_);
-
-			//std::cout << calc.ToString() << std::endl;
 
 			c_map[IndexPair(x, y)] = calc;
 			p_map[pairs[Direction::Origin]] = 0;
@@ -157,31 +154,15 @@ void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 }
 
 void FluidSim::LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac) {
-	unsigned int step, x, y, z,
-		bound = size_x_ - 1; //z is for later when we add 3 dimensions
-	map<IndexPair, F_Vector>& c_map = current.GetVectorMap(),
-		p_map = previous.GetVectorMap();
+	float* results_x = LinearSolverCuda(0, current, previous, a_fac, c_fac, iterations_, size_x_);
 
-	unsigned int array_size = bound * bound;
+	current.RepackMap(results_x, results_x);
 
-	for (step = 0; step < iterations_; step++) {
-		for (y = 1; y < bound; y++) {
-			for (x = 1; x < bound; x++) {
+	free(results_x);
 
-				map<FluidSim::Direction, IndexPair> pairs = GetAdjacentCoordinates(IndexPair(x, y));
-
-				F_Vector calc = c_map[pairs[Direction::Right]]
-					+ c_map[pairs[Direction::Left]]
-					+ c_map[pairs[Direction::Up]]
-					+ c_map[pairs[Direction::Down]];
-				calc = calc * a_fac;
-
-				calc = calc + p_map[pairs[Direction::Origin]];
-				c_map[pairs[Direction::Origin]] = calc * (1.0f / c_fac);
-			}
-		}
-	}
 	BoundaryConditions(bounds, current);
+
+	//std::cout << current.ToString() << std::endl;
 }
 
 map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(IndexPair incident) {

@@ -36,3 +36,10 @@ void CudaMemoryAllocator(vector<reference_wrapper<float*>>& ptrs, size_t size_al
 /// </summary>
 cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type,
     cudaError_t error, size_t size_alloc, size_t element_alloc = 1);
+
+/// <summary> 
+/// Makes CPU to wait until call is finished
+/// </summary>
+/// 
+
+cudaError_t SyncFunction(string method_name, cudaError_t error);

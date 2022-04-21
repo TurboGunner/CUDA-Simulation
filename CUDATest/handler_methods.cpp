@@ -44,13 +44,24 @@ void CudaMemoryAllocator(vector<reference_wrapper<float*>>& ptrs, size_t size_al
     }
 }
 
-cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type, 
+cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type,
     cudaError_t error, size_t size_alloc, size_t element_alloc) {
+
     if (error == cudaSuccess) {
         error = cudaMemcpy(tgt, src, size_alloc * element_alloc, mem_copy_type);
         if (error != cudaSuccess) {
-            fprintf(stderr, "cudaMemcpy failed!");
+            std::cout << err_msg << std::endl;
         }
     }
     return error;
+}
+
+cudaError_t SyncFunction(string method_name, cudaError_t error) {
+    cudaError_t cuda_status = error;
+    cuda_status = cudaDeviceSynchronize();
+    if (cuda_status != cudaSuccess) {
+        std::cout << "cudaDeviceSynchronize returned error code " << cuda_status << "after launching " << method_name << "\n"  << std::endl;
+        std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << std::endl;
+    }
+    return cuda_status;
 }
