@@ -2,20 +2,15 @@
 #include "handler_methods.hpp"
 #include "fluid_sim.hpp"
 
-#include <iostream>
-#include <functional>
-#include <vector>
-
 using std::reference_wrapper;
 using std::vector;
-
-using std::map;
+using std::function;
 
 __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
-	if (threadIdx.x < length && threadIdx.y < length - 1) {
+	if (threadIdx.x < length && threadIdx.y < length - 1) { //If numbers are incorrect, try adding 1 to all y-bounds accesses with IX
 		for (int i = 0; i < iter; i++) {
 			data[IX(x_bounds, y_bounds, length)] = (data_prev[IX(x_bounds, y_bounds, length)] +
 				a_fac *
@@ -30,46 +25,30 @@ __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* 
 	}
 }
 
-__device__ int IX(unsigned int x, unsigned int y, const unsigned int& size) {
-	unsigned int value = (((y - 1) * size) + x);
-	if (value < (size * size)) {
-		return value;
-	}
-}
-
-__device__ void PointerBoundaries(float* result_ptr, const unsigned int& length) {
-	unsigned int bound = length - 1;
-	result_ptr[IX(0, 1, length)] = result_ptr[IX(1, 1, length)] + result_ptr[IX(0, 2, length)] * .5f;
-	result_ptr[IX(0, length, length)] = result_ptr[IX(1, length, length)] + result_ptr[IX(0, bound, length)] * .5f;
-	result_ptr[IX(bound, 1, length)] = result_ptr[IX(bound - 1, 1, length)] + result_ptr[IX(bound, 2, length)] * .5f;
-	result_ptr[IX(bound, length, length)] = result_ptr[IX(bound - 1, length, length)] + result_ptr[IX(bound, bound, length)] * .5f;
-}
-
 float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length) {
 	float* curr_copy_ptr = nullptr, *prev_copy_ptr = nullptr;
 
-	float* current_ptr = nullptr,
-		*prev_ptr = nullptr;
+	float* current_ptr = current.FlattenMapX(),
+		*prev_ptr = previous.FlattenMapX();
 
-	current_ptr = current.FlattenMapX();
-	prev_ptr = previous.FlattenMapX();
+	unsigned int alloc_size = length * length;
 
-	float* result_ptr = new float[length * length],
+	float* result_ptr = new float[alloc_size],
 		*result_copy_ptr = nullptr;
 
 	vector<reference_wrapper<float*>> bidoof;
 	bidoof.insert(bidoof.end(), { curr_copy_ptr, prev_copy_ptr, result_copy_ptr });
 
-	CudaMemoryAllocator(bidoof, (size_t) length * length, sizeof(float));
+	CudaMemoryAllocator(bidoof, (size_t) alloc_size, sizeof(float));
 
 	cudaError_t cuda_status = cudaSuccess;
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", curr_copy_ptr, current_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t) length * length,
+		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
 		sizeof(float));
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", prev_copy_ptr, prev_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t) length * length,
+		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
 		sizeof(float));
 
 	int thread_count = 16;
@@ -80,22 +59,17 @@ float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous,
 
 	LinearSolverKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, a_fac, c_fac, length, iter);
 
-	cuda_status = cudaGetLastError();
-	if (cuda_status != cudaSuccess) {
-		fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cuda_status));
-		CudaMemoryFreer(bidoof);
-		return result_ptr;
-	}
+	function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
+	cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", "LinearSolverKernel", cuda_status);
 
-	cuda_status = SyncFunction("LinearSolverKernel", cuda_status);
+	function<cudaError_t()> sync_func = []() { return cudaDeviceSynchronize(); };
+	cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", "LinearSolverKernel", cuda_status);
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", result_ptr, result_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t)current.GetVectorMap().size(),
+		cudaMemcpyDeviceToHost, cuda_status, (size_t) alloc_size,
 		sizeof(float));
 
-
 	if (cuda_status != cudaSuccess) {
-		std::cout << "Not working!" << std::endl;
 		CudaMemoryFreer(bidoof);
 	}
 

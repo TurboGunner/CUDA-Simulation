@@ -30,6 +30,9 @@
     <ClInclude Include="fluid_sim_cuda.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="cuda_sim_helpers.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="handler_methods.cpp">
@@ -52,7 +55,10 @@
     <CudaCompile Include="kernel.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
-    <CudaCompile Include="fluid_sim_cuda.cu">
+    <CudaCompile Include="linear_solver.cu">
+      <Filter>cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="advect.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
   </ItemGroup>

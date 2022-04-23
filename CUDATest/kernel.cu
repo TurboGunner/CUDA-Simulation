@@ -43,7 +43,7 @@ int main()
 
     std::cout << simulation.density_.ToString() << std::endl;
 
-    CudaExceptionHandler(cuda_status, "LinearSolverCuda failed!");
+    //CudaExceptionHandler(cuda_status, "LinearSolverCuda failed!");
 
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

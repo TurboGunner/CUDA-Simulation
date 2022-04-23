@@ -79,7 +79,8 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="fluid_sim_cuda.cu" />
+    <CudaCompile Include="advect.cu" />
+    <CudaCompile Include="linear_solver.cu" />
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +91,7 @@
     <ClCompile Include="vector_field.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cuda_sim_helpers.cuh" />
     <ClInclude Include="fluid_sim.hpp" />
     <ClInclude Include="fluid_sim_cuda.cuh" />
     <ClInclude Include="handler_methods.hpp" />

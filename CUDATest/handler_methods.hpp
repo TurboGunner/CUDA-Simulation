@@ -9,6 +9,7 @@
 using std::string;
 using std::reference_wrapper;
 using std::vector;
+using std::function;
 
 /// <summary> 
 /// Throws an invalid argument with the supplied error message when CUDA status is invalid.
@@ -38,8 +39,6 @@ cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyK
     cudaError_t error, size_t size_alloc, size_t element_alloc = 1);
 
 /// <summary> 
-/// Makes CPU to wait until call is finished
+/// Wraps any cudaError_t returning call to handler internal error checking
 /// </summary>
-/// 
-
-cudaError_t SyncFunction(string method_name, cudaError_t error);
+cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name, string method_name, cudaError_t error);

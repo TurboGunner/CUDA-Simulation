@@ -6,6 +6,7 @@
 using std::string;
 using std::vector;
 using std::reference_wrapper;
+using std::function;
 
 void CudaExceptionHandler(cudaError_t cuda_status, string error_message) {
     if (cuda_status != cudaSuccess) {
@@ -56,11 +57,14 @@ cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyK
     return error;
 }
 
-cudaError_t SyncFunction(string method_name, cudaError_t error) {
+cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name, string method_name, cudaError_t error) {
     cudaError_t cuda_status = error;
-    cuda_status = cudaDeviceSynchronize();
     if (cuda_status != cudaSuccess) {
-        std::cout << "cudaDeviceSynchronize returned error code " << cuda_status << "after launching " << method_name << "\n"  << std::endl;
+        return cuda_status;
+    }
+    cuda_status = func();
+    if (cuda_status != cudaSuccess) {
+        std::cout << operation_name << " returned error code " << cuda_status << "after launching " << method_name << "\n" << std::endl;
         std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << std::endl;
     }
     return cuda_status;
