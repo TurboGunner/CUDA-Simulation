@@ -49,7 +49,7 @@ set<F_Vector> VectorField::LoadDefaultVectorSet() {
 	return output;
 }
 
-string VectorField::ToString() {
+string VectorField::ToString() const {
 	string output;
 	for (auto const& entry : map_) {
 		output += entry.first.ToString() + "\n" + entry.second.ToString() + "\n\n";
@@ -75,7 +75,6 @@ float* VectorField::FlattenMapX() {
 	return arr;
 }
 
-
 float* VectorField::FlattenMapY() {
 	float* arr = new float[map_.size()];
 	unsigned int count = 0;
@@ -86,10 +85,30 @@ float* VectorField::FlattenMapY() {
 	return arr;
 }
 
+float3* VectorField::FlattenMap() {
+	unsigned int bound = map_.size();
+	float* x_dim = FlattenMapX(),
+		*y_dim = FlattenMapY();
+	float3* vectors = new float3[bound];
+	for (int i = 0; i < bound; i++) {
+		vectors[i] = float3(x_dim[i], y_dim[i]);
+	}
+	return vectors;
+}
+
 void VectorField::RepackMap(float* x, float* y) {
 	unsigned int count = 0;
 	for (auto& entry : map_) {
 		entry.second = F_Vector(x[count], y[count]);
+		count++;
+	}
+}
+
+void VectorField::RepackMapVector(float3* vectors) {
+	unsigned int count = 0;
+	for (auto& entry : map_) {
+		float3 curr_vector = vectors[count];
+		entry.second = F_Vector(curr_vector.x, curr_vector.y);
 		count++;
 	}
 }

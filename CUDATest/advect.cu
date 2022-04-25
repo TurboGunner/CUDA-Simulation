@@ -62,6 +62,8 @@ float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, Vecto
 		*v_x_ptr = velocity.FlattenMapX(),
 		*v_y_ptr = velocity.FlattenMapY();
 
+	float3* v_ptrs;
+
 	unsigned int alloc_size = length * length;
 
 	float* result_ptr = new float[alloc_size],

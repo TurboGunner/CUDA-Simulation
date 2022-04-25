@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cuda_runtime.h"
-#include "device_launch_parameters.h"
 
 __device__ inline int IX(unsigned int x, unsigned int y, const unsigned int& size) {
 	unsigned int value = (((y - 1) * size) + x);
