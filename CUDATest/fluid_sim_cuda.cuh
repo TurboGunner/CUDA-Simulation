@@ -14,6 +14,6 @@ __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* 
 
 float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length);
 
-__global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float* velocity_x, float* velocity_y, float dt, unsigned int length);
+__global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, float dt, unsigned int length);
 
 float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length);

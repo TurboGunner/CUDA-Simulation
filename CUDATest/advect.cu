@@ -4,7 +4,7 @@ using std::reference_wrapper;
 using std::vector;
 using std::function;
 
-__global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float* velocity_x, float* velocity_y, float dt, unsigned int length) {
+__global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, float dt, unsigned int length) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
@@ -18,8 +18,8 @@ __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, f
 	float x_value, y_value;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		x_value = (float) x_bounds - (x_dt * velocity_x[IX(x_bounds, y_bounds + 1, length)]);
-		y_value = (float) y_bounds - (y_dt * velocity_y[IX(x_bounds, y_bounds + 1, length)]);
+		x_value = (float) x_bounds - (x_dt * velocity[IX(x_bounds, y_bounds + 1, length)].x);
+		y_value = (float) y_bounds - (y_dt * velocity[IX(x_bounds, y_bounds + 1, length)].y);
 
 		if (x_value < 0.5f) {
 			x_value = 0.5f;
@@ -55,14 +55,13 @@ __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, f
 }
 
 float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
-	float* curr_copy_ptr = nullptr, *prev_copy_ptr = nullptr, *v_x_copy_ptr = nullptr, * v_y_copy_ptr = nullptr;
+	float* curr_copy_ptr = nullptr, *prev_copy_ptr = nullptr;
 
 	float* current_ptr = current.FlattenMapX(), //Maybe make current and previous part of the same vector to consolidate?
-		* prev_ptr = previous.FlattenMapX(),
-		*v_x_ptr = velocity.FlattenMapX(),
-		*v_y_ptr = velocity.FlattenMapY();
+		*prev_ptr = previous.FlattenMapX();
 
-	float3* v_ptrs;
+	float3* v_ptr = velocity.FlattenMap(),
+		*v_copy_ptr = nullptr;
 
 	unsigned int alloc_size = length * length;
 
@@ -70,27 +69,29 @@ float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, Vecto
 		*result_copy_ptr = nullptr;
 
 	vector<reference_wrapper<float*>> bidoof;
-	bidoof.insert(bidoof.end(), { curr_copy_ptr, prev_copy_ptr, result_copy_ptr, v_x_copy_ptr, v_y_copy_ptr });
+	bidoof.insert(bidoof.end(), { curr_copy_ptr, prev_copy_ptr, result_copy_ptr });
 
-	CudaMemoryAllocator(bidoof, (size_t)alloc_size, sizeof(float));
+	CudaMemoryAllocator(bidoof, (size_t) alloc_size, sizeof(float));
+
+	vector<reference_wrapper<float3*>> bidoof2;
+	bidoof2.insert(bidoof2.end(), { v_copy_ptr } );
+
+	//Maybe have more consolidation by auto-copying allocated pointers to the GPU
+	CudaMemoryAllocator(bidoof2, (size_t) alloc_size, sizeof(float3));
 
 	cudaError_t cuda_status = cudaSuccess;
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", curr_copy_ptr, current_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
 		sizeof(float));
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", prev_copy_ptr, prev_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
 		sizeof(float));
 
-	cuda_status = CopyFunction("cudaMemcpy failed!", v_x_copy_ptr, v_x_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
-		sizeof(float));
-
-	cuda_status = CopyFunction("cudaMemcpy failed!", v_y_copy_ptr, v_y_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
-		sizeof(float));
+	cuda_status = CopyFunction("cudaMemcpy failed!", v_copy_ptr, v_ptr,
+		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
+		sizeof(float3));
 
 	int thread_count = 16;
 	int block_count_field = (((length * length) + thread_count) - 1) / thread_count;
@@ -98,7 +99,7 @@ float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, Vecto
 	dim3 threads(thread_count, thread_count);
 	dim3 blocks(block_count_field, block_count_field);
 
-	AdvectKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, v_x_copy_ptr, v_y_copy_ptr, dt, length);
+	AdvectKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, v_copy_ptr, dt, length);
 
 	function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
 	cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", "LinearSolverKernel", cuda_status);
