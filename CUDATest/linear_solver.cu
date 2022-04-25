@@ -2,26 +2,22 @@
 #include "handler_methods.hpp"
 #include "fluid_sim.hpp"
 
-using std::reference_wrapper;
-using std::vector;
-using std::function;
-
 __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
-	if (threadIdx.x < length && threadIdx.y < length - 1) { //If numbers are incorrect, try adding 1 to all y-bounds accesses with IX
+	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) { //If numbers are incorrect, try adding 1 to all y-bounds accesses with IX
 		for (int i = 0; i < iter; i++) {
-			data[IX(x_bounds, y_bounds, length)] = (data_prev[IX(x_bounds, y_bounds, length)] +
+			data[IX(x_bounds, y_bounds + 1, length)] = (data_prev[IX(x_bounds, y_bounds + 1, length)] +
 				a_fac *
-				(data[IX(x_bounds + 1, y_bounds, length)]
-					+ data[IX(x_bounds - 1, y_bounds, length)]
-					+ data[IX(x_bounds, y_bounds + 1, length)]
-					+ data[IX(x_bounds, y_bounds - 1, length)]))
+				(data[IX(x_bounds + 1, y_bounds + 1, length)]
+					+ data[IX(x_bounds - 1, y_bounds + 1, length)]
+					+ data[IX(x_bounds, y_bounds + 2, length)]
+					+ data[IX(x_bounds, y_bounds, length)]))
 				* (1.0f / c_fac);
 		}
 		PointerBoundaries(data, length);
-		result_ptr[IX(x_bounds, y_bounds, length)] = data[IX(x_bounds, y_bounds, length)];
+		result_ptr[IX(x_bounds, y_bounds + 1, length)] = data[IX(x_bounds, y_bounds + 1, length)];
 	}
 }
 
@@ -51,11 +47,8 @@ float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous,
 		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
 		sizeof(float));
 
-	int thread_count = 16;
-	int block_count_field = (((length * length) + thread_count) - 1) / thread_count;
-
-	dim3 threads(thread_count, thread_count);
-	dim3 blocks(block_count_field, block_count_field);
+	dim3 blocks, threads;
+	ThreadAllocator(blocks, threads, length);
 
 	LinearSolverKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, a_fac, c_fac, length, iter);
 

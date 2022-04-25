@@ -10,6 +10,10 @@
 #include <functional>
 #include <vector>
 
+using std::reference_wrapper;
+using std::vector;
+using std::function;
+
 __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter);
 
 float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length);

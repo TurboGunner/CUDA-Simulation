@@ -16,15 +16,12 @@
     <Filter Include="includes\cuda">
       <UniqueIdentifier>{38a54fdc-7192-45e1-8f79-d71f8a5d4094}</UniqueIdentifier>
     </Filter>
+    <Filter Include="includes\data_structures">
+      <UniqueIdentifier>{77fd86ea-b696-4fc1-ae19-8ab724439de6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handler_methods.hpp">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="vector_field.hpp">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="fluid_sim.hpp">
       <Filter>includes</Filter>
     </ClInclude>
     <ClInclude Include="fluid_sim_cuda.cuh">
@@ -32,6 +29,18 @@
     </ClInclude>
     <ClInclude Include="cuda_sim_helpers.cuh">
       <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid_sim.hpp">
+      <Filter>includes\data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_field.hpp">
+      <Filter>includes\data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="f_vector.hpp">
+      <Filter>includes\data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="index_pair.hpp">
+      <Filter>includes\data_structures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

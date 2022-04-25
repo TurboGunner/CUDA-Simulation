@@ -2,11 +2,7 @@
 
 #include <stdexcept>
 #include <iostream>
-
-using std::string;
-using std::vector;
-using std::reference_wrapper;
-using std::function;
+#include <math.h>
 
 void CudaExceptionHandler(cudaError_t cuda_status, string error_message) {
     if (cuda_status != cudaSuccess) {
@@ -66,7 +62,7 @@ cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyK
     return error;
 }
 
-cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name, string method_name, cudaError_t error) {
+cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name, string method_name, cudaError_t error, string optional_args) {
     cudaError_t cuda_status = error;
     if (cuda_status != cudaSuccess) {
         return cuda_status;
@@ -75,6 +71,19 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
     if (cuda_status != cudaSuccess) {
         std::cout << operation_name << " returned error code " << cuda_status << "after launching " << method_name << "\n" << std::endl;
         std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << std::endl;
+        if (optional_args.size() > 0) {
+            std::cout << "Additional Stacktrace: " << optional_args << std::endl;
+        }
     }
     return cuda_status;
+}
+
+void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block) {
+    unsigned int threads_per_dim = (int)sqrt(threads_per_block);
+    unsigned int block_count = ((length + threads_per_dim) - 1) / (threads_per_dim);
+
+    threads = dim3(threads_per_dim, threads_per_dim);
+    blocks = dim3(block_count, block_count);
+
+    std::cout << "Allocated " << threads.x * threads.y * block_count * block_count << " threads!" << std::endl;
 }

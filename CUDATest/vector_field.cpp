@@ -3,10 +3,6 @@
 #include <stdexcept>
 #include <iostream>
 
-using std::string;
-using std::set;
-using std::map;
-
 //Constructors
 
 VectorField::VectorField(unsigned int x, unsigned int y) {
@@ -93,6 +89,10 @@ float3* VectorField::FlattenMap() {
 	for (int i = 0; i < bound; i++) {
 		vectors[i] = float3(x_dim[i], y_dim[i]);
 	}
+
+	free(x_dim);
+	free(y_dim);
+
 	return vectors;
 }
 

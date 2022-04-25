@@ -4,8 +4,6 @@
 #include <stdexcept>
 #include <iostream>
 
-using std::map;
-
 FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter) {
 	dt_ = timestep;
 	diffusion_ = diff;
@@ -78,60 +76,8 @@ void FluidSim::Project() {
 }
 
 void FluidSim::Advect(int bounds, float dt) {
-	VectorField& current = density_,
-		previous = density_prev_,
-		velocity = velocity_;
 
-	unsigned int bound = size_x_ - 1;
-	float x_current, x_previous, y_current, y_previous;
-
-	float x_dt = dt * (size_x_ - 2);
-	float y_dt = dt * (size_x_ - 2);
-
-	float velocity_x_curr, velocity_x_prev, velocity_y_curr, velocity_y_prev;
-	float x, y;
-
-	int x_value, y_value;
-
-	map<IndexPair, F_Vector> c_map = current.GetVectorMap(),
-		p_map = previous.GetVectorMap(),
-		v_map = velocity.GetVectorMap();
-
-	for (y = 1; y < bound; y++) {
-		for (x = 1; x < bound; x++) {
-			x_value = x - (x_dt * v_map[IndexPair(x, y)].vx);
-			y_value = y - (y_dt * v_map[IndexPair(x, y)].vy);
-
-			if (x_value < 0.5f) {
-				x_value = 0.5f;
-			}
-			if (x_value > size_x_ + 0.5f) {
-				x_value = size_x_ + 0.5f;
-			}
-			x_current = x_value;
-			x_previous = x_current + 1.0f;
-			if (y_value < 0.5f) {
-				y_value = 0.5f;
-			}
-			if (y_value > size_x_ + 0.5f) {
-				y_value = size_x_ + 0.5f;
-			}
-			y_current = y_value;
-			y_previous = y_current + 1.0f;
-
-			velocity_x_prev = x_value - x_current;
-			velocity_x_curr = 1.0f - velocity_x_prev;
-			velocity_y_prev = y_value - y_current;
-			velocity_y_curr = 1.0f - velocity_y_prev;
-
-			c_map[IndexPair(x, y)] =
-				((p_map[IndexPair(int(x_current), int(y_current))] * velocity_y_curr) +
-				(p_map[IndexPair(int(x_current), int(y_previous))] * velocity_y_prev) * velocity_x_curr) +
-				((p_map[IndexPair(int(x_previous), int(y_current))] * velocity_y_curr) +
-				(p_map[IndexPair(int(x_previous), int(y_previous))] * velocity_y_prev) * velocity_x_prev);
-		}
-	}
-	BoundaryConditions(bounds, current);
+	float* result_ptr = AdvectCuda(0, density_, density_prev_, velocity_, dt, size_x_);
 }
 
 void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
@@ -161,8 +107,6 @@ void FluidSim::LinearSolve(int bounds, VectorField& current, VectorField& previo
 	free(results_x);
 
 	BoundaryConditions(bounds, current);
-
-	//std::cout << current.ToString() << std::endl;
 }
 
 map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(IndexPair incident) {

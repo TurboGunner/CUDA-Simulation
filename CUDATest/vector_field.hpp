@@ -1,6 +1,10 @@
 #pragma once
 
 #include "cuda_runtime.h"
+
+#include "f_vector.hpp"
+#include "index_pair.hpp"
+
 #include <string>
 #include <set>
 #include <map>
@@ -8,45 +12,6 @@
 using std::string;
 using std::set;
 using std::map;
-
-struct F_Vector {
-	F_Vector(float x_in = 1, float y_in = 1);
-
-	float* AsArrPair();
-
-	float Magnitude() const;
-
-	bool operator==(const F_Vector& v1) const;
-
-	const F_Vector operator+(const F_Vector& v1) const;
-	const F_Vector operator-(const F_Vector& v1) const;
-
-	F_Vector operator*(float num);
-	F_Vector operator*(unsigned int num);
-
-	size_t operator()(const F_Vector& v1) const noexcept;
-
-	void operator=(const F_Vector& copy);
-
-	string ToString() const;
-
-	float vx, vy; //Components
-};
-
-struct IndexPair {
-	IndexPair() = default;
-	IndexPair(unsigned int x_in, unsigned int y_in);
-
-	bool operator==(const IndexPair& i1) const;
-
-	unsigned int operator()(const IndexPair& i1) const noexcept;
-
-	bool operator<(const IndexPair& i1) const;
-
-	string ToString() const;
-
-	unsigned int x = 0, y = 0; //Spots
-};
 
 class VectorField {
 	public:
@@ -56,7 +21,7 @@ class VectorField {
 		VectorField(unsigned int x = 1, unsigned int y = 1);
 
 		/// <summary> 
-		/// Polymorphism constructor, used if there is a pre-loaded set argument.
+		/// Loaded constructor, used if there is a pre-loaded set argument.
 		/// </summary>
 		VectorField(unsigned int x, unsigned int y, const set<F_Vector>& set);
 
@@ -79,7 +44,6 @@ class VectorField {
 		/// Flattens the y direction of the map into a float pointer array.
 		/// </summary>
 		float* FlattenMapY();
-
 
 		/// <summary> 
 		/// Flattens the entire map into a CUDA provided float vector struct, where it is a pointer array.

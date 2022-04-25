@@ -1,9 +1,5 @@
 #include "fluid_sim_cuda.cuh"
 
-using std::reference_wrapper;
-using std::vector;
-using std::function;
-
 __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, float dt, unsigned int length) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
@@ -46,12 +42,13 @@ __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, f
 		data[IX(x_bounds, y_bounds + 1, length)] =
 			((data_prev[IX(unsigned int(x_current), unsigned int(y_current + 1), length)] * velocity_y_curr) +
 				(data_prev[IX(unsigned int(x_current), int(y_previous + 1), length)] * velocity_y_prev) * velocity_x_curr) +
-			((data_prev[IX(unsigned int(x_current), unsigned int(y_current + 1), length)] * velocity_y_curr) +
-				(data_prev[IX(unsigned int(x_previous), unsigned int(y_current + 1), length)] * velocity_y_prev) * velocity_x_prev);
+			((data_prev[IX(unsigned int(x_previous), unsigned int(y_current + 1), length)] * velocity_y_curr) +
+				(data_prev[IX(unsigned int(x_previous), unsigned int(y_previous + 1), length)] * velocity_y_prev) * velocity_x_prev);
 	}
-
-	PointerBoundaries(data, length);
 	result_ptr[IX(x_bounds, y_bounds + 1, length)] = data[IX(x_bounds, y_bounds + 1, length)];
+	if (x_bounds * y_bounds >= (length * length)) {
+		PointerBoundaries(result_ptr, length);
+	}
 }
 
 float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
@@ -93,11 +90,8 @@ float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, Vecto
 		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
 		sizeof(float3));
 
-	int thread_count = 16;
-	int block_count_field = (((length * length) + thread_count) - 1) / thread_count;
-
-	dim3 threads(thread_count, thread_count);
-	dim3 blocks(block_count_field, block_count_field);
+	dim3 blocks, threads;
+	ThreadAllocator(blocks, threads, length);
 
 	AdvectKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, v_copy_ptr, dt, length);
 
