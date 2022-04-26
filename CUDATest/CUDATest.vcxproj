@@ -82,6 +82,7 @@
     <CudaCompile Include="advect.cu" />
     <CudaCompile Include="linear_solver.cu" />
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="project.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="f_vector.cpp" />

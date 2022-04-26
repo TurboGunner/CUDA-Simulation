@@ -70,5 +70,8 @@
     <CudaCompile Include="advect.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
+    <CudaCompile Include="project.cu">
+      <Filter>cuda</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

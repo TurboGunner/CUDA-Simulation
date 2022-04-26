@@ -21,3 +21,7 @@ float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous,
 __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, float dt, unsigned int length);
 
 float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length);
+
+__global__ void ProjectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, unsigned int length, unsigned int iter);
+
+float* ProjectCuda(VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter);
