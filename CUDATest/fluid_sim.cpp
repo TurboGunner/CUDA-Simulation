@@ -39,45 +39,25 @@ VectorField FluidSim::Diffuse(int bounds, float diff, float dt) {
 }
 
 void FluidSim::Project() {
+	tuple<float3*, float*, float*> result_tuple = ProjectCuda(density_, density_prev_, velocity_, size_x_, iterations_);
 
-	unsigned int x, y, bound = size_x_ - 1;
-	map<IndexPair, F_Vector>& c_map = density_.GetVectorMap(),
-		p_map = density_prev_.GetVectorMap(),
-		v_map = velocity_.GetVectorMap();
+	float* result_ptr = std::get<1>(result_tuple),
+		*prev_ptr = std::get<2>(result_tuple);
+	float3* v_ptr = std::get<0>(result_tuple);
 
-	for (y = 1; y < bound; y++) {
-		for (x = 1; x < bound; x++) {
+	std::cout << "e: " << v_ptr[0].x << std::endl;
 
-			map<FluidSim::Direction, IndexPair> pairs = GetAdjacentCoordinates(IndexPair(x, y));
-
-			F_Vector calc =
-				(v_map[pairs[Direction::Right]] - v_map[pairs[Direction::Left]])
-				+ (v_map[pairs[Direction::Up]] - v_map[pairs[Direction::Down]]);
-			calc = calc * -0.5f * (1.0f / size_x_);
-
-			c_map[IndexPair(x, y)] = calc;
-			p_map[pairs[Direction::Origin]] = 0;
-		}
-	}
-	BoundaryConditions(0, density_);
-	BoundaryConditions(0, density_prev_);
-	LinearSolve(0, density_, density_prev_, 1, 4);
-
-	for (y = 1; y < bound; y++) {
-		for (x = 1; x < bound; x++) {
-			map<FluidSim::Direction, IndexPair> pairs = GetAdjacentCoordinates(IndexPair(x, y));
-			v_map[pairs[Direction::Origin]].vx -= 0.5f * v_map[pairs[Direction::Right]].vx
-				- v_map[pairs[Direction::Left]].vx * size_x_;
-			v_map[pairs[Direction::Origin]].vy -= 0.5f * v_map[pairs[Direction::Up]].vy
-				- v_map[pairs[Direction::Down]].vy * size_x_;
-		}
-	}
-	BoundaryConditions(1, velocity_);
+	density_.RepackMap(result_ptr, result_ptr);
+	density_prev_.RepackMap(prev_ptr, prev_ptr);
+	velocity_.RepackMapVector(v_ptr);
+	//std::cout << "e: " << velocity_.GetVectorMap()[IndexPair(0, 0)].ToString() << std::endl;
 }
 
 void FluidSim::Advect(int bounds, float dt) {
-
 	float* result_ptr = AdvectCuda(0, density_, density_prev_, velocity_, dt, size_x_);
+	VectorField& density_field = density_;
+	density_field.RepackMap(result_ptr, result_ptr);
+	std::cout << density_.ToString() << std::endl;
 }
 
 void FluidSim::BoundaryConditions(int bounds, VectorField& input) {

@@ -63,7 +63,7 @@ class VectorField {
 		/// <summary> 
 		/// Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct.
 		/// </summary>
-		string ToString() const;
+		string ToString();
 
 	private:
 		map<IndexPair, F_Vector> map_;

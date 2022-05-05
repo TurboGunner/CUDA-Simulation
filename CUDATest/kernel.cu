@@ -17,15 +17,15 @@ using std::reference_wrapper;
 using std::function;
 
 void SimulationOperations(FluidSim& simulation) {
-    simulation.AddVelocity(IndexPair(0, 0), 10, 10);
-    simulation.AddVelocity(IndexPair(1, 0), 22, 2);
-    simulation.AddVelocity(IndexPair(1, 1), 2022, 220);
+    simulation.AddVelocity(IndexPair(5, 5), 120, 10);
+    simulation.AddVelocity(IndexPair(1, 0), 222, 2);
+    simulation.AddVelocity(IndexPair(1, 1), 22, 220);
 
     simulation.AddDensity(IndexPair(1, 1), 10.0f);
-    simulation.AddDensity(IndexPair(2, 2), 10.0f);
+    simulation.AddDensity(IndexPair(2, 2), 100.0f);
 
-    simulation.Diffuse(1, 1.0f, 1.0f);
-    simulation.Project();
+    simulation.Diffuse(1, 1.0f, 2.0f);
+    //simulation.Project();
     simulation.Advect(0, 2.0f);
     //std::cout << simulation.velocity_.ToString() << std::endl;
 }
@@ -45,8 +45,6 @@ int main()
 
     float a_fac = simulation.dt_ * simulation.diffusion_ * (simulation.size_x_ - 2) * (simulation.size_x_ - 2);
     float c_fac = 1.0f + (4.0f * a_fac);
-
-    std::cout << simulation.density_.ToString() << std::endl;
 
     //CudaExceptionHandler(cuda_status, "LinearSolverCuda failed!");
 

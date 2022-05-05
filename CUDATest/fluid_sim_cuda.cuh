@@ -9,10 +9,12 @@
 #include <iostream>
 #include <functional>
 #include <vector>
+#include <tuple>
 
 using std::reference_wrapper;
 using std::vector;
 using std::function;
+using std::tuple;
 
 __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter);
 
@@ -22,6 +24,6 @@ __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, f
 
 float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length);
 
-__global__ void ProjectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, unsigned int length, unsigned int iter);
+__global__ void ProjectKernel(float3* result_ptr, float* data, float* data_prev, float3* velocity, unsigned int length, unsigned int iter);
 
-float* ProjectCuda(VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter);
+tuple<float3*, float*, float*> ProjectCuda(VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter);

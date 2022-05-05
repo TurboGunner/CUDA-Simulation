@@ -36,16 +36,16 @@ VectorField::VectorField(unsigned int x, unsigned int y, const set<F_Vector>& se
 set<F_Vector> VectorField::LoadDefaultVectorSet() {
 	set<F_Vector> output;
 	unsigned int y_current = 0;
-	for (F_Vector vector(1, 1); y_current < size_y_; y_current++) {
+	for (y_current; y_current < size_y_; y_current++) {
 		for (unsigned int i = 0; i < size_x_; i++) {
 			IndexPair pair(i, y_current);
-			map_.emplace(pair, vector);
+			map_.emplace(pair, RandomVector());
 		}
 	}
 	return output;
 }
 
-string VectorField::ToString() const {
+string VectorField::ToString() {
 	string output;
 	for (auto const& entry : map_) {
 		output += entry.first.ToString() + "\n" + entry.second.ToString() + "\n\n";
@@ -89,7 +89,6 @@ float3* VectorField::FlattenMap() {
 	for (int i = 0; i < bound; i++) {
 		vectors[i] = float3(x_dim[i], y_dim[i]);
 	}
-
 	free(x_dim);
 	free(y_dim);
 
@@ -97,18 +96,23 @@ float3* VectorField::FlattenMap() {
 }
 
 void VectorField::RepackMap(float* x, float* y) {
-	unsigned int count = 0;
-	for (auto& entry : map_) {
-		entry.second = F_Vector(x[count], y[count]);
-		count++;
+	unsigned int y_current = 0;
+	for (y_current; y_current < size_y_; y_current++) {
+		unsigned int row_multiplier = (size_x_ - 1) * y_current;
+		for (unsigned int i = 0; i < size_x_; i++) {
+			map_[IndexPair(i, y_current)] = F_Vector(x[i + row_multiplier], y[i + row_multiplier]);
+		}
 	}
+	//std::cout << ToString() << std::endl;
 }
 
 void VectorField::RepackMapVector(float3* vectors) {
 	unsigned int count = 0;
-	for (auto& entry : map_) {
-		float3 curr_vector = vectors[count];
-		entry.second = F_Vector(curr_vector.x, curr_vector.y);
-		count++;
+	unsigned int y_current = 0;
+	for (y_current; y_current < size_y_; y_current++) {
+		unsigned int row_multiplier = (size_x_ - 1) * y_current;
+		for (unsigned int i = 0; i < size_x_; i++) {
+			map_[IndexPair(i, y_current)] = F_Vector(vectors[i + row_multiplier].x, vectors[i + row_multiplier].y);
+		}
 	}
 }

@@ -17,15 +17,20 @@ __device__ inline void PointerBoundaries(float* result_ptr, const unsigned int& 
 	result_ptr[IX(bound, length, length)] = result_ptr[IX(bound - 1, length, length)] + result_ptr[IX(bound, bound, length)] * .5f;
 }
 
-__device__ inline void PointerBoundariesSpecial(float* result_ptr, const unsigned int& length) {
+__device__ inline void PointerBoundariesSpecialX(float* result_ptr, const unsigned int& length) {
 	unsigned int bound = length - 1;
 	for (int i = 1; i < bound; i++) {
-		result_ptr[IX(i, 1, length)] *= -1.0f;
-		result_ptr[IX(i, length, length)] *= -1.0f;
+		result_ptr[IX(i, 1, length)] = -result_ptr[IX(i, 2, length)];
+		result_ptr[IX(i, length, length)] = -result_ptr[IX(i, bound, length)];
 	}
+	PointerBoundaries(result_ptr, length);
+}
+
+__device__ inline void PointerBoundariesSpecialY(float* result_ptr, const unsigned int& length) {
+	unsigned int bound = length - 1;
 	for (int j = 1; j < bound; j++) {
-		result_ptr[IX(0, j + 1, length)] *= -1.0f;
-		result_ptr[IX(bound, j + 1, length)] *= -1.0f;
+		result_ptr[IX(0, j + 1, length)] = -result_ptr[IX(1, j + 1, length)];
+		result_ptr[IX(bound, j + 1, length)] = -result_ptr[IX(bound - 1, j + 1, length)];
 	}
 	PointerBoundaries(result_ptr, length);
 }
@@ -35,19 +40,11 @@ __device__ inline void PointerBoundariesSpecial(float3* vector_ptr, const unsign
 
 	for (int i = 0; i < length * length; i++) {
 		x_dim[i] = vector_ptr[i].x;
+		y_dim[i] = vector_ptr[i].y;
 	}
 
-	float* result_ptr = x_dim;
-
-	for (int x = 0; x <= 1; x++) { //Only 1 for now due to two dimensions
-		if (x == 1) {
-			result_ptr = y_dim;
-		}
-		else if (x == 2) {
-			result_ptr = z_dim;
-		}
-		PointerBoundariesSpecial(result_ptr, length);
-	}
+	PointerBoundariesSpecialX(x_dim, length);
+	PointerBoundariesSpecialY(y_dim, length);
 }
 
 __device__ inline void LinearSolverGPU(float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter) {

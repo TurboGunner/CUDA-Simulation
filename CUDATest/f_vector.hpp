@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <random>
 
 using std::string;
 
@@ -62,3 +63,15 @@ struct F_Vector {
 
 	float vx, vy; //Components
 };
+
+/// <summary> 
+/// Generates a vector with random values based on the Mersenne Twister algorithm.
+/// </summary>
+inline F_Vector RandomVector() {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> dist(1, 10);
+
+	F_Vector f = F_Vector(dist(gen), dist(gen));
+	return f;
+}

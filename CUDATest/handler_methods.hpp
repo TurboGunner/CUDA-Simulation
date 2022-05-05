@@ -22,9 +22,19 @@ void CudaExceptionHandler(cudaError_t cuda_status, string error_message);
 void CudaMemoryFreer(void* ptrs[]);
 
 /// <summary> 
-/// Polymorphism, frees a referenced std::vector of referenced wrapped int pointers.
+/// Polymorphism, frees a referenced std::vector of referenced wrapped float pointers.
 /// </summary>
 void CudaMemoryFreer(vector<reference_wrapper<float*>>& ptrs);
+
+/// <summary> 
+/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers.
+/// </summary>
+void CudaMemoryFreer(vector<reference_wrapper<float3*>>& ptrs);
+
+/// <summary> 
+/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers.
+/// </summary>
+void MemoryFreer(void* ptrs[], size_t element_alloc);
 
 /// <summary> 
 /// Allocates memory to a referenced std::vector of referenced wrapped float pointers.
@@ -35,7 +45,7 @@ void CudaMemoryAllocator(vector<reference_wrapper<float*>>& ptrs, size_t size_al
 /// <summary> 
 /// Allocates memory to a referenced std::vector of referenced wrapped float3 pointers.
 /// <para> Note: element_alloc does not have to be supplied if size_alloc contains the combined size of the elements. </para>
-/// <para> This is a polymorphism of the float version for float3 struct pointer references.
+/// <para> This is a polymorphism of the float version for float3 struct pointer references. </para>
 /// </summary>
 void CudaMemoryAllocator(vector<reference_wrapper<float3*>>& ptrs, size_t size_alloc, size_t element_alloc = 1);
 

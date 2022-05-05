@@ -21,6 +21,7 @@ bool F_Vector::operator==(const F_Vector& v1) const {
 	return vx == v1.vx && vy == v1.vy;
 }
 
+
 const F_Vector F_Vector::operator+(const F_Vector& v1) const {
 	F_Vector output = *this;
 	output.vx += v1.vx;

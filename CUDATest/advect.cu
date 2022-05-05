@@ -44,8 +44,10 @@ __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, f
 				(data_prev[IX(unsigned int(x_current), int(y_previous + 1), length)] * velocity_y_prev) * velocity_x_curr) +
 			((data_prev[IX(unsigned int(x_previous), unsigned int(y_current + 1), length)] * velocity_y_curr) +
 				(data_prev[IX(unsigned int(x_previous), unsigned int(y_previous + 1), length)] * velocity_y_prev) * velocity_x_prev);
+
+		printf("%.5f  | %d ", (data_prev[IX(unsigned int(x_current), unsigned int(y_current + 1), length)]), x_bounds);
+		result_ptr[IX(x_bounds, y_bounds + 1, length)] = data[IX(x_bounds, y_bounds + 1, length)];
 	}
-	result_ptr[IX(x_bounds, y_bounds + 1, length)] = data[IX(x_bounds, y_bounds + 1, length)];
 	if (x_bounds * y_bounds >= (length * length)) {
 		PointerBoundaries(result_ptr, length);
 	}
@@ -108,5 +110,6 @@ float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, Vecto
 	if (cuda_status != cudaSuccess) {
 		CudaMemoryFreer(bidoof);
 	}
+
 	return result_ptr;
 }
