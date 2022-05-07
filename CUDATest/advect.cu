@@ -1,5 +1,4 @@
 #include "fluid_sim_cuda.cuh"
-#include "handler_wrapper.hpp"
 
 __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, float dt, unsigned int length) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
@@ -52,16 +51,15 @@ __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, f
 	}
 }
 
-float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
-	CudaMethodHandler handler(length * length);
+void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
+	unsigned int alloc_size = length * length;
+	CudaMethodHandler handler(alloc_size);
 	float* curr_copy_ptr = nullptr, *prev_copy_ptr = nullptr;
 
 	float* current_ptr = current.FlattenMapX(), //Maybe make current and previous part of the same vector to consolidate?
 		*prev_ptr = previous.FlattenMapX();
 
 	float3* v_ptr = velocity.FlattenMap(), *v_copy_ptr = nullptr;
-
-	unsigned int alloc_size = length * length;
 
 	float* result_ptr = new float[alloc_size], *result_copy_ptr = nullptr;
 
@@ -89,6 +87,4 @@ float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, Vecto
 		sizeof(float));
 
 	current.RepackMap(result_ptr, result_ptr);
-
-	return result_ptr;
 }

@@ -5,16 +5,15 @@
 #include "cuda_sim_helpers.cuh"
 #include "vector_field.hpp"
 #include "handler_methods.hpp"
+#include "handler_wrapper.hpp"
 
 #include <iostream>
 #include <functional>
 #include <vector>
-#include <tuple>
 
 using std::reference_wrapper;
 using std::vector;
 using std::function;
-using std::tuple;
 
 __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds);
 
@@ -22,8 +21,8 @@ float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous,
 
 __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, float3* velocity, float dt, unsigned int length);
 
-float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length);
+void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length);
 
 __global__ void ProjectKernel(float3* result_ptr, float* data, float* data_prev, float3* velocity, unsigned int length, unsigned int iter, int bounds);
 
-tuple<float3*, float*, float*> ProjectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter);
+void ProjectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter);

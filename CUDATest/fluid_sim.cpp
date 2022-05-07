@@ -39,21 +39,11 @@ VectorField FluidSim::Diffuse(int bounds, float diff, float dt) {
 }
 
 void FluidSim::Project() {
-	tuple<float3*, float*, float*> result_tuple = ProjectCuda(0, density_, density_prev_, velocity_, size_x_, iterations_);
-
-	float* result_ptr = std::get<1>(result_tuple),
-		*prev_ptr = std::get<2>(result_tuple);
-	float3* v_ptr = std::get<0>(result_tuple);
-
-	std::cout << "e: " << v_ptr[0].x << std::endl;
-
-	density_.RepackMap(result_ptr, result_ptr);
-	density_prev_.RepackMap(prev_ptr, prev_ptr);
-	velocity_.RepackMapVector(v_ptr);
+	ProjectCuda(0, density_, density_prev_, velocity_, size_x_, iterations_);
 }
 
 void FluidSim::Advect(int bounds, float dt) {
-	float* result_ptr = AdvectCuda(0, density_, density_prev_, velocity_, dt, size_x_);
+	AdvectCuda(0, density_, density_prev_, velocity_, dt, size_x_);
 	std::cout << density_.ToString() << std::endl;
 }
 

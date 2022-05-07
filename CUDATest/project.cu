@@ -36,30 +36,25 @@ __global__ void ProjectKernel(float3* result_ptr, float* data, float* data_prev,
 	}
 }
 
-tuple<float3*, float*, float*> ProjectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter) {
+void ProjectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter) {
+	unsigned int alloc_size = length * length;
+	CudaMethodHandler handler(alloc_size);
 	float* curr_copy_ptr = nullptr, * prev_copy_ptr = nullptr;
 
 	float* current_ptr = current.FlattenMapX(), //Maybe make current and previous part of the same vector to consolidate?
-		* prev_ptr = previous.FlattenMapX();
+		*prev_ptr = previous.FlattenMapX();
 
-	float3* v_ptr = velocity.FlattenMap(),
-		* v_copy_ptr = nullptr;
+	float3* v_ptr = velocity.FlattenMap(), *v_copy_ptr = nullptr;
 
-	unsigned int alloc_size = length * length;
+	float3* result_ptr = new float3[alloc_size], *result_copy_ptr = nullptr;
 
-	float3* result_ptr = new float3[alloc_size],
-		*result_copy_ptr = nullptr;
+	handler.float_copy_ptrs_.insert(handler.float_copy_ptrs_.end(), { curr_copy_ptr, prev_copy_ptr });
+	handler.float_ptrs_.insert(handler.float_ptrs_.end(), { current_ptr, prev_ptr });
 
-	vector<reference_wrapper<float*>> bidoof;
-	bidoof.insert(bidoof.end(), { curr_copy_ptr, prev_copy_ptr });
+	handler.float3_copy_ptrs_.insert(handler.float3_copy_ptrs_.end(), { v_copy_ptr, result_copy_ptr });
+	handler.float3_ptrs_.insert(handler.float3_ptrs_.end(), { v_ptr, result_ptr });
 
-	CudaMemoryAllocator(bidoof, (size_t)alloc_size, sizeof(float));
-
-	vector<reference_wrapper<float3*>> bidoof2;
-	bidoof2.insert(bidoof2.end(), { v_copy_ptr, result_copy_ptr });
-
-	//Maybe have more consolidation by auto-copying allocated pointers to the GPU
-	CudaMemoryAllocator(bidoof2, (size_t)alloc_size, sizeof(float3));
+	handler.AllocateCopyPointers();
 
 	cudaError_t cuda_status = cudaSuccess;
 
@@ -80,11 +75,7 @@ tuple<float3*, float*, float*> ProjectCuda(int bounds, VectorField& current, Vec
 
 	ProjectKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, v_copy_ptr, length, iter, bounds);
 
-	function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
-	cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", "LinearSolverKernel", cuda_status);
-
-	function<cudaError_t()> sync_func = []() { return cudaDeviceSynchronize(); };
-	cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", "LinearSolverKernel", cuda_status);
+	handler.PostExecutionChecks();
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", result_ptr, result_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
@@ -98,10 +89,7 @@ tuple<float3*, float*, float*> ProjectCuda(int bounds, VectorField& current, Vec
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
-	if (cuda_status != cudaSuccess) {
-		CudaMemoryFreer(bidoof);
-		CudaMemoryFreer(bidoof2);
-	}
-
-	return std::make_tuple(result_ptr, current_ptr, prev_ptr);
+	velocity.RepackMapVector(result_ptr);
+	previous.RepackMap(prev_ptr, prev_ptr);
+	current.RepackMap(current_ptr, current_ptr);
 }
