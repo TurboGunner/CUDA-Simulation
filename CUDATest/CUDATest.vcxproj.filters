@@ -19,6 +19,9 @@
     <Filter Include="includes\data_structures">
       <UniqueIdentifier>{77fd86ea-b696-4fc1-ae19-8ab724439de6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cuda\navier_stokes_funcs">
+      <UniqueIdentifier>{6a67e2ef-e4e2-429b-a791-03ea68c0b85b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handler_methods.hpp">
@@ -42,6 +45,9 @@
     <ClInclude Include="index_pair.hpp">
       <Filter>includes\data_structures</Filter>
     </ClInclude>
+    <ClInclude Include="handler_wrapper.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="handler_methods.cpp">
@@ -59,19 +65,22 @@
     <ClCompile Include="f_vector.cpp">
       <Filter>cpp\data_structures</Filter>
     </ClCompile>
+    <ClCompile Include="handler_wrapper.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="project.cu">
+      <Filter>cuda\navier_stokes_funcs</Filter>
+    </CudaCompile>
+    <CudaCompile Include="linear_solver.cu">
+      <Filter>cuda\navier_stokes_funcs</Filter>
+    </CudaCompile>
     <CudaCompile Include="kernel.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
-    <CudaCompile Include="linear_solver.cu">
-      <Filter>cuda</Filter>
-    </CudaCompile>
     <CudaCompile Include="advect.cu">
-      <Filter>cuda</Filter>
-    </CudaCompile>
-    <CudaCompile Include="project.cu">
-      <Filter>cuda</Filter>
+      <Filter>cuda\navier_stokes_funcs</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

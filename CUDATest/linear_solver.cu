@@ -2,11 +2,11 @@
 #include "handler_methods.hpp"
 #include "fluid_sim.hpp"
 
-__global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter) {
+__global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
-	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) { //If numbers are incorrect, try adding 1 to all y-bounds accesses with IX
+	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		for (int i = 0; i < iter; i++) {
 			data[IX(x_bounds, y_bounds + 1, length)] = (data_prev[IX(x_bounds, y_bounds + 1, length)] +
 				a_fac *
@@ -16,7 +16,12 @@ __global__ void LinearSolverKernel(float* result_ptr, float* data, const float* 
 					+ data[IX(x_bounds, y_bounds, length)]))
 				* (1.0f / c_fac);
 		}
-		PointerBoundaries(data, length);
+		if (bounds == 0) {
+			PointerBoundaries(data, length);
+		}
+		else {
+			PointerBoundariesSpecialX(data, length);
+		}
 		result_ptr[IX(x_bounds, y_bounds + 1, length)] = data[IX(x_bounds, y_bounds + 1, length)];
 	}
 }
@@ -50,7 +55,7 @@ float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous,
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	LinearSolverKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, a_fac, c_fac, length, iter);
+	LinearSolverKernel<<<blocks, threads>>> (result_copy_ptr, curr_copy_ptr, prev_copy_ptr, a_fac, c_fac, length, iter, bounds);
 
 	function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
 	cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", "LinearSolverKernel", cuda_status);

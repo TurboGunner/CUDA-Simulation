@@ -39,7 +39,7 @@ VectorField FluidSim::Diffuse(int bounds, float diff, float dt) {
 }
 
 void FluidSim::Project() {
-	tuple<float3*, float*, float*> result_tuple = ProjectCuda(density_, density_prev_, velocity_, size_x_, iterations_);
+	tuple<float3*, float*, float*> result_tuple = ProjectCuda(0, density_, density_prev_, velocity_, size_x_, iterations_);
 
 	float* result_ptr = std::get<1>(result_tuple),
 		*prev_ptr = std::get<2>(result_tuple);
@@ -50,13 +50,10 @@ void FluidSim::Project() {
 	density_.RepackMap(result_ptr, result_ptr);
 	density_prev_.RepackMap(prev_ptr, prev_ptr);
 	velocity_.RepackMapVector(v_ptr);
-	//std::cout << "e: " << velocity_.GetVectorMap()[IndexPair(0, 0)].ToString() << std::endl;
 }
 
 void FluidSim::Advect(int bounds, float dt) {
 	float* result_ptr = AdvectCuda(0, density_, density_prev_, velocity_, dt, size_x_);
-	VectorField& density_field = density_;
-	density_field.RepackMap(result_ptr, result_ptr);
 	std::cout << density_.ToString() << std::endl;
 }
 
@@ -80,7 +77,7 @@ void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 }
 
 void FluidSim::LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac) {
-	float* results_x = LinearSolverCuda(0, current, previous, a_fac, c_fac, iterations_, size_x_);
+	float* results_x = LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_x_);
 
 	current.RepackMap(results_x, results_x);
 

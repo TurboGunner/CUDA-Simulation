@@ -16,7 +16,7 @@ using std::vector;
 using std::function;
 using std::tuple;
 
-__global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter);
+__global__ void LinearSolverKernel(float* result_ptr, float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds);
 
 float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length);
 
@@ -24,6 +24,6 @@ __global__ void AdvectKernel(float* result_ptr, float* data, float* data_prev, f
 
 float* AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length);
 
-__global__ void ProjectKernel(float3* result_ptr, float* data, float* data_prev, float3* velocity, unsigned int length, unsigned int iter);
+__global__ void ProjectKernel(float3* result_ptr, float* data, float* data_prev, float3* velocity, unsigned int length, unsigned int iter, int bounds);
 
-tuple<float3*, float*, float*> ProjectCuda(VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter);
+tuple<float3*, float*, float*> ProjectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const unsigned int& length, const unsigned int& iter);

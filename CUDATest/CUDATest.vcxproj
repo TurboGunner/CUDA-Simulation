@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="f_vector.cpp" />
+    <ClCompile Include="handler_wrapper.cpp" />
     <ClCompile Include="index_pair.cpp" />
     <ClCompile Include="fluid_sim.cpp" />
     <ClCompile Include="handler_methods.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="fluid_sim_cuda.cuh" />
     <ClInclude Include="f_vector.hpp" />
     <ClInclude Include="handler_methods.hpp" />
+    <ClInclude Include="handler_wrapper.hpp" />
     <ClInclude Include="index_pair.hpp" />
     <ClInclude Include="vector_field.hpp" />
   </ItemGroup>
