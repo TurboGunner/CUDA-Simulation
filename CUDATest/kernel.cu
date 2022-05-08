@@ -24,15 +24,15 @@ void SimulationOperations(FluidSim& simulation) {
     simulation.AddDensity(IndexPair(1, 1), 10.0f);
     simulation.AddDensity(IndexPair(2, 2), 100.0f);
 
-    //simulation.Diffuse(1, 1.0f, 2.0f);
-    simulation.Project();
+    simulation.Diffuse(1, 1.0f, 2.0f, simulation.velocity_, simulation.velocity_prev_);
+    simulation.Project(simulation.velocity_prev_, simulation.velocity_);
     //simulation.Advect(0, 2.0f);
     //std::cout << simulation.velocity_.ToString() << std::endl;
 }
 
 int main()
 {
-    unsigned int iter = 8, side_bound = 8;
+    unsigned int iter = 32, side_bound = 8;
     FluidSim simulation(.1f, 1.0f, 1, side_bound, side_bound, iter);
     SimulationOperations(simulation);
 

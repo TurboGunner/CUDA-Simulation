@@ -15,14 +15,14 @@ struct FluidSim {
 
 	void BoundaryConditions(int bounds, VectorField& input);
 
-	VectorField Diffuse(int bounds, float diff, float dt);
-	void Project();
+	VectorField Diffuse(int bounds, float visc, float dt, VectorField& current, VectorField& previous);
+	void Project(VectorField& v_current, VectorField& v_previous);
 	void Advect(int bounds, float dt);
 
 	float dt_ = 0, diffusion_ = 0, viscosity_ = 0;
 	unsigned int size_x_ = 0, size_y_ = 0; //Bounds
 	unsigned int iterations_;
-	VectorField density_, velocity_, density_prev_;
+	VectorField density_, velocity_, velocity_prev_, density_prev_;
 
 	enum class Direction { Origin, Left, Right, Up, Down };
 
