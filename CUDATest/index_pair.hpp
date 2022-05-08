@@ -23,7 +23,7 @@ struct IndexPair {
 	/// <summary> 
 	/// Operator overload for returning the proper hash code for IndexPair.
 	/// </summary>
-	unsigned int operator()(const IndexPair& i1) const noexcept;
+	size_t operator()(const IndexPair& i1) const noexcept;
 
 	/// <summary> 
 	/// Operator overload for comparing (less than). Required for proper functioning with maps.

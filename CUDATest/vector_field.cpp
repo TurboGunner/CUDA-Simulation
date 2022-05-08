@@ -47,8 +47,13 @@ set<F_Vector> VectorField::LoadDefaultVectorSet() {
 
 string VectorField::ToString() {
 	string output;
-	for (auto const& entry : map_) {
-		output += entry.first.ToString() + "\n" + entry.second.ToString() + "\n\n";
+	unsigned int size = (unsigned int) sqrt(map_.size());
+	unsigned int y_current = 0;
+	for (y_current; y_current < size; y_current++) {
+		for (unsigned int i = 0; i < size; i++) {
+			IndexPair current(i, y_current);
+			output += current.ToString() + "\n" + map_[current].ToString() + "\n\n";
+		}
 	}
 	return output;
 }
@@ -57,26 +62,40 @@ void VectorField::operator=(const VectorField& copy) {
 	map_ = copy.map_;
 }
 
-map<IndexPair, F_Vector>& VectorField::GetVectorMap() {
+unordered_map<IndexPair, F_Vector, Hash>& VectorField::GetVectorMap() {
 	return map_;
 }
 
 float* VectorField::FlattenMapX() {
 	float* arr = new float[map_.size()];
+
 	unsigned int count = 0;
-	for (const auto& entry : map_) {
-		arr[count] = entry.second.vx;
-		count++;
+	unsigned int size = (unsigned int)sqrt(map_.size());
+	unsigned int y_current = 0;
+
+	for (y_current; y_current < size; y_current++) {
+		for (unsigned int i = 0; i < size; i++) {
+			IndexPair current(i, y_current);
+			arr[count] = map_[current].vx;
+			count++;
+		}
 	}
 	return arr;
 }
 
 float* VectorField::FlattenMapY() {
 	float* arr = new float[map_.size()];
+
 	unsigned int count = 0;
-	for (const auto& entry : map_) {
-		arr[count] = entry.second.vy;
-		count++;
+	unsigned int size = (unsigned int) sqrt(map_.size());
+	unsigned int y_current = 0;
+
+	for (y_current; y_current < size; y_current++) {
+		for (unsigned int i = 0; i < size; i++) {
+			IndexPair current(i, y_current);
+			arr[count] = map_[current].vy;
+			count++;
+		}
 	}
 	return arr;
 }
@@ -97,9 +116,10 @@ float3* VectorField::FlattenMap() {
 
 void VectorField::RepackMap(float* x, float* y) {
 	unsigned int y_current = 0;
-	for (y_current; y_current < size_y_; y_current++) {
-		unsigned int row_multiplier = (size_x_ - 1) * y_current;
-		for (unsigned int i = 0; i < size_x_; i++) {
+	unsigned int size = (unsigned int)sqrt(map_.size());
+	for (y_current; y_current < size; y_current++) {
+		unsigned int row_multiplier = (size - 1) * y_current;
+		for (unsigned int i = 0; i < size; i++) {
 			map_[IndexPair(i, y_current)] = F_Vector(x[i + row_multiplier], y[i + row_multiplier]);
 		}
 	}
@@ -107,9 +127,10 @@ void VectorField::RepackMap(float* x, float* y) {
 
 void VectorField::RepackMapVector(float3* vectors) {
 	unsigned int y_current = 0;
-	for (y_current; y_current < size_y_; y_current++) {
-		unsigned int row_multiplier = (size_x_ - 1) * y_current;
-		for (unsigned int i = 0; i < size_x_; i++) {
+	unsigned int size = (unsigned int)sqrt(map_.size());
+	for (y_current; y_current < size; y_current++) {
+		unsigned int row_multiplier = (size - 1) * y_current;
+		for (unsigned int i = 0; i < size; i++) {
 			map_[IndexPair(i, y_current)] = F_Vector(vectors[i + row_multiplier].x, vectors[i + row_multiplier].y);
 			std::cout << y_current << std::endl;
 		}

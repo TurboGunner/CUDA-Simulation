@@ -48,7 +48,7 @@ void FluidSim::Advect(int bounds, float dt) {
 
 void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 	unsigned int bound = size_x_ - 1;
-	map<IndexPair, F_Vector>& c_map = input.GetVectorMap();
+	unordered_map<IndexPair, F_Vector, Hash>& c_map = input.GetVectorMap();
 
 	for (int i = 1; i < bound; i++) {
 		c_map[IndexPair(i, 0)].vx = bounds == 1 ? c_map[IndexPair(i, 0)].vx * -1.0f : c_map[IndexPair(i, 1)].vx;
@@ -66,17 +66,12 @@ void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 }
 
 void FluidSim::LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac) {
-	float* results_x = LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_x_);
-
-	current.RepackMap(results_x, results_x);
-
-	free(results_x);
-
+	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_x_);
 	BoundaryConditions(bounds, current);
 }
 
-map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(IndexPair incident) {
-	map<FluidSim::Direction, IndexPair> output;
+unordered_map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(IndexPair incident) {
+	unordered_map<FluidSim::Direction, IndexPair> output;
 	output.emplace(Direction::Origin, incident);
 
 	output.emplace(Direction::Left, IndexPair(incident.x - 1, incident.y));

@@ -7,11 +7,19 @@
 
 #include <string>
 #include <set>
-#include <map>
+#include <unordered_map>
 
 using std::string;
 using std::set;
-using std::map;
+using std::unordered_map;
+
+struct Hash {
+	size_t operator()(const IndexPair& i1) const {
+		unsigned int hash1 = std::hash<unsigned int>()(i1.x);
+		unsigned int hash2 = std::hash<unsigned int>()(i1.y);
+		return hash1 ^ (hash2 << 1);
+	}
+};
 
 class VectorField {
 	public:
@@ -28,7 +36,7 @@ class VectorField {
 		/// <summary> 
 		/// Gets a reference of the vector field map that contains the data.
 		/// </summary>
-		map<IndexPair, F_Vector>& GetVectorMap();
+		unordered_map<IndexPair, F_Vector, Hash>& GetVectorMap();
 
 		/// <summary> 
 		/// Operator overload for copying the data of an existing vector field.
@@ -66,7 +74,7 @@ class VectorField {
 		string ToString();
 
 	private:
-		map<IndexPair, F_Vector> map_;
+		unordered_map<IndexPair, F_Vector, Hash> map_;
 		unsigned int size_x_, size_y_;
 		set<F_Vector> LoadDefaultVectorSet();
 };

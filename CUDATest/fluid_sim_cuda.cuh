@@ -19,7 +19,7 @@ using std::function;
 
 __global__ void LinearSolverKernel(float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds);
 
-float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length);
+void LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length);
 
 __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, float dt, unsigned int length);
 

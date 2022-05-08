@@ -3,9 +3,9 @@
 #include "vector_field.hpp"
 #include <math.h>
 
-#include <map>
+#include <unordered_map>
 
-using std::map;
+using std::unordered_map;
 
 struct FluidSim {
 	FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter);
@@ -20,7 +20,7 @@ struct FluidSim {
 	void Advect(int bounds, float dt);
 
 	float dt_ = 0, diffusion_ = 0, viscosity_ = 0;
-	unsigned int size_x_ = 0, size_y_ = 0; //Bounds
+	unsigned int size_x_, size_y_; //Bounds
 	unsigned int iterations_;
 	VectorField density_, velocity_, velocity_prev_, density_prev_;
 
@@ -28,5 +28,5 @@ struct FluidSim {
 
 private:
 	void LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac);
-	map<Direction, IndexPair> GetAdjacentCoordinates(IndexPair incident); //Data Member
+	unordered_map<Direction, IndexPair> GetAdjacentCoordinates(IndexPair incident); //Data Member
 };

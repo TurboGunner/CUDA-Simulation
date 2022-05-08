@@ -43,7 +43,7 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 			((data_prev[IX(unsigned int(x_previous), unsigned int(y_current + 1), length)] * velocity_y_curr) +
 				(data_prev[IX(unsigned int(x_previous), unsigned int(y_previous + 1), length)] * velocity_y_prev) * velocity_x_prev);
 
-		printf("%.5f | %d ", (data_prev[IX(unsigned int(x_current), unsigned int(y_current + 1), length)]), x_bounds);
+		//printf("%.5f | %d ", (data_prev[IX(unsigned int(x_current), unsigned int(y_current + 1), length)]), x_bounds);
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
 		PointerBoundaries(data, length);
@@ -70,17 +70,7 @@ void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorF
 
 	cudaError_t cuda_status = cudaSuccess;
 
-	cuda_status = CopyFunction("cudaMemcpy failed! (prev)", prev_copy_ptr, prev_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
-		sizeof(float));
-
-	cuda_status = CopyFunction("cudaMemcpy failed! (curr)", curr_copy_ptr, current_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
-		sizeof(float));
-
-	cuda_status = CopyFunction("cudaMemcpy failed! (v)", v_copy_ptr, v_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
-		sizeof(float3));
+	cuda_status = handler.CopyToMemory(cudaMemcpyHostToDevice, cuda_status);
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
@@ -89,11 +79,10 @@ void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorF
 
 	cuda_status = handler.PostExecutionChecks(cuda_status);
 
-	float* ptr = new float[alloc_size];
-
-	cuda_status = CopyFunction("cudaMemcpy failed! (result)", ptr, curr_copy_ptr,
+	cuda_status = CopyFunction("cudaMemcpy failed! (result)", current_ptr, curr_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
-	current.RepackMap(ptr, ptr);
+	current.RepackMap(current_ptr, current_ptr);
+	handler.~CudaMethodHandler();
 }
