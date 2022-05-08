@@ -26,7 +26,7 @@ struct FluidSim {
 
 	enum class Direction { Origin, Left, Right, Up, Down };
 
-	private:
-		void LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac);
-		map<Direction, IndexPair> GetAdjacentCoordinates(IndexPair incident); //Data Member
+private:
+	void LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac);
+	map<Direction, IndexPair> GetAdjacentCoordinates(IndexPair incident); //Data Member
 };

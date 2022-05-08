@@ -103,16 +103,16 @@ void VectorField::RepackMap(float* x, float* y) {
 			map_[IndexPair(i, y_current)] = F_Vector(x[i + row_multiplier], y[i + row_multiplier]);
 		}
 	}
-	//std::cout << ToString() << std::endl;
+	std::cout << ToString() << std::endl;
 }
 
 void VectorField::RepackMapVector(float3* vectors) {
-	unsigned int count = 0;
 	unsigned int y_current = 0;
 	for (y_current; y_current < size_y_; y_current++) {
 		unsigned int row_multiplier = (size_x_ - 1) * y_current;
 		for (unsigned int i = 0; i < size_x_; i++) {
 			map_[IndexPair(i, y_current)] = F_Vector(vectors[i + row_multiplier].x, vectors[i + row_multiplier].y);
+			std::cout << y_current << std::endl;
 		}
 	}
 }

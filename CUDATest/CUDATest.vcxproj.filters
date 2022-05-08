@@ -33,9 +33,6 @@
     <ClInclude Include="cuda_sim_helpers.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="fluid_sim.hpp">
-      <Filter>includes\data_structures</Filter>
-    </ClInclude>
     <ClInclude Include="vector_field.hpp">
       <Filter>includes\data_structures</Filter>
     </ClInclude>
@@ -46,6 +43,9 @@
       <Filter>includes\data_structures</Filter>
     </ClInclude>
     <ClInclude Include="handler_wrapper.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid_sim.hpp">
       <Filter>includes</Filter>
     </ClInclude>
   </ItemGroup>

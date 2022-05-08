@@ -12,8 +12,8 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 	float x_value, y_value;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		x_value = (float) x_bounds - (x_dt * velocity[IX(x_bounds, y_bounds + 1, length)].x);
-		y_value = (float) y_bounds - (y_dt * velocity[IX(x_bounds, y_bounds + 1, length)].y);
+		x_value = (float)x_bounds - (x_dt * velocity[IX(x_bounds, y_bounds + 1, length)].x);
+		y_value = (float)y_bounds - (y_dt * velocity[IX(x_bounds, y_bounds + 1, length)].y);
 
 		if (x_value < 0.5f) {
 			x_value = 0.5f;
@@ -53,12 +53,12 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
 	unsigned int alloc_size = length * length;
 	CudaMethodHandler handler(alloc_size, "AdvectCudaKernel");
-	float* curr_copy_ptr = nullptr, *prev_copy_ptr = nullptr;
+	float* curr_copy_ptr = nullptr, * prev_copy_ptr = nullptr;
 
 	float* current_ptr = current.FlattenMapX(), //Maybe make current and previous part of the same vector to consolidate?
-		*prev_ptr = previous.FlattenMapX();
+		* prev_ptr = previous.FlattenMapX();
 
-	float3* v_ptr = velocity.FlattenMap(), *v_copy_ptr = nullptr;
+	float3* v_ptr = velocity.FlattenMap(), * v_copy_ptr = nullptr;
 
 	handler.float_copy_ptrs_.insert(handler.float_copy_ptrs_.end(), { curr_copy_ptr, prev_copy_ptr });
 	handler.float_ptrs_.insert(handler.float_ptrs_.end(), { current_ptr, prev_ptr });
@@ -70,14 +70,14 @@ void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorF
 
 	cudaError_t cuda_status = cudaSuccess;
 
-	cuda_status = handler.CopyToMemory(cudaMemcpyHostToDevice);
+	cuda_status = handler.CopyToMemory(cudaMemcpyHostToDevice, cuda_status);
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	AdvectKernel<<<blocks, threads>>> (curr_copy_ptr, prev_copy_ptr, v_copy_ptr, dt, length);
+	AdvectKernel <<<blocks, threads>>> (curr_copy_ptr, prev_copy_ptr, v_copy_ptr, dt, length);
 
-	cuda_status = handler.PostExecutionChecks();
+	cuda_status = handler.PostExecutionChecks(cuda_status);
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", current_ptr, curr_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,

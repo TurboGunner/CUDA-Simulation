@@ -47,6 +47,7 @@ void CudaMemoryAllocator(vector<reference_wrapper<float*>>& ptrs, size_t size_al
     for (size_t i = 0; i < ptrs.size(); i++) {
         if (ptrs.at(i).get() == nullptr) {
             cudaError_t output_status = cudaMalloc((void**)&ptrs.at(i).get(), size_alloc * element_alloc);
+            std::cout << "Allocated " << size_alloc * element_alloc << " bytes!" << std::endl;
             CudaExceptionHandler(output_status, "cudaMalloc failed!");
         }
     }
@@ -56,6 +57,7 @@ void CudaMemoryAllocator(vector<reference_wrapper<float3*>>& ptrs, size_t size_a
     for (size_t i = 0; i < ptrs.size(); i++) {
         if (ptrs.at(i).get() == nullptr) {
             cudaError_t output_status = cudaMalloc((void**)&ptrs.at(i).get(), size_alloc * element_alloc);
+            std::cout << "Allocated " << size_alloc * element_alloc << " bytes!" << std::endl;
             CudaExceptionHandler(output_status, "cudaMalloc failed!");
         }
     }

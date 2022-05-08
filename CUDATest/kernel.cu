@@ -34,20 +34,21 @@ int main()
 {
     unsigned int iter = 32, side_bound = 8;
     FluidSim simulation(.1f, 1.0f, 1, side_bound, side_bound, iter);
-    SimulationOperations(simulation);
 
     cudaError_t cuda_status = cudaSuccess;
 
     function<cudaError_t()> set_device_func = []() { return cudaSetDevice(0); };
-    cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main", 
+    cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main",
         cuda_status, "Do you have a CUDA-capable GPU installed?");
 
     float a_fac = simulation.dt_ * simulation.diffusion_ * (simulation.size_x_ - 2) * (simulation.size_x_ - 2);
     float c_fac = 1.0f + (4.0f * a_fac);
 
+    SimulationOperations(simulation);
+
     //CudaExceptionHandler(cuda_status, "LinearSolverCuda failed!");
 
-    cuda_status = cudaDeviceReset();
+    //cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");
 
     return 0;

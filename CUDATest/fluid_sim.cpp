@@ -61,7 +61,7 @@ void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 
 	c_map[IndexPair(0, 0)] = c_map[IndexPair(1, 0)] + c_map[IndexPair(0, 1)] * .5f;
 	c_map[IndexPair(0, bound)] = c_map[IndexPair(1, bound)] + c_map[IndexPair(0, bound - 1)] * .5f;
-	c_map[IndexPair(bound, 0)] = c_map[IndexPair(bound - 1, 0)] +  c_map[IndexPair(bound, 1)] * .5f;
+	c_map[IndexPair(bound, 0)] = c_map[IndexPair(bound - 1, 0)] + c_map[IndexPair(bound, 1)] * .5f;
 	c_map[IndexPair(bound, bound)] = c_map[IndexPair(bound - 1, bound)] + c_map[IndexPair(bound, bound - 1)] * .5f;
 }
 

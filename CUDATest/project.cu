@@ -10,11 +10,10 @@ __global__ void ProjectKernel(float3* velocity, float* data, float* data_prev, u
 				- velocity[IX(x_bounds - 1, y_bounds + 1, length)].x
 				+ velocity[IX(x_bounds, y_bounds + 2, length)].y
 				- velocity[IX(x_bounds, y_bounds, length)].y)
-			* -0.5f) * (1.0f / length);
-
+				* -0.5f) * (1.0f / length);
+		printf("%.5f\n", data_prev[IX(x_bounds, y_bounds + 1, length)]);
 		data_prev[IX(x_bounds, y_bounds + 1, length)] = 0;
 	}
-	printf("%.5f\n", data[IX(x_bounds, y_bounds + 1, length)]);
 	if (x_bounds * y_bounds >= (length * length)) {
 		PointerBoundaries(data, length);
 		PointerBoundaries(data_prev, length);
@@ -24,11 +23,11 @@ __global__ void ProjectKernel(float3* velocity, float* data, float* data_prev, u
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		velocity[IX(x_bounds, y_bounds + 1, length)].x -= 0.5f
 			* (data_prev[IX(x_bounds + 1, y_bounds + 1, length)]
-			- data_prev[IX(x_bounds - 1, y_bounds + 1, length)]) 
+				- data_prev[IX(x_bounds - 1, y_bounds + 1, length)])
 			* length;
 		velocity[IX(x_bounds, y_bounds + 1, length)].y -= 0.5f
 			* (data_prev[IX(x_bounds, y_bounds + 2, length)]
-			- data_prev[IX(x_bounds, y_bounds, length)])
+				- data_prev[IX(x_bounds, y_bounds, length)])
 			* length;
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
@@ -40,9 +39,9 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	unsigned int alloc_size = length * length;
 	CudaMethodHandler handler(alloc_size, "ProjectCudaKernel");
 
-	float3* v_ptr = velocity.FlattenMap(), *v_copy_ptr = nullptr;
-	float* v_x_prev_ptr = velocity_prev.FlattenMapX(), *v_x_prev_copy_ptr = velocity_prev.FlattenMapX();
-	float* v_y_prev_ptr = velocity_prev.FlattenMapY(), *v_y_prev_copy_ptr = velocity_prev.FlattenMapY();
+	float3* v_ptr = velocity.FlattenMap(), * v_copy_ptr = nullptr;
+	float* v_x_prev_ptr = velocity_prev.FlattenMapX(), * v_x_prev_copy_ptr = nullptr;
+	float* v_y_prev_ptr = velocity_prev.FlattenMapY(), * v_y_prev_copy_ptr = nullptr;
 
 	handler.float_copy_ptrs_.insert(handler.float_copy_ptrs_.end(), { v_x_prev_copy_ptr, v_y_prev_copy_ptr });
 	handler.float_ptrs_.insert(handler.float_ptrs_.end(), { v_x_prev_ptr, v_y_prev_ptr });
@@ -54,25 +53,41 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 
 	cudaError_t cuda_status = cudaSuccess;
 
+	cuda_status = CopyFunction("cudaMemcpy failed!", v_x_prev_copy_ptr, v_x_prev_ptr,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		sizeof(float));
+
+	cuda_status = CopyFunction("cudaMemcpy failed!", v_y_prev_copy_ptr, v_y_prev_ptr,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		sizeof(float));
+
+	cuda_status = CopyFunction("cudaMemcpy failed!", v_copy_ptr, v_ptr,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		sizeof(float3));
+
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	ProjectKernel<<<blocks, threads>>> (v_copy_ptr, v_x_prev_copy_ptr, v_y_prev_copy_ptr, length, iter, bounds);
+	ProjectKernel <<<blocks, threads>>> (v_copy_ptr, v_x_prev_copy_ptr, v_y_prev_copy_ptr, length, iter, bounds);
 
-	handler.PostExecutionChecks();
+	handler.PostExecutionChecks(cuda_status);
 
-	cuda_status = CopyFunction("cudaMemcpy failed!", v_ptr, v_copy_ptr,
+	cuda_status = CopyFunction("cudaMemcpy failed at v_x_ptr!", v_x_prev_ptr, v_x_prev_copy_ptr,
+		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
+		sizeof(float));
+
+	cuda_status = CopyFunction("cudaMemcpy failed at v_y_ptr!", v_y_prev_ptr, v_y_prev_copy_ptr,
+		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
+		sizeof(float));
+
+	float3* ptr = new float3[alloc_size];
+
+	cuda_status = CopyFunction("cudaMemcpy failed at v_ptr!", ptr, v_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float3));
 
-	cuda_status = CopyFunction("cudaMemcpy failed!", v_x_prev_ptr, v_x_prev_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
-		sizeof(float));
+	std::cout << ptr[9].x << std::endl;
 
-	cuda_status = CopyFunction("cudaMemcpy failed!", v_y_prev_ptr, v_y_prev_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
-		sizeof(float));
-
-	velocity.RepackMapVector(v_ptr);
+	velocity.RepackMapVector(ptr);
 	velocity_prev.RepackMap(v_x_prev_ptr, v_y_prev_ptr);
 }

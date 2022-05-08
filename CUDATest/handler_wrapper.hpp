@@ -23,9 +23,9 @@ class CudaMethodHandler {
 
 		void AllocateCopyPointers();
 
-		cudaError_t CopyToMemory(cudaMemcpyKind mode);
+		cudaError_t CopyToMemory(cudaMemcpyKind mode, cudaError_t status);
 
-		cudaError_t PostExecutionChecks();
+		cudaError_t PostExecutionChecks(cudaError_t status);
 
 		vector<reference_wrapper<float*>> float_ptrs_, float_copy_ptrs_;
 		vector<reference_wrapper<float3*>> float3_ptrs_, float3_copy_ptrs_;

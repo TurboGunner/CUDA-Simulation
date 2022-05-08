@@ -28,26 +28,26 @@ __global__ void LinearSolverKernel(float* data, const float* data_prev, float a_
 }
 
 float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length) {
-	float* curr_copy_ptr = nullptr, *prev_copy_ptr = nullptr;
+	float* curr_copy_ptr = nullptr, * prev_copy_ptr = nullptr;
 
 	float* current_ptr = current.FlattenMapX(),
-		*prev_ptr = previous.FlattenMapX();
+		* prev_ptr = previous.FlattenMapX();
 
 	unsigned int alloc_size = length * length;
 
 	vector<reference_wrapper<float*>> bidoof;
 	bidoof.insert(bidoof.end(), { curr_copy_ptr, prev_copy_ptr });
 
-	CudaMemoryAllocator(bidoof, (size_t) alloc_size, sizeof(float));
+	CudaMemoryAllocator(bidoof, (size_t)alloc_size, sizeof(float));
 
 	cudaError_t cuda_status = cudaSuccess;
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", curr_copy_ptr, current_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", prev_copy_ptr, prev_ptr,
-		cudaMemcpyHostToDevice, cuda_status, (size_t) alloc_size,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
 	dim3 blocks, threads;
@@ -62,7 +62,7 @@ float* LinearSolverCuda(int bounds, VectorField& current, VectorField& previous,
 	cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", "LinearSolverKernel", cuda_status);
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", current_ptr, curr_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t) alloc_size,
+		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
 	if (cuda_status != cudaSuccess) {
