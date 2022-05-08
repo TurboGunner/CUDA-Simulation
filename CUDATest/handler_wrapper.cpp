@@ -22,8 +22,13 @@ void CudaMethodHandler::AllocateCopyPointers() {
 }
 
 CudaMethodHandler::~CudaMethodHandler() {
-	//CudaMemoryFreer(float_copy_ptrs_);
-	//CudaMemoryFreer(float3_copy_ptrs_);
+	//GPU Memory Copy Pointers
+	CudaMemoryFreer(float_copy_ptrs_);
+	CudaMemoryFreer(float3_copy_ptrs_);
+
+	//System Memory Data Pointers
+	MemoryFreer(float_ptrs_);
+	MemoryFreer(float3_ptrs_);
 }
 
 cudaError_t CudaMethodHandler::CopyToMemory(cudaMemcpyKind mode, cudaError_t status) {

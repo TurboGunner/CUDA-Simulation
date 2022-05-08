@@ -88,7 +88,8 @@ cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyK
     if (error == cudaSuccess) {
         error = cudaMemcpy(tgt, src, size_alloc * element_alloc, mem_copy_type);
         if (error != cudaSuccess) {
-            std::cout << err_msg << std::endl;
+            std::cout << err_msg << " due to error code " << error << "\n" << std::endl;
+            std::cout << "Error Stacktrace: " << cudaGetErrorString(error) << "\n" << std::endl;
         }
     }
     return error;
@@ -102,7 +103,7 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
     cuda_status = func();
     if (cuda_status != cudaSuccess) {
         std::cout << operation_name << " returned error code " << cuda_status << "after launching " << method_name << "\n" << std::endl;
-        std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << std::endl;
+        std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
         if (optional_args.size() > 0) {
             std::cout << "Additional Stacktrace: " << optional_args << std::endl;
         }

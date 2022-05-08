@@ -23,11 +23,11 @@ __global__ void ProjectKernel(float3* velocity, float* data, float* data_prev, u
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		velocity[IX(x_bounds, y_bounds + 1, length)].x -= 0.5f
 			* (data_prev[IX(x_bounds + 1, y_bounds + 1, length)]
-				- data_prev[IX(x_bounds - 1, y_bounds + 1, length)])
+			- data_prev[IX(x_bounds - 1, y_bounds + 1, length)])
 			* length;
 		velocity[IX(x_bounds, y_bounds + 1, length)].y -= 0.5f
 			* (data_prev[IX(x_bounds, y_bounds + 2, length)]
-				- data_prev[IX(x_bounds, y_bounds, length)])
+			- data_prev[IX(x_bounds, y_bounds, length)])
 			* length;
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
@@ -68,7 +68,7 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	ProjectKernel <<<blocks, threads>>> (v_copy_ptr, v_x_prev_copy_ptr, v_y_prev_copy_ptr, length, iter, bounds);
+	ProjectKernel<<<blocks, threads>>> (v_copy_ptr, v_x_prev_copy_ptr, v_y_prev_copy_ptr, length, iter, bounds);
 
 	handler.PostExecutionChecks(cuda_status);
 
@@ -85,8 +85,6 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	cuda_status = CopyFunction("cudaMemcpy failed at v_ptr!", ptr, v_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float3));
-
-	std::cout << ptr[9].x << std::endl;
 
 	velocity.RepackMapVector(ptr);
 	velocity_prev.RepackMap(v_x_prev_ptr, v_y_prev_ptr);

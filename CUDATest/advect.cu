@@ -70,7 +70,17 @@ void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorF
 
 	cudaError_t cuda_status = cudaSuccess;
 
-	cuda_status = handler.CopyToMemory(cudaMemcpyHostToDevice, cuda_status);
+	cuda_status = CopyFunction("cudaMemcpy failed! (prev)", prev_copy_ptr, prev_ptr,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		sizeof(float));
+
+	cuda_status = CopyFunction("cudaMemcpy failed! (curr)", curr_copy_ptr, current_ptr,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		sizeof(float));
+
+	cuda_status = CopyFunction("cudaMemcpy failed! (v)", v_copy_ptr, v_ptr,
+		cudaMemcpyHostToDevice, cuda_status, (size_t)alloc_size,
+		sizeof(float3));
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
@@ -79,9 +89,11 @@ void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorF
 
 	cuda_status = handler.PostExecutionChecks(cuda_status);
 
-	cuda_status = CopyFunction("cudaMemcpy failed!", current_ptr, curr_copy_ptr,
+	float* ptr = new float[alloc_size];
+
+	cuda_status = CopyFunction("cudaMemcpy failed! (result)", ptr, curr_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
-	current.RepackMap(current_ptr, curr_copy_ptr);
+	current.RepackMap(ptr, ptr);
 }
