@@ -68,6 +68,18 @@ void MemoryFreer(void* ptrs[], size_t element_alloc) {
     }
 }
 
+void MemoryFreer(vector<reference_wrapper<float*>>& ptrs) {
+    for (size_t i = 0; i < ptrs.size(); i++) {
+        free(ptrs.at(i).get());
+    }
+}
+
+void MemoryFreer(vector<reference_wrapper<float3*>>& ptrs) {
+    for (size_t i = 0; i < ptrs.size(); i++) {
+        free(ptrs.at(i).get());
+    }
+}
+
 cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type,
     cudaError_t error, size_t size_alloc, size_t element_alloc) {
 

@@ -22,19 +22,29 @@ void CudaExceptionHandler(cudaError_t cuda_status, string error_message);
 void CudaMemoryFreer(void* ptrs[]);
 
 /// <summary> 
-/// Polymorphism, frees a referenced std::vector of referenced wrapped float pointers.
+/// Polymorphism, frees a referenced std::vector of referenced wrapped float pointers in GPU memory.
 /// </summary>
 void CudaMemoryFreer(vector<reference_wrapper<float*>>& ptrs);
 
 /// <summary> 
-/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers.
+/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers in GPU memory.
 /// </summary>
 void CudaMemoryFreer(vector<reference_wrapper<float3*>>& ptrs);
 
 /// <summary> 
-/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers.
+/// Polymorphism, frees a vector of void pointers in system memory.
 /// </summary>
 void MemoryFreer(void* ptrs[], size_t element_alloc);
+
+/// <summary> 
+/// Polymorphism, frees a referenced std::vector of referenced wrapped float pointers in system memory.
+/// </summary>
+void MemoryFreer(vector<reference_wrapper<float*>>& ptrs);
+
+/// <summary> 
+/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers in system memory.
+/// </summary>
+void MemoryFreer(vector<reference_wrapper<float3*>>& ptrs);
 
 /// <summary> 
 /// Allocates memory to a referenced std::vector of referenced wrapped float pointers.

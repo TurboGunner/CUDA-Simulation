@@ -38,7 +38,7 @@ __global__ void ProjectKernel(float3* velocity, float* data, float* data_prev, u
 
 void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const unsigned int& length, const unsigned int& iter) {
 	unsigned int alloc_size = length * length;
-	CudaMethodHandler handler(alloc_size);
+	CudaMethodHandler handler(alloc_size, "ProjectCudaKernel");
 
 	float3* v_ptr = velocity.FlattenMap(), *v_copy_ptr = nullptr;
 	float* v_x_prev_ptr = velocity_prev.FlattenMapX(), *v_x_prev_copy_ptr = velocity_prev.FlattenMapX();

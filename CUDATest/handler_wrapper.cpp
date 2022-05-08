@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-CudaMethodHandler::CudaMethodHandler(const unsigned int& alloc_size) {
+CudaMethodHandler::CudaMethodHandler(const unsigned int& alloc_size, string method_name) {
 	if (alloc_size < 1) {
 		throw std::invalid_argument("Invalid size argument. Must be 1 or greater.");
 	}
@@ -19,10 +19,7 @@ void CudaMethodHandler::AllocateCopyPointers() {
 }
 
 CudaMethodHandler::~CudaMethodHandler() {
-	CudaMemoryFreer(float_copy_ptrs_);
-	CudaMemoryFreer(float3_copy_ptrs_);
-	CudaMemoryFreer(float_ptrs_);
-	CudaMemoryFreer(float3_ptrs_);
+
 }
 
 cudaError_t CudaMethodHandler::CopyToMemory(cudaMemcpyKind mode) {
@@ -43,9 +40,9 @@ cudaError_t CudaMethodHandler::CopyToMemory(cudaMemcpyKind mode) {
 cudaError_t CudaMethodHandler::PostExecutionChecks() {
 	cudaError_t cuda_status = cudaSuccess;
 	function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
-	cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", "LinearSolverKernel", cuda_status);
+	cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", method_name_, cuda_status);
 
 	function<cudaError_t()> sync_func = []() { return cudaDeviceSynchronize(); };
-	cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", "LinearSolverKernel", cuda_status);
+	cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", method_name_, cuda_status);
 	return cuda_status;
 }

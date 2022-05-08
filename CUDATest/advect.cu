@@ -1,8 +1,8 @@
 #include "fluid_sim_cuda.cuh"
 
 __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, float dt, unsigned int length) {
-	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
-	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
+	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
+	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
 	float x_current, x_previous, y_current, y_previous;
 
@@ -52,7 +52,7 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 
 void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
 	unsigned int alloc_size = length * length;
-	CudaMethodHandler handler(alloc_size);
+	CudaMethodHandler handler(alloc_size, "AdvectCudaKernel");
 	float* curr_copy_ptr = nullptr, *prev_copy_ptr = nullptr;
 
 	float* current_ptr = current.FlattenMapX(), //Maybe make current and previous part of the same vector to consolidate?

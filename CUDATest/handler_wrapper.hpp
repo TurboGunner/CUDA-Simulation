@@ -17,7 +17,7 @@ using std::function;
 class CudaMethodHandler {
 	public:
 		CudaMethodHandler() = default;
-		CudaMethodHandler(const unsigned int& alloc_size);
+		CudaMethodHandler(const unsigned int& alloc_size, string method_name);
 
 		~CudaMethodHandler();
 
@@ -29,5 +29,8 @@ class CudaMethodHandler {
 
 		vector<reference_wrapper<float*>> float_ptrs_, float_copy_ptrs_;
 		vector<reference_wrapper<float3*>> float3_ptrs_, float3_copy_ptrs_;
+
+		string method_name_;
+
 		unsigned int alloc_size_;
 };
