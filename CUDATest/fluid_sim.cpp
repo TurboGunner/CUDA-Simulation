@@ -29,8 +29,8 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
 	velocity_.GetVectorMap()[pair] = F_Vector(x, y);
 }
 
-VectorField FluidSim::Diffuse(int bounds, float visc, float dt, VectorField& current, VectorField& previous) {
-	float a = dt * visc * (size_x_ - 2) * (size_x_ - 2);
+VectorField FluidSim::Diffuse(int bounds, float visc, VectorField& current, VectorField& previous) {
+	float a = dt_ * visc * (size_x_ - 2) * (size_x_ - 2);
 
 	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
 	std::cout << density_.ToString() << std::endl;
@@ -41,8 +41,8 @@ void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
 	ProjectCuda(0, v_current, v_previous, size_x_, iterations_);
 }
 
-void FluidSim::Advect(int bounds, float dt) {
-	AdvectCuda(0, density_, density_prev_, velocity_, dt, size_x_);
+void FluidSim::Advect(int bounds, VectorField& current, VectorField& previous, VectorField& velocity) {
+	AdvectCuda(0, current, previous, velocity, dt_, size_x_);
 	std::cout << density_.ToString() << std::endl;
 }
 
