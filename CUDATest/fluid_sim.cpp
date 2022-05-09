@@ -18,7 +18,8 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 
 	density_ = VectorField(size_x, size_y);
 	velocity_ = VectorField(size_x, size_y);
-	density_prev_ = VectorField(size_x, size_y);
+	density_prev_ = density_;
+	velocity_prev_ = velocity_;
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {

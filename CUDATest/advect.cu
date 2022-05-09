@@ -79,12 +79,10 @@ void AdvectCuda(int bounds, VectorField& current, VectorField& previous, VectorF
 
 	cuda_status = handler.PostExecutionChecks(cuda_status);
 
-	float* ptr = new float[alloc_size];
-
-	cuda_status = CopyFunction("cudaMemcpy failed! (result)", ptr, curr_copy_ptr,
+	cuda_status = CopyFunction("cudaMemcpy failed! (result)", current_ptr, curr_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
-	current.RepackMap(ptr, ptr);
+	current.RepackMap(current_ptr, current_ptr);
 	handler.~CudaMethodHandler();
 }

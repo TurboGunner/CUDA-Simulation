@@ -38,7 +38,6 @@ void LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, c
 
 	handler.float_copy_ptrs_.insert(handler.float_copy_ptrs_.end(), { curr_copy_ptr, prev_copy_ptr });
 	handler.float_ptrs_.insert(handler.float_ptrs_.end(), { current_ptr, prev_ptr });
-
 	handler.AllocateCopyPointers();
 
 	cudaError_t cuda_status = cudaSuccess;
@@ -50,11 +49,7 @@ void LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, c
 
 	LinearSolverKernel<<<blocks, threads>>> (curr_copy_ptr, prev_copy_ptr, a_fac, c_fac, length, iter, bounds);
 
-	function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
-	cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", "LinearSolverKernel", cuda_status);
-
-	function<cudaError_t()> sync_func = []() { return cudaDeviceSynchronize(); };
-	cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", "LinearSolverKernel", cuda_status);
+	handler.PostExecutionChecks(cuda_status);
 
 	cuda_status = CopyFunction("cudaMemcpy failed!", current_ptr, curr_copy_ptr,
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
