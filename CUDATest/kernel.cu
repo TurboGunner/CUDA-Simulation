@@ -24,9 +24,12 @@ void SimulationOperations(FluidSim& simulation) {
     simulation.AddDensity(IndexPair(1, 1), 10.0f);
     simulation.AddDensity(IndexPair(2, 2), 100.0f);
 
-    simulation.Diffuse(1, 1.0f, 2.0f, simulation.velocity_, simulation.velocity_prev_);
+    simulation.Diffuse(1, .5f, 2.0f, simulation.velocity_, simulation.velocity_prev_);
     simulation.Project(simulation.velocity_prev_, simulation.velocity_);
-    simulation.Advect(0, 2.0f);
+    simulation.Advect(0, 1.0f);
+    //simulation.Project(simulation.velocity_prev_, simulation.velocity_);
+    //simulation.Diffuse(0, .5, 2.0f, simulation.density_prev_, simulation.density_);
+    //simulation.Advect(0, 1.0f);
     //std::cout << simulation.velocity_.ToString() << std::endl;
 }
 
