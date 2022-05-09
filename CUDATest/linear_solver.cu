@@ -38,6 +38,7 @@ void LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, c
 
 	handler.float_copy_ptrs_.insert(handler.float_copy_ptrs_.end(), { curr_copy_ptr, prev_copy_ptr });
 	handler.float_ptrs_.insert(handler.float_ptrs_.end(), { current_ptr, prev_ptr });
+
 	handler.AllocateCopyPointers();
 
 	cudaError_t cuda_status = cudaSuccess;

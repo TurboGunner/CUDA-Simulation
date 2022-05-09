@@ -21,6 +21,18 @@ struct Hash {
 	}
 };
 
+enum class Axis {X, Y, Z};
+
+struct AxisData {
+	AxisData() = default;
+	AxisData(Axis axis) {
+		axis_ = axis;
+	}
+	float* FlattenMap();
+	Axis axis_;
+	unordered_map<IndexPair, float, Hash> map_;
+};
+
 class VectorField {
 	public:
 		/// <summary> 
@@ -72,6 +84,11 @@ class VectorField {
 		/// Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct.
 		/// </summary>
 		string ToString();
+
+		/// <summary> 
+		/// Flattens the entire map into a CUDA provided float vector struct, where it is a pointer array.
+		/// </summary>
+		AxisData DataConstrained(Axis axis);
 
 	private:
 		unordered_map<IndexPair, F_Vector, Hash> map_;

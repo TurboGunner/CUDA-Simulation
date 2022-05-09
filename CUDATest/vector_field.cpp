@@ -141,3 +141,40 @@ void VectorField::RepackMapVector(float3* vectors) {
 		}
 	}
 }
+
+AxisData VectorField::DataConstrained(Axis axis) {
+	AxisData output(axis);
+	unsigned int size = (unsigned int)sqrt(map_.size());
+	unsigned int y_current = 0;
+	for (y_current; y_current < size; y_current++) {
+		for (unsigned int i = 0; i < size; i++) {
+			IndexPair current(i, y_current);
+			float current_float;
+			if (axis == Axis::X) {
+				current_float = map_[current].vx;
+			}
+			else {
+				current_float = map_[current].vy;
+			}
+			output.map_.emplace(current, current_float);
+		}
+	}
+	return output;
+}
+
+float* AxisData::FlattenMap() {
+	float* arr = new float[map_.size()];
+
+	unsigned int count = 0;
+	unsigned int size = (unsigned int)sqrt(map_.size());
+	unsigned int y_current = 0;
+
+	for (y_current; y_current < size; y_current++) {
+		for (unsigned int i = 0; i < size; i++) {
+			IndexPair current(i, y_current);
+			arr[count] = map_[current];
+			count++;
+		}
+	}
+	return arr;
+}
