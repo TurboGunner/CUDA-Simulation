@@ -57,7 +57,6 @@ string AxisData::ToString() {
 	unsigned int y_current = 0;
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
-			std::cout << i << std::endl;
 			IndexPair current(i, y_current);
 			output += current.ToString() + "\nValue: " + std::to_string(map_[current]) + "\n\n";
 		}

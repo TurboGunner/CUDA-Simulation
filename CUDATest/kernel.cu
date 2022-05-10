@@ -18,31 +18,6 @@ using std::vector;
 using std::reference_wrapper;
 using std::function;
 
-int main()
-{
-    unsigned int iter = 32, side_bound = 8;
-    FluidSim simulation(.1f, 1.0f, 1, side_bound, side_bound, iter);
-
-    cudaError_t cuda_status = cudaSuccess;
-
-    function<cudaError_t()> set_device_func = []() { return cudaSetDevice(0); };
-    cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main",
-        cuda_status, "Do you have a CUDA-capable GPU installed?");
-
-    float a_fac = simulation.dt_ * simulation.diffusion_ * (simulation.size_x_ - 2) * (simulation.size_x_ - 2);
-    float c_fac = 1.0f + (4.0f * a_fac);
-
-    simulation.Simulate();
-
-    //CudaExceptionHandler(cuda_status, "LinearSolverCuda failed!");
-
-    cuda_status = cudaDeviceReset();
-    CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");
-
-    OpenVDBTest(simulation);
-
-    return 0;
-}
 
 void OpenVDBTest(FluidSim& sim) {
     VectorField velocity = sim.velocity_;
@@ -76,4 +51,30 @@ void OpenVDBTest(FluidSim& sim) {
     grids.push_back(gridY);
     file.write(grids);
     file.close();
+}
+
+int main()
+{
+    unsigned int iter = 32, side_bound = 64;
+    FluidSim simulation(.1f, 1.0f, 1, side_bound, side_bound, iter);
+
+    cudaError_t cuda_status = cudaSuccess;
+
+    function<cudaError_t()> set_device_func = []() { return cudaSetDevice(0); };
+    cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main",
+        cuda_status, "Do you have a CUDA-capable GPU installed?");
+
+    float a_fac = simulation.dt_ * simulation.diffusion_ * (simulation.size_x_ - 2) * (simulation.size_x_ - 2);
+    float c_fac = 1.0f + (4.0f * a_fac);
+
+    simulation.Simulate();
+
+    //CudaExceptionHandler(cuda_status, "LinearSolverCuda failed!");
+
+    cuda_status = cudaDeviceReset();
+    CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");
+
+    OpenVDBTest(simulation);
+
+    return 0;
 }

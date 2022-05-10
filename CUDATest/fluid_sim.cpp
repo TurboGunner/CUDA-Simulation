@@ -89,24 +89,35 @@ unordered_map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(I
 void FluidSim::Simulate() {
 	AddVelocity(IndexPair(5, 5), 120, 10);
 	AddVelocity(IndexPair(1, 0), 222, 2);
-	AddVelocity(IndexPair(1, 1), 22, 220);
+	AddVelocity(IndexPair(32, 32), 22, 220);
 
 	AddDensity(IndexPair(1, 1), 10.0f);
 	AddDensity(IndexPair(2, 2), 100.0f);
+	AddDensity(IndexPair(35, 35), 100.0f);
 
-	AxisData v_prev, v;
-	velocity_.DataConstrained(Axis::X, v);
-	velocity_prev_.DataConstrained(Axis::X, v_prev);
+	AxisData v_prev_x, v_x, v_prev_y, v_y;
+	velocity_.DataConstrained(Axis::X, v_x);
+	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
+	velocity_.DataConstrained(Axis::Y, v_y);
+	velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
 
-	Diffuse(1, viscosity_, v_prev, v);
-	velocity_.RepackFromConstrained(v);
-	velocity_prev_.RepackFromConstrained(v_prev);
+	Diffuse(1, viscosity_, v_prev_x, v_x);
+	velocity_.RepackFromConstrained(v_x);
+	velocity_prev_.RepackFromConstrained(v_prev_x);
+
+	Diffuse(2, viscosity_, v_prev_y, v_y);
+	velocity_.RepackFromConstrained(v_y);
+	velocity_prev_.RepackFromConstrained(v_prev_y);
 
 	Project(velocity_prev_, velocity_);
 
-	velocity_.DataConstrained(Axis::X, v);
-	velocity_prev_.DataConstrained(Axis::X, v_prev);
-	Advect(0, v, v_prev, velocity_); //Maybe redefine advect to take in singlet elements in the future?
+	velocity_.DataConstrained(Axis::X, v_x);
+	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
+	Advect(0, v_x, v_prev_x, velocity_);
+
+	velocity_.DataConstrained(Axis::Y, v_y);
+	velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
+	Advect(0, v_y, v_prev_y, velocity_);
 
 	Project(velocity_prev_, velocity_);
 	Diffuse(0, diffusion_, density_prev_, density_);
