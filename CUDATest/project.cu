@@ -11,7 +11,7 @@ __global__ void ProjectKernel(float3* velocity, float* data, float* data_prev, u
 				+ velocity[IX(x_bounds, y_bounds + 2, length)].y
 				- velocity[IX(x_bounds, y_bounds, length)].y)
 				* -0.5f) * (1.0f / length);
-		data_prev[IX(x_bounds, y_bounds + 1, length)] = 0;
+		//data_prev[IX(x_bounds, y_bounds + 1, length)] = 0;
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
 		PointerBoundaries(data, length);
@@ -30,7 +30,12 @@ __global__ void ProjectKernel(float3* velocity, float* data, float* data_prev, u
 			* length;
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
-		PointerBoundariesSpecial(velocity, length);
+		if (bounds == 0) {
+			PointerBoundariesVector(velocity, length);
+		}
+		else {
+			PointerBoundariesSpecial(velocity, length);
+		}
 	}
 }
 
@@ -79,5 +84,7 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	velocity_prev.RepackMap(v_x_prev_ptr, v_y_prev_ptr);
 
 	handler.float3_ptrs_.insert(handler.float3_ptrs_.end(), { ptr });
+	std::cout << v_y_prev_ptr[1] << std::endl;
 	handler.~CudaMethodHandler();
+	std::cout << velocity_prev.GetVectorMap()[IndexPair(1, 1)].ToString() << std::endl;
 }

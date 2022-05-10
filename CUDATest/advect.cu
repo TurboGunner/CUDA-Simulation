@@ -1,6 +1,6 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, float dt, unsigned int length) {
+__global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, float dt, unsigned int length, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
@@ -46,7 +46,15 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 		//printf("%.5f | %d ", (data[IX(unsigned int(x_current), unsigned int(y_current + 1), length)]), x_bounds);
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
-		PointerBoundaries(data, length);
+		if (bounds == 0) {
+			PointerBoundaries(data, length);
+		}
+		if (bounds == 1) {
+			PointerBoundariesSpecialX(data, length);
+		}
+		else {
+			PointerBoundariesSpecialY(data, length);
+		}
 	}
 }
 
@@ -75,7 +83,7 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	AdvectKernel<<<blocks, threads>>> (curr_copy_ptr, prev_copy_ptr, v_copy_ptr, dt, length);
+	AdvectKernel<<<blocks, threads>>> (curr_copy_ptr, prev_copy_ptr, v_copy_ptr, dt, length, bounds);
 
 	cuda_status = handler.PostExecutionChecks(cuda_status);
 

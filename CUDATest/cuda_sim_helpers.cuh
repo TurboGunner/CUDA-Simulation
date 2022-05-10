@@ -17,6 +17,23 @@ __device__ inline void PointerBoundaries(float* result_ptr, const unsigned int& 
 	result_ptr[IX(bound, length, length)] = result_ptr[IX(bound - 1, length, length)] + result_ptr[IX(bound, bound, length)] * .5f;
 }
 
+__device__ inline void PointerBoundariesVector(float3* vector_ptr, const unsigned int& length) {
+	float* x_dim = new float[length], * y_dim = new float[length], * z_dim = new float[length];
+
+	for (int i = 0; i < length * length; i++) {
+		x_dim[i] = vector_ptr[i].x;
+		y_dim[i] = vector_ptr[i].y;
+	}
+
+	PointerBoundaries(x_dim, length);
+	PointerBoundaries(y_dim, length);
+
+	for (int i = 0; i < length * length; i++) {
+		vector_ptr[i].x = x_dim[i];
+		vector_ptr[i].y = y_dim[i];
+	}
+}
+
 __device__ inline void PointerBoundariesSpecialX(float* result_ptr, const unsigned int& length) {
 	unsigned int bound = length - 1;
 	for (int i = 1; i < bound; i++) {
@@ -45,6 +62,11 @@ __device__ inline void PointerBoundariesSpecial(float3* vector_ptr, const unsign
 
 	PointerBoundariesSpecialX(x_dim, length);
 	PointerBoundariesSpecialY(y_dim, length);
+
+	for (int i = 0; i < length * length; i++) {
+		vector_ptr[i].x = x_dim[i];
+		vector_ptr[i].y = y_dim[i];
+	}
 }
 
 __device__ inline void LinearSolverGPU(float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds) {

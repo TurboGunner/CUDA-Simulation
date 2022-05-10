@@ -96,6 +96,7 @@ void FluidSim::Simulate() {
 	AddDensity(IndexPair(35, 35), 100.0f);
 
 	AxisData v_prev_x, v_x, v_prev_y, v_y;
+
 	velocity_.DataConstrained(Axis::X, v_x);
 	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
 	velocity_.DataConstrained(Axis::Y, v_y);
@@ -111,16 +112,23 @@ void FluidSim::Simulate() {
 
 	Project(velocity_prev_, velocity_);
 
-	velocity_.DataConstrained(Axis::X, v_x);
-	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
-	Advect(0, v_x, v_prev_x, velocity_);
+	std::cout << velocity_.GetVectorMap()[IndexPair(1, 1)].ToString() << std::endl;
+
+	AxisData data;
+	velocity_.DataConstrained(Axis::Y, data);
+	//std::cout << data.ToString() << std::endl;
 
 	velocity_.DataConstrained(Axis::Y, v_y);
 	velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
-	Advect(0, v_y, v_prev_y, velocity_);
+	Advect(2, v_y, v_prev_y, velocity_);
+
+	velocity_.DataConstrained(Axis::X, v_x);
+	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
+	Advect(1, v_x, v_prev_x, velocity_);
 
 	Project(velocity_prev_, velocity_);
 	Diffuse(0, diffusion_, density_prev_, density_);
 	Advect(0, density_prev_, density_, velocity_);
+
 	//std::cout << simulation.velocity_.ToString() << std::endl;
 }

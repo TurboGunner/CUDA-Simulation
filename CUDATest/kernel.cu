@@ -40,6 +40,7 @@ void OpenVDBTest(FluidSim& sim) {
             xyz.reset(i, y_current, 0);
             accessorX.setValue(xyz, velocity.GetVectorMap()[current].vx);
             accessorY.setValue(xyz, velocity.GetVectorMap()[current].vy);
+            std::cout << velocity.GetVectorMap()[current].vy << std::endl;
         }
     }
 
@@ -55,7 +56,7 @@ void OpenVDBTest(FluidSim& sim) {
 
 int main()
 {
-    unsigned int iter = 32, side_bound = 64;
+    unsigned int iter = 32, side_bound = 128;
     FluidSim simulation(.1f, 1.0f, 1, side_bound, side_bound, iter);
 
     cudaError_t cuda_status = cudaSuccess;
