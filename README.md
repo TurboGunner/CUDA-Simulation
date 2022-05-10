@@ -21,7 +21,7 @@ Any relevant device functions (methods that are called from the GPU/from global 
 
 ## Data Structure
 
-The primary data is stored within a Vectorfield; defined in vector_field.hpp/cpp.
+The primary data is stored within a VectorField; defined in vector_field.hpp/cpp.
 > The data member that is contained is an unordered (hash) map, where the structure is:
 
 ```cplusplus
@@ -30,11 +30,16 @@ std::unordered_map<IndexPair, F_Vector, Hash> map_;
 
 > Where the key is a struct called IndexPair, the value called F_Vector, and the passed in struct that contains the hash function logic is called Hash.
 
+In order to get a single axis of a VectorField, the data structure AxisData is used- as is defined in axis_data.hpp/cpp.
+>This is done in order to store one-dimensional data such as density in the FluidSim struct, as well as to isolate axes of multi-dimensional data such as velocity.
+
 IndexPair is a struct that is defined in index_pair.hpp/cpp.
 > It stores a coordinate system (x, y) stored as unsigned integers; and this allows for the ordered retrieval of F_Vector values while maintaining O(1) access times and lower cache utilization compared to an ordered map implementation.
 
 F_Vector is a struct that is defined in f_vector.hpp/cpp.
-> It stores the components (x, y) as floats, and this allows for the storing of multi-dimensional data as one struct. Also has methods for calculating magnitude with the provided data members.
+> It stores the components (x, y) as floats, and this allows for the storing of multi-dimensional data such as velocity as one struct. Also has methods for calculating magnitude with the provided data members.
+
+
 
 
 
