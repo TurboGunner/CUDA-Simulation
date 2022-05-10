@@ -20,21 +20,24 @@ __global__ void LinearSolverKernel(float* data, const float* data_prev, float a_
 			if (bounds == 0) {
 				PointerBoundaries(data, length);
 			}
-			else {
+			if (bounds == 1) {
 				PointerBoundariesSpecialX(data, length);
+			}
+			else {
+				PointerBoundariesSpecialY(data, length);
 			}
 		}
 	}
 }
 
-void LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length) {
+void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length) {
 	unsigned int alloc_size = length * length;
 	CudaMethodHandler handler(alloc_size, "LinearSolverKernel");
 
 	float* curr_copy_ptr = nullptr, * prev_copy_ptr = nullptr;
 
-	float* current_ptr = current.FlattenMapX(),
-		* prev_ptr = previous.FlattenMapX();
+	float* current_ptr = current.FlattenMap(),
+		* prev_ptr = previous.FlattenMap();
 
 	handler.float_copy_ptrs_.insert(handler.float_copy_ptrs_.end(), { curr_copy_ptr, prev_copy_ptr });
 	handler.float_ptrs_.insert(handler.float_ptrs_.end(), { current_ptr, prev_ptr });
@@ -56,6 +59,6 @@ void LinearSolverCuda(int bounds, VectorField& current, VectorField& previous, c
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
-	current.RepackMap(current_ptr, current_ptr);
+	current.RepackMap(current_ptr);
 	handler.~CudaMethodHandler();
 }

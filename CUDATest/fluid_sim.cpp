@@ -16,33 +16,36 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 	}
 	iterations_ = iter;
 
-	density_ = VectorField(size_x, size_y);
+	density_ = AxisData(size_x);
 	velocity_ = VectorField(size_x, size_y);
 	density_prev_ = density_;
 	velocity_prev_ = velocity_;
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
-	density_.GetVectorMap()[pair] = F_Vector(amount, amount);
+	density_.map_[pair] = amount;
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
 	velocity_.GetVectorMap()[pair] = F_Vector(x, y);
 }
 
-VectorField FluidSim::Diffuse(int bounds, float visc, VectorField& current, VectorField& previous) {
+void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
 	float a = dt_ * visc * (size_x_ - 2) * (size_x_ - 2);
 
 	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
-	std::cout << density_.ToString() << std::endl;
-	return current;
+}
+
+void FluidSim::DiffuseDensity(int bounds, float diff, AxisData& current, AxisData& previous) {
+	float a = dt_ * diff * (size_x_ - 2) * (size_x_ - 2);
+	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
 }
 
 void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
 	ProjectCuda(0, v_current, v_previous, size_x_, iterations_);
 }
 
-void FluidSim::Advect(int bounds, VectorField& current, VectorField& previous, VectorField& velocity) {
+void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
 	AdvectCuda(0, current, previous, velocity, dt_, size_x_);
 	std::cout << density_.ToString() << std::endl;
 }
@@ -66,9 +69,8 @@ void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 	c_map[IndexPair(bound, bound)] = c_map[IndexPair(bound - 1, bound)] + c_map[IndexPair(bound, bound - 1)] * .5f;
 }
 
-void FluidSim::LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac) {
+void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
 	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_x_);
-	BoundaryConditions(bounds, current);
 }
 
 unordered_map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(IndexPair incident) {
@@ -82,4 +84,32 @@ unordered_map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(I
 	output.emplace(Direction::Down, IndexPair(incident.x, incident.y - 1));
 
 	return output;
+}
+
+void FluidSim::Simulate() {
+	AddVelocity(IndexPair(5, 5), 120, 10);
+	AddVelocity(IndexPair(1, 0), 222, 2);
+	AddVelocity(IndexPair(1, 1), 22, 220);
+
+	AddDensity(IndexPair(1, 1), 10.0f);
+	AddDensity(IndexPair(2, 2), 100.0f);
+
+	AxisData v_prev, v;
+	velocity_.DataConstrained(Axis::X, v);
+	velocity_prev_.DataConstrained(Axis::X, v_prev);
+
+	Diffuse(1, viscosity_, v_prev, v);
+	velocity_.RepackFromConstrained(v);
+	velocity_prev_.RepackFromConstrained(v_prev);
+
+	Project(velocity_prev_, velocity_);
+
+	velocity_.DataConstrained(Axis::X, v);
+	velocity_prev_.DataConstrained(Axis::X, v_prev);
+	Advect(0, v, v_prev, velocity_); //Maybe redefine advect to take in singlet elements in the future?
+
+	Project(velocity_prev_, velocity_);
+	Diffuse(0, diffusion_, density_prev_, density_);
+	Advect(0, density_prev_, density_, velocity_);
+	//std::cout << simulation.velocity_.ToString() << std::endl;
 }

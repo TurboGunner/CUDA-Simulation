@@ -4,6 +4,7 @@
 
 #include "f_vector.hpp"
 #include "index_pair.hpp"
+#include "axis_data.hpp"
 
 #include <string>
 #include <set>
@@ -19,18 +20,6 @@ struct Hash {
 		unsigned int hash2 = std::hash<unsigned int>()(i1.y);
 		return hash1 ^ (hash2 << 1);
 	}
-};
-
-enum class Axis {X, Y, Z};
-
-struct AxisData {
-	AxisData() = default;
-	AxisData(Axis axis) {
-		axis_ = axis;
-	}
-	float* FlattenMap();
-	Axis axis_;
-	unordered_map<IndexPair, float, Hash> map_;
 };
 
 class VectorField {
@@ -86,9 +75,14 @@ class VectorField {
 		string ToString();
 
 		/// <summary> 
-		/// Flattens the entire map into a CUDA provided float vector struct, where it is a pointer array.
+		/// Returns an AxisData struct that contains all data points from a given axis.
 		/// </summary>
-		AxisData DataConstrained(Axis axis);
+		void DataConstrained(Axis axis, AxisData& input);
+
+		/// <summary> 
+		/// Repacks the AxisData struct with the current VectorField instance.
+		/// </summary>
+		void RepackFromConstrained(AxisData& axis);
 
 	private:
 		unordered_map<IndexPair, F_Vector, Hash> map_;

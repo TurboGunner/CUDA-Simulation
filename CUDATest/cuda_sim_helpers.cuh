@@ -67,8 +67,11 @@ __device__ inline void LinearSolverGPU(float* data, const float* data_prev, floa
 		if (bounds == 0) {
 			PointerBoundaries(data, length);
 		}
-		else {
+		if (bounds == 1) {
 			PointerBoundariesSpecialX(data, length);
+		}
+		else {
+			PointerBoundariesSpecialY(data, length);
 		}
 	}
 }

@@ -15,18 +15,22 @@ struct FluidSim {
 
 	void BoundaryConditions(int bounds, VectorField& input);
 
-	VectorField Diffuse(int bounds, float visc, VectorField& current, VectorField& previous);
+	void Diffuse(int bounds, float visc, AxisData& current, AxisData& previous);
+	void DiffuseDensity(int bounds, float diff, AxisData& current, AxisData& previous);
+
 	void Project(VectorField& v_current, VectorField& v_previous);
-	void Advect(int bounds, VectorField& current, VectorField& previous, VectorField& velocity);
+	void Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity);
+	void Simulate();
 
 	float dt_ = 0, diffusion_ = 0, viscosity_ = 0;
 	unsigned int size_x_, size_y_; //Bounds
 	unsigned int iterations_;
-	VectorField density_, velocity_, velocity_prev_, density_prev_;
+	VectorField velocity_, velocity_prev_;
+	AxisData density_, density_prev_;
 
 	enum class Direction { Origin, Left, Right, Up, Down };
 
 private:
-	void LinearSolve(int bounds, VectorField& current, VectorField& previous, float a_fac, float c_fac);
+	void LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac);
 	unordered_map<Direction, IndexPair> GetAdjacentCoordinates(IndexPair incident); //Data Member
 };

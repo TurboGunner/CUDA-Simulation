@@ -16,23 +16,6 @@ using std::vector;
 using std::reference_wrapper;
 using std::function;
 
-void SimulationOperations(FluidSim& simulation) {
-    simulation.AddVelocity(IndexPair(5, 5), 120, 10);
-    simulation.AddVelocity(IndexPair(1, 0), 222, 2);
-    simulation.AddVelocity(IndexPair(1, 1), 22, 220);
-
-    simulation.AddDensity(IndexPair(1, 1), 10.0f);
-    simulation.AddDensity(IndexPair(2, 2), 100.0f);
-
-    simulation.Diffuse(1, 1.0f, simulation.velocity_prev_, simulation.velocity_);
-    simulation.Project(simulation.velocity_prev_, simulation.velocity_);
-    simulation.Advect(0, simulation.velocity_, simulation.velocity_prev_, simulation.velocity_); //Maybe redefine advect to take in singlet elements in the future?
-    simulation.Project(simulation.velocity_prev_, simulation.velocity_);
-    simulation.Diffuse(0, .5, simulation.density_prev_, simulation.density_);
-    simulation.Advect(0, simulation.density_prev_, simulation.density_, simulation.velocity_);
-    //std::cout << simulation.velocity_.ToString() << std::endl;
-}
-
 int main()
 {
     unsigned int iter = 32, side_bound = 8;
@@ -47,7 +30,7 @@ int main()
     float a_fac = simulation.dt_ * simulation.diffusion_ * (simulation.size_x_ - 2) * (simulation.size_x_ - 2);
     float c_fac = 1.0f + (4.0f * a_fac);
 
-    SimulationOperations(simulation);
+    simulation.Simulate();
 
     //CudaExceptionHandler(cuda_status, "LinearSolverCuda failed!");
 

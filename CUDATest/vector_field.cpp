@@ -60,6 +60,9 @@ string VectorField::ToString() {
 
 void VectorField::operator=(const VectorField& copy) {
 	map_ = copy.map_;
+
+	size_x_ = copy.size_x_;
+	size_x_ = copy.size_y_;
 }
 
 unordered_map<IndexPair, F_Vector, Hash>& VectorField::GetVectorMap() {
@@ -142,8 +145,7 @@ void VectorField::RepackMapVector(float3* vectors) {
 	}
 }
 
-AxisData VectorField::DataConstrained(Axis axis) {
-	AxisData output(axis);
+void VectorField::DataConstrained(Axis axis, AxisData& input) {
 	unsigned int size = (unsigned int)sqrt(map_.size());
 	unsigned int y_current = 0;
 	for (y_current; y_current < size; y_current++) {
@@ -156,25 +158,23 @@ AxisData VectorField::DataConstrained(Axis axis) {
 			else {
 				current_float = map_[current].vy;
 			}
-			output.map_.emplace(current, current_float);
+			input.map_.emplace(current, current_float);
 		}
 	}
-	return output;
 }
 
-float* AxisData::FlattenMap() {
-	float* arr = new float[map_.size()];
-
-	unsigned int count = 0;
+void VectorField::RepackFromConstrained(AxisData& axis) {
 	unsigned int size = (unsigned int)sqrt(map_.size());
 	unsigned int y_current = 0;
-
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
-			arr[count] = map_[current];
-			count++;
+			if (axis.axis_ == Axis::X) {
+				map_[current].vx = axis.map_[current];
+			}
+			else {
+				map_[current].vy = axis.map_[current];
+			}
 		}
 	}
-	return arr;
 }
