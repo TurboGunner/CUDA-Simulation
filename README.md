@@ -36,5 +36,28 @@ IndexPair is a struct that is defined in index_pair.hpp/cpp.
 F_Vector is a struct that is defined in f_vector.hpp/cpp.
 > It stores the components (x, y) as floats, and this allows for the storing of multi-dimensional data as one struct. Also has methods for calculating magnitude with the provided data members.
 
+## Fluid Simulation Implementation
+
+A central struct called FluidSim; contained within fluid_sim.hpp/cpp holds the driving logic and handling of the fluid simulation.
+>Velocity and the previous velocity are stored as VectorField structs.
+>Density and the previous density are stored as AxisData structs.
+>The constructor for FluidSim takes in these parameters:
+
+```c++
+FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter);
+```
+
+As for the structure of the global kernel methods and accompanying helper methods, all of them are defined in one central CUDA header file called fluid_sim_cuda.cuh. This contains all relevant definitions for the CUDA calculations.
+
+There are three main steps for fluid simulations that are defined for Navier-Stokes. They are:
+
+### Diffusion
+> Diffusion is not directly handled. Instead, it is defined internally with boundary conditions in the FluidSim struct, and then runs a linear solve based on the diffusion parameters. The linear solver definitions are defined in linear_solver.cu.
+
+### Projection
+> Projection is implemented in project.cu. It is implemented to be in accordance with the Helmholtz-Dodge Composition.
+
+### Advection
+> Advection is implemented in advect.cu. This governs the movement of the density and velocity throughout the field.
 
 
