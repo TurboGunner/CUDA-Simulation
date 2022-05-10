@@ -8,6 +8,7 @@
 using std::unordered_map;
 
 struct FluidSim {
+	FluidSim() = default;
 	FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter);
 
 	void AddDensity(IndexPair pair, float amount);
@@ -27,6 +28,8 @@ struct FluidSim {
 	unsigned int iterations_;
 	VectorField velocity_, velocity_prev_;
 	AxisData density_, density_prev_;
+
+	void operator=(const FluidSim& copy);
 
 	enum class Direction { Origin, Left, Right, Up, Down };
 

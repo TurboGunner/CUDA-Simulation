@@ -126,7 +126,7 @@ void VectorField::RepackMap(float* x, float* y) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
 			map_[IndexPair(i, y_current)] = F_Vector(x[count], y[count]);
-			std::cout << y[count] << std::endl;
+			//std::cout << y[count] << std::endl;
 			count++;
 		}
 	}

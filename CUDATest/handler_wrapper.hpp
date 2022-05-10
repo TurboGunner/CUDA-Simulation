@@ -4,10 +4,13 @@
 
 #include "handler_methods.hpp"
 #include "vector_field.hpp"
+#include "fluid_sim.hpp"
 
 #include <vector>
 #include <string>
 #include <functional>
+
+#include <openvdb/openvdb.h>
 
 using std::string;
 using std::reference_wrapper;
@@ -53,4 +56,21 @@ class CudaMethodHandler {
 		string method_name_;
 
 		unsigned int alloc_size_;
+};
+
+struct OpenVDBHandler {
+	OpenVDBHandler() = default;
+	OpenVDBHandler(FluidSim& sim, string file_name = "FluidSim.vdb");
+
+	openvdb::GridPtrVec CreateGrids();
+	vector<openvdb::FloatGrid::Accessor> GetAccessors();
+
+	void LoadData();
+	void WriteFile();
+
+	FluidSim sim_;
+	vector<openvdb::FloatGrid::Ptr> grids_;
+	vector<string> names_;
+
+	string file_name_;
 };

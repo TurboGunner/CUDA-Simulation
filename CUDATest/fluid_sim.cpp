@@ -47,7 +47,7 @@ void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
 
 void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
 	AdvectCuda(0, current, previous, velocity, dt_, size_x_);
-	std::cout << density_.ToString() << std::endl;
+	//std::cout << density_.ToString() << std::endl;
 }
 
 void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
@@ -114,21 +114,33 @@ void FluidSim::Simulate() {
 
 	std::cout << velocity_.GetVectorMap()[IndexPair(1, 1)].ToString() << std::endl;
 
-	AxisData data;
-	velocity_.DataConstrained(Axis::Y, data);
-	//std::cout << data.ToString() << std::endl;
+	velocity_.DataConstrained(Axis::X, v_x);
+	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
+	Advect(1, v_x, v_prev_x, velocity_);
 
 	velocity_.DataConstrained(Axis::Y, v_y);
 	velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
 	Advect(2, v_y, v_prev_y, velocity_);
 
-	velocity_.DataConstrained(Axis::X, v_x);
-	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
-	Advect(1, v_x, v_prev_x, velocity_);
-
-	Project(velocity_prev_, velocity_);
+	Project(velocity_, velocity_prev_);
 	Diffuse(0, diffusion_, density_prev_, density_);
 	Advect(0, density_prev_, density_, velocity_);
 
 	//std::cout << simulation.velocity_.ToString() << std::endl;
+}
+
+void FluidSim::operator=(const FluidSim& copy) {
+	density_ = copy.density_;
+	density_prev_ = copy.density_prev_;
+
+	velocity_ = copy.velocity_;
+	velocity_prev_ = copy.velocity_prev_;
+
+	size_x_ = copy.size_x_;
+	size_y_ = copy.size_y_;
+
+	dt_ = copy.dt_;
+	diffusion_ = copy.diffusion_;
+	viscosity_ = copy.viscosity_;
+	iterations_ = copy.iterations_;
 }

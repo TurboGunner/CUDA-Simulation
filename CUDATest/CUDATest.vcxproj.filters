@@ -74,6 +74,9 @@
     <ClCompile Include="axis_data.cpp">
       <Filter>cpp\data_structures</Filter>
     </ClCompile>
+    <ClCompile Include="openvdb_wrapper.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="project.cu">

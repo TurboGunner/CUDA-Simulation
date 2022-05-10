@@ -91,6 +91,7 @@
     <ClCompile Include="index_pair.cpp" />
     <ClCompile Include="fluid_sim.cpp" />
     <ClCompile Include="handler_methods.cpp" />
+    <ClCompile Include="openvdb_wrapper.cpp" />
     <ClCompile Include="vector_field.cpp" />
   </ItemGroup>
   <ItemGroup>
