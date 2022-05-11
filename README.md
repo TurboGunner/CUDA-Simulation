@@ -44,7 +44,7 @@ A central struct called FluidSim; contained within fluid_sim.hpp/cpp holds the d
 >The constructor for FluidSim takes in these parameters:
 
 ```c++
-FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter);
+FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter, float time_max = 1);
 ```
 
 As for the structure of the global kernel methods and accompanying helper methods, all of them are defined in one central CUDA header file called fluid_sim_cuda.cuh. This contains all relevant definitions for the CUDA calculations.
