@@ -61,7 +61,7 @@ struct F_Vector {
 	/// </summary>
 	string ToString() const;
 
-	float vx, vy; //Components
+	float vx_, vy_; //Components
 };
 
 /// <summary> 

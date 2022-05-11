@@ -1,10 +1,11 @@
 #include "fluid_sim_cuda.cuh"
 #include "fluid_sim.hpp"
+#include "openvdb_handler.hpp"
 
 #include <stdexcept>
 #include <iostream>
 
-FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter) {
+FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter, float time_max) {
 	dt_ = timestep;
 	diffusion_ = diff;
 	viscosity_ = visc;
@@ -15,11 +16,13 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 		throw std::invalid_argument("Error: The number of iterations must be at least greater than or equal to 1!");
 	}
 	iterations_ = iter;
+	time_max_ = time_max;
+
+	velocity_ = VectorField(size_x, size_y);
+	velocity_prev_ = velocity_;
 
 	density_ = AxisData(size_x);
-	velocity_ = VectorField(size_x, size_y);
 	density_prev_ = density_;
-	velocity_prev_ = velocity_;
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
@@ -47,7 +50,6 @@ void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
 
 void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
 	AdvectCuda(0, current, previous, velocity, dt_, size_x_);
-	//std::cout << density_.ToString() << std::endl;
 }
 
 void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
@@ -55,12 +57,12 @@ void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 	unordered_map<IndexPair, F_Vector, Hash>& c_map = input.GetVectorMap();
 
 	for (int i = 1; i < bound; i++) {
-		c_map[IndexPair(i, 0)].vx = bounds == 1 ? c_map[IndexPair(i, 0)].vx * -1.0f : c_map[IndexPair(i, 1)].vx;
-		c_map[IndexPair(i, bound)].vx = bounds == 1 ? c_map[IndexPair(i, bound - 1)].vx * -1.0f : c_map[IndexPair(i, bound - 1)].vx;
+		c_map[IndexPair(i, 0)].vx_ = bounds == 1 ? c_map[IndexPair(i, 0)].vx_ * -1.0f : c_map[IndexPair(i, 1)].vx_;
+		c_map[IndexPair(i, bound)].vx_ = bounds == 1 ? c_map[IndexPair(i, bound - 1)].vx_ * -1.0f : c_map[IndexPair(i, bound - 1)].vx_;
 	}
 	for (int j = 1; j < bound; j++) {
-		c_map[IndexPair(0, j)].vy = bounds == 1 ? c_map[IndexPair(1, j)].vy * -1.0f : c_map[IndexPair(1, j)].vy;
-		c_map[IndexPair(bound, j)] = bounds == 1 ? c_map[IndexPair(bound - 1, j)] * -1.0f : c_map[IndexPair(bound - 1, j)].vy;
+		c_map[IndexPair(0, j)].vy_ = bounds == 1 ? c_map[IndexPair(1, j)].vy_ * -1.0f : c_map[IndexPair(1, j)].vy_;
+		c_map[IndexPair(bound, j)] = bounds == 1 ? c_map[IndexPair(bound - 1, j)] * -1.0f : c_map[IndexPair(bound - 1, j)].vy_;
 	}
 
 	c_map[IndexPair(0, 0)] = c_map[IndexPair(1, 0)] + c_map[IndexPair(0, 1)] * .5f;
@@ -95,36 +97,43 @@ void FluidSim::Simulate() {
 	AddDensity(IndexPair(2, 2), 100.0f);
 	AddDensity(IndexPair(35, 35), 100.0f);
 
-	AxisData v_prev_x, v_x, v_prev_y, v_y;
+	OpenVDBHandler vdb_handler(*this);
 
-	velocity_.DataConstrained(Axis::X, v_x);
-	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
-	velocity_.DataConstrained(Axis::Y, v_y);
-	velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
+	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!
+		AxisData v_prev_x, v_x, v_prev_y, v_y;
 
-	Diffuse(1, viscosity_, v_prev_x, v_x);
-	velocity_.RepackFromConstrained(v_x);
-	velocity_prev_.RepackFromConstrained(v_prev_x);
+		velocity_.DataConstrained(Axis::X, v_x);
+		velocity_prev_.DataConstrained(Axis::X, v_prev_x);
+		velocity_.DataConstrained(Axis::Y, v_y);
+		velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
 
-	Diffuse(2, viscosity_, v_prev_y, v_y);
-	velocity_.RepackFromConstrained(v_y);
-	velocity_prev_.RepackFromConstrained(v_prev_y);
+		Diffuse(1, viscosity_, v_prev_x, v_x);
+		velocity_.RepackFromConstrained(v_x);
+		velocity_prev_.RepackFromConstrained(v_prev_x);
 
-	Project(velocity_prev_, velocity_);
+		Diffuse(2, viscosity_, v_prev_y, v_y);
+		velocity_.RepackFromConstrained(v_y);
+		velocity_prev_.RepackFromConstrained(v_prev_y);
 
-	std::cout << velocity_.GetVectorMap()[IndexPair(1, 1)].ToString() << std::endl;
+		Project(velocity_prev_, velocity_);
 
-	velocity_.DataConstrained(Axis::X, v_x);
-	velocity_prev_.DataConstrained(Axis::X, v_prev_x);
-	Advect(1, v_x, v_prev_x, velocity_);
+		velocity_.DataConstrained(Axis::X, v_x);
+		velocity_prev_.DataConstrained(Axis::X, v_prev_x);
+		Advect(1, v_x, v_prev_x, velocity_);
 
-	velocity_.DataConstrained(Axis::Y, v_y);
-	velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
-	Advect(2, v_y, v_prev_y, velocity_);
+		velocity_.DataConstrained(Axis::Y, v_y);
+		velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
+		Advect(2, v_y, v_prev_y, velocity_);
 
-	Project(velocity_, velocity_prev_);
-	Diffuse(0, diffusion_, density_prev_, density_);
-	Advect(0, density_prev_, density_, velocity_);
+		Project(velocity_, velocity_prev_);
+		Diffuse(0, diffusion_, density_prev_, density_);
+		Advect(0, density_prev_, density_, velocity_);
+
+		vdb_handler.sim_ = *this;
+
+		vdb_handler.WriteFile();
+
+	}
 
 	//std::cout << simulation.velocity_.ToString() << std::endl;
 }
@@ -143,4 +152,8 @@ void FluidSim::operator=(const FluidSim& copy) {
 	diffusion_ = copy.diffusion_;
 	viscosity_ = copy.viscosity_;
 	iterations_ = copy.iterations_;
+}
+
+FluidSim& FluidSim::operator*() {
+	return *this;
 }

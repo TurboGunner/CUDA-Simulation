@@ -9,7 +9,7 @@ using std::unordered_map;
 
 struct FluidSim {
 	FluidSim() = default;
-	FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter);
+	FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter, float time_max = 1);
 
 	void AddDensity(IndexPair pair, float amount);
 	void AddVelocity(IndexPair pair, float x, float y);
@@ -23,13 +23,20 @@ struct FluidSim {
 	void Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity);
 	void Simulate();
 
-	float dt_ = 0, diffusion_ = 0, viscosity_ = 0;
-	unsigned int size_x_, size_y_; //Bounds
-	unsigned int iterations_;
+
 	VectorField velocity_, velocity_prev_;
 	AxisData density_, density_prev_;
 
+	float dt_ = 0, diffusion_ = 0, viscosity_ = 0;
+
+	unsigned int size_x_, size_y_; //Bounds
+	unsigned int iterations_;
+
+	float time_elapsed_ = 0;
+	float time_max_ = 0;
+
 	void operator=(const FluidSim& copy);
+	FluidSim& operator*();
 
 	enum class Direction { Origin, Left, Right, Up, Down };
 

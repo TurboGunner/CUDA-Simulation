@@ -1,11 +1,10 @@
-#include "handler_wrapper.hpp"
+#include "openvdb_handler.hpp"
 
 #include <stdexcept>
 #include <iostream>
 
 OpenVDBHandler::OpenVDBHandler(FluidSim& sim, string file_name) {
 	sim_ = sim;
-	std::cout << sim.size_x_ << std::endl;
 	names_.insert(names_.end(), {"VelocityVectorX", "VelocityVectorY", "Density"});
 	file_name_ = file_name;
 
@@ -52,19 +51,27 @@ void OpenVDBHandler::LoadData() {
 		for (unsigned int i = 0; i < sim_.size_x_; i++) {
 			IndexPair current(i, y_current);
 			xyz.reset(i, y_current, 0);
-			accessors.at(0).setValue(xyz, velocity.GetVectorMap()[current].vx);
-			accessors.at(1).setValue(xyz, velocity.GetVectorMap()[current].vy);
+			accessors.at(0).setValue(xyz, velocity.GetVectorMap()[current].vx_);
+			accessors.at(1).setValue(xyz, velocity.GetVectorMap()[current].vy_);
 			accessors.at(2).setValue(xyz, density.map_[current]);
 		}
 	}
 }
 
 void OpenVDBHandler::WriteFile() {
-	openvdb::io::File file(file_name_);
+	string file_extension = file_name_ + std::to_string(index_) + ".vdb";
+	openvdb::io::File file(file_extension);
 
 	openvdb::GridPtrVec grid_vec = CreateGrids();
 	LoadData();
 
 	file.write(grid_vec);
 	file.close();
+	//FreeFieldPointers(grid_vec);
+}
+
+void OpenVDBHandler::FreeFieldPointers(openvdb::GridPtrVec grid_vec) {
+	for (int i = 0; i < grid_vec.size(); i++) {
+		grid_vec.at(i).~shared_ptr();
+	}
 }

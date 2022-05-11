@@ -102,7 +102,7 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
     }
     cuda_status = func();
     if (cuda_status != cudaSuccess) {
-        std::cout << operation_name << " returned error code " << cuda_status << "after launching " << method_name << "\n" << std::endl;
+        std::cout << operation_name << " returned error code " << cuda_status << " after launching " << method_name << "\n" << std::endl;
         std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
         if (optional_args.size() > 0) {
             std::cout << "Additional Stacktrace: " << optional_args << std::endl;

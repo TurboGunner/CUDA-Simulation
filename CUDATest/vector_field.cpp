@@ -79,7 +79,7 @@ float* VectorField::FlattenMapX() {
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
-			arr[count] = map_[current].vx;
+			arr[count] = map_[current].vx_;
 			count++;
 		}
 	}
@@ -96,7 +96,7 @@ float* VectorField::FlattenMapY() {
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
-			arr[count] = map_[current].vy;
+			arr[count] = map_[current].vy_;
 			count++;
 		}
 	}
@@ -154,10 +154,10 @@ void VectorField::DataConstrained(Axis axis, AxisData& input) {
 			IndexPair current(i, y_current);
 			float current_float;
 			if (axis == Axis::X) {
-				current_float = map_[current].vx;
+				current_float = map_[current].vx_;
 			}
 			else {
-				current_float = map_[current].vy;
+				current_float = map_[current].vy_;
 			}
 			input.map_.emplace(current, current_float);
 		}
@@ -171,10 +171,10 @@ void VectorField::RepackFromConstrained(AxisData& axis) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
 			if (axis.axis_ == Axis::X) {
-				map_[current].vx = axis.map_[current];
+				map_[current].vx_ = axis.map_[current];
 			}
 			else {
-				map_[current].vy = axis.map_[current];
+				map_[current].vy_ = axis.map_[current];
 			}
 		}
 	}

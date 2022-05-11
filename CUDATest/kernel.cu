@@ -34,8 +34,5 @@ int main()
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");
 
-    OpenVDBHandler vdb_handler(simulation);
-    vdb_handler.WriteFile();
-
     return 0;
 }
