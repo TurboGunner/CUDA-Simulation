@@ -6,6 +6,8 @@ A work in process program for the simulation of fluids via NVIDIA's CUDA.
 
 Written in a mixture of CUDA C and standard C++ using the MSBuild compiler.
 
+Data structures are handled via custom implementations, and file structures are handled via the OpenVDB library created by Dreamworks Animation.
+
 Uses a mixture of OOP, some functional patterns, and helper methods in order to reduce CUDA boilerplate with memory alloc/dealloc calls on GPU/system memory, as well as copying to and from GPU and system memory.
 
 ## CUDA Helper Structure
