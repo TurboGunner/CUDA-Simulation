@@ -23,14 +23,23 @@ Any relevant device functions (methods that are called from the GPU/from global 
 
 ## Data Structure
 
-The primary data is stored within a Vectorfield; defined in vector_field.hpp/cpp.
+The primary data is stored within a VectorField; defined in vector_field.hpp/cpp.
 > The data member that is contained is an unordered (hash) map, where the structure is:
 
-```cplusplus
+```c++
 std::unordered_map<IndexPair, F_Vector, Hash> map_;
 ```
 
-> Where the key is a struct called IndexPair, the value called F_Vector, and the passed in struct that contains the hash function logic is called Hash.
+> Where the key is a struct called IndexPair, the value is F_Vector, and the passed in struct that contains the hash function logic is called Hash.
+
+THe VectorField data structure can be split into its constituent axes via the implementation of axis_data.hpp/cpp.
+>It stores data in an unordered (hash) map, where it stores a uni-dimensional float as the value. Also used in density; where the quantity is scalar.
+
+```c++
+std::unordered_map<IndexPair, float, HashDupe> map_;
+```
+
+> Where the key is a struct called IndexPair, the value is a float primitive, and the passed in struct that contains the hash function logic is called HashDupe.
 
 IndexPair is a struct that is defined in index_pair.hpp/cpp.
 > It stores a coordinate system (x, y) stored as unsigned integers; and this allows for the ordered retrieval of F_Vector values while maintaining O(1) access times and lower cache utilization compared to an ordered map implementation.
