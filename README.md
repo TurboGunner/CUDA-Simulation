@@ -72,3 +72,10 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 > Advection is implemented in advect.cu. This governs the movement of the density and velocity throughout the field.
 
 
+## To-do:
+
+Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
+
+Move data structures to stdgpu and thrust for better interopability and ease of manipulation with data structures.
+
+
