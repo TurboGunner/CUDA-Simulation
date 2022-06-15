@@ -28,6 +28,9 @@
     <Filter Include="includes\wrapper_structs">
       <UniqueIdentifier>{5197f1dd-411c-4d5f-b5bd-85e859134f15}</UniqueIdentifier>
     </Filter>
+    <Filter Include="includes\cuda\data_structures">
+      <UniqueIdentifier>{cf673e69-8e1d-49d1-bf99-4c0ee985f46c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handler_methods.hpp">
@@ -59,6 +62,9 @@
     </ClInclude>
     <ClInclude Include="handler_wrapper.hpp">
       <Filter>includes\wrapper_structs</Filter>
+    </ClInclude>
+    <ClInclude Include="cudamap.cuh">
+      <Filter>includes\cuda\data_structures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
