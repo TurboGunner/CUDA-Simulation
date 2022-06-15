@@ -27,7 +27,7 @@ The primary data is stored within a VectorField; defined in vector_field.hpp/cpp
 > The data member that is contained is a (hash) map, where the structure is:
 
 ```c++
-HashMap<IndexPair, F_Vector, Hash> map_;
+HashMap<IndexPair, F_Vector, Hash<IndexPair>> map_;
 ```
 
 > Where the key is a struct called IndexPair, the value is F_Vector, and the passed in struct that contains the hash function logic is called Hash.
@@ -36,7 +36,7 @@ THe VectorField data structure can be split into its constituent axes via the im
 >It stores data in a hash map, where it stores a uni-dimensional float as the value. Also used in density; where the quantity is scalar.
 
 ```c++
-HashMap<IndexPair, float, HashDupe> map_;
+HashMap<IndexPair, float, HashDupe<IndexPair>> map_;
 ```
 
 > Where the key is a struct called IndexPair, the value is a float primitive, and the passed in struct that contains the hash function logic is called HashDupe.
