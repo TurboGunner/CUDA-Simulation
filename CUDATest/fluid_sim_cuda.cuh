@@ -5,13 +5,13 @@
 
 #include "cudamap.cuh"
 #include "cuda_sim_helpers.cuh"
+#include "index_pair_cuda.cuh"
 
 #include "vector_field.hpp"
 #include "handler_methods.hpp"
 #include "handler_wrapper.hpp"
 #include "fluid_sim.hpp"
 #include "axis_data.hpp"
-#include "index_pair.hpp"
 
 #include <iostream>
 #include <functional>

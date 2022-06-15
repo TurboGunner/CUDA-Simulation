@@ -53,6 +53,7 @@
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -76,6 +77,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -91,6 +94,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="advect.cu" />
+    <CudaCompile Include="index_pair_cuda.cu" />
     <CudaCompile Include="linear_solver.cu" />
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="project.cu" />
@@ -99,7 +103,6 @@
     <ClCompile Include="axis_data.cpp" />
     <ClCompile Include="f_vector.cpp" />
     <ClCompile Include="handler_wrapper.cpp" />
-    <ClCompile Include="index_pair.cpp" />
     <ClCompile Include="fluid_sim.cpp" />
     <ClCompile Include="handler_methods.cpp" />
     <ClCompile Include="openvdb_handler.cpp" />
@@ -114,7 +117,7 @@
     <ClInclude Include="f_vector.hpp" />
     <ClInclude Include="handler_methods.hpp" />
     <ClInclude Include="handler_wrapper.hpp" />
-    <ClInclude Include="index_pair.hpp" />
+    <ClInclude Include="index_pair_cuda.cuh" />
     <ClInclude Include="openvdb_handler.hpp" />
     <ClInclude Include="vector_field.hpp" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "index_pair.hpp"
+#include "index_pair_cuda.cuh"
 
 #include "cudamap.cuh"
 

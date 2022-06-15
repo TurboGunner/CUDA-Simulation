@@ -31,6 +31,9 @@
     <Filter Include="includes\cuda\data_structures">
       <UniqueIdentifier>{cf673e69-8e1d-49d1-bf99-4c0ee985f46c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cuda\data_structures">
+      <UniqueIdentifier>{c4d74515-ec52-4f49-b419-658abfbcf7cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="handler_methods.hpp">
@@ -43,9 +46,6 @@
       <Filter>includes\cuda</Filter>
     </ClInclude>
     <ClInclude Include="f_vector.hpp">
-      <Filter>includes\data_structures</Filter>
-    </ClInclude>
-    <ClInclude Include="index_pair.hpp">
       <Filter>includes\data_structures</Filter>
     </ClInclude>
     <ClInclude Include="fluid_sim.hpp">
@@ -66,6 +66,9 @@
     <ClInclude Include="vector_field.hpp">
       <Filter>includes\data_structures</Filter>
     </ClInclude>
+    <ClInclude Include="index_pair_cuda.cuh">
+      <Filter>includes\cuda\data_structures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="handler_methods.cpp">
@@ -73,9 +76,6 @@
     </ClCompile>
     <ClCompile Include="fluid_sim.cpp">
       <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="index_pair.cpp">
-      <Filter>cpp\data_structures</Filter>
     </ClCompile>
     <ClCompile Include="vector_field.cpp">
       <Filter>cpp\data_structures</Filter>
@@ -105,6 +105,9 @@
     </CudaCompile>
     <CudaCompile Include="advect.cu">
       <Filter>cuda\navier_stokes_funcs</Filter>
+    </CudaCompile>
+    <CudaCompile Include="index_pair_cuda.cu">
+      <Filter>cuda\data_structures</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

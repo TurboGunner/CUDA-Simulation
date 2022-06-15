@@ -1,4 +1,4 @@
-#include "index_pair.hpp"
+#include "index_pair_cuda.cuh"
 
 __host__ __device__ IndexPair::IndexPair(unsigned int x_in, unsigned int y_in) { //Loaded Constructor
 	x = x_in;

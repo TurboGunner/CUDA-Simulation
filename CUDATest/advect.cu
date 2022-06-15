@@ -12,9 +12,8 @@ __global__ void AdvectKernel(HashMap<IndexPair, float, HashDupe<IndexPair>>* dat
 	float x_value, y_value;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
-		x_value = (float)x_bounds - (x_dt * pairs->Get(Direction::Origin).x);
-		y_value = (float)y_bounds - (y_dt * pairs->Get(Direction::Origin).y);
+		x_value = (float)x_bounds - (x_dt * (*velocity)[IndexPair(x_bounds, y_bounds)].vx_);
+		y_value = (float)y_bounds - (y_dt * (*velocity)[IndexPair(x_bounds, y_bounds)].vy_);
 
 		if (x_value < 0.5f) {
 			x_value = 0.5f;
@@ -38,7 +37,7 @@ __global__ void AdvectKernel(HashMap<IndexPair, float, HashDupe<IndexPair>>* dat
 		velocity_y_prev = y_value - y_current;
 		velocity_y_curr = 1.0f - velocity_y_prev;
 
-		(*data)[IX(x_bounds, y_bounds + 1, length)] =
+		(*data)[IndexPair(x_current, y_current)] =
 			(((*data_prev)[IndexPair(x_current, y_current)] * velocity_y_curr) +
 				((*data_prev)[IndexPair(x_current, y_previous)] * velocity_y_prev) * velocity_x_curr) +
 			(((*data_prev)[IndexPair(x_previous, y_current)] * velocity_y_curr) +

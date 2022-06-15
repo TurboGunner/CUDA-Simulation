@@ -3,7 +3,7 @@
 #include "cuda_runtime.h"
 
 #include "f_vector.hpp"
-#include "index_pair.hpp"
+#include "index_pair_cuda.cuh"
 #include "axis_data.hpp"
 #include "cudamap.cuh"
 
