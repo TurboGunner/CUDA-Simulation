@@ -1,6 +1,6 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void AdvectKernel(HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, HashMap<IndexPair, F_Vector, Hash>* velocity, float dt, unsigned int length, int bounds) {
+__global__ void AdvectKernel(HashMap<IndexPair, float, HashDupe<IndexPair>>* data, HashMap<IndexPair, float, HashDupe<IndexPair>>* data_prev, HashMap<IndexPair, F_Vector, Hash<IndexPair>>* velocity, float dt, unsigned int length, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
@@ -13,8 +13,8 @@ __global__ void AdvectKernel(HashMap<IndexPair, float, Hash>* data, HashMap<Inde
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
-		x_value = (float)x_bounds - (x_dt * pairs->Get(FluidSim::Direction::Origin).x);
-		y_value = (float)y_bounds - (y_dt * pairs->Get(FluidSim::Direction::Origin).y);
+		x_value = (float)x_bounds - (x_dt * pairs->Get(Direction::Origin).x);
+		y_value = (float)y_bounds - (y_dt * pairs->Get(Direction::Origin).y);
 
 		if (x_value < 0.5f) {
 			x_value = 0.5f;
@@ -68,7 +68,7 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	AdvectKernel<<<blocks, threads>>> (current.map_, previous.map_, velocity.map_, dt, length, bounds);
+	AdvectKernel<<<blocks, threads>>> (current.map_, previous.map_, velocity.GetVectorMap(), dt, length, bounds);
 
 	cuda_status = handler.PostExecutionChecks(cuda_status);
 }

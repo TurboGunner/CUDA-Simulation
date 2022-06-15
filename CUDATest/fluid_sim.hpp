@@ -5,12 +5,7 @@
 
 #include <math.h>
 
-struct CoordinateHash {
-	__host__ __device__ size_t operator()(const FluidSim::Direction& d1) const {
-		size_t base_hash = (size_t) d1;
-		return base_hash ^ (base_hash << 1);
-	}
-};
+enum class Direction { Origin, Left, Right, Up, Down };
 
 struct FluidSim {
 	FluidSim() = default;
@@ -40,26 +35,24 @@ struct FluidSim {
 	void operator=(const FluidSim& copy);
 	FluidSim& operator*();
 
-	enum class Direction { Origin, Left, Right, Up, Down };
-
 private:
 	void LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac);
 };
 
-__host__ __device__ inline HashMap<FluidSim::Direction, IndexPair, CoordinateHash>* GetAdjacentCoordinates(IndexPair incident, unsigned int size) {
-	auto* output = new HashMap<FluidSim::Direction, IndexPair, CoordinateHash>(size);
-	output->Put(FluidSim::Direction::Origin, incident);
+__host__ __device__ inline HashMap<Direction, IndexPair, HashFunc<Direction>>* GetAdjacentCoordinates(IndexPair incident, unsigned int size) {
+	auto* output = new HashMap<Direction, IndexPair, HashFunc<Direction>>(size);
+	output->Put(Direction::Origin, incident);
 
-	output->Put(FluidSim::Direction::Left, IndexPair(incident.x - 1, incident.y));
-	output->Put(FluidSim::Direction::Right, IndexPair(incident.x + 1, incident.y));
+	output->Put(Direction::Left, IndexPair(incident.x - 1, incident.y));
+	output->Put(Direction::Right, IndexPair(incident.x + 1, incident.y));
 
-	output->Put(FluidSim::Direction::Up, IndexPair(incident.x, incident.y + 1));
-	output->Put(FluidSim::Direction::Down, IndexPair(incident.x, incident.y - 1));
+	output->Put(Direction::Up, IndexPair(incident.x, incident.y + 1));
+	output->Put(Direction::Down, IndexPair(incident.x, incident.y - 1));
 
 	return output;
 }
 
-__host__ __device__ inline void BoundaryConditions(int bounds, HashMap<IndexPair, F_Vector, Hash>* c_map, int side_size) {
+__host__ __device__ inline void BoundaryConditions(int bounds, HashMap<IndexPair, F_Vector, Hash<IndexPair>>* c_map, int side_size) {
 	unsigned int bound = side_size - 1;
 
 	for (int i = 1; i < bound; i++) {
@@ -69,6 +62,24 @@ __host__ __device__ inline void BoundaryConditions(int bounds, HashMap<IndexPair
 	for (int j = 1; j < bound; j++) {
 		(*c_map)[IndexPair(0, j)].vy_ = bounds == 1 ? (*c_map)[IndexPair(1, j)].vy_ * -1.0f : (*c_map)[IndexPair(1, j)].vy_;
 		(*c_map)[IndexPair(bound, j)] = bounds == 1 ? (*c_map)[IndexPair(bound - 1, j)] * -1.0f : (*c_map)[IndexPair(bound - 1, j)].vy_;
+	}
+
+	(*c_map)[IndexPair(0, 0)] = (*c_map)[IndexPair(1, 0)] + (*c_map)[IndexPair(0, 1)] * .5f;
+	(*c_map)[IndexPair(0, bound)] = (*c_map)[IndexPair(1, bound)] + (*c_map)[IndexPair(0, bound - 1)] * .5f;
+	(*c_map)[IndexPair(bound, 0)] = (*c_map)[IndexPair(bound - 1, 0)] + (*c_map)[IndexPair(bound, 1)] * .5f;
+	(*c_map)[IndexPair(bound, bound)] = (*c_map)[IndexPair(bound - 1, bound)] + (*c_map)[IndexPair(bound, bound - 1)] * .5f;
+}
+
+__host__ __device__ inline void BoundaryConditions(int bounds, HashMap<IndexPair, float, HashDupe<IndexPair>>* c_map, int side_size) {
+	unsigned int bound = side_size - 1;
+
+	for (int i = 1; i < bound; i++) {
+		(*c_map)[IndexPair(i, 0)] = bounds == 2 ? (*c_map)[IndexPair(i, 0)] * -1.0f : (*c_map)[IndexPair(i, 1)];
+		(*c_map)[IndexPair(i, bound)] = bounds == 2 ? (*c_map)[IndexPair(i, bound - 1)] * -1.0f : (*c_map)[IndexPair(i, bound - 1)];
+	}
+	for (int j = 1; j < bound; j++) {
+		(*c_map)[IndexPair(0, j)] = bounds == 1 ? (*c_map)[IndexPair(1, j)] * -1.0f : (*c_map)[IndexPair(1, j)];
+		(*c_map)[IndexPair(bound, j)] = bounds == 1 ? (*c_map)[IndexPair(bound - 1, j)] * -1.0f : (*c_map)[IndexPair(bound - 1, j)];
 	}
 
 	(*c_map)[IndexPair(0, 0)] = (*c_map)[IndexPair(1, 0)] + (*c_map)[IndexPair(0, 1)] * .5f;

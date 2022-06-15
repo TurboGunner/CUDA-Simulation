@@ -1,6 +1,6 @@
 #include "index_pair.hpp"
 
-IndexPair::IndexPair(unsigned int x_in, unsigned int y_in) { //Loaded Constructor
+__host__ __device__ IndexPair::IndexPair(unsigned int x_in, unsigned int y_in) { //Loaded Constructor
 	x = x_in;
 	y = y_in;
 }

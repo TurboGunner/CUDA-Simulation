@@ -51,9 +51,9 @@ void OpenVDBHandler::LoadData() {
 		for (unsigned int i = 0; i < sim_.size_x_; i++) {
 			IndexPair current(i, y_current);
 			xyz.reset(i, y_current, 0);
-			accessors.at(0).setValue(xyz, velocity.GetVectorMap()[current].vx_);
-			accessors.at(1).setValue(xyz, velocity.GetVectorMap()[current].vy_);
-			accessors.at(2).setValue(xyz, density.map_[current]);
+			accessors.at(0).setValue(xyz, (*velocity.GetVectorMap())[current].vx_);
+			accessors.at(1).setValue(xyz, (*velocity.GetVectorMap())[current].vy_);
+			accessors.at(2).setValue(xyz, density.map_->Get(current));
 		}
 	}
 }

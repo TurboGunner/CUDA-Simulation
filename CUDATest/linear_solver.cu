@@ -1,6 +1,6 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void LinearSolverKernel(HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds) {
+__global__ void LinearSolverKernel(HashMap<IndexPair, float, HashDupe<IndexPair>>* data, HashMap<IndexPair, float, HashDupe<IndexPair>>* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
@@ -8,12 +8,12 @@ __global__ void LinearSolverKernel(HashMap<IndexPair, float, Hash>* data, HashMa
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		for (int i = 0; i < iter; i++) {
-			data[pairs->Get(FluidSim::Direction::Origin)] = ((*data_prev)[pairs->Get(FluidSim::Direction::Origin)] +
+			(*data)[pairs->Get(Direction::Origin)] = ((*data_prev)[pairs->Get(Direction::Origin)] +
 				a_fac *
-				(*data)[pairs->Get(FluidSim::Direction::Right)]
-					+ (*data)[pairs->Get(FluidSim::Direction::Left)]
-					+ (*data)[pairs->Get(FluidSim::Direction::Up)]
-					+ (*data)[pairs->Get(FluidSim::Direction::Down)])
+				(*data)[pairs->Get(Direction::Right)]
+					+ (*data)[pairs->Get(Direction::Left)]
+					+ (*data)[pairs->Get(Direction::Up)]
+					+ (*data)[pairs->Get(Direction::Down)])
 				* (1.0f / c_fac);
 		}
 		if (x_bounds * y_bounds >= (length * length)) {
@@ -22,9 +22,6 @@ __global__ void LinearSolverKernel(HashMap<IndexPair, float, Hash>* data, HashMa
 			}
 			if (bounds == 1) {
 				PointerBoundariesSpecialX(data, length);
-			}
-			else {
-				PointerBoundariesSpecialY(data, length);
 			}
 		}
 	}

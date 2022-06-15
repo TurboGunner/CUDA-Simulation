@@ -41,7 +41,7 @@ string AxisData::ToString() {
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
-			output += current.ToString() + "\nValue: " + std::to_string(map_[current]) + "\n\n";
+			output += current.ToString() + "\nValue: " + std::to_string(map_->Get(current)) + "\n\n";
 		}
 	}
 	return output;

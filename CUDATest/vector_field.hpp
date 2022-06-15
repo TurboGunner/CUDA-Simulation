@@ -13,9 +13,10 @@
 using std::string;
 using std::set;
 
+template <typename K>
 struct Hash {
-	__host__ __device__ size_t operator()(const IndexPair& i1) const {
-		return i1.x ^ (i1.y << 1);
+	__host__ __device__ size_t operator()(const K& i1, size_t size) const {
+		return ((IndexPair) i1).x ^ (((IndexPair) i1).y << 1) % size;
 	}
 };
 
@@ -34,7 +35,7 @@ class VectorField {
 		/// <summary> 
 		/// Gets a reference of the vector field map that contains the data.
 		/// </summary>
-		HashMap<IndexPair, F_Vector, Hash>*& GetVectorMap();
+		HashMap<IndexPair, F_Vector, Hash<IndexPair>>*& GetVectorMap();
 
 		/// <summary> 
 		/// Operator overload for copying the data of an existing vector field.
@@ -57,7 +58,7 @@ class VectorField {
 		void RepackFromConstrained(AxisData& axis);
 
 	private:
-		HashMap<IndexPair, F_Vector, Hash>* map_;
+		HashMap<IndexPair, F_Vector, Hash<IndexPair>>* map_;
 		unsigned int size_x_, size_y_;
 		set<F_Vector> LoadDefaultVectorSet();
 };

@@ -136,12 +136,14 @@ public:
 
     /// <summary> Calls get from operator overload based on the key input. </summary>
     __host__ __device__ V& operator[](const K& key) {
-        return Get(key);
+        V output = Get(key);
+        return output;
     }
 
     /// <summary> Calls get from operator overload based on the integer index input. </summary>
     __host__ __device__ V& operator[](const int& index) {
-        return Get(index);
+        V output = Get(index);
+        return output;
     }
 
     /// <summary> Assignment operator overload, is a shallow copy of the input object. </summary>

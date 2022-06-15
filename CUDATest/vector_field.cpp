@@ -52,7 +52,7 @@ string VectorField::ToString() {
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
-			output += current.ToString() + "\n" + map_[current].ToString() + "\n\n";
+			output += current.ToString() + "\n" + map_->Get(current).ToString() + "\n\n";
 		}
 	}
 	return output;
@@ -65,7 +65,7 @@ void VectorField::operator=(const VectorField& copy) {
 	size_y_ = copy.size_y_;
 }
 
-HashMap<IndexPair, F_Vector, Hash>*& VectorField::GetVectorMap() {
+HashMap<IndexPair, F_Vector, Hash<IndexPair>>*& VectorField::GetVectorMap() {
 	return map_;
 }
 
@@ -77,10 +77,10 @@ void VectorField::DataConstrained(Axis axis, AxisData& input) {
 			IndexPair current(i, y_current);
 			float current_float;
 			if (axis == Axis::X) {
-				current_float = map_[current].vx_;
+				current_float = map_->Get(current).vx_;
 			}
 			else {
-				current_float = map_[current].vy_;
+				current_float = map_->Get(current).vy_;
 			}
 			input.map_->Put(current, current_float);
 		}
@@ -94,10 +94,10 @@ void VectorField::RepackFromConstrained(AxisData& axis) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
 			if (axis.axis_ == Axis::X) {
-				map_[current].vx_ = axis.map_[current];
+				(*map_)[current].vx_ = axis.map_->Get(current);
 			}
 			else {
-				map_[current].vy_ = axis.map_[current];
+				(*map_)[current].vy_ = axis.map_->Get(current);
 			}
 		}
 	}

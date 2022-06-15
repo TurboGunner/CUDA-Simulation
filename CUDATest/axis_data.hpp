@@ -1,15 +1,17 @@
 #pragma once
 
 #include "index_pair.hpp"
+
 #include "cudamap.cuh"
 
-enum class Axis { X, Y, Z };
-
+template <typename K>
 struct HashDupe {
-	__host__ __device__ size_t operator()(const IndexPair& i1) const {
-		return i1.x ^ (i1.y << 1);
+	__host__ __device__ size_t operator()(const K& i1, size_t size) const {
+		return ((IndexPair)i1).x ^ (((IndexPair)i1).y << 1) % size;
 	}
 };
+
+enum class Axis { X, Y, Z };
 
 struct AxisData {
 	AxisData() = default;
@@ -23,7 +25,7 @@ struct AxisData {
 	void operator=(const AxisData& copy);
 
 	Axis axis_;
-	HashMap<IndexPair, float, HashDupe>* map_;
+	HashMap<IndexPair, float, HashDupe<IndexPair>>* map_;
 
 	unsigned int size_;
 };
