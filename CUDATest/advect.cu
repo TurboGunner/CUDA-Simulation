@@ -44,15 +44,7 @@ __global__ void AdvectKernel(HashMap<IndexPair, float, HashDupe<IndexPair>>* dat
 				((*data_prev)[IndexPair(x_previous, y_previous)] * velocity_y_prev) * velocity_x_prev);
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
-		if (bounds == 0) {
-			PointerBoundaries(data, length);
-		}
-		if (bounds == 1) {
-			PointerBoundariesSpecialX(data, length);
-		}
-		else {
-			PointerBoundariesSpecialY(data, length);
-		}
+		BoundaryConditions(bounds, data, length);
 	}
 }
 

@@ -15,8 +15,8 @@ __global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash<IndexPair>>* vel
 		(*data_prev)[IndexPair(y_bounds, x_bounds)] = 0;
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
-		PointerBoundaries(data, length);
-		PointerBoundaries(data_prev, length);
+		BoundaryConditions(0, data, length);
+		BoundaryConditions(0, data_prev, length);
 		LinearSolverGPU(data, data_prev, 1, 4, length, iter, bounds);
 	}
 

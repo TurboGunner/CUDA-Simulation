@@ -13,8 +13,9 @@ AxisData::AxisData(unsigned int size, Axis axis) {
 	if (size < 1) {
 		throw std::invalid_argument("Error: Bounds must be at least greater than or equal to 1!");
 	}
-	size_ = size;
+	size_ = size * size;
 	axis_ = axis;
+	map_ = new HashMap<IndexPair, float, HashDupe<IndexPair>>(size_);
 	LoadDefaultDataSet();
 }
 
@@ -27,8 +28,8 @@ inline float RandomFloat() {
 
 void AxisData::LoadDefaultDataSet() {
 	unsigned int y_current = 0;
-	for (y_current; y_current < size_; y_current++) {
-		for (unsigned int i = 0; i < size_; i++) {
+	for (y_current; y_current < sqrt(size_); y_current++) {
+		for (unsigned int i = 0; i < sqrt(size_); i++) {
 			map_->Put(IndexPair(i, y_current), RandomFloat());
 		}
 	}

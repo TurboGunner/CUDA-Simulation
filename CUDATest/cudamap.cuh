@@ -15,6 +15,7 @@ struct HashFunc {
     __host__ __device__ size_t operator()(const K& key, size_t size) const
     {
         size_t hash = (size_t)(key);
+        printf("%zu", hash);
         return (hash << 1) % size;
     }
 };
@@ -34,6 +35,7 @@ public:
             throw std::invalid_argument("The input size for the hash table should be at least 1!");
         }
         hash_table_size_ = hash_table_size;
+        std::cout << hash_table_size_ << std::endl;
         Initialization();
     }
 
@@ -41,6 +43,7 @@ public:
     void Initialization() {
         cudaMallocManaged(&table_, (size_t)sizeof(V) * hash_table_size_);
         cudaMallocManaged(&hashes_, (size_t)sizeof(int) * hash_table_size_);
+        printf("%s", "HashMap constructor instantiated!\n");
     }
 
     /// <summary> Destructor for the HashMap implementation. </summary>
@@ -52,7 +55,7 @@ public:
     /// <summary> Allocates new HashMap pointer, new keyword overload. </summary>
     void* operator new(size_t size) {
         void* ptr;
-        cudaMallocManaged(&ptr, sizeof(HashMap<K, V, HashFunc<K>>)); //Allocates the size of the 
+        cudaMallocManaged(&ptr, sizeof(HashMap<K, V, HashFunc<K>>));
         cudaDeviceSynchronize();
         return ptr;
     }
@@ -129,7 +132,7 @@ public:
     __host__ string ToString() {
         string output;
         for (size_t i = 0; i < size_; i++) {
-            output += std::to_string(table_[i]);
+            output += table_[i] + "\n";
         }
         return output;
     }

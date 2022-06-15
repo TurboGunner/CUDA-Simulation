@@ -15,14 +15,10 @@ __global__ void LinearSolverKernel(HashMap<IndexPair, float, HashDupe<IndexPair>
 					+ (*data)[pairs->Get(Direction::Up)]
 					+ (*data)[pairs->Get(Direction::Down)])
 				* (1.0f / c_fac);
+			printf("%f", (*data)[pairs->Get(Direction::Origin)]);
 		}
 		if (x_bounds * y_bounds >= (length * length)) {
-			if (bounds == 0) {
-				PointerBoundaries(data, length);
-			}
-			if (bounds == 1) {
-				PointerBoundariesSpecialX(data, length);
-			}
+			BoundaryConditions(bounds, data, length);
 		}
 	}
 }
@@ -32,6 +28,7 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 	CudaMethodHandler handler(alloc_size, "LinearSolverKernel");
 
 	cudaError_t cuda_status = cudaSuccess;
+	printf("%s", "Hello!");
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);

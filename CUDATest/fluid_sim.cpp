@@ -27,6 +27,7 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
 	density_.map_->Put(pair, amount);
+	printf("%s", "Added density!");
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
@@ -69,6 +70,8 @@ void FluidSim::Simulate() {
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!
 		AxisData v_prev_x, v_x, v_prev_y, v_y;
+
+		std::cout << density_.map_->Get(0) << std::endl;
 
 		velocity_.DataConstrained(Axis::X, v_x);
 		velocity_prev_.DataConstrained(Axis::X, v_prev_x);

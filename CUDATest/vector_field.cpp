@@ -11,6 +11,7 @@ VectorField::VectorField(unsigned int x, unsigned int y) {
 	}
 	size_x_ = x;
 	size_y_ = y;
+	map_ = new HashMap<IndexPair, F_Vector, Hash<IndexPair>>(size_x_ * size_y_);
 	LoadDefaultVectorSet();
 }
 
