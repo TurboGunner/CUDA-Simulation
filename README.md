@@ -21,22 +21,22 @@ The helper class for managing allocation, deallocation, and copying of memory is
 Any relevant device functions (methods that are called from the GPU/from global kernel functions) are defined inline in cuda_sim_helpers.cuh.
 > This includes calls within the global function for linear solving; as happens in projection.
 
-## Data Structure
+## Data Structures
 
 The primary data is stored within a VectorField; defined in vector_field.hpp/cpp.
-> The data member that is contained is an unordered (hash) map, where the structure is:
+> The data member that is contained is a (hash) map, where the structure is:
 
 ```c++
-std::unordered_map<IndexPair, F_Vector, Hash> map_;
+HashMap<IndexPair, F_Vector, Hash> map_;
 ```
 
 > Where the key is a struct called IndexPair, the value is F_Vector, and the passed in struct that contains the hash function logic is called Hash.
 
 THe VectorField data structure can be split into its constituent axes via the implementation of axis_data.hpp/cpp.
->It stores data in an unordered (hash) map, where it stores a uni-dimensional float as the value. Also used in density; where the quantity is scalar.
+>It stores data in a hash map, where it stores a uni-dimensional float as the value. Also used in density; where the quantity is scalar.
 
 ```c++
-std::unordered_map<IndexPair, float, HashDupe> map_;
+HashMap<IndexPair, float, HashDupe> map_;
 ```
 
 > Where the key is a struct called IndexPair, the value is a float primitive, and the passed in struct that contains the hash function logic is called HashDupe.
@@ -46,6 +46,12 @@ IndexPair is a struct that is defined in index_pair.hpp/cpp.
 
 F_Vector is a struct that is defined in f_vector.hpp/cpp.
 > It stores the components (x, y) as floats, and this allows for the storing of multi-dimensional data as one struct. Also has methods for calculating magnitude with the provided data members.
+
+HashMap is a custom CUDA map implementation created in order to solve the issue of poor interopability with previous abstracted code for the original CPU implementation, as well as the amount of safeguards and additional code required to accomodate for the unpacking of VectorField and DataAxis to a float pointer, and the repacking back into the data structure.
+
+It works in a hybridized (managaed) scheme, and has the required C++ object overloads to work properly with CUDADeviceReset. This allows for memory to be accessed interchangably between the host and the device, and to eliminate the necessity for memory copy and allocation abstraction for the data structures; which significantly simplifies the process for which data management is done in both system and GPU contexts.
+
+>Specific GitHub Page Here: https://github.com/TurboGunner/CUDAMap
 
 ## Fluid Simulation Implementation
 
@@ -76,6 +82,4 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 
 Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
 
-Move data structures to stdgpu and thrust for better interopability and ease of manipulation with data structures.
-
-
+Strip back CUDA abstraction due to the new usage of hybridized memory in CUDA.
