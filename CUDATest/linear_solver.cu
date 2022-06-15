@@ -1,10 +1,10 @@
 #include "fluid_sim_cuda.cuh"
-#include "handler_methods.hpp"
-#include "fluid_sim.hpp"
 
 __global__ void LinearSolverKernel(HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
+
+	auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), data->size_);
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		for (int i = 0; i < iter; i++) {

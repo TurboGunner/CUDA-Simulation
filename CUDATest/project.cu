@@ -1,12 +1,11 @@
 #include "fluid_sim_cuda.cuh"
-#include "fluid_sim.hpp"
 
 __global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash>* velocity, HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, unsigned int length, unsigned int iter, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
-	auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
+		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
 		(*data)[pairs->Get(FluidSim::Direction::Origin)] =
 			((*velocity)[pairs->Get(FluidSim::Direction::Right)].vx_
 				- (*velocity)[pairs->Get(FluidSim::Direction::Left)].vx_
@@ -22,6 +21,7 @@ __global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash>* velocity, Hash
 	}
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
+		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
 		(*velocity)[pairs->Get(FluidSim::Direction::Origin)].vx_ -= 0.5f
 			* ((*data_prev)[pairs->Get(FluidSim::Direction::Right)]
 			- (*data_prev)[pairs->Get(FluidSim::Direction::Left)])
@@ -40,11 +40,7 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	unsigned int alloc_size = length * length;
 	CudaMethodHandler handler(alloc_size, "ProjectCudaKernel");
 
-	handler.AllocateCopyPointers();
-
 	cudaError_t cuda_status = cudaSuccess;
-
-	cuda_status = handler.CopyToMemory(cudaMemcpyHostToDevice, cuda_status);
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);

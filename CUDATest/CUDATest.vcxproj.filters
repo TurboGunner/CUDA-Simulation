@@ -42,9 +42,6 @@
     <ClInclude Include="cuda_sim_helpers.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="vector_field.hpp">
-      <Filter>includes\data_structures</Filter>
-    </ClInclude>
     <ClInclude Include="f_vector.hpp">
       <Filter>includes\data_structures</Filter>
     </ClInclude>
@@ -65,6 +62,9 @@
     </ClInclude>
     <ClInclude Include="cudamap.cuh">
       <Filter>includes\cuda\data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_field.hpp">
+      <Filter>includes\data_structures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

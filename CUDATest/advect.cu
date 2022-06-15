@@ -1,6 +1,6 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, float dt, unsigned int length, int bounds) {
+__global__ void AdvectKernel(HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, HashMap<IndexPair, F_Vector, Hash>* velocity, float dt, unsigned int length, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
@@ -12,8 +12,9 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 	float x_value, y_value;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		x_value = (float)x_bounds - (x_dt * velocity[IX(x_bounds, y_bounds + 1, length)].x);
-		y_value = (float)y_bounds - (y_dt * velocity[IX(x_bounds, y_bounds + 1, length)].y);
+		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
+		x_value = (float)x_bounds - (x_dt * pairs->Get(FluidSim::Direction::Origin).x);
+		y_value = (float)y_bounds - (y_dt * pairs->Get(FluidSim::Direction::Origin).y);
 
 		if (x_value < 0.5f) {
 			x_value = 0.5f;
@@ -37,11 +38,11 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 		velocity_y_prev = y_value - y_current;
 		velocity_y_curr = 1.0f - velocity_y_prev;
 
-		data[IX(x_bounds, y_bounds + 1, length)] =
-			((data_prev[IX(unsigned int(x_current), unsigned int(y_current + 1), length)] * velocity_y_curr) +
-				(data_prev[IX(unsigned int(x_current), int(y_previous + 1), length)] * velocity_y_prev) * velocity_x_curr) +
-			((data_prev[IX(unsigned int(x_previous), unsigned int(y_current + 1), length)] * velocity_y_curr) +
-				(data_prev[IX(unsigned int(x_previous), unsigned int(y_previous + 1), length)] * velocity_y_prev) * velocity_x_prev);
+		(*data)[IX(x_bounds, y_bounds + 1, length)] =
+			(((*data_prev)[IndexPair(x_current, y_current)] * velocity_y_curr) +
+				((*data_prev)[IndexPair(x_current, y_previous)] * velocity_y_prev) * velocity_x_curr) +
+			(((*data_prev)[IndexPair(x_previous, y_current)] * velocity_y_curr) +
+				((*data_prev)[IndexPair(x_previous, y_previous)] * velocity_y_prev) * velocity_x_prev);
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
 		if (bounds == 0) {
@@ -60,35 +61,14 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	unsigned int alloc_size = length * length;
 	CudaMethodHandler handler(alloc_size, "AdvectCudaKernel");
 
-	float* curr_copy_ptr = nullptr, * prev_copy_ptr = nullptr;
-
-	float* current_ptr = current->FlattenMap(), //Maybe make current and previous part of the same vector to consolidate?
-		* prev_ptr = previous->FlattenMap();
-
-	float3* v_ptr = velocity.FlattenMap(), * v_copy_ptr = nullptr;
-
-	handler.float_copy_ptrs_.insert(handler.float_copy_ptrs_.end(), { curr_copy_ptr, prev_copy_ptr });
-	handler.float_ptrs_.insert(handler.float_ptrs_.end(), { current_ptr, prev_ptr });
-
-	handler.float3_copy_ptrs_.insert(handler.float3_copy_ptrs_.end(), { v_copy_ptr });
-	handler.float3_ptrs_.insert(handler.float3_ptrs_.end(), { v_ptr });
-
 	handler.AllocateCopyPointers();
 
 	cudaError_t cuda_status = cudaSuccess;
 
-	cuda_status = handler.CopyToMemory(cudaMemcpyHostToDevice, cuda_status);
-
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	AdvectKernel<<<blocks, threads>>> (curr_copy_ptr, prev_copy_ptr, v_copy_ptr, dt, length, bounds);
+	AdvectKernel<<<blocks, threads>>> (current.map_, previous.map_, velocity.map_, dt, length, bounds);
 
 	cuda_status = handler.PostExecutionChecks(cuda_status);
-
-	cuda_status = CopyFunction("cudaMemcpy failed! (result)", current_ptr, curr_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
-		sizeof(float));
-
-	handler.~CudaMethodHandler();
 }
