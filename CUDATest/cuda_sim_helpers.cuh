@@ -18,23 +18,6 @@ __device__ inline void PointerBoundaries(HashMap<IndexPair, float, Hash>* result
 	(*result_ptr)[IX(bound, length, length)] = (*result_ptr)[IX(bound - 1, length, length)] + (*result_ptr)[IX(bound, bound, length)] * .5f;
 }
 
-__device__ inline void PointerBoundariesVector(float3* vector_ptr, const unsigned int& length) {
-	float* x_dim = new float[length], * y_dim = new float[length], * z_dim = new float[length];
-
-	for (int i = 0; i < length * length; i++) {
-		x_dim[i] = vector_ptr[i].x;
-		y_dim[i] = vector_ptr[i].y;
-	}
-
-	PointerBoundaries(x_dim, length);
-	PointerBoundaries(y_dim, length);
-
-	for (int i = 0; i < length * length; i++) {
-		vector_ptr[i].x = x_dim[i];
-		vector_ptr[i].y = y_dim[i];
-	}
-}
-
 __device__ inline void PointerBoundariesSpecialX(HashMap<IndexPair, float, Hash>* result_ptr, const unsigned int& length) {
 	unsigned int bound = length - 1;
 	for (int i = 1; i < bound; i++) {

@@ -52,24 +52,6 @@ void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorF
 	AdvectCuda(0, current, previous, velocity, dt_, size_x_);
 }
 
-void BoundaryConditions(int bounds, HashMap<IndexPair, float, Hash>* c_map, int side_size) {
-	unsigned int bound = side_size - 1;
-
-	for (int i = 1; i < bound; i++) {
-		c_map[IndexPair(i, 0)].vx_ = bounds == 1 ? c_map[IndexPair(i, 0)].vx_ * -1.0f : c_map[IndexPair(i, 1)].vx_;
-		c_map[IndexPair(i, bound)].vx_ = bounds == 1 ? c_map[IndexPair(i, bound - 1)].vx_ * -1.0f : c_map[IndexPair(i, bound - 1)].vx_;
-	}
-	for (int j = 1; j < bound; j++) {
-		c_map[IndexPair(0, j)].vy_ = bounds == 1 ? c_map[IndexPair(1, j)].vy_ * -1.0f : c_map[IndexPair(1, j)].vy_;
-		c_map[IndexPair(bound, j)] = bounds == 1 ? c_map[IndexPair(bound - 1, j)] * -1.0f : c_map[IndexPair(bound - 1, j)].vy_;
-	}
-
-	c_map[IndexPair(0, 0)] = c_map[IndexPair(1, 0)] + c_map[IndexPair(0, 1)] * .5f;
-	c_map[IndexPair(0, bound)] = c_map[IndexPair(1, bound)] + c_map[IndexPair(0, bound - 1)] * .5f;
-	c_map[IndexPair(bound, 0)] = c_map[IndexPair(bound - 1, 0)] + c_map[IndexPair(bound, 1)] * .5f;
-	c_map[IndexPair(bound, bound)] = c_map[IndexPair(bound - 1, bound)] + c_map[IndexPair(bound, bound - 1)] * .5f;
-}
-
 void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
 	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_x_);
 }

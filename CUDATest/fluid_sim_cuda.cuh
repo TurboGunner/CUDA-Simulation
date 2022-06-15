@@ -26,6 +26,6 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 
 void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const unsigned int& length);
 
-__global__ void ProjectKernel(float3* velocity, float* data, float* data_prev, unsigned int length, unsigned int iter, int bounds);
+__global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash>* velocity, HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, unsigned int length, unsigned int iter, int bounds);
 
 void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const unsigned int& length, const unsigned int& iter);

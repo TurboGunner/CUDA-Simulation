@@ -7,9 +7,8 @@ __global__ void LinearSolverKernel(HashMap<IndexPair, float, Hash>* data, HashMa
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		auto* pairs = GetAdjacentCoordinates(IndexPair(x_bounds, y_bounds), data->size_);
 		for (int i = 0; i < iter; i++) {
-			data[IX(x_bounds, y_bounds + 1, length)] = ((*data_prev)[pairs->Get(FluidSim::Direction::Origin)] +
+			data[pairs->Get(FluidSim::Direction::Origin)] = ((*data_prev)[pairs->Get(FluidSim::Direction::Origin)] +
 				a_fac *
 				(*data)[pairs->Get(FluidSim::Direction::Right)]
 					+ (*data)[pairs->Get(FluidSim::Direction::Left)]

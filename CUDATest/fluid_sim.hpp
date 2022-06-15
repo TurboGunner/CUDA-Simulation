@@ -7,7 +7,7 @@
 
 struct CoordinateHash {
 	__host__ __device__ size_t operator()(const FluidSim::Direction& d1) const {
-		size_t base_hash = (size_t)d1;
+		size_t base_hash = (size_t) d1;
 		return base_hash ^ (base_hash << 1);
 	}
 };
@@ -57,4 +57,22 @@ __host__ __device__ inline HashMap<FluidSim::Direction, IndexPair, CoordinateHas
 	output->Put(FluidSim::Direction::Down, IndexPair(incident.x, incident.y - 1));
 
 	return output;
+}
+
+__host__ __device__ inline void BoundaryConditions(int bounds, HashMap<IndexPair, F_Vector, Hash>* c_map, int side_size) {
+	unsigned int bound = side_size - 1;
+
+	for (int i = 1; i < bound; i++) {
+		(*c_map)[IndexPair(i, 0)].vx_ = bounds == 1 ? (*c_map)[IndexPair(i, 0)].vx_ * -1.0f : (*c_map)[IndexPair(i, 1)].vx_;
+		(*c_map)[IndexPair(i, bound)].vx_ = bounds == 1 ? (*c_map)[IndexPair(i, bound - 1)].vx_ * -1.0f : (*c_map)[IndexPair(i, bound - 1)].vx_;
+	}
+	for (int j = 1; j < bound; j++) {
+		(*c_map)[IndexPair(0, j)].vy_ = bounds == 1 ? (*c_map)[IndexPair(1, j)].vy_ * -1.0f : (*c_map)[IndexPair(1, j)].vy_;
+		(*c_map)[IndexPair(bound, j)] = bounds == 1 ? (*c_map)[IndexPair(bound - 1, j)] * -1.0f : (*c_map)[IndexPair(bound - 1, j)].vy_;
+	}
+
+	(*c_map)[IndexPair(0, 0)] = (*c_map)[IndexPair(1, 0)] + (*c_map)[IndexPair(0, 1)] * .5f;
+	(*c_map)[IndexPair(0, bound)] = (*c_map)[IndexPair(1, bound)] + (*c_map)[IndexPair(0, bound - 1)] * .5f;
+	(*c_map)[IndexPair(bound, 0)] = (*c_map)[IndexPair(bound - 1, 0)] + (*c_map)[IndexPair(bound, 1)] * .5f;
+	(*c_map)[IndexPair(bound, bound)] = (*c_map)[IndexPair(bound - 1, bound)] + (*c_map)[IndexPair(bound, bound - 1)] * .5f;
 }

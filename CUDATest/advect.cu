@@ -62,8 +62,8 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 
 	float* curr_copy_ptr = nullptr, * prev_copy_ptr = nullptr;
 
-	float* current_ptr = current.FlattenMap(), //Maybe make current and previous part of the same vector to consolidate?
-		* prev_ptr = previous.FlattenMap();
+	float* current_ptr = current->FlattenMap(), //Maybe make current and previous part of the same vector to consolidate?
+		* prev_ptr = previous->FlattenMap();
 
 	float3* v_ptr = velocity.FlattenMap(), * v_copy_ptr = nullptr;
 
