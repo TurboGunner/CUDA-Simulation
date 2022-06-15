@@ -49,7 +49,7 @@ F_Vector is a struct that is defined in f_vector.hpp/cpp.
 
 HashMap is a custom CUDA map implementation created in order to solve the issue of poor interopability with previous abstracted code for the original CPU implementation, as well as the amount of safeguards and additional code required to accomodate for the unpacking of VectorField and DataAxis to a float pointer, and the repacking back into the data structure.
 
-It works in a hybridized (managaed) scheme, and has the required C++ object overloads to work properly with CUDADeviceReset. This allows for memory to be accessed interchangably between the host and the device, and to eliminate the necessity for memory copy and allocation abstraction for the data structures; which significantly simplifies the process for which data management is done in both system and GPU contexts.
+It works in a hybridized (managed) scheme, and has the required C++ object overloads to work properly with CUDADeviceReset. This allows for memory to be accessed interchangably between the host and the device, and to eliminate the necessity for memory copy and allocation abstraction for the data structures; which significantly simplifies the process for which data management is done in both system and GPU contexts.
 
 >Specific GitHub Page Here: https://github.com/TurboGunner/CUDAMap
 
