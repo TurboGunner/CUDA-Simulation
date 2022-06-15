@@ -66,25 +66,6 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 
 	handler.PostExecutionChecks(cuda_status);
 
-	float* output = new float[alloc_size];
-
-	cuda_status = CopyFunction("cudaMemcpy failed at v_x_ptr", v_x_prev_ptr, v_x_prev_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
-		sizeof(float));
-
-	cuda_status = CopyFunction("cudaMemcpy failed at v_y_ptr", v_y_prev_ptr, v_y_prev_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
-		sizeof(float));
-
-	float3* ptr = new float3[alloc_size];
-
-	cuda_status = CopyFunction("cudaMemcpy failed at v_ptr", ptr, v_copy_ptr,
-		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
-		sizeof(float3));
-
-	velocity.RepackMapVector(ptr);
-	velocity_prev.RepackMap(v_x_prev_ptr, v_y_prev_ptr);
-
 	handler.float3_ptrs_.insert(handler.float3_ptrs_.end(), { ptr });
 	handler.~CudaMethodHandler();
 }

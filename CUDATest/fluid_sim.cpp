@@ -26,11 +26,11 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
-	density_.map_[pair] = amount;
+	density_.map_->Put(pair, amount);
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
-	velocity_.GetVectorMap()[pair] = F_Vector(x, y);
+	velocity_.GetVectorMap()->Put(pair, F_Vector(x, y));
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
@@ -52,9 +52,8 @@ void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorF
 	AdvectCuda(0, current, previous, velocity, dt_, size_x_);
 }
 
-void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
-	unsigned int bound = size_x_ - 1;
-	unordered_map<IndexPair, F_Vector, Hash>& c_map = input.GetVectorMap();
+void BoundaryConditions(int bounds, HashMap<IndexPair, float, Hash>* c_map, int side_size) {
+	unsigned int bound = side_size - 1;
 
 	for (int i = 1; i < bound; i++) {
 		c_map[IndexPair(i, 0)].vx_ = bounds == 1 ? c_map[IndexPair(i, 0)].vx_ * -1.0f : c_map[IndexPair(i, 1)].vx_;
@@ -73,19 +72,6 @@ void FluidSim::BoundaryConditions(int bounds, VectorField& input) {
 
 void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
 	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_x_);
-}
-
-unordered_map<FluidSim::Direction, IndexPair> FluidSim::GetAdjacentCoordinates(IndexPair incident) {
-	unordered_map<FluidSim::Direction, IndexPair> output;
-	output.emplace(Direction::Origin, incident);
-
-	output.emplace(Direction::Left, IndexPair(incident.x - 1, incident.y));
-	output.emplace(Direction::Right, IndexPair(incident.x + 1, incident.y));
-
-	output.emplace(Direction::Up, IndexPair(incident.x, incident.y + 1));
-	output.emplace(Direction::Down, IndexPair(incident.x, incident.y - 1));
-
-	return output;
 }
 
 void FluidSim::Simulate() {

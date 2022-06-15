@@ -3,6 +3,7 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+#include "cudamap.cuh"
 #include "cuda_sim_helpers.cuh"
 
 #include "vector_field.hpp"
@@ -17,7 +18,7 @@ using std::reference_wrapper;
 using std::vector;
 using std::function;
 
-__global__ void LinearSolverKernel(float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds);
+__global__ void LinearSolverKernel(HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds);
 
 void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length);
 

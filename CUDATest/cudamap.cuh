@@ -135,12 +135,12 @@ public:
     }
 
     /// <summary> Calls get from operator overload based on the key input. </summary>
-    __host__ __device__ V operator[](const K& key) {
+    __host__ __device__ V& operator[](const K& key) {
         return Get(key);
     }
 
     /// <summary> Calls get from operator overload based on the integer index input. </summary>
-    __host__ __device__ V operator[](const int& index) {
+    __host__ __device__ V& operator[](const int& index) {
         return Get(index);
     }
 

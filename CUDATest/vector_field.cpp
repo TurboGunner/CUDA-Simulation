@@ -28,7 +28,7 @@ VectorField::VectorField(unsigned int x, unsigned int y, const set<F_Vector>& se
 			yCurrent++;
 		}
 		IndexPair pair(xCurrent, yCurrent);
-		map_.at(pair) = element;
+		map_->Put(pair, element);
 		xCurrent++;
 	}
 }
@@ -39,7 +39,7 @@ set<F_Vector> VectorField::LoadDefaultVectorSet() {
 	for (y_current; y_current < size_y_; y_current++) {
 		for (unsigned int i = 0; i < size_x_; i++) {
 			IndexPair pair(i, y_current);
-			map_.emplace(pair, RandomVector());
+			map_->Put(pair, RandomVector());
 		}
 	}
 	return output;
@@ -47,7 +47,7 @@ set<F_Vector> VectorField::LoadDefaultVectorSet() {
 
 string VectorField::ToString() {
 	string output;
-	unsigned int size = (unsigned int) sqrt(map_.size());
+	unsigned int size = size_x_;
 	unsigned int y_current = 0;
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
@@ -65,89 +65,12 @@ void VectorField::operator=(const VectorField& copy) {
 	size_y_ = copy.size_y_;
 }
 
-unordered_map<IndexPair, F_Vector, Hash>& VectorField::GetVectorMap() {
+HashMap<IndexPair, F_Vector, Hash>*& VectorField::GetVectorMap() {
 	return map_;
 }
 
-float* VectorField::FlattenMapX() {
-	float* arr = new float[map_.size()];
-
-	unsigned int count = 0;
-	unsigned int size = (unsigned int)sqrt(map_.size());
-	unsigned int y_current = 0;
-
-	for (y_current; y_current < size; y_current++) {
-		for (unsigned int i = 0; i < size; i++) {
-			IndexPair current(i, y_current);
-			arr[count] = map_[current].vx_;
-			count++;
-		}
-	}
-	return arr;
-}
-
-float* VectorField::FlattenMapY() {
-	float* arr = new float[map_.size()];
-
-	unsigned int count = 0;
-	unsigned int size = (unsigned int) sqrt(map_.size());
-	unsigned int y_current = 0;
-
-	for (y_current; y_current < size; y_current++) {
-		for (unsigned int i = 0; i < size; i++) {
-			IndexPair current(i, y_current);
-			arr[count] = map_[current].vy_;
-			count++;
-		}
-	}
-	return arr;
-}
-
-float3* VectorField::FlattenMap() {
-	unsigned int bound = map_.size();
-	float* x_dim = FlattenMapX(),
-		*y_dim = FlattenMapY();
-	float3* vectors = new float3[bound];
-	for (int i = 0; i < bound; i++) {
-		vectors[i] = float3(x_dim[i], y_dim[i]);
-	}
-	free(x_dim);
-	free(y_dim);
-
-	return vectors;
-}
-
-void VectorField::RepackMap(float* x, float* y) {
-	unsigned int y_current = 0;
-	unsigned int size = (unsigned int)sqrt(map_.size());
-	unsigned int count = 0;
-
-	for (y_current; y_current < size; y_current++) {
-		for (unsigned int i = 0; i < size; i++) {
-			IndexPair current(i, y_current);
-			map_[IndexPair(i, y_current)] = F_Vector(x[count], y[count]);
-			//std::cout << y[count] << std::endl;
-			count++;
-		}
-	}
-}
-
-void VectorField::RepackMapVector(float3* vectors) {
-	unsigned int y_current = 0;
-	unsigned int size = (unsigned int)sqrt(map_.size());
-	unsigned int count = 0;
-
-	for (y_current; y_current < size; y_current++) {
-		for (unsigned int i = 0; i < size; i++) {
-			IndexPair current(i, y_current);
-			map_[IndexPair(i, y_current)] = F_Vector(vectors[count].x, vectors[count].y);
-			count++;
-		}
-	}
-}
-
 void VectorField::DataConstrained(Axis axis, AxisData& input) {
-	unsigned int size = (unsigned int)sqrt(map_.size());
+	unsigned int size = size_x_;
 	unsigned int y_current = 0;
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
@@ -159,13 +82,13 @@ void VectorField::DataConstrained(Axis axis, AxisData& input) {
 			else {
 				current_float = map_[current].vy_;
 			}
-			input.map_.emplace(current, current_float);
+			input.map_->Put(current, current_float);
 		}
 	}
 }
 
 void VectorField::RepackFromConstrained(AxisData& axis) {
-	unsigned int size = (unsigned int)sqrt(map_.size());
+	unsigned int size = size_x_;
 	unsigned int y_current = 0;
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {

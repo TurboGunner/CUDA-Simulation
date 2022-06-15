@@ -1,17 +1,13 @@
 #pragma once
 
 #include "index_pair.hpp"
-
-#include <unordered_map>
-using std::unordered_map;
+#include "cudamap.cuh"
 
 enum class Axis { X, Y, Z };
 
 struct HashDupe {
-	size_t operator()(const IndexPair& i1) const {
-		unsigned int hash1 = std::hash<unsigned int>()(i1.x);
-		unsigned int hash2 = std::hash<unsigned int>()(i1.y);
-		return hash1 ^ (hash2 << 1);
+	__host__ __device__ size_t operator()(const IndexPair& i1) const {
+		return i1.x ^ (i1.y << 1);
 	}
 };
 
@@ -22,14 +18,12 @@ struct AxisData {
 
 	void LoadDefaultDataSet();
 
-	float* FlattenMap();
-	void RepackMap(float* data);
 	string ToString();
 
 	void operator=(const AxisData& copy);
 
 	Axis axis_;
-	unordered_map<IndexPair, float, HashDupe> map_;
+	HashMap<IndexPair, float, HashDupe>* map_;
 
 	unsigned int size_;
 };

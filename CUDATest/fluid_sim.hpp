@@ -1,11 +1,16 @@
 #pragma once
 
 #include "vector_field.hpp"
+#include "cudamap.cuh"
+
 #include <math.h>
 
-#include <unordered_map>
-
-using std::unordered_map;
+struct CoordinateHash {
+	__host__ __device__ size_t operator()(const FluidSim::Direction& d1) const {
+		size_t base_hash = (size_t)d1;
+		return base_hash ^ (base_hash << 1);
+	}
+};
 
 struct FluidSim {
 	FluidSim() = default;
@@ -14,15 +19,12 @@ struct FluidSim {
 	void AddDensity(IndexPair pair, float amount);
 	void AddVelocity(IndexPair pair, float x, float y);
 
-	void BoundaryConditions(int bounds, VectorField& input);
-
 	void Diffuse(int bounds, float visc, AxisData& current, AxisData& previous);
 	void DiffuseDensity(int bounds, float diff, AxisData& current, AxisData& previous);
 
 	void Project(VectorField& v_current, VectorField& v_previous);
 	void Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity);
 	void Simulate();
-
 
 	VectorField velocity_, velocity_prev_;
 	AxisData density_, density_prev_;
@@ -42,5 +44,17 @@ struct FluidSim {
 
 private:
 	void LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac);
-	unordered_map<Direction, IndexPair> GetAdjacentCoordinates(IndexPair incident); //Data Member
 };
+
+__host__ __device__ inline HashMap<FluidSim::Direction, IndexPair, CoordinateHash>* GetAdjacentCoordinates(IndexPair incident, unsigned int size) {
+	auto* output = new HashMap<FluidSim::Direction, IndexPair, CoordinateHash>(size);
+	output->Put(FluidSim::Direction::Origin, incident);
+
+	output->Put(FluidSim::Direction::Left, IndexPair(incident.x - 1, incident.y));
+	output->Put(FluidSim::Direction::Right, IndexPair(incident.x + 1, incident.y));
+
+	output->Put(FluidSim::Direction::Up, IndexPair(incident.x, incident.y + 1));
+	output->Put(FluidSim::Direction::Down, IndexPair(incident.x, incident.y - 1));
+
+	return output;
+}

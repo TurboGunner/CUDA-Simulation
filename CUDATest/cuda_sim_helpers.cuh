@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cuda_runtime.h"
+#include "vector_field.hpp"
 
 __device__ inline int IX(unsigned int x, unsigned int y, const unsigned int& size) {
 	unsigned int value = (((y - 1) * size) + x);
@@ -9,12 +10,12 @@ __device__ inline int IX(unsigned int x, unsigned int y, const unsigned int& siz
 	}
 }
 
-__device__ inline void PointerBoundaries(float* result_ptr, const unsigned int& length) {
+__device__ inline void PointerBoundaries(HashMap<IndexPair, float, Hash>* result_ptr, const unsigned int& length) {
 	unsigned int bound = length - 1;
-	result_ptr[IX(0, 1, length)] = result_ptr[IX(1, 1, length)] + result_ptr[IX(0, 2, length)] * .5f;
-	result_ptr[IX(0, length, length)] = result_ptr[IX(1, length, length)] + result_ptr[IX(0, bound, length)] * .5f;
-	result_ptr[IX(bound, 1, length)] = result_ptr[IX(bound - 1, 1, length)] + result_ptr[IX(bound, 2, length)] * .5f;
-	result_ptr[IX(bound, length, length)] = result_ptr[IX(bound - 1, length, length)] + result_ptr[IX(bound, bound, length)] * .5f;
+	(*result_ptr)[IX(0, 1, length)] = (*result_ptr)[IX(1, 1, length)] + (*result_ptr)[IX(0, 2, length)] * .5f;
+	(*result_ptr)[IX(0, length, length)] = (*result_ptr)[IX(1, length, length)] + (*result_ptr)[IX(0, bound, length)] * .5f;
+	(*result_ptr)[IX(bound, 1, length)] = (*result_ptr)[IX(bound - 1, 1, length)] + (*result_ptr)[IX(bound, 2, length)] * .5f;
+	(*result_ptr)[IX(bound, length, length)] = (*result_ptr)[IX(bound - 1, length, length)] + (*result_ptr)[IX(bound, bound, length)] * .5f;
 }
 
 __device__ inline void PointerBoundariesVector(float3* vector_ptr, const unsigned int& length) {
@@ -34,20 +35,20 @@ __device__ inline void PointerBoundariesVector(float3* vector_ptr, const unsigne
 	}
 }
 
-__device__ inline void PointerBoundariesSpecialX(float* result_ptr, const unsigned int& length) {
+__device__ inline void PointerBoundariesSpecialX(HashMap<IndexPair, float, Hash>* result_ptr, const unsigned int& length) {
 	unsigned int bound = length - 1;
 	for (int i = 1; i < bound; i++) {
-		result_ptr[IX(i, 1, length)] = -result_ptr[IX(i, 2, length)];
-		result_ptr[IX(i, length, length)] = -result_ptr[IX(i, bound, length)];
+		(*result_ptr)[IX(i, 1, length)] = (*result_ptr)[IX(i, 2, length)] * -1;
+		(*result_ptr)[IX(i, length, length)] = (*result_ptr)[IX(i, bound, length)] * -1;
 	}
 	PointerBoundaries(result_ptr, length);
 }
 
-__device__ inline void PointerBoundariesSpecialY(float* result_ptr, const unsigned int& length) {
+__device__ inline void PointerBoundariesSpecialY(HashMap<IndexPair, float, Hash>* result_ptr, const unsigned int& length) {
 	unsigned int bound = length - 1;
 	for (int j = 1; j < bound; j++) {
-		result_ptr[IX(0, j + 1, length)] = -result_ptr[IX(1, j + 1, length)];
-		result_ptr[IX(bound, j + 1, length)] = -result_ptr[IX(bound - 1, j + 1, length)];
+		(*result_ptr)[IX(0, j + 1, length)] = -(*result_ptr)[IX(1, j + 1, length)];
+		(*result_ptr)[IX(bound, j + 1, length)] = -(*result_ptr)[IX(bound - 1, j + 1, length)];
 	}
 	PointerBoundaries(result_ptr, length);
 }
@@ -69,7 +70,7 @@ __device__ inline void PointerBoundariesSpecial(float3* vector_ptr, const unsign
 	}
 }
 
-__device__ inline void LinearSolverGPU(float* data, const float* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds) {
+__device__ inline void LinearSolverGPU(HashMap<IndexPair, float, Hash>* data, HashMap<IndexPair, float, Hash>* data_prev, float a_fac, float c_fac, unsigned int length, unsigned int iter, int bounds) {
 	unsigned int x_bounds = 1;
 	unsigned int y_bounds = 1;
 

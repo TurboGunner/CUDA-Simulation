@@ -59,6 +59,7 @@ __global__ void AdvectKernel(float* data, float* data_prev, float3* velocity, fl
 void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
 	unsigned int alloc_size = length * length;
 	CudaMethodHandler handler(alloc_size, "AdvectCudaKernel");
+
 	float* curr_copy_ptr = nullptr, * prev_copy_ptr = nullptr;
 
 	float* current_ptr = current.FlattenMap(), //Maybe make current and previous part of the same vector to consolidate?
@@ -89,6 +90,5 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 		cudaMemcpyDeviceToHost, cuda_status, (size_t)alloc_size,
 		sizeof(float));
 
-	current.RepackMap(current_ptr);
 	handler.~CudaMethodHandler();
 }
