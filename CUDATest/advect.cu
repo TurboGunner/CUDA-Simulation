@@ -12,8 +12,8 @@ __global__ void AdvectKernel(HashMap<IndexPair, float, HashDupe<IndexPair>>* dat
 	float x_value, y_value;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		x_value = (float)x_bounds - (x_dt * (*velocity)[IndexPair(x_bounds, y_bounds)].vx_);
-		y_value = (float)y_bounds - (y_dt * (*velocity)[IndexPair(x_bounds, y_bounds)].vy_);
+		x_value = (float)x_bounds - (x_dt * (*velocity)[IndexPair(y_bounds, x_bounds)].vx_);
+		y_value = (float)y_bounds - (y_dt * (*velocity)[IndexPair(y_bounds, x_bounds)].vy_);
 
 		if (x_value < 0.5f) {
 			x_value = 0.5f;

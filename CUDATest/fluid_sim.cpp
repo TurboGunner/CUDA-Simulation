@@ -26,8 +26,7 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
-	density_.map_->Put(pair, amount);
-	printf("%s", "Added density!");
+	density_.map_->Put(pair, amount);;
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
@@ -68,8 +67,11 @@ void FluidSim::Simulate() {
 
 	OpenVDBHandler vdb_handler(*this);
 
+	size_t total_size = size_x_ * size_y_;
+
+	AxisData v_prev_x(total_size, Axis::X), v_x(total_size, Axis::X), v_prev_y(total_size, Axis::Y), v_y(total_size, Axis::Y);
+
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!
-		AxisData v_prev_x, v_x, v_prev_y, v_y;
 
 		std::cout << density_.map_->Get(0) << std::endl;
 

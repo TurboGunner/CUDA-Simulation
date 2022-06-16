@@ -11,7 +11,7 @@ __device__ inline void LinearSolverGPU(HashMap<IndexPair, float, HashDupe<IndexP
 	unsigned int y_bounds = 1;
 
 	for (int i = 0; i < iter; i++) {
-		HashMap<Direction, IndexPair, HashFunc<Direction>>* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), data->size_);
+		HashMap<Direction, IndexPair, HashFunc<Direction>>* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds));
 
 		if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 			for (int i = 0; i < iter; i++) {

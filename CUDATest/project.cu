@@ -5,7 +5,7 @@ __global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash<IndexPair>>* vel
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
+		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds));
 		(*data)[pairs->Get(Direction::Origin)] =
 			((*velocity)[pairs->Get(Direction::Right)].vx_
 				- (*velocity)[pairs->Get(Direction::Left)].vx_
@@ -21,7 +21,7 @@ __global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash<IndexPair>>* vel
 	}
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds), velocity->size_);
+		auto* pairs = GetAdjacentCoordinates(IndexPair(y_bounds, x_bounds));
 		(*velocity)[pairs->Get(Direction::Origin)].vx_ -= 0.5f
 			* ((*data_prev)[pairs->Get(Direction::Right)]
 			- (*data_prev)[pairs->Get(Direction::Left)])

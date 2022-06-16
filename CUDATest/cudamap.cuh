@@ -14,9 +14,9 @@ struct HashFunc {
     /// <para> Should be replaced depending on use-case and key input type. </para> </summary>
     __host__ __device__ size_t operator()(const K& key, size_t size) const
     {
-        size_t hash = (size_t)(key);
+        unsigned long hash = (unsigned long)(key);
         printf("%zu", hash);
-        return (hash << 1) % size;
+        return hash;
     }
 };
 
@@ -53,10 +53,13 @@ public:
     }
 
     /// <summary> Allocates new HashMap pointer, new keyword overload. </summary>
-    void* operator new(size_t size) {
+    __host__ __device__ void* operator new(size_t size) {
         void* ptr;
+#ifdef __CUDA_ARCH__
+        printf("%u\n", size);
+#endif
         cudaMallocManaged(&ptr, sizeof(HashMap<K, V, HashFunc<K>>));
-        cudaDeviceSynchronize();
+        //cudaDeviceSynchronize();
         return ptr;
     }
 

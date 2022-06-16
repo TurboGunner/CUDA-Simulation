@@ -39,8 +39,8 @@ private:
 	void LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac);
 };
 
-__host__ __device__ inline HashMap<Direction, IndexPair, HashFunc<Direction>>* GetAdjacentCoordinates(IndexPair incident, unsigned int size) {
-	auto* output = new HashMap<Direction, IndexPair, HashFunc<Direction>>(size);
+__host__ __device__ inline HashMap<Direction, IndexPair, HashFunc<Direction>>* GetAdjacentCoordinates(IndexPair incident) {
+	auto* output = new HashMap<Direction, IndexPair, HashFunc<Direction>>(5);
 	output->Put(Direction::Origin, incident);
 
 	output->Put(Direction::Left, IndexPair(incident.x - 1, incident.y));
