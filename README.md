@@ -83,3 +83,5 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
 
 Strip back CUDA abstraction due to the new usage of hybridized memory in CUDA.
+
+Add a marker to axis_data.hpp/cpp to allow for the potential needed triggered destruction of the HashMap pointer if it is copied from a temporary source such as an intermediate from velocity.
