@@ -52,8 +52,6 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	unsigned int alloc_size = length * length;
 	CudaMethodHandler handler(alloc_size, "AdvectCudaKernel");
 
-	handler.AllocateCopyPointers();
-
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;

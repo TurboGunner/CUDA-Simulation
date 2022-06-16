@@ -15,7 +15,7 @@ struct HashFunc {
     __host__ __device__ size_t operator()(const K& key, size_t size) const
     {
         unsigned long hash = (unsigned long)(key);
-        printf("%zu", hash);
+        printf("%u", hash);
         return hash;
     }
 };
@@ -30,17 +30,17 @@ public:
     }
 
     /// <summary> Loaded Constructor, allocates with size argument. </summary>
-    HashMap(const size_t& hash_table_size) {
+    __host__ __device__ HashMap(const size_t& hash_table_size) {
         if (hash_table_size < 1) {
-            throw std::invalid_argument("The input size for the hash table should be at least 1!");
+            printf("%s\n", "The input size for the hash table should be at least 1!");
         }
         hash_table_size_ = hash_table_size;
-        std::cout << hash_table_size_ << std::endl;
+        printf("%zu\n", hash_table_size_);
         Initialization();
     }
 
     /// <summary> Helper method to initialize unified memory with the values and the accompanying hash map. </summary>
-    void Initialization() {
+    __host__ __device__ void Initialization() {
         cudaMallocManaged(&table_, (size_t)sizeof(V) * hash_table_size_);
         cudaMallocManaged(&hashes_, (size_t)sizeof(int) * hash_table_size_);
         printf("%s", "HashMap constructor instantiated!\n");
@@ -64,7 +64,7 @@ public:
     }
 
     /// <summary> Deallocates HashMap pointers, delete keyword overload. </summary>
-    void operator delete(void* ptr) {
+    __host__ __device__ void operator delete(void* ptr) {
         cudaDeviceSynchronize();
         cudaFree(ptr);
     }
@@ -82,7 +82,7 @@ public:
         size_t hash = hash_func_(key, hash_table_size_);
         long hash_pos = FindHash(hash);
         if (hash_pos == -1) {
-            printf("%s", "Invalid Index!\n");
+            //printf("%s", "Invalid Index!\n");
         }
         return table_[hash_pos];
 

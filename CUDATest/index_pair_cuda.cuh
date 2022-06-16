@@ -37,5 +37,21 @@ struct IndexPair {
 	/// </summary>
 	string ToString() const;
 
+	__host__ __device__ inline IndexPair Left() {
+		return IndexPair(x - 1, y);
+	}
+
+	__host__ __device__ inline IndexPair Right() {
+		return IndexPair(x + 1, y);
+	}
+
+	__host__ __device__ inline IndexPair Up() {
+		return IndexPair(x, y + 1);
+	}
+
+	__host__ __device__ inline IndexPair Down() {
+		return IndexPair(x, y - 1);
+	}
+
 	unsigned int x = 0, y = 0; //Spots
 };
