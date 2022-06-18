@@ -13,7 +13,7 @@ AxisData::AxisData(unsigned int size, Axis axis) {
 	if (size < 1) {
 		throw std::invalid_argument("Error: Bounds must be at least greater than or equal to 1!");
 	}
-	size_ = size;
+	size_ = size * size;
 	axis_ = axis;
 	map_ = new HashMap<IndexPair, float, HashDupe<IndexPair>>(size_);
 	LoadDefaultDataSet();
@@ -37,10 +37,9 @@ void AxisData::LoadDefaultDataSet() {
 
 string AxisData::ToString() {
 	string output;
-	unsigned int size = size_;
 	unsigned int y_current = 0;
-	for (y_current; y_current < size; y_current++) {
-		for (unsigned int i = 0; i < size; i++) {
+	for (y_current; y_current < sqrt(size_); y_current++) {
+		for (unsigned int i = 0; i < sqrt(size_); i++) {
 			IndexPair current(i, y_current);
 			output += current.ToString() + "\nValue: " + std::to_string(map_->Get(current)) + "\n\n";
 		}

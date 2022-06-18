@@ -14,11 +14,10 @@ __global__ void LinearSolverKernel(HashMap<IndexPair, float, HashDupe<IndexPair>
 					+ (*data)[incident.Up()]
 					+ (*data)[incident.Down()])
 				* (1.0f / c_fac);
-			//printf("%f\n", (*data)[incident]);
 		}
-		if (x_bounds * y_bounds >= (length * length)) {
-			BoundaryConditions(bounds, data, length);
-		}
+	}
+	if (x_bounds * y_bounds >= (length * length)) {
+		BoundaryConditions(bounds, data, length);
 	}
 }
 
@@ -30,6 +29,8 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
+
+	std::cout << current.map_->Get(IndexPair(length - 1, length -1)) << std::endl;
 
 	LinearSolverKernel<<<blocks, threads>>> (current.map_, previous.map_, a_fac, c_fac, length, iter, bounds);
 

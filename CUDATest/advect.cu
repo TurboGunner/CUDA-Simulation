@@ -57,6 +57,8 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
+	std::cout << "bidoof" << std::endl;
+
 	AdvectKernel<<<blocks, threads>>> (current.map_, previous.map_, velocity.GetVectorMap(), dt, length, bounds);
 
 	cuda_status = handler.PostExecutionChecks(cuda_status);

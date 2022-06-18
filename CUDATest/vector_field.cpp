@@ -41,6 +41,7 @@ set<F_Vector> VectorField::LoadDefaultVectorSet() {
 		for (unsigned int i = 0; i < size_x_; i++) {
 			IndexPair pair(i, y_current);
 			map_->Put(pair, RandomVector());
+			//std::cout << (y_current * size_y_) + i << std::endl;
 		}
 	}
 	return output;
@@ -60,6 +61,7 @@ string VectorField::ToString() {
 }
 
 void VectorField::operator=(const VectorField& copy) {
+	map_ = map_ = new HashMap<IndexPair, F_Vector, Hash<IndexPair>>(copy.size_x_ * copy.size_y_);
 	map_ = copy.map_;
 
 	size_x_ = copy.size_x_;
@@ -95,11 +97,14 @@ void VectorField::RepackFromConstrained(AxisData& axis) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
 			if (axis.axis_ == Axis::X) {
+				std::cout << current.ToString() << std::endl;
 				(*map_)[current].vx_ = axis.map_->Get(current);
 			}
 			else {
 				(*map_)[current].vy_ = axis.map_->Get(current);
 			}
+			//std::cout << current.ToString() << std::endl;
 		}
 	}
+	//std::cout << "Last element!" << std::endl;
 }

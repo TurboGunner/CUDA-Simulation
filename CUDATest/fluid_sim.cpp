@@ -19,10 +19,10 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 	time_max_ = time_max;
 
 	velocity_ = VectorField(size_x, size_y);
-	velocity_prev_ = velocity_;
+	velocity_prev_ = VectorField(size_x, size_y);
 
 	density_ = AxisData(size_x);
-	density_prev_ = density_;
+	density_prev_ = AxisData(size_x);
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
@@ -69,33 +69,32 @@ void FluidSim::Simulate() {
 
 	size_t total_size = size_x_ * size_y_;
 
-	AxisData v_prev_x(total_size, Axis::X), v_x(total_size, Axis::X), v_prev_y(total_size, Axis::Y), v_y(total_size, Axis::Y);
+	AxisData v_prev_x(size_x_, Axis::X), v_x(size_x_, Axis::X), v_prev_y(size_x_, Axis::Y), v_y(size_x_, Axis::Y);
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!
-
-		std::cout << density_.map_->Get(0) << std::endl;
-
 		velocity_.DataConstrained(Axis::X, v_x);
 		velocity_prev_.DataConstrained(Axis::X, v_prev_x);
 		velocity_.DataConstrained(Axis::Y, v_y);
 		velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
 
 		Diffuse(1, viscosity_, v_prev_x, v_x);
-		velocity_.RepackFromConstrained(v_x);
-		velocity_prev_.RepackFromConstrained(v_prev_x);
+		//velocity_.RepackFromConstrained(v_x);
+		//velocity_prev_.RepackFromConstrained(v_prev_x);
 
-		Diffuse(2, viscosity_, v_prev_y, v_y);
-		velocity_.RepackFromConstrained(v_y);
-		velocity_prev_.RepackFromConstrained(v_prev_y);
+		//Diffuse(2, viscosity_, v_prev_y, v_y);
+		//velocity_.RepackFromConstrained(v_y);
+		//velocity_prev_.RepackFromConstrained(v_prev_y);
+
+		//std::cout << velocity_.ToString() << std::endl;
 
 		Project(velocity_prev_, velocity_);
 
-		velocity_.DataConstrained(Axis::X, v_x);
-		velocity_prev_.DataConstrained(Axis::X, v_prev_x);
+		//velocity_.DataConstrained(Axis::X, v_x);
+		//velocity_prev_.DataConstrained(Axis::X, v_prev_x);
 		Advect(1, v_x, v_prev_x, velocity_);
 
-		velocity_.DataConstrained(Axis::Y, v_y);
-		velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
+		//velocity_.DataConstrained(Axis::Y, v_y);
+		//velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
 		Advect(2, v_y, v_prev_y, velocity_);
 
 		Project(velocity_, velocity_prev_);

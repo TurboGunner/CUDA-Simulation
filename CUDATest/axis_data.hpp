@@ -7,7 +7,7 @@
 template <typename K>
 struct HashDupe {
 	__host__ __device__ size_t operator()(const K& i1, size_t size) const {
-		return ((IndexPair)i1).x ^ (((IndexPair)i1).y << 1) % size;
+		return (((IndexPair)i1).x) + (((IndexPair)i1).y * (sqrt(size)));
 	}
 };
 

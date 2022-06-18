@@ -14,8 +14,7 @@ struct HashFunc {
     /// <para> Should be replaced depending on use-case and key input type. </para> </summary>
     __host__ __device__ size_t operator()(const K& key, size_t size) const
     {
-        unsigned long hash = (unsigned long)(key);
-        printf("%u", hash);
+        unsigned long hash = (unsigned long)(key) % size;
         return hash;
     }
 };
@@ -71,7 +70,7 @@ public:
 
     /// <summary> Associative array logic, allows for the mapping of hashes to index positions. </summary>
     __host__ __device__ long FindHash(const int& hash) {
-        if (hash > hash_table_size_ || hashes_[hash] == 0) {
+        if (hash > hash_table_size_) {
             return -1;
         }
         return hashes_[hash] - 1;
@@ -82,7 +81,7 @@ public:
         size_t hash = hash_func_(key, hash_table_size_);
         long hash_pos = FindHash(hash);
         if (hash_pos == -1) {
-            //printf("%s", "Invalid Index!\n");
+            printf("Hash: %u ", hash);
         }
         return table_[hash_pos];
 
@@ -104,9 +103,12 @@ public:
 
     /// <summary> Accessor method when int index is an input. </summary>
     __host__ void Put(const K& key, const V& value) {
+        if (hash_table_size_ - 1 == size_) {
+            printf("%zu\n", size_);
+        }
         size_t hash = hash_func_(key, hash_table_size_);
         long hash_pos = FindHash(hash);
-        if (hash_pos == -1) {
+        if (hash_pos == -1 && size_ <= hash_table_size_) {
             hashes_[hash] = size_ + 1;
 
             table_[size_] = value;
@@ -154,10 +156,11 @@ public:
 
     /// <summary> Assignment operator overload, is a shallow copy of the input object. </summary>
     HashMap& operator=(const HashMap& src) {
-        if (src == *this) {
+        if (table_ == src.table_) {
             return *this;
         }
-        table_ = src.table_;
+        Initialization();
+        *(table_) = *(src.table_);
         return *this;
     }
 

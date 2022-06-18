@@ -12,7 +12,7 @@ __global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash<IndexPair>>* vel
 				+ (*velocity)[incident.Up()].vy_
 				- (*velocity)[incident.Down()].vy_
 				* -0.5f) * (1.0f / length);
-		(*data_prev)[IndexPair(y_bounds, x_bounds)] = 0;
+		(*data_prev)[incident] = 0;
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
 		BoundaryConditions(0, data, length);
@@ -51,6 +51,11 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	velocity_prev.DataConstrained(Axis::Y, v_prev_y);
 
 	ProjectKernel<<<blocks, threads>>> (velocity.GetVectorMap(), v_prev_x.map_, v_prev_y.map_, length, iter, bounds);
+
+	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
+
+	velocity_prev.RepackFromConstrained(v_prev_x);
+	velocity_prev.RepackFromConstrained(v_prev_y);
 
 	handler.PostExecutionChecks(cuda_status);
 }

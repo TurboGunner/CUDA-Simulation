@@ -63,11 +63,11 @@
     <ClInclude Include="cudamap.cuh">
       <Filter>includes\cuda\data_structures</Filter>
     </ClInclude>
-    <ClInclude Include="vector_field.hpp">
-      <Filter>includes\data_structures</Filter>
-    </ClInclude>
     <ClInclude Include="index_pair_cuda.cuh">
       <Filter>includes\cuda\data_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_field.hpp">
+      <Filter>includes\data_structures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
