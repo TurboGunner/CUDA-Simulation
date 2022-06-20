@@ -46,7 +46,6 @@ __global__ void ProjectKernel(HashMap<F_Vector>* velocity, HashMap<F_Vector>* ve
 
 void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const unsigned int& length, const unsigned int& iter) {
 	unsigned int alloc_size = length * length;
-	CudaMethodHandler handler(alloc_size, "ProjectCudaKernel");
 
 	cudaError_t cuda_status = cudaSuccess;
 
@@ -71,7 +70,7 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
 
-	handler.PostExecutionChecks(cuda_status);
+	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
 
 	v_temp_output->HostTransfer(cuda_status);
 	v_prev_x.map_->HostTransfer(cuda_status);

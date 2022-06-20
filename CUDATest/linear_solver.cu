@@ -23,9 +23,6 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 }
 
 void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const unsigned int& length) {
-	unsigned int alloc_size = length * length;
-	CudaMethodHandler handler(alloc_size, "LinearSolverKernel");
-
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;
@@ -40,7 +37,9 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 
 	LinearSolverKernel<<<blocks, threads>>> (c_map, p_map, a_fac, c_fac, length, iter, bounds);
 
-	handler.PostExecutionChecks(cuda_status);
+	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
+
+	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel");
 
 	current.map_->HostTransfer(cuda_status);
 	previous.map_->HostTransfer(cuda_status);

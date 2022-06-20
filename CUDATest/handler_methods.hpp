@@ -24,12 +24,8 @@ void CudaMemoryFreer(void* ptrs[]);
 /// <summary> 
 /// Polymorphism, frees a referenced std::vector of referenced wrapped float pointers in GPU memory.
 /// </summary>
-void CudaMemoryFreer(vector<reference_wrapper<float*>>& ptrs);
-
-/// <summary> 
-/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers in GPU memory.
-/// </summary>
-void CudaMemoryFreer(vector<reference_wrapper<float3*>>& ptrs);
+template <typename T>
+void CudaMemoryFreer(vector<reference_wrapper<T*>>& ptrs);
 
 /// <summary> 
 /// Polymorphism, frees a vector of void pointers in system memory.
@@ -39,12 +35,8 @@ void MemoryFreer(void* ptrs[], size_t element_alloc);
 /// <summary> 
 /// Polymorphism, frees a referenced std::vector of referenced wrapped float pointers in system memory.
 /// </summary>
-void MemoryFreer(vector<reference_wrapper<float*>>& ptrs);
-
-/// <summary> 
-/// Polymorphism, frees a referenced std::vector of referenced wrapped float3 pointers in system memory.
-/// </summary>
-void MemoryFreer(vector<reference_wrapper<float3*>>& ptrs);
+template <typename T>
+void MemoryFreer(vector<reference_wrapper<T*>>& ptrs);
 
 /// <summary> 
 /// Allocates memory to a referenced std::vector of referenced wrapped float pointers.
@@ -74,3 +66,5 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
 /// Allocates threads based on given vector field lengths and threads allocated per dimension. Order: blocks, threads.
 /// </summary>
 void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block = 16);
+
+cudaError_t PostExecutionChecks(cudaError_t status, string method_name);

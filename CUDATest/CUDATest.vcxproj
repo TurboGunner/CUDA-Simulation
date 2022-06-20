@@ -102,7 +102,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="axis_data.cpp" />
-    <ClCompile Include="handler_wrapper.cpp" />
     <ClCompile Include="fluid_sim.cpp" />
     <ClCompile Include="handler_methods.cpp" />
     <ClCompile Include="openvdb_handler.cpp" />
@@ -116,7 +115,6 @@
     <ClInclude Include="fluid_sim_cuda.cuh" />
     <ClInclude Include="f_vector_cuda.cuh" />
     <ClInclude Include="handler_methods.hpp" />
-    <ClInclude Include="handler_wrapper.hpp" />
     <ClInclude Include="index_pair_cuda.cuh" />
     <ClInclude Include="openvdb_handler.hpp" />
     <ClInclude Include="vector_field.hpp" />

@@ -9,7 +9,6 @@
 
 #include "vector_field.hpp"
 #include "handler_methods.hpp"
-#include "handler_wrapper.hpp"
 #include "fluid_sim.hpp"
 #include "axis_data.hpp"
 

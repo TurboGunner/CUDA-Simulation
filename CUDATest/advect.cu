@@ -50,7 +50,6 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 
 void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const unsigned int& length) {
 	unsigned int alloc_size = length * length;
-	CudaMethodHandler handler(alloc_size, "AdvectCudaKernel");
 
 	cudaError_t cuda_status = cudaSuccess;
 
@@ -68,7 +67,7 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map, dt, length, bounds);
 
-	cuda_status = handler.PostExecutionChecks(cuda_status);
+	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
 
 	velocity.GetVectorMap()->HostTransfer(cuda_status);
 	current.map_->HostTransfer(cuda_status);

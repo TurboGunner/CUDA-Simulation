@@ -54,9 +54,6 @@
     <ClInclude Include="openvdb_handler.hpp">
       <Filter>includes\wrapper_structs</Filter>
     </ClInclude>
-    <ClInclude Include="handler_wrapper.hpp">
-      <Filter>includes\wrapper_structs</Filter>
-    </ClInclude>
     <ClInclude Include="cudamap.cuh">
       <Filter>includes\cuda\data_structures</Filter>
     </ClInclude>
@@ -84,9 +81,6 @@
       <Filter>cpp\data_structures</Filter>
     </ClCompile>
     <ClCompile Include="openvdb_handler.cpp">
-      <Filter>cpp\wrapper_structs</Filter>
-    </ClCompile>
-    <ClCompile Include="handler_wrapper.cpp">
       <Filter>cpp\wrapper_structs</Filter>
     </ClCompile>
   </ItemGroup>

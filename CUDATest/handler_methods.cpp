@@ -21,7 +21,8 @@ void CudaMemoryFreer(void* ptrs[]) {
     }
 }
 
-void CudaMemoryFreer(vector<reference_wrapper<float*>>& ptrs) {
+template <typename T>
+void CudaMemoryFreer(vector<reference_wrapper<T*>>& ptrs) {
     try {
         for (size_t i = 0; i < ptrs.size(); i++) {
             cudaFree(ptrs.at(i).get());
@@ -32,51 +33,8 @@ void CudaMemoryFreer(vector<reference_wrapper<float*>>& ptrs) {
     }
 }
 
-void CudaMemoryFreer(vector<reference_wrapper<float3*>>& ptrs) {
-    try {
-        for (size_t i = 0; i < ptrs.size(); i++) {
-            cudaFree(ptrs.at(i).get());
-        }
-    }
-    catch (std::exception e) {
-        printf(e.what());
-    }
-}
-
-void CudaMemoryAllocator(vector<reference_wrapper<float*>>& ptrs, size_t size_alloc, size_t element_alloc) { //0 if used combined alloc
-    for (size_t i = 0; i < ptrs.size(); i++) {
-        if (ptrs.at(i).get() == nullptr) {
-            cudaError_t output_status = cudaMalloc((void**)&ptrs.at(i).get(), size_alloc * element_alloc);
-            std::cout << "Allocated " << size_alloc * element_alloc << " bytes!" << std::endl;
-            CudaExceptionHandler(output_status, "cudaMalloc failed!");
-        }
-    }
-}
-
-void CudaMemoryAllocator(vector<reference_wrapper<float3*>>& ptrs, size_t size_alloc, size_t element_alloc) {
-    for (size_t i = 0; i < ptrs.size(); i++) {
-        if (ptrs.at(i).get() == nullptr) {
-            cudaError_t output_status = cudaMalloc((void**)&ptrs.at(i).get(), size_alloc * element_alloc);
-            std::cout << "Allocated " << size_alloc * element_alloc << " bytes!" << std::endl;
-            CudaExceptionHandler(output_status, "cudaMalloc failed!");
-        }
-    }
-}
-
-void MemoryFreer(void* ptrs[], size_t element_alloc) {
-    std::cout << sizeof(ptrs) << std::endl;
-    for (size_t i = 0; i < sizeof(ptrs) * element_alloc; i++) {
-        free(ptrs[i]);
-    }
-}
-
-void MemoryFreer(vector<reference_wrapper<float*>>& ptrs) {
-    for (size_t i = 0; i < ptrs.size(); i++) {
-        free(ptrs.at(i).get());
-    }
-}
-
-void MemoryFreer(vector<reference_wrapper<float3*>>& ptrs) {
+template <typename T>
+void MemoryFreer(vector<reference_wrapper<T*>>& ptrs) {
     for (size_t i = 0; i < ptrs.size(); i++) {
         free(ptrs.at(i).get());
     }
@@ -119,4 +77,16 @@ void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, co
     blocks = dim3(block_count, block_count);
 
     std::cout << "Allocated " << threads.x * threads.y * block_count * block_count << " threads!" << std::endl;
+}
+
+cudaError_t PostExecutionChecks(cudaError_t status, string method_name) {
+    cudaError_t cuda_status = status;
+    if (cuda_status == cudaSuccess) {
+        function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
+        cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", method_name, cuda_status);
+
+        function<cudaError_t()> sync_func = []() { return cudaDeviceSynchronize(); };
+        cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", method_name, cuda_status);
+    }
+    return cuda_status;
 }
