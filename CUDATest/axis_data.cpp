@@ -15,7 +15,7 @@ AxisData::AxisData(unsigned int size, Axis axis) {
 	}
 	size_ = size * size;
 	axis_ = axis;
-	map_ = new HashMap<IndexPair, float, HashDupe<IndexPair>>(size_);
+	map_ = new HashMap<float>(size_);
 	LoadDefaultDataSet();
 }
 

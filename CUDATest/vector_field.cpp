@@ -11,7 +11,7 @@ VectorField::VectorField(unsigned int x, unsigned int y) {
 	}
 	size_x_ = x;
 	size_y_ = y;
-	map_ = new HashMap<IndexPair, F_Vector, Hash<IndexPair>>(size_x_ * size_y_);
+	map_ = new HashMap<F_Vector>(size_x_ * size_y_);
 	LoadDefaultVectorSet();
 }
 
@@ -54,21 +54,21 @@ string VectorField::ToString() {
 	for (y_current; y_current < size; y_current++) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
-			output += current.ToString() + "\n" + map_->Get(current).ToString() + "\n\n";
+			output += current.ToString() + "\n" + map_->Get(current.IX(size)).ToString() + "\n\n";
 		}
 	}
 	return output;
 }
 
 void VectorField::operator=(const VectorField& copy) {
-	map_ = map_ = new HashMap<IndexPair, F_Vector, Hash<IndexPair>>(copy.size_x_ * copy.size_y_);
+	map_ = map_ = new HashMap<F_Vector>(copy.size_x_ * copy.size_y_);
 	map_ = copy.map_;
 
 	size_x_ = copy.size_x_;
 	size_y_ = copy.size_y_;
 }
 
-HashMap<IndexPair, F_Vector, Hash<IndexPair>>*& VectorField::GetVectorMap() {
+HashMap<F_Vector>*& VectorField::GetVectorMap() {
 	return map_;
 }
 
@@ -80,14 +80,15 @@ void VectorField::DataConstrained(Axis axis, AxisData& input) {
 			IndexPair current(i, y_current);
 			float current_float;
 			if (axis == Axis::X) {
-				current_float = map_->Get(current).vx_;
+				current_float = map_->Get(current.IX(size)).vx_;
 			}
 			else {
-				current_float = map_->Get(current).vy_;
+				current_float = map_->Get(current.IX(size)).vy_;
 			}
-			input.map_->Put(current, current_float);
+			input.map_->Put(current.IX(size), current_float);
 		}
 	}
+	std::cout << "Axis constrained!" << std::endl;
 }
 
 void VectorField::RepackFromConstrained(AxisData& axis) {
@@ -97,11 +98,10 @@ void VectorField::RepackFromConstrained(AxisData& axis) {
 		for (unsigned int i = 0; i < size; i++) {
 			IndexPair current(i, y_current);
 			if (axis.axis_ == Axis::X) {
-				std::cout << current.ToString() << std::endl;
-				(*map_)[current].vx_ = axis.map_->Get(current);
+				map_->Get(current.IX(size)).vx_ = axis.map_->Get(current.IX(size));
 			}
 			else {
-				(*map_)[current].vy_ = axis.map_->Get(current);
+				map_->Get(current.IX(size)).vy_ = axis.map_->Get(current.IX(size));
 			}
 			//std::cout << current.ToString() << std::endl;
 		}

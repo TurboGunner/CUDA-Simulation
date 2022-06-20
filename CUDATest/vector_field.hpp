@@ -2,7 +2,7 @@
 
 #include "cuda_runtime.h"
 
-#include "f_vector.hpp"
+#include "f_vector_cuda.cuh"
 #include "index_pair_cuda.cuh"
 #include "axis_data.hpp"
 #include "cudamap.cuh"
@@ -12,13 +12,6 @@
 
 using std::string;
 using std::set;
-
-template <typename K>
-struct Hash {
-	__host__ __device__ size_t operator()(const K& i1, size_t size) const {
-		return (((IndexPair)i1).x ) + (((IndexPair)i1).y * (sqrt(size)));
-	}
-};
 
 class VectorField {
 	public:
@@ -35,7 +28,7 @@ class VectorField {
 		/// <summary> 
 		/// Gets a reference of the vector field map that contains the data.
 		/// </summary>
-		HashMap<IndexPair, F_Vector, Hash<IndexPair>>*& GetVectorMap();
+		HashMap<F_Vector>*& GetVectorMap();
 
 		/// <summary> 
 		/// Operator overload for copying the data of an existing vector field.
@@ -58,7 +51,7 @@ class VectorField {
 		void RepackFromConstrained(AxisData& axis);
 
 	private:
-		HashMap<IndexPair, F_Vector, Hash<IndexPair>>* map_;
+		HashMap<F_Vector>* map_;
 		unsigned int size_x_, size_y_;
 		set<F_Vector> LoadDefaultVectorSet();
 };

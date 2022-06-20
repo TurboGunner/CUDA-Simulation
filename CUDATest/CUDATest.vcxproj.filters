@@ -45,9 +45,6 @@
     <ClInclude Include="cuda_sim_helpers.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="f_vector.hpp">
-      <Filter>includes\data_structures</Filter>
-    </ClInclude>
     <ClInclude Include="fluid_sim.hpp">
       <Filter>includes</Filter>
     </ClInclude>
@@ -69,6 +66,9 @@
     <ClInclude Include="vector_field.hpp">
       <Filter>includes\data_structures</Filter>
     </ClInclude>
+    <ClInclude Include="f_vector_cuda.cuh">
+      <Filter>includes\cuda\data_structures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="handler_methods.cpp">
@@ -78,9 +78,6 @@
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="vector_field.cpp">
-      <Filter>cpp\data_structures</Filter>
-    </ClCompile>
-    <ClCompile Include="f_vector.cpp">
       <Filter>cpp\data_structures</Filter>
     </ClCompile>
     <ClCompile Include="axis_data.cpp">
@@ -107,6 +104,9 @@
       <Filter>cuda\navier_stokes_funcs</Filter>
     </CudaCompile>
     <CudaCompile Include="index_pair_cuda.cu">
+      <Filter>cuda\data_structures</Filter>
+    </CudaCompile>
+    <CudaCompile Include="f_vector_cuda.cu">
       <Filter>cuda\data_structures</Filter>
     </CudaCompile>
   </ItemGroup>

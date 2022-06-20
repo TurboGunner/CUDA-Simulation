@@ -4,13 +4,6 @@
 
 #include "cudamap.cuh"
 
-template <typename K>
-struct HashDupe {
-	__host__ __device__ size_t operator()(const K& i1, size_t size) const {
-		return (((IndexPair)i1).x) + (((IndexPair)i1).y * (sqrt(size)));
-	}
-};
-
 enum class Axis { X, Y, Z };
 
 struct AxisData {
@@ -25,7 +18,7 @@ struct AxisData {
 	void operator=(const AxisData& copy);
 
 	Axis axis_;
-	HashMap<IndexPair, float, HashDupe<IndexPair>>* map_;
+	HashMap<float>* map_;
 
 	unsigned int size_;
 };

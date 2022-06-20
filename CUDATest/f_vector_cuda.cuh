@@ -1,5 +1,9 @@
 #pragma once
 
+#include "cuda_runtime.h"
+
+#include "handler_methods.hpp"
+
 #include <string>
 #include <random>
 
@@ -9,7 +13,7 @@ struct F_Vector {
 	/// <summary> 
 	/// Default constructor. Has defaults for all dimension sizes as 1.
 	/// </summary>
-	F_Vector(float x_in = 1, float y_in = 1);
+	__host__ __device__ F_Vector(float x_in = 1, float y_in = 1);
 
 	/// <summary> 
 	/// Returns a float pointer of all F_Vector values.
@@ -29,22 +33,22 @@ struct F_Vector {
 	/// <summary> 
 	/// Operator overload for addition of two vectors elementwise.
 	/// </summary>
-	const F_Vector operator+(const F_Vector& v1) const;
+	__host__ __device__ const F_Vector operator+(const F_Vector& v1) const;
 
 	/// <summary> 
 	/// Operator overload for subtraction of two vectors elementwise.
 	/// </summary>
-	const F_Vector operator-(const F_Vector& v1) const;
+	__host__ __device__ const F_Vector operator-(const F_Vector& v1) const;
 
 	/// <summary> 
 	/// Operator overload for multiplication of a vector by a provided float elementwise.
 	/// </summary>
-	F_Vector operator*(float num);
+	__host__ __device__ F_Vector operator*(float num);
 
 	/// <summary> 
 	/// Operator overload for multiplication of a vector by a provided unsigned int elementwise.
 	/// </summary>
-	F_Vector operator*(unsigned int num);
+	__host__ __device__ F_Vector operator*(unsigned int num);
 
 	/// <summary> 
 	/// Operator overload for returning the proper hash code for F_Vector.
@@ -54,7 +58,7 @@ struct F_Vector {
 	/// <summary> 
 	/// Operator overload for copying the data of an existing F_Vector.
 	/// </summary>
-	void operator=(const F_Vector& copy);
+	__host__ __device__ void operator=(const F_Vector& copy);
 
 	/// <summary> 
 	/// Returns an std::string of the components of F_Vector.
@@ -62,6 +66,7 @@ struct F_Vector {
 	string ToString() const;
 
 	float vx_, vy_; //Components
+	float *vx_ptr_, *vy_ptr_;
 };
 
 /// <summary> 

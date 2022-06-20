@@ -4,6 +4,10 @@ __host__ __device__ IndexPair::IndexPair(unsigned int x_in, unsigned int y_in) {
 	x = x_in;
 	y = y_in;
 }
+__host__ __device__ size_t IndexPair::IX(size_t size) const {
+	return x + (y * size);
+}
+
 
 bool IndexPair::operator==(const IndexPair& i1) const {
 	return x == i1.x && y == i1.y;

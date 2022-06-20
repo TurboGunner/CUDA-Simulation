@@ -2,24 +2,21 @@
 
 #include "cuda_runtime.h"
 
+#include "index_pair_cuda.cuh"
+
+#include "handler_methods.hpp"
+
 #include <stdexcept>
 #include <string>
 #include <iostream>
+#include <functional>
+#include <vector>
 
 using std::string;
+using std::reference_wrapper;
+using std::vector;
 
-template <typename K>
-struct HashFunc {
-    /// <summary> Default provided hashing function for this data structure. 
-    /// <para> Should be replaced depending on use-case and key input type. </para> </summary>
-    __host__ __device__ size_t operator()(const K& key, size_t size) const
-    {
-        unsigned long hash = (unsigned long)(key) % size;
-        return hash;
-    }
-};
-
-template <typename K, typename V, typename F = HashFunc<K>>
+template <typename V>
 class HashMap {
 public:
     /// <summary> The default constructor for the HashMap. </summary>
@@ -40,25 +37,39 @@ public:
 
     /// <summary> Helper method to initialize unified memory with the values and the accompanying hash map. </summary>
     __host__ __device__ void Initialization() {
-        cudaMallocManaged(&table_, (size_t)sizeof(V) * hash_table_size_);
-        cudaMallocManaged(&hashes_, (size_t)sizeof(int) * hash_table_size_);
+        cudaMalloc(&table_, (size_t)sizeof(V) * hash_table_size_);
+        cudaMalloc(&hashes_, (size_t)sizeof(int) * hash_table_size_);
+
+        table_host_ = new V[hash_table_size_];
+        hashes_host_ = new int[hash_table_size_];
+
+        for (size_t i = 0; i < hash_table_size_; i++) {
+            hashes_host_[i] = 0;
+        }
         printf("%s", "HashMap constructor instantiated!\n");
+    }
+
+    __host__ __device__ size_t hash_func_(IndexPair i1) {
+        size_t hash = i1.x + (i1.y * (sqrt(hash_table_size_)));
+        return hash;
     }
 
     /// <summary> Destructor for the HashMap implementation. </summary>
     ~HashMap() {
         cudaFree(table_);
+        free((void*) table_host_);
         cudaFree(hashes_);
+        free((void*) hashes_host_);
     }
 
     /// <summary> Allocates new HashMap pointer, new keyword overload. </summary>
     __host__ __device__ void* operator new(size_t size) {
         void* ptr;
 #ifdef __CUDA_ARCH__
+#else
         printf("%u\n", size);
 #endif
-        cudaMallocManaged(&ptr, sizeof(HashMap<K, V, HashFunc<K>>));
-        //cudaDeviceSynchronize();
+        ptr = malloc(sizeof(HashMap<V>));
         return ptr;
     }
 
@@ -73,62 +84,104 @@ public:
         if (hash > hash_table_size_) {
             return -1;
         }
+#ifdef __CUDA_ARCH__
         return hashes_[hash] - 1;
+#else
+        return hashes_host_[hash] - 1;
+#endif
     }
 
     /// <summary> Accessor method when key is an input. </summary>
-    __host__ __device__ V Get(const K& key) {
-        size_t hash = hash_func_(key, hash_table_size_);
+    __host__ __device__ V& Get(const IndexPair& key) {
+        size_t hash = hash_func_(key);
         long hash_pos = FindHash(hash);
         if (hash_pos == -1) {
-            printf("Hash: %u ", hash);
+            //printf("Hash: %u ", hash);
         }
+#ifdef __CUDA_ARCH__
         return table_[hash_pos];
-
+#else
+        return table_host_[hash_pos];
+#endif
     }
 
     /// <summary> Accessor method when an integer index is an input. </summary>
-    __host__ __device__ V Get(const int& index) {
+    __host__ __device__ V& Get(const int& index) {
 #ifdef __CUDA_ARCH__
         if (index < 0 || index >= size_) {
-            printf("%s", "Invalid Index!\n");
+            //printf("%s", "Invalid Index!\n");
         }
+        return table_[index];
 #else
-        if (index < 0 || index >= size_) {
+        if (index < 0) {
             throw std::invalid_argument("Invalid index!");
         }
+        return table_host_[index];
 #endif
-        return table_[index];
     }
 
     /// <summary> Accessor method when int index is an input. </summary>
-    __host__ void Put(const K& key, const V& value) {
-        if (hash_table_size_ - 1 == size_) {
-            printf("%zu\n", size_);
-        }
-        size_t hash = hash_func_(key, hash_table_size_);
+    __host__ __device__ void Put(const IndexPair& key, const V& value) {
+#ifdef __CUDA_ARCH__
+#else
+        size_t hash = hash_func_(key);
         long hash_pos = FindHash(hash);
-        if (hash_pos == -1 && size_ <= hash_table_size_) {
-            hashes_[hash] = size_ + 1;
 
-            table_[size_] = value;
+        if (hash_pos == -1 && size_ <= hash_table_size_) {
+            hashes_host_[hash] = size_ + 1;
+            table_host_[size_] = value;
             size_++;
+            return;
         }
-        else {
-            table_[hash_pos] = value;
-        }
+#endif
+#ifdef __CUDA_ARCH__
+        printf("%f", key.IX(sqrt(hash_table_size_)));
+         table_[key.IX(sqrt(hash_table_size_))] = value;
+#else
+        table_host_[hash_pos] = value;
+#endif
+    }
+
+    /// <summary> Accessor method when int index is an input. </summary>
+    __host__ __device__ void Put(int key, V value) {
+#ifdef __CUDA_ARCH__
+            table_[key] = value;
+#else
+            table_host_[key] = value;
+#endif
+    }
+
+    __host__ __device__ size_t Size() const {
+        return hash_table_size_;
+    }
+    void DeviceTransfer(cudaError_t& cuda_status, HashMap<V>*& src, HashMap<V>*& ptr) {
+        cuda_status = CopyFunction("DeviceTransferTable", table_, table_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(V), hash_table_size_);
+        cuda_status = CopyFunction("DeviceTransferHash", hashes_, hashes_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(int), hash_table_size_);
+        cuda_status = cudaMalloc(&ptr, sizeof(HashMap<V>));
+        cuda_status = CopyFunction("DeviceTransferObject", ptr, src, cudaMemcpyHostToDevice, cuda_status, sizeof(HashMap<V>), 1);
+        device_alloc_ = ptr;
+    }
+
+    __host__ void HostTransfer(cudaError_t& cuda_status) {
+        cuda_status = CopyFunction("HostTransferTable", table_host_, table_, cudaMemcpyDeviceToHost, cuda_status, sizeof(V), hash_table_size_);
+        cudaFree(device_alloc_);
     }
 
     /// <summary> Removes hash table value, treated as erased in the pointers logically. </summary>
-    __host__ __device__ void Remove(const K& key) {
+    __host__ __device__ void Remove(const IndexPair& key) {
         size_t hash = hash_func_(key, hash_table_size_);
-        long hash_pos = FindHash(hash);
+        unsigned long hash_pos = FindHash(hash);
         if (hash_pos == -1) {
             return;
         }
-
-        table_[hash_pos] = 0;
-        hashes_[hash] = -1;
+        int hash_pos_empty = 0, hash_empty = -1;
+#ifdef __CUDA_ARCH__
+        table_[hash_pos] = hash_pos_empty;
+        hashes_[hash] = hash_empty;
+#else
+        table_host_[hash_pos] = hash_pos_empty;
+        hashes_host_[hash] = hash_empty;
+#endif
 
         size_--;
     }
@@ -137,13 +190,13 @@ public:
     __host__ string ToString() {
         string output;
         for (size_t i = 0; i < size_; i++) {
-            output += table_[i] + "\n";
+            output += table_host_[i] + "\n";
         }
         return output;
     }
 
     /// <summary> Calls get from operator overload based on the key input. </summary>
-    __host__ __device__ V& operator[](const K& key) {
+    __host__ __device__ V& operator[](const IndexPair& key) {
         V output = Get(key);
         return output;
     }
@@ -159,19 +212,26 @@ public:
         if (table_ == src.table_) {
             return *this;
         }
-        Initialization();
-        *(table_) = *(src.table_);
+        table_ = src.table_;
+        hashes_ = src.hashes_;
         return *this;
     }
 
-    long size_ = 0;
-    size_t hash_table_size_;
-
 private:
-    V* table_;
-    int* hashes_;
-
-    F hash_func_;
+    V* table_, *table_host_;
+    int* hashes_, *hashes_host_;
 
     const size_t DEFAULT_SIZE = 10000;
+
+    HashMap<V>* device_alloc_ = nullptr;
+
+    long size_ = 0;
+    size_t hash_table_size_;
 };
+
+/**
+Notes:
+1) Maybe use a vector in order to make it dynamically resizable
+2) Maybe use this as a means to have it keep track of allocations and subsequently add more memory
+3) Maybe create table of pointers
+*/

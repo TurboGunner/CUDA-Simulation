@@ -17,6 +17,8 @@ struct IndexPair {
 	/// </summary>
 	__host__ __device__ IndexPair(unsigned int x_in, unsigned int y_in);
 
+	__host__ __device__ size_t IX(size_t size) const;
+
 	/// <summary> 
 	/// Operator overload for copying the data of an existing index pair.
 	/// </summary>

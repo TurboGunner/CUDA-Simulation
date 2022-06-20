@@ -1,18 +1,18 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash<IndexPair>>* velocity, HashMap<IndexPair, float, HashDupe<IndexPair>>* data, HashMap<IndexPair, float, HashDupe<IndexPair>>* data_prev, unsigned int length, unsigned int iter, int bounds) {
+__global__ void ProjectKernel(HashMap<F_Vector>* velocity, HashMap<F_Vector>* velocity_output, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, unsigned int iter, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
-	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
+	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) { 
 		IndexPair incident(y_bounds, x_bounds);
-		(*data)[incident] =
-			((*velocity)[incident.Right()].vx_
-				- (*velocity)[incident.Left()].vx_
-				+ (*velocity)[incident.Up()].vy_
-				- (*velocity)[incident.Down()].vy_
+		data->Get(incident.IX(length)) =
+			(velocity->Get(incident.Right().IX(length)).vx_
+				- velocity->Get(incident.Left().IX(length)).vx_
+				+ velocity->Get(incident.Up().IX(length)).vy_
+				- velocity->Get(incident.Down().IX(length)).vy_
 				* -0.5f) * (1.0f / length);
-		(*data_prev)[incident] = 0;
+		data_prev->Get(incident.IX(length)) = 0;
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
 		BoundaryConditions(0, data, length);
@@ -22,17 +22,25 @@ __global__ void ProjectKernel(HashMap<IndexPair, F_Vector, Hash<IndexPair>>* vel
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		IndexPair incident(y_bounds, x_bounds);
-		(*velocity)[incident].vx_ -= 0.5f
-			* ((*data_prev)[incident.Right()]
-			- (*data_prev)[incident.Left()])
-			* length;
-		(*velocity)[incident].vy_ -= 0.5f
-			* ((*data_prev)[incident.Up()]
-			- (*data_prev)[incident.Down()])
-			* length;
+		float compute_x = velocity->Get(incident.IX(length)).vx_ - (-0.5f *
+			(data_prev->Get(incident.Right().IX(length))
+			- data_prev->Get(incident.Left().IX(length))) 
+			* length);
+
+		float compute_y = velocity->Get(incident.IX(length)).vy_ - (-0.5f * 
+			(data_prev->Get(incident.Up().IX(length))
+			- data_prev->Get(incident.Down().IX(length))) 
+			* length);
+		velocity_output->Put(incident.IX(length), F_Vector(velocity->Get(incident.IX(length)).vx_ - (-0.5f *
+			(data_prev->Get(incident.Right().IX(length))
+				- data_prev->Get(incident.Left().IX(length)))
+			* length), velocity->Get(incident.IX(length)).vy_ - (-0.5f *
+				(data_prev->Get(incident.Up().IX(length))
+					- data_prev->Get(incident.Down().IX(length)))
+				* length)));
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
-		BoundaryConditions(bounds, velocity, length);
+		BoundaryConditions(bounds, velocity_output, length);
 	}
 }
 
@@ -50,12 +58,28 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	velocity_prev.DataConstrained(Axis::X, v_prev_x);
 	velocity_prev.DataConstrained(Axis::Y, v_prev_y);
 
-	ProjectKernel<<<blocks, threads>>> (velocity.GetVectorMap(), v_prev_x.map_, v_prev_y.map_, length, iter, bounds);
+	HashMap<F_Vector>* v_map = nullptr, *v_output = nullptr;
+	HashMap<float>* x_map = nullptr, *y_map = nullptr;
+	velocity.GetVectorMap()->DeviceTransfer(cuda_status, velocity.GetVectorMap(), v_map);
+	v_prev_x.map_->DeviceTransfer(cuda_status, v_prev_x.map_, x_map);
+	v_prev_y.map_->DeviceTransfer(cuda_status, v_prev_y.map_, y_map);
+
+	HashMap<F_Vector>* v_temp_output = new HashMap<F_Vector>(alloc_size);
+	v_temp_output->DeviceTransfer(cuda_status, v_temp_output, v_output);
+
+	ProjectKernel<<<blocks, threads>>> (v_map, v_output, x_map, y_map, length, iter, bounds);
 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
+
+	handler.PostExecutionChecks(cuda_status);
+
+	v_temp_output->HostTransfer(cuda_status);
+	v_prev_x.map_->HostTransfer(cuda_status);
+	v_prev_y.map_->HostTransfer(cuda_status);
+	velocity.GetVectorMap() = v_temp_output;
 
 	velocity_prev.RepackFromConstrained(v_prev_x);
 	velocity_prev.RepackFromConstrained(v_prev_y);
 
-	handler.PostExecutionChecks(cuda_status);
+	//std::cout << velocity.ToString() << std::endl;
 }

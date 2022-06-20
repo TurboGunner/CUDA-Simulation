@@ -1,8 +1,8 @@
-#include "f_vector.hpp"
+#include "f_vector_cuda.cuh"
 
 #include <math.h>
 
-F_Vector::F_Vector(float x_in, float y_in) { //Loaded Constructor
+__host__ __device__ F_Vector::F_Vector(float x_in, float y_in) { //Loaded Constructor
 	vx_ = x_in;
 	vy_ = y_in;
 }
@@ -22,27 +22,27 @@ bool F_Vector::operator==(const F_Vector& v1) const {
 }
 
 
-const F_Vector F_Vector::operator+(const F_Vector& v1) const {
+__host__ __device__ const F_Vector F_Vector::operator+(const F_Vector& v1) const {
 	F_Vector output = *this;
 	output.vx_ += v1.vx_;
 	output.vy_ += v1.vy_;
 	return output;
 }
 
-const F_Vector F_Vector::operator-(const F_Vector& v1) const {
+__host__ __device__ const F_Vector F_Vector::operator-(const F_Vector& v1) const {
 	F_Vector output = *this;
 	output.vx_ -= v1.vx_;
 	output.vy_ -= v1.vy_;
 	return output;
 }
 
-F_Vector F_Vector::operator*(float num) {
+__host__ __device__ F_Vector F_Vector::operator*(float num) {
 	vx_ *= num;
 	vy_ *= num;
 	return *this;
 }
 
-F_Vector F_Vector::operator*(unsigned int num) {
+__host__ __device__ F_Vector F_Vector::operator*(unsigned int num) {
 	vx_ *= num;
 	vy_ *= num;
 	return *this;
@@ -54,7 +54,7 @@ size_t F_Vector::operator()(const F_Vector& v1) const noexcept {
 	return hash1 ^ (hash2 << 1);
 }
 
-void F_Vector::operator=(const F_Vector& copy) {
+__host__ __device__ void F_Vector::operator=(const F_Vector& copy) {
 	vx_ = copy.vx_;
 	vy_ = copy.vy_;
 }
