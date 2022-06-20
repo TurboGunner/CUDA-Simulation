@@ -88,7 +88,6 @@ void VectorField::DataConstrained(Axis axis, AxisData& input) {
 			input.map_->Put(current.IX(size), current_float);
 		}
 	}
-	std::cout << "Axis constrained!" << std::endl;
 }
 
 void VectorField::RepackFromConstrained(AxisData& axis) {

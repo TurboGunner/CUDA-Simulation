@@ -83,8 +83,6 @@ void FluidSim::Simulate() {
 		velocity_.RepackFromConstrained(v_y);
 		velocity_prev_.RepackFromConstrained(v_prev_y);
 
-		//std::cout << velocity_.ToString() << std::endl;
-
 		Project(velocity_prev_, velocity_);
 
 		velocity_.DataConstrained(Axis::X, v_x);
@@ -102,10 +100,7 @@ void FluidSim::Simulate() {
 		vdb_handler.sim_ = *this;
 
 		vdb_handler.WriteFile();
-
 	}
-
-	//std::cout << simulation.velocity_.ToString() << std::endl;
 }
 
 void FluidSim::operator=(const FluidSim& copy) {

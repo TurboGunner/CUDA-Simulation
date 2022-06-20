@@ -68,7 +68,7 @@ void OpenVDBHandler::WriteFile() {
 
 	file.write(grid_vec);
 	file.close();
-	//FreeFieldPointers(grid_vec);
+	FreeFieldPointers(grid_vec);
 }
 
 void OpenVDBHandler::FreeFieldPointers(openvdb::GridPtrVec grid_vec) {

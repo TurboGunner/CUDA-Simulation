@@ -31,7 +31,6 @@ public:
             printf("%s\n", "The input size for the hash table should be at least 1!");
         }
         hash_table_size_ = hash_table_size;
-        printf("%zu\n", hash_table_size_);
         Initialization();
     }
 
@@ -46,7 +45,6 @@ public:
         for (size_t i = 0; i < hash_table_size_; i++) {
             hashes_host_[i] = 0;
         }
-        printf("%s", "HashMap constructor instantiated!\n");
     }
 
     __host__ __device__ size_t hash_func_(IndexPair i1) {
@@ -65,10 +63,6 @@ public:
     /// <summary> Allocates new HashMap pointer, new keyword overload. </summary>
     __host__ __device__ void* operator new(size_t size) {
         void* ptr;
-#ifdef __CUDA_ARCH__
-#else
-        printf("%u\n", size);
-#endif
         ptr = malloc(sizeof(HashMap<V>));
         return ptr;
     }
@@ -95,9 +89,6 @@ public:
     __host__ __device__ V& Get(const IndexPair& key) {
         size_t hash = hash_func_(key);
         long hash_pos = FindHash(hash);
-        if (hash_pos == -1) {
-            //printf("Hash: %u ", hash);
-        }
 #ifdef __CUDA_ARCH__
         return table_[hash_pos];
 #else
@@ -108,9 +99,6 @@ public:
     /// <summary> Accessor method when an integer index is an input. </summary>
     __host__ __device__ V& Get(const int& index) {
 #ifdef __CUDA_ARCH__
-        if (index < 0 || index >= size_) {
-            //printf("%s", "Invalid Index!\n");
-        }
         return table_[index];
 #else
         if (index < 0) {

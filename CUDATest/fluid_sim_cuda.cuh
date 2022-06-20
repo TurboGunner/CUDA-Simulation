@@ -31,3 +31,22 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 __global__ void ProjectKernel(HashMap<F_Vector>* velocity, HashMap<F_Vector>* velocity_output, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, unsigned int iter, int bounds);
 
 void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const unsigned int& length, const unsigned int& iter);
+
+extern __device__ IndexPair* index_ptr;
+
+inline void IndexAllocator(int size) {
+	const unsigned int alloc_size = size * size;
+	IndexPair* host_ptr = new IndexPair[alloc_size];
+
+	cudaMalloc(&index_ptr, alloc_size * sizeof(IndexPair));
+
+	unsigned int y_current = 0;
+	for (y_current; y_current < size; y_current++) {
+		for (unsigned int i = 0; i < size; i++) {
+			IndexPair current(i, y_current);
+			host_ptr[current.IX(size)] = current;
+		}
+	}
+	cudaError_t cuda_status = cudaSuccess;
+	cuda_status = CopyFunction("CachedIndexPair", index_ptr, host_ptr, cudaMemcpyHostToDevice, cuda_status, alloc_size, sizeof(IndexPair));
+}
