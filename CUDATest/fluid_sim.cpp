@@ -94,8 +94,9 @@ void FluidSim::Simulate() {
 		Advect(2, v_y, v_prev_y, velocity_);
 
 		Project(velocity_, velocity_prev_);
+
 		Diffuse(0, diffusion_, density_prev_, density_);
-		Advect(0, density_prev_, density_, velocity_);
+		Advect(0, density_, density_prev_, velocity_);
 
 		vdb_handler.sim_ = *this;
 

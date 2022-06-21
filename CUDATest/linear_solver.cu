@@ -33,8 +33,6 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 	current.map_->DeviceTransfer(cuda_status, current.map_, c_map);
 	previous.map_->DeviceTransfer(cuda_status, previous.map_, p_map);
 
-	std::cout << c_map << std::endl;
-
 	LinearSolverKernel<<<blocks, threads>>> (c_map, p_map, a_fac, c_fac, length, iter, bounds);
 
 	PostExecutionChecks(cuda_status, "ProjectCudaKernel");

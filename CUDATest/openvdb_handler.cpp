@@ -53,7 +53,7 @@ void OpenVDBHandler::LoadData() {
 			xyz.reset(i, y_current, 0);
 			accessors.at(0).setValue(xyz, (*velocity.GetVectorMap())[current.IX(sim_.size_x_)].vx_);
 			accessors.at(1).setValue(xyz, (*velocity.GetVectorMap())[current.IX(sim_.size_y_)].vy_);
-			accessors.at(2).setValue(xyz, density.map_->Get(current));
+			accessors.at(2).setValue(xyz, density.map_->Get(current.IX(sim_.size_y_)));
 		}
 	}
 	//std::cout << velocity.ToString() << std::endl;

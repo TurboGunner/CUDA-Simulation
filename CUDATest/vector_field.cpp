@@ -41,7 +41,6 @@ set<F_Vector> VectorField::LoadDefaultVectorSet() {
 		for (unsigned int i = 0; i < size_x_; i++) {
 			IndexPair pair(i, y_current);
 			map_->Put(pair, RandomVector());
-			//std::cout << (y_current * size_y_) + i << std::endl;
 		}
 	}
 	return output;
@@ -102,8 +101,6 @@ void VectorField::RepackFromConstrained(AxisData& axis) {
 			else {
 				map_->Get(current.IX(size)).vy_ = axis.map_->Get(current.IX(size));
 			}
-			//std::cout << current.ToString() << std::endl;
 		}
 	}
-	//std::cout << "Last element!" << std::endl;
 }

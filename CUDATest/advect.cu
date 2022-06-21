@@ -21,7 +21,7 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 		if (x_value > length + 0.5f) {
 			x_value = length + 0.5f;
 		}
-		x_current = x_value;
+		x_current = floor(x_value);
 		x_previous = x_current + 1.0f;
 		if (y_value < 0.5f) {
 			y_value = 0.5f;
@@ -29,7 +29,7 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 		if (y_value > length + 0.5f) {
 			y_value = length + 0.5f;
 		}
-		y_current = y_value;
+		y_current = floor(y_value);
 		y_previous = y_current + 1.0f;
 
 		velocity_x_prev = x_value - x_current;
@@ -37,11 +37,11 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 		velocity_y_prev = y_value - y_current;
 		velocity_y_curr = 1.0f - velocity_y_prev;
 
-		(*data)[IndexPair(x_current, y_current).IX(length)] =
-			(((*data_prev)[IndexPair(x_current, y_current).IX(length)] * velocity_y_curr) +
-				((*data_prev)[IndexPair(x_current, y_previous).IX(length)] * velocity_y_prev) * velocity_x_curr) +
-			(((*data_prev)[IndexPair(x_previous, y_current).IX(length)] * velocity_y_curr) +
-				((*data_prev)[IndexPair(x_previous, y_previous).IX(length)] * velocity_y_prev) * velocity_x_prev);
+		(*data)[IndexPair(y_bounds, x_bounds).IX(length)] =
+			velocity_x_curr * (((*data_prev)[IndexPair(x_current, y_current).IX(length)] * velocity_y_curr) +
+				((*data_prev)[IndexPair(x_current, y_previous).IX(length)] * velocity_y_prev)) +
+			velocity_x_prev * (((*data_prev)[IndexPair(x_previous, y_current).IX(length)] * velocity_y_curr) +
+				((*data_prev)[IndexPair(x_previous, y_previous).IX(length)] * velocity_y_prev));
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
 		BoundaryConditions(bounds, data, length);
