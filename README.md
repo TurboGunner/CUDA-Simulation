@@ -4,9 +4,9 @@
 
 A work in process program for the simulation of fluids via NVIDIA's CUDA.
 
-Written in a mixture of CUDA C and standard C++ using the MSBuild compiler.
+Written in a mixture of CUDA C/C++ and standard C++ using the MSBuild compiler.
 
-Data structures are handled via custom implementations, and file structures are handled via the OpenVDB library created by Dreamworks Animation.
+Data structures are handled via custom implementations, and file exports are handled via the OpenVDB library created by Dreamworks Animation.
 
 Uses a mixture of OOP, some functional patterns, and helper methods in order to reduce CUDA boilerplate with memory alloc/dealloc calls on GPU/system memory, as well as copying to and from GPU and system memory.
 
@@ -15,48 +15,37 @@ Uses a mixture of OOP, some functional patterns, and helper methods in order to 
 All relevant CUDA helper methods are contained within handler_methods.hpp/cpp.
 > This is where the helper method that contains logic for wrapping common calls that each global kernel function indirectly or directly handles.
 
-The helper class for managing allocation, deallocation, and copying of memory is located within handler_wrapper.hpp/cpp.
-> This class makes many calls to handler_methods.cpp, and allows for more standard handling of the call as an object (i.e. with a proper destructor freeing both GPU and system memory at once).
-
-Any relevant device functions (methods that are called from the GPU/from global kernel functions) are defined inline in cuda_sim_helpers.cuh.
-> This includes calls within the global function for linear solving; as happens in projection.
-
 ## Data Structures
 
-The primary data is stored within a VectorField; defined in vector_field.hpp/cpp.
-> The data member that is contained is a (hash) map, where the structure is:
-
-```c++
-HashMap<IndexPair, F_Vector, Hash<IndexPair>> map_;
-```
-
-> Where the key is a struct called IndexPair, the value is F_Vector, and the passed in struct that contains the hash function logic is called Hash.
-
-THe VectorField data structure can be split into its constituent axes via the implementation of axis_data.hpp/cpp.
+The VectorField data structure can be split into its constituent axes via the implementation of axis_data.hpp/cpp.
 >It stores data in a hash map, where it stores a uni-dimensional float as the value. Also used in density; where the quantity is scalar.
 
 ```c++
-HashMap<IndexPair, float, HashDupe<IndexPair>> map_;
+HashMap<float>* map_;
 ```
 
-> Where the key is a struct called IndexPair, the value is a float primitive, and the passed in struct that contains the hash function logic is called HashDupe.
+> Where the key is the struct ndexPair, the value is a float primitive, and the passed in struct that contains the hash function logic is called HashDupe.
+
+The multi-axis data (velocity) is stored within a VectorField; defined in vector_field.hpp/cpp.
+> The data member that is contained is a pointer array of AxisData objects, where the structure is:
+
+```c++
+AxisData* map_;
+```
 
 IndexPair is a struct that is defined in index_pair.hpp/cpp.
-> It stores a coordinate system (x, y) stored as unsigned integers; and this allows for the ordered retrieval of F_Vector values while maintaining O(1) access times and lower cache utilization compared to an ordered map implementation.
+> It stores a coordinate system (x, y) stored as unsigned integers; and this allows for the ordered retrieval of axis corresponding float values while maintaining O(1) access times and lower cache utilization compared to an ordered map implementation.
 
-F_Vector is a struct that is defined in f_vector.hpp/cpp.
-> It stores the components (x, y) as floats, and this allows for the storing of multi-dimensional data as one struct. Also has methods for calculating magnitude with the provided data members.
+HashMap is a custom CUDA map implementation created in order to solve the issue of poor interopability with previous (un)abstracted code for the original data management implementation, as well as the amount of safeguards and additional code required to accomodate for the unpacking of VectorField and DataAxis to a float pointer, and the repacking back into the data structure.
 
-HashMap is a custom CUDA map implementation created in order to solve the issue of poor interopability with previous abstracted code for the original CPU implementation, as well as the amount of safeguards and additional code required to accomodate for the unpacking of VectorField and DataAxis to a float pointer, and the repacking back into the data structure.
+It works in a standard host-device scheme- but differs as it is able to be accessed seamlessly by either device or host due to the setup of the data structure. This allows for memory to be accessed interchangably between the host and the device, and to eliminate the necessity for excessively bloated memory copy and allocation abstraction for the data structures; which significantly simplifies the process for which data management is done in both system and GPU contexts.
 
-It works in a hybridized (managed) scheme, and has the required C++ object overloads to work properly with CUDADeviceReset. This allows for memory to be accessed interchangably between the host and the device, and to eliminate the necessity for memory copy and allocation abstraction for the data structures; which significantly simplifies the process for which data management is done in both system and GPU contexts.
-
->Specific GitHub Page Here: https://github.com/TurboGunner/CUDAMap
+>Specific GitHub Page Here: https://github.com/TurboGunner/CUDAMap (this served as the basis for the original plan to use a hybridized scheme, but that was scrapped due to the inherent lack of support of asynchronous page migration required to make the unified memory viable performance wise except on Linux).
 
 ## Fluid Simulation Implementation
 
 A central struct called FluidSim; contained within fluid_sim.hpp/cpp holds the driving logic and handling of the fluid simulation.
->Velocity and the previous velocity are stored as VectorField structs.
+>Velocity and the previous velocity are stored as VectorField structs; which holds an AxisData struct for each axis.
 >Density and the previous density are stored as AxisData structs.
 >The constructor for FluidSim takes in these parameters:
 
@@ -82,6 +71,6 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 
 Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
 
-Strip back CUDA abstraction due to the new usage of hybridized memory in CUDA.
+Move to 3D from 2D Navier-Stokes.
 
-Add a marker to axis_data.hpp/cpp to allow for the potential needed triggered destruction of the HashMap pointer if it is copied from a temporary source such as an intermediate from velocity.
+Further optimize memory allocation and usage via possible device pointers for the respective data structures for the fluid simulation.
