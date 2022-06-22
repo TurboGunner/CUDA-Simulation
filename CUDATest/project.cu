@@ -52,14 +52,10 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	HashMap<float>* v_map_x = nullptr, *v_map_y = nullptr,
-		* x_map = nullptr, *y_map = nullptr;
-
-	velocity.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[0].map_, v_map_x);
-	velocity.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[1].map_, v_map_y);
-
-	velocity_prev.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity_prev.GetVectorMap()[0].map_, x_map);
-	velocity_prev.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity_prev.GetVectorMap()[1].map_, y_map);
+	HashMap<float>* v_map_x = velocity.GetVectorMap()[0].map_->device_alloc_,
+		*v_map_y = velocity.GetVectorMap()[1].map_->device_alloc_,
+		*x_map = velocity_prev.GetVectorMap()[0].map_->device_alloc_,
+		*y_map = velocity_prev.GetVectorMap()[1].map_->device_alloc_;
 
 	ProjectKernel<<<blocks, threads>>> (v_map_x, v_map_y, y_map, x_map, length, bounds);
 	LinearSolverKernel<<<blocks, threads>>> (y_map, x_map, 1, 4, length, iter, bounds);
@@ -68,10 +64,4 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
 
 	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
-
-	velocity.GetVectorMap()[0].map_->HostTransfer(cuda_status);
-	velocity.GetVectorMap()[1].map_->HostTransfer(cuda_status);
-
-	velocity.GetVectorMap()[0].map_->HostTransfer(cuda_status);
-	velocity_prev.GetVectorMap()[1].map_->HostTransfer(cuda_status);
 }

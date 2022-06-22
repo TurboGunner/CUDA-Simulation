@@ -28,17 +28,12 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	HashMap<float>* c_map = nullptr, *p_map = nullptr;
-
-	current.map_->DeviceTransfer(cuda_status, current.map_, c_map);
-	previous.map_->DeviceTransfer(cuda_status, previous.map_, p_map);
+	HashMap<float>* c_map = current.map_->device_alloc_,
+		*p_map = previous.map_->device_alloc_;
 
 	LinearSolverKernel<<<blocks, threads>>> (c_map, p_map, a_fac, c_fac, length, iter, bounds);
 
 	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
 
 	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel");
-
-	current.map_->HostTransfer(cuda_status);
-	previous.map_->HostTransfer(cuda_status);
 }

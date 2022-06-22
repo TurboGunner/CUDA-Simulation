@@ -56,22 +56,14 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	HashMap<float>* v_map_x = nullptr, *v_map_y = nullptr,
-		*c_map = nullptr, *p_map = nullptr;
-
-	velocity.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[0].map_, v_map_x);
-	velocity.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[1].map_, v_map_y);
-	current.map_->DeviceTransfer(cuda_status, current.map_, c_map);
-	previous.map_->DeviceTransfer(cuda_status, previous.map_, p_map);
+	HashMap<float>* v_map_x = velocity.GetVectorMap()[0].map_->device_alloc_,
+		*v_map_y = velocity.GetVectorMap()[1].map_->device_alloc_,
+		*c_map = current.map_->device_alloc_,
+		*p_map = previous.map_->device_alloc_;
 
 	std::cout << "bidoof" << std::endl;
 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, dt, length, bounds);
 
 	PostExecutionChecks(cuda_status, "AdvectCudaKernel");
-
-	velocity.GetVectorMap()[0].map_->HostTransfer(cuda_status);
-	velocity.GetVectorMap()[1].map_->HostTransfer(cuda_status);
-	current.map_->HostTransfer(cuda_status);
-	previous.map_->HostTransfer(cuda_status);
 }

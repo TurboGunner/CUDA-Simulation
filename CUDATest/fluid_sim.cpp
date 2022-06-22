@@ -26,10 +26,16 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
-	density_.map_->Put(pair, amount);;
+	if (pair.x >= size_x_ || pair.y >= size_y_) {
+		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
+	}
+	density_.map_->Put(pair, amount);
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
+	if (pair.x >= size_x_ || pair.y >= size_y_) {
+		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
+	}
 	velocity_.GetVectorMap()[0].map_->Put(pair, x);
 	velocity_.GetVectorMap()[1].map_->Put(pair, y);
 }
@@ -61,8 +67,9 @@ void FluidSim::Simulate() {
 	AddDensity(IndexPair(2, 2), 100.0f);
 	AddDensity(IndexPair(35, 35), 100.0f);
 
-	cudaError_t cuda_status = cudaSuccess;
 	OpenVDBHandler vdb_handler(*this);
+
+	AllocateDeviceData();
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!
 
@@ -79,10 +86,38 @@ void FluidSim::Simulate() {
 		Diffuse(0, diffusion_, density_prev_, density_);
 		Advect(0, density_, density_prev_, velocity_);
 
-		vdb_handler.sim_ = *this;
+		//vdb_handler.sim_ = *this;
+
+		ReallocateHostData();
 
 		vdb_handler.WriteFile();
 	}
+}
+
+void FluidSim::AllocateDeviceData() {
+	HashMap<float>* d_map = nullptr, *d_prev_map = nullptr,
+		*v_map_x = nullptr, *v_map_y = nullptr,
+		*v_prev_map_x = nullptr, *v_prev_map_y = nullptr;
+
+	density_.map_->DeviceTransfer(cuda_status, density_.map_, d_map);
+	density_prev_.map_->DeviceTransfer(cuda_status, density_prev_.map_, d_prev_map);
+
+	velocity_.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity_.GetVectorMap()[0].map_, v_map_x);
+	velocity_.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity_.GetVectorMap()[1].map_, v_map_y);
+
+	velocity_prev_.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity_prev_.GetVectorMap()[0].map_, v_prev_map_x);
+	velocity_prev_.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity_prev_.GetVectorMap()[1].map_, v_prev_map_y);
+}
+
+void FluidSim::ReallocateHostData() {
+	density_.map_->HostTransfer(cuda_status);
+	density_prev_.map_->HostTransfer(cuda_status);
+
+	velocity_.GetVectorMap()[0].map_->HostTransfer(cuda_status);
+	velocity_.GetVectorMap()[1].map_->HostTransfer(cuda_status);
+
+	velocity_.GetVectorMap()[0].map_->HostTransfer(cuda_status);
+	velocity_prev_.GetVectorMap()[1].map_->HostTransfer(cuda_status);
 }
 
 void FluidSim::operator=(const FluidSim& copy) {

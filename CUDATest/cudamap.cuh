@@ -9,12 +9,8 @@
 #include <stdexcept>
 #include <string>
 #include <iostream>
-#include <functional>
-#include <vector>
 
 using std::string;
-using std::reference_wrapper;
-using std::vector;
 
 template <typename V>
 class HashMap {
@@ -36,8 +32,8 @@ public:
 
     /// <summary> Helper method to initialize unified memory with the values and the accompanying hash map. </summary>
     __host__ __device__ void Initialization() {
-        cudaMalloc(&table_, (size_t)sizeof(V) * hash_table_size_);
-        cudaMalloc(&hashes_, (size_t)sizeof(int) * hash_table_size_);
+        cudaMalloc(&table_, (size_t) sizeof(V) * hash_table_size_);
+        cudaMalloc(&hashes_, (size_t) sizeof(int) * hash_table_size_);
 
         table_host_ = new V[hash_table_size_];
         hashes_host_ = new int[hash_table_size_];
@@ -139,10 +135,7 @@ public:
 #endif
     }
 
-    __host__ __device__ size_t Size() const {
-        return hash_table_size_;
-    }
-
+    /// <summary> Device Transfer method, uses a toggle boolean to ensure that the device pointer equivalent is only allocated once. </summary
     void DeviceTransfer(cudaError_t& cuda_status, HashMap<V>*& src, HashMap<V>*& ptr) {
         cuda_status = CopyFunction("DeviceTransferTable", table_, table_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(V), hash_table_size_);
         cuda_status = CopyFunction("DeviceTransferHash", hashes_, hashes_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(int), hash_table_size_);
@@ -211,11 +204,11 @@ public:
         return *this;
     }
 
+    HashMap<V>* device_alloc_ = nullptr;
+
 private:
     V* table_, *table_host_;
     int* hashes_, *hashes_host_;
-
-    HashMap<V>* device_alloc_ = nullptr;
 
     long size_ = 0;
     size_t hash_table_size_;

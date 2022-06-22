@@ -29,3 +29,19 @@ bool IndexPair::operator<(const IndexPair& i1) const {
 string IndexPair::ToString() const {
 	return "X Component: " + std::to_string(x) + " | Y Component: " + std::to_string(y);
 }
+
+__host__ __device__ IndexPair IndexPair::Left() {
+	return IndexPair(x - 1, y);
+}
+
+__host__ __device__ IndexPair IndexPair::Right() {
+	return IndexPair(x + 1, y);
+}
+
+__host__ __device__ IndexPair IndexPair::Up() {
+	return IndexPair(x, y + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::Down() {
+	return IndexPair(x, y - 1);
+}

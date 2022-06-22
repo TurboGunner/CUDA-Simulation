@@ -70,7 +70,7 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
 }
 
 void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block) {
-    unsigned int threads_per_dim = (int)sqrt(threads_per_block);
+    unsigned int threads_per_dim = (int) sqrt(threads_per_block);
     unsigned int block_count = ((length + threads_per_dim) - 1) / (threads_per_dim);
 
     threads = dim3(threads_per_dim, threads_per_dim);

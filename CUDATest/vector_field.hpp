@@ -13,24 +13,16 @@ using std::string;
 class VectorField {
 	public:
 		VectorField() = default;
-		/// <summary> 
-		/// Default constructor. Has defaults for all dimension sizes as 1.
-		/// </summary>
+		/// <summary> Default constructor. Has defaults for all dimension sizes as 1. </summary>
 		VectorField(unsigned int x, unsigned int y);
 
-		/// <summary> 
-		/// Gets a reference of the vector field map that contains the data.
-		/// </summary>
+		/// <summary> Gets a reference of the vector field map that contains the data. </summary>
 		AxisData*& GetVectorMap();
 
-		/// <summary> 
-		/// Operator overload for copying the data of an existing vector field.
-		/// </summary>
+		/// <summary> Operator overload for copying the data of an existing vector field. </summary>
 		void operator=(const VectorField& copy);
 
-		/// <summary> 
-		/// Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct.
-		/// </summary>
+		/// <summary> Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct. </summary>
 		string ToString();
 
 	private:
