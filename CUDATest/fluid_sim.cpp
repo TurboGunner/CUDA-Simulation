@@ -21,8 +21,8 @@ FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, 
 	velocity_ = VectorField(size_x, size_y);
 	velocity_prev_ = VectorField(size_x, size_y);
 
-	density_ = AxisData(size_x);
-	density_prev_ = AxisData(size_x);
+	density_ = AxisData(size_x, size_x);
+	density_prev_ = AxisData(size_x, size_y);
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
@@ -37,11 +37,6 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
 	float a = dt_ * visc * (size_x_ - 2) * (size_x_ - 2);
 
-	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
-}
-
-void FluidSim::DiffuseDensity(int bounds, float diff, AxisData& current, AxisData& previous) {
-	float a = dt_ * diff * (size_x_ - 2) * (size_x_ - 2);
 	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
 }
 

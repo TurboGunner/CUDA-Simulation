@@ -57,6 +57,7 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 
 	velocity.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[0].map_, v_map_x);
 	velocity.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[1].map_, v_map_y);
+
 	velocity_prev.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity_prev.GetVectorMap()[0].map_, x_map);
 	velocity_prev.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity_prev.GetVectorMap()[1].map_, y_map);
 

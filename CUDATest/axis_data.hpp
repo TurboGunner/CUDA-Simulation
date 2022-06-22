@@ -9,7 +9,7 @@ enum class Axis { X, Y, Z };
 struct AxisData {
 	AxisData() = default;
 	AxisData(Axis axis);
-	AxisData(unsigned int size, Axis axis = Axis::X); //For density
+	AxisData(unsigned int size_x, unsigned int size_y, Axis axis = Axis::X); //For density
 
 	void LoadDefaultDataSet();
 
@@ -20,5 +20,5 @@ struct AxisData {
 	Axis axis_;
 	HashMap<float>* map_;
 
-	unsigned int size_;
+	unsigned int size_x_, size_y_;
 };

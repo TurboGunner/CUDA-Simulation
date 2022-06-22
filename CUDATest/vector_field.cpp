@@ -20,7 +20,7 @@ VectorField::VectorField(unsigned int x, unsigned int y) {
 	size_x_ = x;
 	size_y_ = y;
 	map_ = new AxisData[2];
-	AxisData axis_x(size_x_, Axis::X), axis_y(size_y_, Axis::Y);
+	AxisData axis_x(size_x_, size_y_, Axis::X), axis_y(size_x_, size_y_, Axis::Y);
 	map_[0] = axis_x;
 	map_[1] = axis_y;
 	LoadDefaultVectorSet();
@@ -39,10 +39,9 @@ void VectorField::LoadDefaultVectorSet() {
 
 string VectorField::ToString() {
 	string output;
-	unsigned int size = size_x_;
 	unsigned int y_current = 0;
-	for (y_current; y_current < size; y_current++) {
-		for (unsigned int i = 0; i < size; i++) {
+	for (y_current; y_current < size_y_; y_current++) {
+		for (unsigned int i = 0; i < size_x_; i++) {
 			IndexPair current(i, y_current);
 			output += current.ToString() + "\n" + 
 				std::to_string(map_[0].map_->Get(current.IX(size))) 

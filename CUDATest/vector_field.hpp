@@ -15,7 +15,7 @@ class VectorField {
 		/// <summary> 
 		/// Default constructor. Has defaults for all dimension sizes as 1.
 		/// </summary>
-		VectorField(unsigned int x = 1, unsigned int y = 1);
+		VectorField(unsigned int x, unsigned int y);
 
 		/// <summary> 
 		/// Gets a reference of the vector field map that contains the data.

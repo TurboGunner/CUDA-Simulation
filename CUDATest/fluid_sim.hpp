@@ -15,7 +15,6 @@ struct FluidSim {
 	void AddVelocity(IndexPair pair, float x, float y);
 
 	void Diffuse(int bounds, float visc, AxisData& current, AxisData& previous);
-	void DiffuseDensity(int bounds, float diff, AxisData& current, AxisData& previous);
 
 	void Project(VectorField& v_current, VectorField& v_previous);
 	void Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity);
