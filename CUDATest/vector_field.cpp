@@ -44,9 +44,9 @@ string VectorField::ToString() {
 		for (unsigned int i = 0; i < size_x_; i++) {
 			IndexPair current(i, y_current);
 			output += current.ToString() + "\n" + 
-				std::to_string(map_[0].map_->Get(current.IX(size))) 
+				std::to_string(map_[0].map_->Get(current.IX(size_x_))) 
 				+ " | "
-				+ std::to_string(map_[1].map_->Get(current.IX(size))) 
+				+ std::to_string(map_[1].map_->Get(current.IX(size_y_))) 
 				+ "\n\n";
 		}
 	}

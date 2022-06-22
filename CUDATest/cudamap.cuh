@@ -142,11 +142,12 @@ public:
     __host__ __device__ size_t Size() const {
         return hash_table_size_;
     }
-    void DeviceTransfer(cudaError_t& cuda_status, HashMap<V>*& src, HashMap<V>*& ptr, bool alloc_source = true) {
+    void DeviceTransfer(cudaError_t& cuda_status, HashMap<V>*& src, HashMap<V>*& ptr) {
         cuda_status = CopyFunction("DeviceTransferTable", table_, table_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(V), hash_table_size_);
         cuda_status = CopyFunction("DeviceTransferHash", hashes_, hashes_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(int), hash_table_size_);
-        if (alloc_source) {
+        if (!device_allocated_status) {
             cuda_status = cudaMalloc(&ptr, sizeof(HashMap<V>));
+            device_allocated_status = true;
         }
         cuda_status = CopyFunction("DeviceTransferObject", ptr, src, cudaMemcpyHostToDevice, cuda_status, sizeof(HashMap<V>), 1);
         device_alloc_ = ptr;
@@ -210,17 +211,12 @@ private:
     V* table_, *table_host_;
     int* hashes_, *hashes_host_;
 
-    const size_t DEFAULT_SIZE = 10000;
-
     HashMap<V>* device_alloc_ = nullptr;
 
     long size_ = 0;
     size_t hash_table_size_;
-};
 
-/**
-Notes:
-1) Maybe use a vector in order to make it dynamically resizable
-2) Maybe use this as a means to have it keep track of allocations and subsequently add more memory
-3) Maybe create table of pointers
-*/
+    const size_t DEFAULT_SIZE = 10000;
+
+    bool device_allocated_status = false; //Ensures that the device pointer equivalent is only allocated once
+};

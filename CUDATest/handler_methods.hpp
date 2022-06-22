@@ -33,23 +33,17 @@ void CudaMemoryFreer(vector<reference_wrapper<T*>>& ptrs);
 void MemoryFreer(void* ptrs[], size_t element_alloc);
 
 /// <summary> 
-/// Polymorphism, frees a referenced std::vector of referenced wrapped float pointers in system memory.
+/// Polymorphism, frees a referenced std::vector of referenced wrapped type generic pointers in system memory.
 /// </summary>
 template <typename T>
 void MemoryFreer(vector<reference_wrapper<T*>>& ptrs);
 
 /// <summary> 
-/// Allocates memory to a referenced std::vector of referenced wrapped float pointers.
+/// Allocates memory to a referenced std::vector of referenced wrapped generic pointers.
 /// <para> Note: element_alloc does not have to be supplied if size_alloc contains the combined size of the elements. </para>
 /// </summary>
-void CudaMemoryAllocator(vector<reference_wrapper<float*>>& ptrs, size_t size_alloc, size_t element_alloc = 1);
-
-/// <summary> 
-/// Allocates memory to a referenced std::vector of referenced wrapped float3 pointers.
-/// <para> Note: element_alloc does not have to be supplied if size_alloc contains the combined size of the elements. </para>
-/// <para> This is a polymorphism of the float version for float3 struct pointer references. </para>
-/// </summary>
-void CudaMemoryAllocator(vector<reference_wrapper<float3*>>& ptrs, size_t size_alloc, size_t element_alloc = 1);
+template <typename T>
+void CudaMemoryAllocator(vector<reference_wrapper<T*>>& ptrs, size_t size_alloc, size_t element_alloc = 1);
 
 /// <summary> 
 /// Copies either CUDA memory into system RAM, or vice versa. Also includes error checking.

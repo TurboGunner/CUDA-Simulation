@@ -61,6 +61,7 @@ void FluidSim::Simulate() {
 	AddDensity(IndexPair(2, 2), 100.0f);
 	AddDensity(IndexPair(35, 35), 100.0f);
 
+	cudaError_t cuda_status = cudaSuccess;
 	OpenVDBHandler vdb_handler(*this);
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!

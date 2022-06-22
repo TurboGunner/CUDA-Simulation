@@ -12,6 +12,7 @@ using std::string;
 
 class VectorField {
 	public:
+		VectorField() = default;
 		/// <summary> 
 		/// Default constructor. Has defaults for all dimension sizes as 1.
 		/// </summary>
