@@ -40,7 +40,7 @@ HashMap is a custom CUDA map implementation created in order to solve the issue 
 
 It works in a standard host-device scheme- but differs as it is able to be accessed seamlessly by either device or host due to the setup of the data structure. This allows for memory to be accessed interchangably between the host and the device, and to eliminate the necessity for excessively bloated memory copy and allocation abstraction for the data structures; which significantly simplifies the process for which data management is done in both system and GPU contexts.
 
->Specific GitHub Page Here: https://github.com/TurboGunner/CUDAMap (this served as the basis for the original plan to use a hybridized scheme, but that was scrapped due to the inherent lack of support of asynchronous page migration required to make the unified memory viable performance wise except on Linux).
+>Specific GitHub Page Here: https://github.com/TurboGunner/CUDAMap (this served as the basis for the original plan to use a hybridized scheme, but that was scrapped due to the inherent lack of support of asynchronous page migration required to make the unified memory viable performance wise except on Linux.)
 
 ## Fluid Simulation Implementation
 
@@ -71,6 +71,8 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 
 Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
 
-Move to 3D from 2D Navier-Stokes.
+Move to 3D from 2D Navier-Stokes, and add the requisite functional and data structure changes necessary.
 
 Further optimize memory allocation and usage via possible device pointers for the respective data structures for the fluid simulation.
+
+Add in a timestep to finally allow for animated VDB sequence support.
