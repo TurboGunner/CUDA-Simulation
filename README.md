@@ -73,6 +73,6 @@ Move from Gauss-Siedel to a conjugate gradient solver for the linear systems sol
 
 Move to 3D from 2D Navier-Stokes, and add the requisite functional and data structure changes necessary.
 
-Further optimize memory allocation and usage via possible device pointers for the respective data structures for the fluid simulation.
+Figure out issue pertaining the Blender lack of displaying and usage of velocity fields in the VDB export.
 
 Add in a timestep to finally allow for animated VDB sequence support.
