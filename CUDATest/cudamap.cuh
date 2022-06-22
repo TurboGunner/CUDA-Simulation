@@ -142,17 +142,18 @@ public:
     __host__ __device__ size_t Size() const {
         return hash_table_size_;
     }
-    void DeviceTransfer(cudaError_t& cuda_status, HashMap<V>*& src, HashMap<V>*& ptr) {
+    void DeviceTransfer(cudaError_t& cuda_status, HashMap<V>*& src, HashMap<V>*& ptr, bool alloc_source = true) {
         cuda_status = CopyFunction("DeviceTransferTable", table_, table_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(V), hash_table_size_);
         cuda_status = CopyFunction("DeviceTransferHash", hashes_, hashes_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(int), hash_table_size_);
-        cuda_status = cudaMalloc(&ptr, sizeof(HashMap<V>));
+        if (alloc_source) {
+            cuda_status = cudaMalloc(&ptr, sizeof(HashMap<V>));
+        }
         cuda_status = CopyFunction("DeviceTransferObject", ptr, src, cudaMemcpyHostToDevice, cuda_status, sizeof(HashMap<V>), 1);
         device_alloc_ = ptr;
     }
 
     __host__ void HostTransfer(cudaError_t& cuda_status) {
         cuda_status = CopyFunction("HostTransferTable", table_host_, table_, cudaMemcpyDeviceToHost, cuda_status, sizeof(V), hash_table_size_);
-        cudaFree(device_alloc_);
     }
 
     /// <summary> Removes hash table value, treated as erased in the pointers logically. </summary>

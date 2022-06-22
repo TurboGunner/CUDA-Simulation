@@ -94,7 +94,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="advect.cu" />
-    <CudaCompile Include="f_vector_cuda.cu" />
     <CudaCompile Include="index_pair_cuda.cu" />
     <CudaCompile Include="linear_solver.cu" />
     <CudaCompile Include="kernel.cu" />
@@ -110,10 +109,8 @@
   <ItemGroup>
     <ClInclude Include="axis_data.hpp" />
     <ClInclude Include="cudamap.cuh" />
-    <ClInclude Include="cuda_sim_helpers.cuh" />
     <ClInclude Include="fluid_sim.hpp" />
     <ClInclude Include="fluid_sim_cuda.cuh" />
-    <ClInclude Include="f_vector_cuda.cuh" />
     <ClInclude Include="handler_methods.hpp" />
     <ClInclude Include="index_pair_cuda.cuh" />
     <ClInclude Include="openvdb_handler.hpp" />

@@ -2,16 +2,13 @@
 
 #include "cuda_runtime.h"
 
-#include "f_vector_cuda.cuh"
 #include "index_pair_cuda.cuh"
 #include "axis_data.hpp"
 #include "cudamap.cuh"
 
 #include <string>
-#include <set>
 
 using std::string;
-using std::set;
 
 class VectorField {
 	public:
@@ -21,14 +18,9 @@ class VectorField {
 		VectorField(unsigned int x = 1, unsigned int y = 1);
 
 		/// <summary> 
-		/// Loaded constructor, used if there is a pre-loaded set argument.
-		/// </summary>
-		VectorField(unsigned int x, unsigned int y, const set<F_Vector>& set);
-
-		/// <summary> 
 		/// Gets a reference of the vector field map that contains the data.
 		/// </summary>
-		HashMap<F_Vector>*& GetVectorMap();
+		AxisData*& GetVectorMap();
 
 		/// <summary> 
 		/// Operator overload for copying the data of an existing vector field.
@@ -40,18 +32,8 @@ class VectorField {
 		/// </summary>
 		string ToString();
 
-		/// <summary> 
-		/// Returns an AxisData struct that contains all data points from a given axis.
-		/// </summary>
-		void DataConstrained(Axis axis, AxisData& input);
-
-		/// <summary> 
-		/// Repacks the AxisData struct with the current VectorField instance.
-		/// </summary>
-		void RepackFromConstrained(AxisData& axis);
-
 	private:
-		HashMap<F_Vector>* map_;
+		AxisData* map_;
 		unsigned int size_x_, size_y_;
-		set<F_Vector> LoadDefaultVectorSet();
+		void LoadDefaultVectorSet();
 };

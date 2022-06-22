@@ -30,7 +30,8 @@ void FluidSim::AddDensity(IndexPair pair, float amount) {
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
-	velocity_.GetVectorMap()->Put(pair, F_Vector(x, y));
+	velocity_.GetVectorMap()[0].map_->Put(pair, x);
+	velocity_.GetVectorMap()[1].map_->Put(pair, y);
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
@@ -67,31 +68,15 @@ void FluidSim::Simulate() {
 
 	OpenVDBHandler vdb_handler(*this);
 
-	AxisData v_prev_x(size_x_, Axis::X), v_x(size_x_, Axis::X), v_prev_y(size_x_, Axis::Y), v_y(size_x_, Axis::Y);
-
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!
-		velocity_.DataConstrained(Axis::X, v_x);
-		velocity_prev_.DataConstrained(Axis::X, v_prev_x);
-		velocity_.DataConstrained(Axis::Y, v_y);
-		velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
 
-		Diffuse(1, viscosity_, v_prev_x, v_x);
-		velocity_.RepackFromConstrained(v_x);
-		velocity_prev_.RepackFromConstrained(v_prev_x);
-
-		Diffuse(2, viscosity_, v_prev_y, v_y);
-		velocity_.RepackFromConstrained(v_y);
-		velocity_prev_.RepackFromConstrained(v_prev_y);
+		Diffuse(1, viscosity_, velocity_prev_.GetVectorMap()[0], velocity_.GetVectorMap()[0]);
+		Diffuse(2, viscosity_, velocity_prev_.GetVectorMap()[1], velocity_.GetVectorMap()[1]);
 
 		Project(velocity_prev_, velocity_);
 
-		velocity_.DataConstrained(Axis::X, v_x);
-		velocity_prev_.DataConstrained(Axis::X, v_prev_x);
-		Advect(1, v_x, v_prev_x, velocity_);
-
-		velocity_.DataConstrained(Axis::Y, v_y);
-		velocity_prev_.DataConstrained(Axis::Y, v_prev_y);
-		Advect(2, v_y, v_prev_y, velocity_);
+		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_);
+		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_);
 
 		Project(velocity_, velocity_prev_);
 

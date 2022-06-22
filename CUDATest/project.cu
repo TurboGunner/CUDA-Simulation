@@ -1,16 +1,16 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void ProjectKernel(HashMap<F_Vector>* velocity, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, int bounds) {
+__global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) { 
 		IndexPair incident(y_bounds, x_bounds);
 		data->Get(incident.IX(length)) =
-			((velocity->Get(incident.Right().IX(length)).vx_
-				- velocity->Get(incident.Left().IX(length)).vx_
-				+ velocity->Get(incident.Up().IX(length)).vy_
-				- velocity->Get(incident.Down().IX(length)).vy_)
+			((velocity_x->Get(incident.Right().IX(length))
+				- velocity_x->Get(incident.Left().IX(length))
+				+ velocity_y->Get(incident.Up().IX(length))
+				- velocity_y->Get(incident.Down().IX(length)))
 				* -0.5f) / length;
 		data_prev->Get(incident.IX(length)) = 0;
 	}
@@ -20,25 +20,27 @@ __global__ void ProjectKernel(HashMap<F_Vector>* velocity, HashMap<float>* data,
 	}
 }
 
-__global__ void ProjectKernel2(HashMap<F_Vector>* velocity, HashMap<F_Vector>* velocity_output, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, int bounds) {
+__global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, int bounds) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
 		IndexPair incident(y_bounds, x_bounds);
-		float compute_x = velocity->Get(incident.IX(length)).vx_ - (-0.5f *
+		float compute_x = velocity_x->Get(incident.IX(length)) - (-0.5f *
 			(data_prev->Get(incident.Right().IX(length))
 				- data_prev->Get(incident.Left().IX(length)))
 			* length);
 
-		float compute_y = velocity->Get(incident.IX(length)).vy_ - (-0.5f *
+		float compute_y = velocity_y->Get(incident.IX(length)) - (-0.5f *
 			(data_prev->Get(incident.Up().IX(length))
 				- data_prev->Get(incident.Down().IX(length)))
 			* length);
-		velocity_output->Put(incident.IX(length), F_Vector(compute_x, compute_y));
+		velocity_x->Put(incident.IX(length), compute_x);
+		velocity_y->Put(incident.IX(length), compute_y);
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
-		BoundaryConditions(bounds, velocity_output, length);
+		BoundaryConditions(bounds, velocity_x, length);
+		BoundaryConditions(bounds, velocity_y, length);
 	}
 }
 
@@ -50,33 +52,25 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length);
 
-	AxisData v_prev_x(length, Axis::X), v_prev_y(length, Axis::Y);
+	HashMap<float>* v_map_x = nullptr, *v_map_y = nullptr,
+		* x_map = nullptr, *y_map = nullptr;
 
-	velocity_prev.DataConstrained(Axis::X, v_prev_x);
-	velocity_prev.DataConstrained(Axis::Y, v_prev_y);
+	velocity.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[0].map_, v_map_x);
+	velocity.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity.GetVectorMap()[1].map_, v_map_y);
+	velocity_prev.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity_prev.GetVectorMap()[0].map_, x_map);
+	velocity_prev.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity_prev.GetVectorMap()[1].map_, y_map);
 
-	HashMap<F_Vector>* v_map = nullptr, *v_output = nullptr;
-	HashMap<float>* x_map = nullptr, *y_map = nullptr;
-	velocity.GetVectorMap()->DeviceTransfer(cuda_status, velocity.GetVectorMap(), v_map);
-	v_prev_x.map_->DeviceTransfer(cuda_status, v_prev_x.map_, x_map);
-	v_prev_y.map_->DeviceTransfer(cuda_status, v_prev_y.map_, y_map);
-
-	HashMap<F_Vector>* v_temp_output = new HashMap<F_Vector>(alloc_size);
-	v_temp_output->DeviceTransfer(cuda_status, v_temp_output, v_output);
-
-	ProjectKernel<<<blocks, threads>>> (v_map, y_map, x_map, length, bounds);
+	ProjectKernel<<<blocks, threads>>> (v_map_x, v_map_y, y_map, x_map, length, bounds);
 	LinearSolverKernel<<<blocks, threads>>> (y_map, x_map, 1, 4, length, iter, bounds);
-	ProjectKernel2<<<blocks, threads>>> (v_map, v_output, y_map, x_map, length, bounds);
+	ProjectKernel2<<<blocks, threads>>> (v_map_x, v_map_y, y_map, x_map, length, bounds);
 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
 
 	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
 
-	v_temp_output->HostTransfer(cuda_status);
-	v_prev_x.map_->HostTransfer(cuda_status);
-	v_prev_y.map_->HostTransfer(cuda_status);
-	velocity.GetVectorMap() = v_temp_output;
+	velocity.GetVectorMap()[0].map_->HostTransfer(cuda_status);
+	velocity.GetVectorMap()[1].map_->HostTransfer(cuda_status);
 
-	velocity_prev.RepackFromConstrained(v_prev_x);
-	velocity_prev.RepackFromConstrained(v_prev_y);
+	velocity.GetVectorMap()[0].map_->HostTransfer(cuda_status);
+	velocity_prev.GetVectorMap()[1].map_->HostTransfer(cuda_status);
 }
