@@ -66,5 +66,4 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, dt, length, bounds);
 
 	PostExecutionChecks(cuda_status, "AdvectCudaKernel");
-	//std::cout << velocity.ToString() << std::endl;
 }

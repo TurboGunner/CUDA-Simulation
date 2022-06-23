@@ -14,7 +14,7 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 				+ data->Get(incident.Up().IX(length))
 				+ data->Get(incident.Down().IX(length)))
 				* (1.0f / c_fac);
-			data->Put(incident.IX(length), compute);
+			data->Get(incident.IX(length)) = compute;
 		}
 	}
 	if (x_bounds * y_bounds >= (length * length)) {

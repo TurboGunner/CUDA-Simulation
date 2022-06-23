@@ -35,8 +35,8 @@ public:
         cudaMalloc(&table_, (size_t) sizeof(V) * hash_table_size_);
         cudaMalloc(&hashes_, (size_t) sizeof(int) * hash_table_size_);
 
-        table_host_ = new V[hash_table_size_];
-        hashes_host_ = new int[hash_table_size_];
+        cudaMallocHost(&table_host_, sizeof(V) * hash_table_size_);
+        cudaMallocHost(&hashes_host_, (size_t)sizeof(int) * hash_table_size_);
 
         for (size_t i = 0; i < hash_table_size_; i++) {
             hashes_host_[i] = 0;

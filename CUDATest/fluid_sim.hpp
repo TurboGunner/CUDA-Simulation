@@ -53,6 +53,10 @@ struct FluidSim {
 
 	cudaError_t cuda_status = cudaSuccess;
 
+	HashMap<float>* d_map = nullptr, * d_prev_map = nullptr,
+		* v_map_x = nullptr, * v_map_y = nullptr,
+		* v_prev_map_x = nullptr, * v_prev_map_y = nullptr;
+
 private:
 	/// <summary> Gauss-Siedel systems of linear equations solver. /summary>
 	void LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac);

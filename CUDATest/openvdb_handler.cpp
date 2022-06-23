@@ -9,6 +9,7 @@ OpenVDBHandler::OpenVDBHandler(FluidSim& sim, string file_name) {
 	file_name_ = file_name;
 
 	openvdb::initialize();
+	grid_vec = CreateGrids();
 }
 
 openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
@@ -56,19 +57,17 @@ void OpenVDBHandler::LoadData() {
 			accessors.at(2).setValue(xyz, density.map_->Get(current.IX(sim_.size_y_)));
 		}
 	}
-	//std::cout << velocity.GetVectorMap()[1].ToString() << std::endl;
 }
 
 void OpenVDBHandler::WriteFile() {
 	string file_extension = file_name_ + std::to_string(index_) + ".vdb";
 	openvdb::io::File file(file_extension);
 
-	openvdb::GridPtrVec grid_vec = CreateGrids();
 	LoadData();
 
 	file.write(grid_vec);
 	file.close();
-	FreeFieldPointers(grid_vec);
+	index_++;
 }
 
 void OpenVDBHandler::FreeFieldPointers(openvdb::GridPtrVec grid_vec) {

@@ -28,5 +28,6 @@ struct OpenVDBHandler {
 
 private:
 	unsigned int index_ = 0;
+	openvdb::GridPtrVec grid_vec;
 	void FreeFieldPointers(openvdb::GridPtrVec grid_vec);
 };

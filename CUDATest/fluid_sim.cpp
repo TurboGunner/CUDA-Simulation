@@ -69,10 +69,9 @@ void FluidSim::Simulate() {
 
 	OpenVDBHandler vdb_handler(*this);
 
-	AllocateDeviceData();
-
-	for (time_elapsed_ = 0; time_elapsed_ < time_max_ && time_elapsed_ <= 0; time_elapsed_ += dt_) { //Second bound condition is temporary!
-
+	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) { //Second bound condition is temporary!
+		AllocateDeviceData();
+		std::cout << velocity_.GetVectorMap()[0].map_->Get(IndexPair(32, 32).IX(size_x_)) << std::endl;
 		Diffuse(1, viscosity_, velocity_prev_.GetVectorMap()[0], velocity_.GetVectorMap()[0]);
 		Diffuse(2, viscosity_, velocity_prev_.GetVectorMap()[1], velocity_.GetVectorMap()[1]);
 
@@ -81,7 +80,7 @@ void FluidSim::Simulate() {
 		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_prev_);
 		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_prev_);
 
-		Project(velocity_, velocity_prev_);
+		Project(velocity_prev_, velocity_);
 
 		Diffuse(0, diffusion_, density_prev_, density_);
 		Advect(0, density_, density_prev_, velocity_);
@@ -93,10 +92,6 @@ void FluidSim::Simulate() {
 }
 
 void FluidSim::AllocateDeviceData() {
-	HashMap<float>* d_map = nullptr, *d_prev_map = nullptr,
-		*v_map_x = nullptr, *v_map_y = nullptr,
-		*v_prev_map_x = nullptr, *v_prev_map_y = nullptr;
-
 	density_.map_->DeviceTransfer(cuda_status, density_.map_, d_map);
 	density_prev_.map_->DeviceTransfer(cuda_status, density_prev_.map_, d_prev_map);
 
