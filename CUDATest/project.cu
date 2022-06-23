@@ -1,6 +1,6 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, int bounds) {
+__global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
@@ -20,7 +20,7 @@ __global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* veloci
 	}
 }
 
-__global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length, int bounds) {
+__global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, unsigned int length) {
 	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
@@ -57,9 +57,9 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 		*x_map = velocity_prev.GetVectorMap()[0].map_->device_alloc_,
 		*y_map = velocity_prev.GetVectorMap()[1].map_->device_alloc_;
 
-	ProjectKernel<<<blocks, threads>>> (v_map_x, v_map_y, x_map, y_map, length, bounds);
+	ProjectKernel<<<blocks, threads>>> (v_map_x, v_map_y, x_map, y_map, length);
 	LinearSolverKernel<<<blocks, threads>>> (x_map, y_map, 1, 4, length, iter, bounds);
-	ProjectKernel2<<<blocks, threads>>> (v_map_x, v_map_y, x_map, y_map, length, bounds);
+	ProjectKernel2<<<blocks, threads>>> (v_map_x, v_map_y, x_map, y_map, length);
 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
 

@@ -79,14 +79,15 @@ void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, co
     std::cout << "Allocated " << threads.x * threads.y * block_count * block_count << " threads!" << std::endl;
 }
 
-cudaError_t PostExecutionChecks(cudaError_t status, string method_name) {
+cudaError_t PostExecutionChecks(cudaError_t status, string method_name, bool sync_wait) {
     cudaError_t cuda_status = status;
     if (cuda_status == cudaSuccess) {
         function<cudaError_t()> error_check_func = []() { return cudaGetLastError(); };
         cuda_status = WrapperFunction(error_check_func, "cudaGetLastError (kernel launch)", method_name, cuda_status);
-
-        function<cudaError_t()> sync_func = []() { return cudaDeviceSynchronize(); };
-        cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", method_name, cuda_status);
+        if (sync_wait) {
+            function<cudaError_t()> sync_func = []() { return cudaDeviceSynchronize(); };
+            cuda_status = WrapperFunction(sync_func, "cudaDeviceSynchronize", method_name, cuda_status);
+        }
     }
     return cuda_status;
 }

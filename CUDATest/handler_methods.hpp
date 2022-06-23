@@ -43,4 +43,4 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
 /// <summary> Allocates threads based on given vector field lengths and threads allocated per dimension. Order: blocks, threads. </summary>
 void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block = 16);
 
-cudaError_t PostExecutionChecks(cudaError_t status, string method_name);
+cudaError_t PostExecutionChecks(cudaError_t status, string method_name, bool sync_wait = false);
