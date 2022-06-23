@@ -12,9 +12,9 @@ __global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* veloci
 				+ velocity_y->Get(incident.Up().IX(length))
 				- velocity_y->Get(incident.Down().IX(length)))
 				* -0.5f) / length;
-		data_prev->Get(incident.IX(length)) = 1;
+		data_prev->Get(incident.IX(length)) = 0;
 	}
-	if (x_bounds * y_bounds >= (length * length)) {
+	if (x_bounds == length - 1 && y_bounds == length - 1) {
 		BoundaryConditions(0, data, length);
 		BoundaryConditions(0, data_prev, length);
 	}
@@ -38,7 +38,7 @@ __global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* veloc
 		velocity_x->Put(incident.IX(length), compute_x);
 		velocity_y->Put(incident.IX(length), compute_y);
 	}
-	if (x_bounds * y_bounds >= (length * length)) {
+	if (x_bounds == length - 1 && y_bounds == length - 1) {
 		BoundaryConditions(1, velocity_x, length);
 		BoundaryConditions(2, velocity_y, length);
 	}

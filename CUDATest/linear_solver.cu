@@ -17,7 +17,7 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 			data->Get(incident.IX(length)) = compute;
 		}
 	}
-	if (x_bounds * y_bounds >= (length * length)) {
+	if (x_bounds == length - 1 && y_bounds == length - 1) {
 		BoundaryConditions(bounds, data, length);
 	}
 }

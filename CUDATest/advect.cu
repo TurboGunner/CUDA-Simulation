@@ -8,7 +8,7 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 
 	float x_dt = dt * (length - 2), y_dt = dt * (length - 2);
 
-	float velocity_x_curr, velocity_x_prev, velocity_y_curr, velocity_y_prev;
+	float density_current, density_prev, time_current, time_prev;
 	float x_value, y_value;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
@@ -21,7 +21,7 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 		if (x_value > length + 0.5f) {
 			x_value = length + 0.5f;
 		}
-		x_current = floor(x_value);
+		x_current = floorf(x_value);
 		x_previous = x_current + 1.0f;
 		if (y_value < 0.5f) {
 			y_value = 0.5f;
@@ -29,21 +29,23 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 		if (y_value > length + 0.5f) {
 			y_value = length + 0.5f;
 		}
-		y_current = floor(y_value);
+		y_current = floorf(y_value);
 		y_previous = y_current + 1.0f;
 
-		velocity_x_prev = x_value - x_current;
-		velocity_x_curr = 1.0f - velocity_x_prev;
-		velocity_y_prev = y_value - y_current;
-		velocity_y_curr = 1.0f - velocity_y_prev;
+		density_prev = x_value - x_current;
+		density_current = 1.0f - density_prev;
+		time_prev = y_value - y_current;
+		time_current = 1.0f - time_prev;
 
 		(*data)[IndexPair(y_bounds, x_bounds).IX(length)] =
-			velocity_x_curr * (((*data_prev)[IndexPair(x_current, y_current).IX(length)] * velocity_y_curr) +
-				((*data_prev)[IndexPair(x_current, y_previous).IX(length)] * velocity_y_prev)) +
-			velocity_x_prev * (((*data_prev)[IndexPair(x_previous, y_current).IX(length)] * velocity_y_curr) +
-				((*data_prev)[IndexPair(x_previous, y_previous).IX(length)] * velocity_y_prev));
+			(density_current * 
+				(((*data_prev)[IndexPair(x_current, y_current).IX(length)] * time_current) +
+				((*data_prev)[IndexPair(x_current, y_previous).IX(length)] * time_prev))) +
+			(density_prev *
+				(((*data_prev)[IndexPair(x_previous, y_current).IX(length)] * time_current) +
+				((*data_prev)[IndexPair(x_previous, y_previous).IX(length)] * time_prev)));
 	}
-	if (x_bounds * y_bounds >= (length * length)) {
+	if (x_bounds == length - 1 && y_bounds == length - 1) {
 		BoundaryConditions(bounds, data, length);
 	}
 }

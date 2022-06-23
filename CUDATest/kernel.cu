@@ -19,7 +19,7 @@ using std::function;
 int main()
 {
     unsigned int iter = 32, side_bound = 128;
-    FluidSim simulation(.1f, .1f, 1, side_bound, side_bound, iter);
+    FluidSim simulation(0.0166f, .05f, 1, side_bound, side_bound, iter);
 
     cudaError_t cuda_status = cudaSuccess;
 

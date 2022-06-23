@@ -9,7 +9,7 @@
 inline float RandomFloat() {
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dist(1, 10);
+	std::uniform_real_distribution<> dist(0, 0);
 	return dist(gen);
 }
 
