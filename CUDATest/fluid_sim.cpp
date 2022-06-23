@@ -59,9 +59,9 @@ void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, fl
 }
 
 void FluidSim::Simulate() {
-	AddVelocity(IndexPair(5, 5), 120, 10);
-	AddVelocity(IndexPair(1, 0), 222, 2);
-	AddVelocity(IndexPair(32, 32), 22, 220);
+	AddVelocity(IndexPair(5, 5), 12, 10);
+	AddVelocity(IndexPair(4, 3), 22, 22);
+	AddVelocity(IndexPair(32, 32), 22, 22);
 
 	AddDensity(IndexPair(1, 1), 10.0f);
 	AddDensity(IndexPair(2, 2), 100.0f);
@@ -76,17 +76,15 @@ void FluidSim::Simulate() {
 		Diffuse(1, viscosity_, velocity_prev_.GetVectorMap()[0], velocity_.GetVectorMap()[0]);
 		Diffuse(2, viscosity_, velocity_prev_.GetVectorMap()[1], velocity_.GetVectorMap()[1]);
 
-		Project(velocity_prev_, velocity_);
+		Project(velocity_, velocity_prev_);
 
-		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_);
-		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_);
+		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_prev_);
+		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_prev_);
 
 		Project(velocity_, velocity_prev_);
 
 		Diffuse(0, diffusion_, density_prev_, density_);
 		Advect(0, density_, density_prev_, velocity_);
-
-		//vdb_handler.sim_ = *this;
 
 		ReallocateHostData();
 
@@ -116,7 +114,7 @@ void FluidSim::ReallocateHostData() {
 	velocity_.GetVectorMap()[0].map_->HostTransfer(cuda_status);
 	velocity_.GetVectorMap()[1].map_->HostTransfer(cuda_status);
 
-	velocity_.GetVectorMap()[0].map_->HostTransfer(cuda_status);
+	velocity_prev_.GetVectorMap()[0].map_->HostTransfer(cuda_status);
 	velocity_prev_.GetVectorMap()[1].map_->HostTransfer(cuda_status);
 }
 

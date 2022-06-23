@@ -39,8 +39,8 @@ __global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* veloc
 		velocity_y->Put(incident.IX(length), compute_y);
 	}
 	if (x_bounds * y_bounds >= (length * length)) {
-		BoundaryConditions(bounds, velocity_x, length);
-		BoundaryConditions(bounds, velocity_y, length);
+		BoundaryConditions(1, velocity_x, length);
+		BoundaryConditions(2, velocity_y, length);
 	}
 }
 
@@ -57,9 +57,9 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 		*x_map = velocity_prev.GetVectorMap()[0].map_->device_alloc_,
 		*y_map = velocity_prev.GetVectorMap()[1].map_->device_alloc_;
 
-	ProjectKernel<<<blocks, threads>>> (v_map_x, v_map_y, y_map, x_map, length, bounds);
-	LinearSolverKernel<<<blocks, threads>>> (y_map, x_map, 1, 4, length, iter, bounds);
-	ProjectKernel2<<<blocks, threads>>> (v_map_x, v_map_y, y_map, x_map, length, bounds);
+	ProjectKernel<<<blocks, threads>>> (v_map_x, v_map_y, x_map, y_map, length, bounds);
+	LinearSolverKernel<<<blocks, threads>>> (x_map, y_map, 1, 4, length, iter, bounds);
+	ProjectKernel2<<<blocks, threads>>> (v_map_x, v_map_y, x_map, y_map, length, bounds);
 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
 

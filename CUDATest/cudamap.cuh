@@ -173,15 +173,6 @@ public:
         size_--;
     }
 
-    /// <summary> Does ToString output. Host only. </summary>
-    __host__ string ToString() {
-        string output;
-        for (size_t i = 0; i < size_; i++) {
-            output += table_host_[i] + "\n";
-        }
-        return output;
-    }
-
     /// <summary> Calls get from operator overload based on the key input. </summary>
     __host__ __device__ V& operator[](const IndexPair& key) {
         V output = Get(key);

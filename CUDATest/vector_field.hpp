@@ -12,8 +12,10 @@ using std::string;
 
 class VectorField {
 	public:
+		/// <summary> Default constructor. </summary>
 		VectorField() = default;
-		/// <summary> Default constructor. Has defaults for all dimension sizes as 1. </summary>
+
+		/// <summary> Loaded constructor for the size initialization of the vector field. </summary>
 		VectorField(unsigned int x, unsigned int y);
 
 		/// <summary> Gets a reference of the vector field map that contains the data. </summary>
@@ -28,5 +30,6 @@ class VectorField {
 	private:
 		AxisData* map_;
 		unsigned int size_x_, size_y_;
+
 		void LoadDefaultVectorSet();
 };

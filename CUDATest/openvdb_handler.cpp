@@ -51,11 +51,12 @@ void OpenVDBHandler::LoadData() {
 		for (unsigned int i = 0; i < sim_.size_x_; i++) {
 			IndexPair current(i, y_current);
 			xyz.reset(i, y_current, 0);
-			accessors.at(0).setValue(xyz, (*velocity.GetVectorMap()[0].map_)[current.IX(sim_.size_x_)]);
-			accessors.at(1).setValue(xyz, (*velocity.GetVectorMap()[1].map_)[current.IX(sim_.size_y_)]);
+			accessors.at(0).setValue(xyz, velocity.GetVectorMap()[0].map_->Get(current.IX(sim_.size_x_)));
+			accessors.at(1).setValue(xyz, velocity.GetVectorMap()[1].map_->Get(current.IX(sim_.size_y_)));
 			accessors.at(2).setValue(xyz, density.map_->Get(current.IX(sim_.size_y_)));
 		}
 	}
+	//std::cout << velocity.GetVectorMap()[1].ToString() << std::endl;
 }
 
 void OpenVDBHandler::WriteFile() {

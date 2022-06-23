@@ -7,14 +7,22 @@
 enum class Axis { X, Y, Z };
 
 struct AxisData {
+	/// <summary> Default constructor. </summary>
 	AxisData() = default;
+
+	/// <summary> Loaded constructor, has no size allocation, meant to be initialized later for the size. </summary>
 	AxisData(Axis axis);
+
+	/// <summary> Loaded constructor, has size allocation parameters, and a default parameter for the axis. </summary>
 	AxisData(unsigned int size_x, unsigned int size_y, Axis axis = Axis::X); //For density
 
+	/// <summary> Loads in random floats from 0 to 10 using the Mersenne-Twister algorithm. </summary>
 	void LoadDefaultDataSet();
 
+	/// <summary> Outputs float values bundled together into one std::string output. </summary>
 	string ToString();
 
+	/// <summary> Operator overload for the copy function. </summary>
 	void operator=(const AxisData& copy);
 
 	Axis axis_;
