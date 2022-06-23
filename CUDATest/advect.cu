@@ -12,8 +12,8 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 	float x_value, y_value;
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) {
-		x_value = (float)x_bounds - (x_dt * (*velocity_x)[IndexPair(y_bounds, x_bounds).IX(length)]);
-		y_value = (float)y_bounds - (y_dt * (*velocity_y)[IndexPair(y_bounds, x_bounds).IX(length)]);
+		x_value = (float) sqrt((float) x_bounds) - (x_dt * (*velocity_x).Get(IndexPair(y_bounds, x_bounds).IX(length)));
+		y_value = (float) sqrt((float) y_bounds) - (y_dt * (*velocity_y).Get(IndexPair(y_bounds, x_bounds).IX(length)));
 
 		if (x_value < 0.5f) {
 			x_value = 0.5f;
@@ -37,7 +37,7 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 		time_prev = y_value - y_current;
 		time_current = 1.0f - time_prev;
 
-		(*data)[IndexPair(y_bounds, x_bounds).IX(length)] =
+		data->Get(IndexPair(y_bounds, x_bounds).IX(length)) =
 			(density_current * 
 				(((*data_prev)[IndexPair(x_current, y_current).IX(length)] * time_current) +
 				((*data_prev)[IndexPair(x_current, y_previous).IX(length)] * time_prev))) +
@@ -67,5 +67,5 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, dt, length, bounds);
 
-	PostExecutionChecks(cuda_status, "AdvectCudaKernel");
+	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");
 }

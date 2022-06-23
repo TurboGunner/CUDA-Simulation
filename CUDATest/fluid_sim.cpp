@@ -61,16 +61,17 @@ void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, fl
 void FluidSim::Simulate() {
 	AddVelocity(IndexPair(5, 5), 12, 10);
 	AddVelocity(IndexPair(4, 3), 22, 22);
-	AddVelocity(IndexPair(32, 32), 202, 202);
+	AddVelocity(IndexPair(32, 32), 220, 22);
 
 	AddDensity(IndexPair(1, 1), 10.0f);
-	AddDensity(IndexPair(2, 2), 100.0f);
+	AddDensity(IndexPair(2, 2), 10.0f);
 	AddDensity(IndexPair(32, 32), 10.0f);
 
 	OpenVDBHandler vdb_handler(*this);
 
+	AllocateDeviceData();
+
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) { //Second bound condition is temporary!
-		AllocateDeviceData();
 		std::cout << density_.map_->Get(IndexPair(32, 32).IX(size_x_)) << std::endl;
 		std::cout << velocity_.GetVectorMap()[0].map_->Get(IndexPair(32, 32).IX(size_x_)) << std::endl;
 		Diffuse(1, viscosity_, velocity_prev_.GetVectorMap()[0], velocity_.GetVectorMap()[0]);
@@ -81,7 +82,7 @@ void FluidSim::Simulate() {
 		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_prev_);
 		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_prev_);
 
-		Project(velocity_prev_, velocity_);
+		Project(velocity_, velocity_prev_);
 
 		Diffuse(0, diffusion_, density_prev_, density_);
 		Advect(0, density_, density_prev_, velocity_);

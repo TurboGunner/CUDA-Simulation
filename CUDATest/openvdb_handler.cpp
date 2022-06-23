@@ -1,7 +1,8 @@
 #include "openvdb_handler.hpp"
 
-#include <stdexcept>
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
 OpenVDBHandler::OpenVDBHandler(FluidSim& sim, string file_name) {
 	sim_ = sim;
@@ -60,7 +61,7 @@ void OpenVDBHandler::LoadData() {
 }
 
 void OpenVDBHandler::WriteFile() {
-	string file_extension = file_name_ + std::to_string(index_) + ".vdb";
+	string file_extension = file_name_ + std::format("{:04}", index_) + ".vdb";
 	openvdb::io::File file(file_extension);
 
 	LoadData();

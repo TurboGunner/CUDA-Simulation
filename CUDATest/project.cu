@@ -6,17 +6,19 @@ __global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* veloci
 
 	if (threadIdx.x < length - 1 && threadIdx.y < length - 1) { 
 		IndexPair incident(y_bounds, x_bounds);
+
 		data->Get(incident.IX(length)) =
 			((velocity_x->Get(incident.Right().IX(length))
 				- velocity_x->Get(incident.Left().IX(length))
 				+ velocity_y->Get(incident.Up().IX(length))
 				- velocity_y->Get(incident.Down().IX(length)))
 				* -0.5f) / length;
+
 		data_prev->Get(incident.IX(length)) = 0;
 	}
 	if (x_bounds == length - 1 && y_bounds == length - 1) {
-		BoundaryConditions(0, data, length);
 		BoundaryConditions(0, data_prev, length);
+		BoundaryConditions(0, data, length);
 	}
 }
 
@@ -63,5 +65,5 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
 
-	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
+	cuda_status = PostExecutionChecks(cuda_status, "ProjectCudaKernel");
 }

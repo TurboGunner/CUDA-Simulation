@@ -10,9 +10,9 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 			float compute = data_prev->Get(incident.IX(length)) +
 				a_fac *
 				(data->Get(incident.Right().IX(length))
-				+ data->Get(incident.Left().IX(length))
-				+ data->Get(incident.Up().IX(length))
-				+ data->Get(incident.Down().IX(length)))
+					+ data->Get(incident.Left().IX(length))
+					+ data->Get(incident.Up().IX(length))
+					+ data->Get(incident.Down().IX(length)))
 				* (1.0f / c_fac);
 			data->Get(incident.IX(length)) = compute;
 		}
@@ -32,8 +32,6 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 		*p_map = previous.map_->device_alloc_;
 
 	LinearSolverKernel<<<blocks, threads>>> (c_map, p_map, a_fac, c_fac, length, iter, bounds);
-
-	PostExecutionChecks(cuda_status, "ProjectCudaKernel");
 
 	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel");
 }
