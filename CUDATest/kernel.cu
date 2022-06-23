@@ -18,8 +18,10 @@ using std::function;
 
 int main()
 {
+    const float FPS_10 = .1f, FPS_24 = 0.04166f, FPS_60 = 0.0166f;
+
     unsigned int iter = 32, side_bound = 128;
-    FluidSim simulation(0.0166f, .05f, 1, side_bound, side_bound, iter);
+    FluidSim simulation(FPS_10, .05f, 1, side_bound, side_bound, iter, 1);
 
     cudaError_t cuda_status = cudaSuccess;
 

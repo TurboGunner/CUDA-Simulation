@@ -2,16 +2,8 @@
 
 #include <stdexcept>
 #include <iostream>
-#include <random>
 
 //Constructors
-
-inline float RandomFloat() {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dist(0, 0);
-	return dist(gen);
-}
 
 VectorField::VectorField(unsigned int x, unsigned int y) {
 	if (x == 0 || y == 0) {
@@ -31,8 +23,8 @@ void VectorField::LoadDefaultVectorSet() {
 	for (y_current; y_current < size_y_; y_current++) {
 		for (unsigned int i = 0; i < size_x_; i++) {
 			IndexPair pair(i, y_current);
-			map_[0].map_->Put(pair, RandomFloat());
-			map_[1].map_->Put(pair, RandomFloat());
+			map_[0].map_->Put(pair, 0);
+			map_[1].map_->Put(pair, 0);
 		}
 	}
 }

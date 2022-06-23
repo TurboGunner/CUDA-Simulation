@@ -31,5 +31,6 @@ class VectorField {
 		AxisData* map_;
 		unsigned int size_x_, size_y_;
 
+		/// <summary> Loads in zeroes for all data. Made to be sparse. </summary>
 		void LoadDefaultVectorSet();
 };

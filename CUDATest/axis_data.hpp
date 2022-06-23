@@ -16,9 +16,6 @@ struct AxisData {
 	/// <summary> Loaded constructor, has size allocation parameters, and a default parameter for the axis. </summary>
 	AxisData(unsigned int size_x, unsigned int size_y, Axis axis = Axis::X); //For density
 
-	/// <summary> Loads in random floats from 0 to 10 using the Mersenne-Twister algorithm. </summary>
-	void LoadDefaultDataSet();
-
 	/// <summary> Outputs float values bundled together into one std::string output. </summary>
 	string ToString();
 
@@ -28,5 +25,8 @@ struct AxisData {
 	Axis axis_;
 	HashMap<float>* map_;
 
-	unsigned int size_x_, size_y_;
+	private:
+		unsigned int size_x_, size_y_;
+		/// <summary> Loads in zeroes for all data. Made to be sparse. </summary>
+		void LoadDefaultDataSet();
 };
