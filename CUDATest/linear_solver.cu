@@ -5,7 +5,7 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 	unsigned int x_bounds = blockIdx.z * blockDim.z + threadIdx.z + 1;
 
-	if (threadIdx.x < length.x - 1 && threadIdx.y < length.y - 1) {
+	if (threadIdx.x < length.x - 1 && threadIdx.y < length.y - 1 && threadIdx.z < length.z - 1) {
 		IndexPair incident(z_bounds, y_bounds, x_bounds);
 		for (int i = 0; i < iter; i++) {
 			float compute = data_prev->Get(incident.IX(length.x)) +
@@ -18,7 +18,7 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 			data->Get(incident.IX(length.x)) = compute;
 		}
 	}
-	if (x_bounds == length.x - 1 && y_bounds == length.y - 1) {
+	if (x_bounds == length.x - 1 && y_bounds == length.y - 1 && z_bounds == length.z - 1) {
 		BoundaryConditions(bounds, data, length);
 	}
 }
