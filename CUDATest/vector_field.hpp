@@ -16,7 +16,7 @@ class VectorField {
 		VectorField() = default;
 
 		/// <summary> Loaded constructor for the size initialization of the vector field. </summary>
-		VectorField(unsigned int x, unsigned int y);
+		VectorField(uint3 size);
 
 		/// <summary> Gets a reference of the vector field map that contains the data. </summary>
 		AxisData*& GetVectorMap();
@@ -29,7 +29,7 @@ class VectorField {
 
 	private:
 		AxisData* map_;
-		unsigned int size_x_, size_y_;
+		uint3 size_;
 
 		/// <summary> Loads in zeroes for all data. Made to be sparse. </summary>
 		void LoadDefaultVectorSet();

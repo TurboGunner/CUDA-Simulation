@@ -8,12 +8,11 @@ AxisData::AxisData(Axis axis) {
 	LoadDefaultDataSet();
 }
 
-AxisData::AxisData(unsigned int size_x, unsigned int size_y, Axis axis) {
+AxisData::AxisData(uint3 size, Axis axis) {
 	if (size_x < 1 || size_y < 1) {
 		throw std::invalid_argument("Error: Bounds must be at least greater than or equal to 1!");
 	}
-	size_x_ = size_x;
-	size_y_ = size_y;
+	size_ = size;
 	axis_ = axis;
 	map_ = new HashMap<float>(size_x_ * size_y_);
 	LoadDefaultDataSet();

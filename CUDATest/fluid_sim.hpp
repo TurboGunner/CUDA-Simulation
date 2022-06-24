@@ -12,7 +12,7 @@ struct FluidSim {
 	FluidSim() = default;
 
 	/// <summary> Loaded Constructor, allocates with all corresponding simulation arguments. </summary>
-	FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter, float time_max = 1);
+	FluidSim(float timestep, float diff, float visc, uint3 size, unsigned int iter, float time_max = 1);
 
 	/// <summary> Adding density to the simulation at a specific IndexPair point. </summary>
 	void AddDensity(IndexPair pair, float amount);
@@ -48,7 +48,7 @@ struct FluidSim {
 
 	float dt_ = 0, time_elapsed_ = 0, time_max_ = 0;
 
-	unsigned int size_x_, size_y_; //Bounds
+	uint3 size_;
 	unsigned int iterations_;
 
 	cudaError_t cuda_status = cudaSuccess;

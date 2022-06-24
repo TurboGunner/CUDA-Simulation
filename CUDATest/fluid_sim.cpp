@@ -5,12 +5,11 @@
 #include <stdexcept>
 #include <iostream>
 
-FluidSim::FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter, float time_max) {
+FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned int iter, float time_max) {
 	dt_ = timestep;
 	diffusion_ = diff;
 	viscosity_ = visc;
-	size_x_ = size_x;
-	size_y_ = size_y;
+	size_ = size;
 
 	if (iter == 0) {
 		throw std::invalid_argument("Error: The number of iterations must be at least greater than or equal to 1!");
