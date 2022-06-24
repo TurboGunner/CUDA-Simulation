@@ -1,8 +1,9 @@
 #include "index_pair_cuda.cuh"
 
-__host__ __device__ IndexPair::IndexPair(unsigned int x_in, unsigned int y_in) { //Loaded Constructor
+__host__ __device__ IndexPair::IndexPair(unsigned int x_in, unsigned int y_in, unsigned int z_in) { //Loaded Constructor
 	x = x_in;
 	y = y_in;
+	z = z_in;
 }
 __host__ __device__ size_t IndexPair::IX(size_t size) const {
 	return x + (y * size);
@@ -31,17 +32,25 @@ string IndexPair::ToString() const {
 }
 
 __host__ __device__ IndexPair IndexPair::Left() {
-	return IndexPair(x - 1, y);
+	return IndexPair(x - 1, y, z);
 }
 
 __host__ __device__ IndexPair IndexPair::Right() {
-	return IndexPair(x + 1, y);
+	return IndexPair(x + 1, y, z);
 }
 
 __host__ __device__ IndexPair IndexPair::Up() {
-	return IndexPair(x, y + 1);
+	return IndexPair(x, y + 1, z);
 }
 
 __host__ __device__ IndexPair IndexPair::Down() {
-	return IndexPair(x, y - 1);
+	return IndexPair(x, y - 1, z);
+}
+
+__host__ __device__ IndexPair IndexPair::Front() {
+	return IndexPair(x, y, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::Back() {
+	return IndexPair(x, y, z - 1);
 }

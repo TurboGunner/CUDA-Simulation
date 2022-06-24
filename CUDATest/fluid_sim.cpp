@@ -17,15 +17,15 @@ FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned 
 	iterations_ = iter;
 	time_max_ = time_max;
 
-	velocity_ = VectorField(size_x, size_y);
-	velocity_prev_ = VectorField(size_x, size_y);
+	velocity_ = VectorField(size_);
+	velocity_prev_ = VectorField(size_);
 
-	density_ = AxisData(size_x, size_x);
-	density_prev_ = AxisData(size_x, size_y);
+	density_ = AxisData(size_);
+	density_prev_ = AxisData(size_);
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
-	if (pair.x >= size_x_ || pair.y >= size_y_) {
+	if (pair.x >= size_.y || pair.y >= size_.y || pair) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
 	density_.map_->Put(pair, amount);

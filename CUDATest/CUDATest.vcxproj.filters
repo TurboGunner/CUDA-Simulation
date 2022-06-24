@@ -94,5 +94,8 @@
     <CudaCompile Include="index_pair_cuda.cu">
       <Filter>cuda\data_structures</Filter>
     </CudaCompile>
+    <CudaCompile Include="boundary_conditions.cu">
+      <Filter>cuda\navier_stokes_funcs</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

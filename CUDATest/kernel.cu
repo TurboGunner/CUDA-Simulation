@@ -21,7 +21,13 @@ int main()
     const float FPS_10 = .1f, FPS_24 = 0.04166f, FPS_60 = 0.0166f;
 
     unsigned int iter = 32, side_bound = 256;
-    FluidSim simulation(FPS_10, .05f, 1, side_bound, side_bound, iter, 2);
+    uint3 sim_dimensions;
+
+    sim_dimensions.x = side_bound;
+    sim_dimensions.y = side_bound;
+    sim_dimensions.z = side_bound;
+
+    FluidSim simulation(FPS_10, .05f, 1, sim_dimensions, iter, 2);
 
     cudaError_t cuda_status = cudaSuccess;
 
