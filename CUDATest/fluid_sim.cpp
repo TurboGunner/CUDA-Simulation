@@ -32,7 +32,7 @@ void FluidSim::AddDensity(IndexPair pair, float amount) {
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
-	if (pair.x >= size_x_ || pair.y >= size_y_) {
+	if (pair.x >= size_.x || pair.y >= size_.y) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
 	velocity_.GetVectorMap()[0].map_->Put(pair, x);
@@ -40,7 +40,7 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
-	float a = dt_ * visc * (size_x_ - 2) * (size_x_ - 2);
+	float a = dt_ * visc * (size_.x - 2) * (size_.y - 2);
 
 	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
 }

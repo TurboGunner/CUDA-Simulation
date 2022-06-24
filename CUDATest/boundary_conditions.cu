@@ -1,6 +1,7 @@
 #include "fluid_sim_cuda.cuh"
 
-__host__ __device__ void BoundaryConditions(int bounds, HashMap<float>* c_map, int length) {
+__host__ __device__ void BoundaryConditions(int bounds, HashMap<float>* c_map, uint3 size) {
+	unsigned int length = size.x;
 	unsigned int bound = length - 1;
 
 	for (int i = 1; i < bound; i++) {
