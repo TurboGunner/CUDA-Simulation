@@ -12,8 +12,8 @@ __global__ void BoundaryConditions(int bounds, HashMap<float>* c_map, uint3 size
 	(*c_map)[IndexPair(y_bounds, 0, x_bounds).IX(length)] = bounds == 2 ? -(*c_map)[IndexPair(y_bounds, 1, x_bounds).IX(length)] : (*c_map)[IndexPair(y_bounds, 1, x_bounds).IX(length)];
 	(*c_map)[IndexPair(y_bounds, bound, x_bounds).IX(length)] = bounds == 2 ? -(*c_map)[IndexPair(y_bounds, bound - 1, x_bounds).IX(length)] : (*c_map)[IndexPair(y_bounds, bound - 1, x_bounds).IX(length)];
 
-	(*c_map)[IndexPair(0, x_bounds, x_bounds).IX(length)] = bounds == 1 ? -(*c_map)[IndexPair(1, x_bounds, x_bounds).IX(length), x_bounds] : (*c_map)[IndexPair(1, x_bounds, x_bounds).IX(length)];
-	(*c_map)[IndexPair(bound, x_bounds, x_bounds).IX(length)] = bounds == 1 ? -(*c_map)[IndexPair(bound - 1, x_bounds, x_bounds).IX(length)] : (*c_map)[IndexPair(bound - 1, x_bounds, x_bounds).IX(length)];
+	(*c_map)[IndexPair(0, y_bounds, x_bounds).IX(length)] = bounds == 1 ? -(*c_map)[IndexPair(1, y_bounds, x_bounds).IX(length), x_bounds] : (*c_map)[IndexPair(1, y_bounds, x_bounds).IX(length)];
+	(*c_map)[IndexPair(bound, y_bounds, x_bounds).IX(length)] = bounds == 1 ? -(*c_map)[IndexPair(bound - 1, y_bounds, x_bounds).IX(length)] : (*c_map)[IndexPair(bound - 1, y_bounds, x_bounds).IX(length)];
 
 	if (x_bounds == size.x - 1 && y_bounds == size.y - 1) {
 		(*c_map)[IndexPair(0, 0, 0).IX(length)] = .33f * //Min X, Min Y, Min Z
