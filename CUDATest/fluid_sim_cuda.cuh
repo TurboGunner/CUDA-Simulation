@@ -23,13 +23,13 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 
 void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const uint3& length);
 
-__global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, HashMap<float>* velocity_x, HashMap<float>* velocity_y, float dt, uint3 length, int bounds);
+__global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* velocity_z, float dt, uint3 length, int bounds);
 
 void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const uint3& length);
 
-__global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, uint3 length);
+__global__ void ProjectKernel(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* velocity_z, HashMap<float>* data, HashMap<float>* data_prev, uint3 length);
 
-__global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* data, HashMap<float>* data_prev, uint3 length);
+__global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* velocity_y, HashMap<float>* velocity_z, HashMap<float>* data, HashMap<float>* data_prev, uint3 length);
 
 void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const uint3& length, const unsigned int& iter);
 

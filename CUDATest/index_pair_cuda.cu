@@ -6,7 +6,7 @@ __host__ __device__ IndexPair::IndexPair(unsigned int x_in, unsigned int y_in, u
 	z = z_in;
 }
 __host__ __device__ size_t IndexPair::IX(size_t size) const {
-	return x + (y * size);
+	return x + (y * size) + (z * (size * size));
 }
 
 

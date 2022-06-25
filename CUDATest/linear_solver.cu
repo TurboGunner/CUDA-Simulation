@@ -13,8 +13,11 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 				(data->Get(incident.Right().IX(length.x))
 					+ data->Get(incident.Left().IX(length.x))
 					+ data->Get(incident.Up().IX(length.x))
-					+ data->Get(incident.Down().IX(length.x)))
+					+ data->Get(incident.Down().IX(length.x))
+					+ data->Get(incident.Front().IX(length.x))
+					+ data->Get(incident.Back().IX(length.x)))
 				* (1.0f / c_fac);
+
 			data->Get(incident.IX(length.x)) = compute;
 		}
 	}

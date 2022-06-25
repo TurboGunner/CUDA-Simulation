@@ -20,7 +20,7 @@ int main()
 {
     const float FPS_10 = .1f, FPS_24 = 0.04166f, FPS_60 = 0.0166f;
 
-    unsigned int iter = 32, side_bound = 256;
+    unsigned int iter = 32, side_bound = 128;
     uint3 sim_dimensions;
 
     sim_dimensions.x = side_bound;

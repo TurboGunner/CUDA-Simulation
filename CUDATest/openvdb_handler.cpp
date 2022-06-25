@@ -34,9 +34,10 @@ vector<openvdb::FloatGrid::Accessor> OpenVDBHandler::GetAccessors() {
 
 	openvdb::FloatGrid::Accessor accessor_x = grids_.at(0)->getAccessor(),
 		accessor_y = grids_.at(1)->getAccessor(),
-		accessor_density = grids_.at(2)->getAccessor();
+		accessor_z = grids_.at(2)->getAccessor(),
+		accessor_density = grids_.at(3)->getAccessor();
 
-	accessors.insert(accessors.end(), { accessor_x, accessor_y, accessor_density });
+	accessors.insert(accessors.end(), { accessor_x, accessor_y, accessor_z, accessor_density });
 	return accessors;
 }
 
@@ -45,17 +46,20 @@ void OpenVDBHandler::LoadData() {
 	AxisData density = sim_.density_;
 
 	vector<openvdb::FloatGrid::Accessor> accessors = GetAccessors();
-	unsigned int y_current = 0;
+	unsigned int y_current = 0, z_current = 0;
 
 	openvdb::Coord xyz(0, 0, 0);
 
-	for (y_current; y_current < sim_.size_y_; y_current++) {
-		for (unsigned int i = 0; i < sim_.size_x_; i++) {
-			IndexPair current(i, y_current);
-			xyz.reset(i, y_current, 0);
-			accessors.at(0).setValue(xyz, velocity.GetVectorMap()[0].map_->Get(current.IX(sim_.size_x_)));
-			accessors.at(1).setValue(xyz, velocity.GetVectorMap()[1].map_->Get(current.IX(sim_.size_y_)));
-			accessors.at(2).setValue(xyz, density.map_->Get(current.IX(sim_.size_y_)));
+	for (z_current; z_current < sim_.size_.z; z_current++) {
+		for (y_current; y_current < sim_.size_.y; y_current++) {
+			for (unsigned int i = 0; i < sim_.size_.x; i++) {
+				IndexPair current(i, y_current, z_current);
+				xyz.reset(i, y_current, z_current);
+				accessors.at(0).setValue(xyz, velocity.GetVectorMap()[0].map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(1).setValue(xyz, velocity.GetVectorMap()[1].map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(2).setValue(xyz, velocity.GetVectorMap()[2].map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(3).setValue(xyz, density.map_->Get(current.IX(sim_.size_.x)));
+			}
 		}
 	}
 }

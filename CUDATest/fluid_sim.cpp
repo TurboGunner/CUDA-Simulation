@@ -25,14 +25,14 @@ FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned 
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
-	if (pair.x >= size_.y || pair.y >= size_.y || pair) {
+	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
 	density_.map_->Put(pair, amount);
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
-	if (pair.x >= size_.x || pair.y >= size_.y) {
+	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
 	velocity_.GetVectorMap()[0].map_->Put(pair, x);
@@ -46,40 +46,42 @@ void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& prev
 }
 
 void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
-	ProjectCuda(0, v_current, v_previous, size_x_, iterations_);
+	ProjectCuda(0, v_current, v_previous, size_, iterations_);
 }
 
 void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
-	AdvectCuda(0, current, previous, velocity, dt_, size_x_);
+	AdvectCuda(0, current, previous, velocity, dt_, size_);
 }
 
 void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
-	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_x_);
+	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_);
 }
 
 void FluidSim::Simulate() {
-	AddVelocity(IndexPair(5, 5), 12, 10);
-	AddVelocity(IndexPair(4, 3), 22, 22);
-	AddVelocity(IndexPair(32, 32), 220, 22);
+	AddVelocity(IndexPair(5, 5, 5), 12, 10);
+	AddVelocity(IndexPair(4, 3, 3), 22, 22);
+	AddVelocity(IndexPair(32, 32, 32), 220, 22);
 
-	AddDensity(IndexPair(1, 1), 10.0f);
-	AddDensity(IndexPair(2, 2), 10.0f);
-	AddDensity(IndexPair(32, 32), 10.0f);
+	AddDensity(IndexPair(1, 1, 1), 10.0f);
+	AddDensity(IndexPair(2, 2, 2), 10.0f);
+	AddDensity(IndexPair(32, 32, 32), 10.0f);
 
 	OpenVDBHandler vdb_handler(*this);
 
 	AllocateDeviceData();
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) { //Second bound condition is temporary!
-		std::cout << density_.map_->Get(IndexPair(32, 32).IX(size_x_)) << std::endl;
-		std::cout << velocity_.GetVectorMap()[0].map_->Get(IndexPair(32, 32).IX(size_x_)) << std::endl;
+		std::cout << density_.map_->Get(IndexPair(32, 32, 32).IX(size_.x)) << std::endl;
+		std::cout << velocity_.GetVectorMap()[0].map_->Get(IndexPair(32, 32, 32).IX(size_.x)) << std::endl;
 		Diffuse(1, viscosity_, velocity_prev_.GetVectorMap()[0], velocity_.GetVectorMap()[0]);
 		Diffuse(2, viscosity_, velocity_prev_.GetVectorMap()[1], velocity_.GetVectorMap()[1]);
+		Diffuse(3, viscosity_, velocity_prev_.GetVectorMap()[2], velocity_.GetVectorMap()[2]);
 
 		Project(velocity_prev_, velocity_);
 
 		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_prev_);
 		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_prev_);
+		Advect(3, velocity_.GetVectorMap()[2], velocity_prev_.GetVectorMap()[2], velocity_prev_);
 
 		Project(velocity_, velocity_prev_);
 
@@ -97,9 +99,11 @@ void FluidSim::AllocateDeviceData() {
 
 	velocity_.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity_.GetVectorMap()[0].map_, v_map_x);
 	velocity_.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity_.GetVectorMap()[1].map_, v_map_y);
+	velocity_.GetVectorMap()[2].map_->DeviceTransfer(cuda_status, velocity_.GetVectorMap()[2].map_, v_map_z);
 
 	velocity_prev_.GetVectorMap()[0].map_->DeviceTransfer(cuda_status, velocity_prev_.GetVectorMap()[0].map_, v_prev_map_x);
 	velocity_prev_.GetVectorMap()[1].map_->DeviceTransfer(cuda_status, velocity_prev_.GetVectorMap()[1].map_, v_prev_map_y);
+	velocity_prev_.GetVectorMap()[2].map_->DeviceTransfer(cuda_status, velocity_prev_.GetVectorMap()[2].map_, v_prev_map_z);
 }
 
 void FluidSim::ReallocateHostData() {
@@ -109,9 +113,11 @@ void FluidSim::ReallocateHostData() {
 
 	velocity_.GetVectorMap()[0].map_->HostTransfer(cuda_status);
 	velocity_.GetVectorMap()[1].map_->HostTransfer(cuda_status);
+	velocity_.GetVectorMap()[2].map_->HostTransfer(cuda_status);
 
 	velocity_prev_.GetVectorMap()[0].map_->HostTransfer(cuda_status);
 	velocity_prev_.GetVectorMap()[1].map_->HostTransfer(cuda_status);
+	velocity_prev_.GetVectorMap()[2].map_->HostTransfer(cuda_status);
 }
 
 void FluidSim::operator=(const FluidSim& copy) {
@@ -121,8 +127,7 @@ void FluidSim::operator=(const FluidSim& copy) {
 	velocity_ = copy.velocity_;
 	velocity_prev_ = copy.velocity_prev_;
 
-	size_x_ = copy.size_x_;
-	size_y_ = copy.size_y_;
+	size_ = copy.size_;
 
 	dt_ = copy.dt_;
 	diffusion_ = copy.diffusion_;
