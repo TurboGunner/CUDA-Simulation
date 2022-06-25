@@ -72,7 +72,3 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
 
 Move to 3D from 2D Navier-Stokes, and add the requisite functional and data structure changes necessary.
-
-Figure out issue pertaining to the weird artifacts upon using projection; particularly on the y-axis of the vector field.
-
-Add in a timestep to finally allow for animated VDB sequence support.
