@@ -1,6 +1,9 @@
 #include "fluid_sim_cuda.cuh"
 
 __device__ inline void AveragerLogic(float& value, float& current, float& previous, const unsigned int& length) {
+	if (value < 0.5f) {
+		value = 0.5f;
+	}
 	if (value > length + 0.5f) {
 		value = length + 0.5f;
 	}
@@ -27,16 +30,11 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 
 	float x_value, y_value, z_value;
 
-	if (threadIdx.x < length.x - 1 && threadIdx.y < length.y - 1 && threadIdx.z < length.z - 1) {
-		x_value = cbrt((float) x_bounds) - (x_dt * (*velocity_x).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
-		y_value = cbrt((float) y_bounds) - (y_dt * (*velocity_y).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
-		z_value = cbrt((float) z_bounds) - (z_dt * (*velocity_z).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
+	if (x_bounds < length.x - 1 && y_bounds < length.y - 1 && z_bounds < length.z - 1) {
+		x_value = x_bounds - (x_dt * (*velocity_x).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
+		y_value = y_bounds - (y_dt * (*velocity_y).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
+		z_value = z_bounds - (z_dt * (*velocity_z).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
 
-		if (x_value < 0.5f) {
-			x_value = 0.5f;
-		}
-
-		//Should turn into a function later!
 		AveragerLogic(x_value, x_current, x_previous, length.x);
 		AveragerLogic(y_value, y_current, y_previous, length.y);
 		AveragerLogic(z_value, z_current, z_previous, length.z);
@@ -62,9 +60,6 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 
 		data->Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)) = compute_x_current + compute_x_prev;
 	}
-	if (x_bounds == length.x - 1 && y_bounds == length.y - 1 && z_bounds == length.z - 1) {
-		BoundaryConditions(bounds, data, length);
-	}
 }
 
 void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const uint3& length) {
@@ -72,6 +67,9 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
+
+	dim3 bound_blocks(blocks.x, blocks.y),
+		bound_threads(threads.x, threads.y);
 
 	HashMap<float>* v_map_x = velocity.GetVectorMap()[0].map_->device_alloc_,
 		*v_map_y = velocity.GetVectorMap()[1].map_->device_alloc_,
@@ -82,6 +80,7 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	std::cout << "bidoof" << std::endl;
 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, v_map_z, dt, length, bounds);
+	BoundaryConditions<<<bound_blocks, bound_threads>>> (0, c_map, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");
 }

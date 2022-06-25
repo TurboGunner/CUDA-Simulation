@@ -6,7 +6,7 @@
 //Constructors
 
 VectorField::VectorField(uint3 size) {
-	if (x == 0 || y == 0) {
+	if (size.x == 0 || size.y == 0 || size.z == 0) {
 		throw std::invalid_argument("Error: Bounds must be at least greater than or equal to 1!");
 	}
 	size_ = size;
@@ -19,27 +19,34 @@ VectorField::VectorField(uint3 size) {
 }
 
 void VectorField::LoadDefaultVectorSet() {
-	unsigned int y_current = 0;
-	for (y_current; y_current < size_.y; y_current++) {
-		for (unsigned int i = 0; i < size_.x; i++) {
-			IndexPair pair(i, y_current);
-			map_[0].map_->Put(pair, 0);
-			map_[1].map_->Put(pair, 0);
+	unsigned int y_current = 0, z_current = 0;
+	for (z_current; z_current < size_.z; z_current++) {
+		for (y_current; y_current < size_.y; y_current++) {
+			for (unsigned int i = 0; i < size_.x; i++) {
+				IndexPair pair(i, y_current, z_current);
+				map_[0].map_->Put(pair, 0);
+				map_[1].map_->Put(pair, 0);
+				map_[2].map_->Put(pair, 0);
+			}
 		}
 	}
 }
 
 string VectorField::ToString() {
 	string output;
-	unsigned int y_current = 0;
-	for (y_current; y_current < size_.y; y_current++) {
-		for (unsigned int i = 0; i < size_.x; i++) {
-			IndexPair current(i, y_current);
-			output += current.ToString() + "\n" + 
-				std::to_string(map_[0].map_->Get(current.IX(size_.x))) 
-				+ " | "
-				+ std::to_string(map_[1].map_->Get(current.IX(size_.y)))
-				+ "\n\n";
+	unsigned int y_current = 0, z_current = 0;
+	for (z_current; z_current < size_.z; z_current++) {
+		for (y_current; y_current < size_.y; y_current++) {
+			for (unsigned int i = 0; i < size_.x; i++) {
+				IndexPair current(i, y_current, z_current);
+				output += current.ToString() + "\n" +
+					std::to_string(map_[0].map_->Get(current.IX(size_.x)))
+					+ " | "
+					+ std::to_string(map_[1].map_->Get(current.IX(size_.y)))
+					+ " | "
+					+ std::to_string(map_[2].map_->Get(current.IX(size_.z)))
+					+ "\n\n";
+			}
 		}
 	}
 	return output;

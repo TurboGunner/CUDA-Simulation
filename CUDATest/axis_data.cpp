@@ -19,21 +19,25 @@ AxisData::AxisData(uint3 size, Axis axis) {
 }
 
 void AxisData::LoadDefaultDataSet() {
-	unsigned int y_current = 0;
-	for (y_current; y_current < size_.y; y_current++) {
-		for (unsigned int i = 0; i < size_.x; i++) {
-			map_->Put(IndexPair(i, y_current), 0);
+	unsigned int y_current = 0, z_current = 0;
+	for (z_current; z_current < size_.z; z_current++) {
+		for (y_current; y_current < size_.y; y_current++) {
+			for (unsigned int i = 0; i < size_.x; i++) {
+				map_->Put(IndexPair(i, y_current, z_current), 0);
+			}
 		}
 	}
 }
 
 string AxisData::ToString() {
 	string output;
-	unsigned int y_current = 0;
-	for (y_current; y_current < size_.y; y_current++) {
-		for (unsigned int i = 0; i < size_.x; i++) {
-			IndexPair current(i, y_current);
-			output += current.ToString() + "\nValue: " + std::to_string(map_->Get(current)) + "\n\n";
+	unsigned int y_current = 0, z_current = 0;
+	for (z_current; z_current < size_.z; z_current++) {
+		for (y_current; y_current < size_.y; y_current++) {
+			for (unsigned int i = 0; i < size_.x; i++) {
+				IndexPair current(i, y_current, z_current);
+				output += current.ToString() + "\nValue: " + std::to_string(map_->Get(current)) + "\n\n";
+			}
 		}
 	}
 	return output;

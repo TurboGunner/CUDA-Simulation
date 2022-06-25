@@ -28,21 +28,22 @@ void FluidSim::AddDensity(IndexPair pair, float amount) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
-	density_.map_->Put(pair, amount);
+	density_.map_->Put(pair.IX(size_.x), amount);
 }
 
-void FluidSim::AddVelocity(IndexPair pair, float x, float y) {
+void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
-	velocity_.GetVectorMap()[0].map_->Put(pair, x);
-	velocity_.GetVectorMap()[1].map_->Put(pair, y);
+	velocity_.GetVectorMap()[0].map_->Put(pair.IX(size_.x), x);
+	velocity_.GetVectorMap()[1].map_->Put(pair.IX(size_.x), y);
+	velocity_.GetVectorMap()[2].map_->Put(pair.IX(size_.x), z);
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
 	float a = dt_ * visc * (size_.x - 2) * (size_.y - 2);
 
-	LinearSolve(bounds, current, previous, a, 1 + 4 * a);
+	LinearSolve(bounds, current, previous, a, 1 + 6 * a);
 }
 
 void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
@@ -58,13 +59,13 @@ void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, fl
 }
 
 void FluidSim::Simulate() {
-	AddVelocity(IndexPair(5, 5, 5), 12, 10);
-	AddVelocity(IndexPair(4, 3, 3), 22, 22);
-	AddVelocity(IndexPair(32, 32, 32), 220, 22);
+	AddVelocity(IndexPair(5, 5, 5), 12, 10, 22);
+	AddVelocity(IndexPair(4, 3, 3), 22, 22, 22);
+	AddVelocity(IndexPair(32, 32, 32), 220, 22, 22);
 
 	AddDensity(IndexPair(1, 1, 1), 10.0f);
 	AddDensity(IndexPair(2, 2, 2), 10.0f);
-	AddDensity(IndexPair(32, 32, 32), 10.0f);
+	AddDensity(IndexPair(32, 32, 32), 1000.0f);
 
 	OpenVDBHandler vdb_handler(*this);
 
@@ -77,7 +78,8 @@ void FluidSim::Simulate() {
 		Diffuse(2, viscosity_, velocity_prev_.GetVectorMap()[1], velocity_.GetVectorMap()[1]);
 		Diffuse(3, viscosity_, velocity_prev_.GetVectorMap()[2], velocity_.GetVectorMap()[2]);
 
-		Project(velocity_prev_, velocity_);
+		//Project(velocity_prev_, velocity_);
+		Project(velocity_, velocity_prev_);
 
 		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_prev_);
 		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_prev_);

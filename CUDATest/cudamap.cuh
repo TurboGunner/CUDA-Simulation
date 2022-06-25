@@ -44,7 +44,7 @@ public:
     }
 
     __host__ __device__ size_t hash_func_(IndexPair i1) {
-        size_t hash = i1.x + (i1.y * (sqrt(hash_table_size_)));
+        size_t hash = i1.x + (i1.y * cbrt(hash_table_size_)) + (i1.z * (cbrt(hash_table_size_) * cbrt(hash_table_size_)));
         return hash;
     }
 
@@ -119,8 +119,8 @@ public:
         }
 #endif
 #ifdef __CUDA_ARCH__
-        printf("%f", key.IX(sqrt(hash_table_size_)));
-         table_[key.IX(sqrt(hash_table_size_))] = value;
+        printf("%f", key.IX(cbrt(hash_table_size_)));
+         table_[key.IX(cbrt(hash_table_size_))] = value;
 #else
         table_host_[hash_pos] = value;
 #endif

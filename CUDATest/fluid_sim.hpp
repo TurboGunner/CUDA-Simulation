@@ -18,7 +18,7 @@ struct FluidSim {
 	void AddDensity(IndexPair pair, float amount);
 
 	/// <summary> Adding velocity to the simulation at a specific IndexPair point. </summary>
-	void AddVelocity(IndexPair pair, float x, float y);
+	void AddVelocity(IndexPair pair, float x, float y, float z);
 
 	/// <summary> Diffusion method for simulation. Should either be used with the viscocity or diffusion float in the "visc" argument. </summary>
 	void Diffuse(int bounds, float visc, AxisData& current, AxisData& previous);

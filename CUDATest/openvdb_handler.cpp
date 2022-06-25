@@ -6,7 +6,7 @@
 
 OpenVDBHandler::OpenVDBHandler(FluidSim& sim, string file_name) {
 	sim_ = sim;
-	names_.insert(names_.end(), {"VelocityVectorX", "VelocityVectorY", "Density"});
+	names_.insert(names_.end(), {"VelocityVectorX", "VelocityVectorY", "VelocityVectorZ", "Density"});
 	file_name_ = file_name;
 
 	openvdb::initialize();
@@ -18,14 +18,16 @@ openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
 
 	openvdb::FloatGrid::Ptr grid_x = openvdb::FloatGrid::create(),
 		grid_y = openvdb::FloatGrid::create(),
+		grid_z = openvdb::FloatGrid::create(),
 		grid_density = openvdb::FloatGrid::create();
 
 	grid_x->setName(names_.at(0));
 	grid_y->setName(names_.at(1));
-	grid_density->setName(names_.at(2));
+	grid_z->setName(names_.at(2));
+	grid_density->setName(names_.at(3));
 
-	grids.insert(grids.end(), { grid_x, grid_y, grid_density });
-	grids_.insert(grids_.end(), { grid_x, grid_y, grid_density });
+	grids.insert(grids.end(), { grid_x, grid_y, grid_z, grid_density });
+	grids_.insert(grids_.end(), { grid_x, grid_y, grid_z, grid_density });
 	return grids;
 }
 
