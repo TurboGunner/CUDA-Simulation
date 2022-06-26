@@ -71,4 +71,6 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 
 Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
 
-Move to 3D from 2D Navier-Stokes, and add the requisite functional and data structure changes necessary.
+Fix implementation issues with OpenVDB and the 3D implementation.
+
+Change CUDA helper type from void to cudaError_t in order to consolidate and improve error checking.
