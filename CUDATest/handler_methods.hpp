@@ -14,9 +14,6 @@ using std::function;
 /// <summary> Throws an invalid argument with the supplied error message when CUDA status is invalid. </summary>
 void CudaExceptionHandler(cudaError_t cuda_status, string error_message);
 
-/// <summary> Frees an array of void pointers. </summary>
-void CudaMemoryFreer(void* ptrs[]);
-
 /// <summary> Polymorphism, frees a referenced std::vector of referenced wrapped float pointers in GPU memory. </summary>
 template <typename T>
 void CudaMemoryFreer(vector<reference_wrapper<T*>>& ptrs);
@@ -44,3 +41,7 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
 void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block = 16);
 
 cudaError_t PostExecutionChecks(cudaError_t status, string method_name, bool sync_wait = false);
+
+/// <summary> Allocates threads based on given vector field lengths and threads allocated per dimension. Order: blocks, threads. 
+/// <para> Delegated specificially for the BoundaryConditions check. </para> </summary>
+void ThreadAllocator2D(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block = 16);

@@ -29,14 +29,11 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
-	dim3 bound_blocks(blocks.x, blocks.y),
-		bound_threads(threads.x, threads.y);
-
 	HashMap<float>* c_map = current.map_->device_alloc_,
 		*p_map = previous.map_->device_alloc_;
 
 	LinearSolverKernel<<<blocks, threads>>> (c_map, p_map, a_fac, c_fac, length, iter, bounds);
-	BoundaryConditions<<<bound_blocks, bound_threads>>> (0, c_map, length);
+	BoundaryConditionsCuda(0, c_map, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel");
 }

@@ -68,9 +68,6 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
-	dim3 bound_blocks(blocks.x, blocks.y),
-		bound_threads(threads.x, threads.y);
-
 	HashMap<float>* v_map_x = velocity.GetVectorMap()[0].map_->device_alloc_,
 		*v_map_y = velocity.GetVectorMap()[1].map_->device_alloc_,
 		*v_map_z = velocity.GetVectorMap()[2].map_->device_alloc_,
@@ -80,7 +77,7 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	std::cout << "bidoof" << std::endl;
 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, v_map_z, dt, length, bounds);
-	BoundaryConditions<<<bound_blocks, bound_threads>>> (0, c_map, length);
+	BoundaryConditionsCuda(0, c_map, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");
 }

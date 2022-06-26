@@ -34,3 +34,5 @@ __global__ void ProjectKernel2(HashMap<float>* velocity_x, HashMap<float>* veloc
 void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const uint3& length, const unsigned int& iter);
 
 __global__ void BoundaryConditions(int bounds, HashMap<float>* c_map, uint3 length);
+
+void BoundaryConditionsCuda(int bounds, HashMap<float>* map, const uint3& length);

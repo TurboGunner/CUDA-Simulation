@@ -10,17 +10,6 @@ void CudaExceptionHandler(cudaError_t cuda_status, string error_message) {
     }
 }
 
-void CudaMemoryFreer(void* ptrs[]) {
-    try {
-        for (size_t i = 0; i < sizeof(ptrs); i++) {
-            cudaFree(ptrs[i]);
-        }
-    }
-    catch (std::exception e) {
-        printf(e.what());
-    }
-}
-
 template <typename T>
 void CudaMemoryFreer(vector<reference_wrapper<T*>>& ptrs) {
     try {
@@ -78,6 +67,17 @@ void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, co
 
     std::cout << "Allocated " << threads.x * threads.y * threads.z * block_count * block_count * block_count << " threads!" << std::endl;
 }
+
+void ThreadAllocator2D(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block) {
+    unsigned int threads_per_dim = (unsigned int)sqrt(threads_per_block);
+    unsigned int block_count = ((length + threads_per_dim) - 1) / (threads_per_dim);
+
+    threads = dim3(threads_per_dim, threads_per_dim);
+    blocks = dim3(block_count, block_count);
+
+    std::cout << "Allocated " << threads.x * threads.y * block_count * block_count << " threads!" << std::endl;
+}
+
 
 cudaError_t PostExecutionChecks(cudaError_t status, string method_name, bool sync_wait) {
     cudaError_t cuda_status = status;

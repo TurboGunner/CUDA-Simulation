@@ -78,8 +78,7 @@ void FluidSim::Simulate() {
 		Diffuse(2, viscosity_, velocity_prev_.GetVectorMap()[1], velocity_.GetVectorMap()[1]);
 		Diffuse(3, viscosity_, velocity_prev_.GetVectorMap()[2], velocity_.GetVectorMap()[2]);
 
-		//Project(velocity_prev_, velocity_);
-		Project(velocity_, velocity_prev_);
+		Project(velocity_prev_, velocity_);
 
 		Advect(1, velocity_.GetVectorMap()[0], velocity_prev_.GetVectorMap()[0], velocity_prev_);
 		Advect(2, velocity_.GetVectorMap()[1], velocity_prev_.GetVectorMap()[1], velocity_prev_);

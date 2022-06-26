@@ -55,9 +55,6 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
-	dim3 bound_blocks(blocks.x, blocks.y),
-		bound_threads(threads.x, threads.y);
-
 	HashMap<float>* v_map_x = velocity.GetVectorMap()[0].map_->device_alloc_,
 		*v_map_y = velocity.GetVectorMap()[1].map_->device_alloc_,
 		*v_map_z = velocity.GetVectorMap()[2].map_->device_alloc_,
@@ -65,8 +62,8 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 		*y_map = velocity_prev.GetVectorMap()[1].map_->device_alloc_;
 
 	ProjectKernel<<<blocks, threads>>> (v_map_x, v_map_y, v_map_z, y_map, x_map, length);
-	BoundaryConditions<<<bound_blocks, bound_threads>>> (0, x_map, length);
-	BoundaryConditions<<<bound_blocks, bound_threads>>> (0, y_map, length);
+	BoundaryConditionsCuda(0, x_map, length);
+	BoundaryConditionsCuda(0, y_map, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "ProjectFirstKernel");
 
@@ -75,9 +72,9 @@ void ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, 
 	cuda_status = PostExecutionChecks(cuda_status, "ProjectLinearSolve");
 
 	ProjectKernel2<<<blocks, threads>>> (v_map_x, v_map_y, v_map_z, y_map, x_map, length);
-	BoundaryConditions<<<bound_blocks, bound_threads>>> (1, v_map_x, length);
-	BoundaryConditions<<<bound_blocks, bound_threads>>> (2, v_map_y, length);
-	BoundaryConditions<<<bound_blocks, bound_threads>>> (3, v_map_z, length);
+	BoundaryConditionsCuda(1, v_map_x, length);
+	BoundaryConditionsCuda(2, v_map_y, length);
+	BoundaryConditionsCuda(3, v_map_z, length);
 
 	std::cout << "Yo Pierre, you wanna come out here? *door squeaking noise*" << std::endl;
 
