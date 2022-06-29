@@ -14,14 +14,18 @@ struct IndexPair {
 	__host__ __device__ IndexPair(unsigned int x_in, unsigned int y_in, unsigned int z_in);
 
 	/// <summary> Returns the effective linearized index of the grid. 
-	/// <para> Made mostly for global/devices accesses due to CUDA being rather finicky with references. </para> </summary>
+	/// <para> Made mostly for global/device accesses due to CUDA being rather finicky with references. </para> </summary>
 	__host__ __device__ size_t IX(size_t size) const;
+
+	/// <summary> Returns the effective linearized index of the grid, using a non-square boundary. 
+	/// <para> Made mostly for global/devices accesses due to CUDA being rather finicky with references. </para> </summary>
+	__host__ __device__ size_t IX(uint3 size) const;
 
 	/// <summary> Operator overload for copying the data of an existing index pair. </summary>
 	bool operator==(const IndexPair& i1) const;
 
 	/// <summary> Operator overload for returning the proper hash code for IndexPair. </summary>
-	size_t operator()(const IndexPair& i1) const noexcept;
+	__host__ size_t operator()(const IndexPair& i1) const noexcept;
 
 	/// <summary>  Operator overload for comparing (less than). Required for proper functioning with maps. </summary>
 	bool operator<(const IndexPair& i1) const;

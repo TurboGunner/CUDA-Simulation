@@ -60,12 +60,13 @@ __global__ void BoundaryConditions(int bounds, HashMap<float>* c_map, uint3 size
 	}
 }
 
-void BoundaryConditionsCuda(int bounds, HashMap<float>* map, const uint3& length) {
+cudaError_t BoundaryConditionsCuda(int bounds, HashMap<float>* map, const uint3& length) {
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;
 	ThreadAllocator2D(blocks, threads, length.x);
 
 	BoundaryConditions<<<blocks, threads>>> (bounds, map, length);
-	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel");
+	cuda_status = PostExecutionChecks(cuda_status, "BoundaryConditionsKernel");
+	return cuda_status;
 }

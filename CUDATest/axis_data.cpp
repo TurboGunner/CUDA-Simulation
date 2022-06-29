@@ -23,7 +23,7 @@ void AxisData::LoadDefaultDataSet() {
 	for (z_current; z_current < size_.z; z_current++) {
 		for (y_current; y_current < size_.y; y_current++) {
 			for (unsigned int i = 0; i < size_.x; i++) {
-				map_->Put(IndexPair(i, y_current, z_current), 0);
+				map_->Put(IndexPair(i, y_current, z_current).IX(size_.x), .5);
 			}
 		}
 	}
@@ -47,4 +47,8 @@ void AxisData::operator=(const AxisData& copy) {
 	map_ = copy.map_;
 	axis_ = copy.axis_;
 	size_ = copy.size_;
+}
+
+bool AxisData::operator<(const AxisData& copy) const {
+	return !(axis_ == copy.axis_ && size_.x == copy.size_.x && size_.y == copy.size_.y && size_.z == copy.size_.z);
 }

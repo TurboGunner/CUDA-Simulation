@@ -62,17 +62,17 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 	}
 }
 
-void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const uint3& length) {
+cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const uint3& length) {
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
-	HashMap<float>* v_map_x = velocity.GetVectorMap()[0].map_->device_alloc_,
-		*v_map_y = velocity.GetVectorMap()[1].map_->device_alloc_,
-		*v_map_z = velocity.GetVectorMap()[2].map_->device_alloc_,
-		*c_map = current.map_->device_alloc_,
-		*p_map = previous.map_->device_alloc_;
+	HashMap<float>*& v_map_x = velocity.map_[0].map_->device_alloc_,
+		*&v_map_y = velocity.map_[1].map_->device_alloc_,
+		*&v_map_z = velocity.map_[2].map_->device_alloc_,
+		*&c_map = current.map_->device_alloc_,
+		*&p_map = previous.map_->device_alloc_;
 
 	std::cout << "bidoof" << std::endl;
 
@@ -80,4 +80,5 @@ void AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& 
 	BoundaryConditionsCuda(0, c_map, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");
+	return cuda_status;
 }

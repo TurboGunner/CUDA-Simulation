@@ -7,8 +7,12 @@
 #include "cudamap.cuh"
 
 #include <string>
+#include <vector>
+#include <functional>
 
 using std::string;
+using std::vector;
+using std::reference_wrapper;
 
 class VectorField {
 	public:
@@ -19,7 +23,6 @@ class VectorField {
 		VectorField(uint3 size);
 
 		/// <summary> Gets a reference of the vector field map that contains the data. </summary>
-		AxisData*& GetVectorMap();
 
 		/// <summary> Operator overload for copying the data of an existing vector field. </summary>
 		void operator=(const VectorField& copy);
@@ -27,8 +30,9 @@ class VectorField {
 		/// <summary> Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct. </summary>
 		string ToString();
 
+		vector<AxisData> map_;
+
 	private:
-		AxisData* map_;
 		uint3 size_;
 
 		/// <summary> Loads in zeroes for all data. Made to be sparse. </summary>

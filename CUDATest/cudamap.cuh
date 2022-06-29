@@ -148,10 +148,12 @@ public:
         else {
             ptr = device_alloc_;
         }
+        std::cout << table_host_[0] << std::endl;
     }
 
     __host__ void HostTransfer(cudaError_t& cuda_status) {
         cuda_status = CopyFunction("HostTransferTable", table_host_, table_, cudaMemcpyDeviceToHost, cuda_status, sizeof(V), hash_table_size_);
+        cudaDeviceSynchronize();
     }
 
     /// <summary> Removes hash table value, treated as erased in the pointers logically. </summary>
@@ -193,6 +195,10 @@ public:
         table_ = src.table_;
         hashes_ = src.hashes_;
         return *this;
+    }
+
+    __host__ __device__ size_t Size() const {
+        return hash_table_size_;
     }
 
     HashMap<V>* device_alloc_ = nullptr;

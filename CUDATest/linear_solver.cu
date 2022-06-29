@@ -23,7 +23,7 @@ __global__ void LinearSolverKernel(HashMap<float>* data, HashMap<float>* data_pr
 	}
 }
 
-void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const uint3& length) {
+cudaError_t LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const uint3& length) {
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;
@@ -36,4 +36,5 @@ void LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const f
 	BoundaryConditionsCuda(0, c_map, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel");
+	return cuda_status;
 }

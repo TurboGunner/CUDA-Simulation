@@ -11,6 +11,8 @@ OpenVDBHandler::OpenVDBHandler(FluidSim& sim, string file_name) {
 
 	openvdb::initialize();
 	grid_vec = CreateGrids();
+
+	std::cout << sim_.density_.map_->Get(IndexPair(32, 32, 32).IX(sim_.size_.x)) << std::endl;
 }
 
 openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
@@ -44,9 +46,13 @@ vector<openvdb::FloatGrid::Accessor> OpenVDBHandler::GetAccessors() {
 }
 
 void OpenVDBHandler::LoadData() {
-	VectorField velocity = sim_.velocity_;
-	AxisData density = sim_.density_;
+	LoadData(sim_.velocity_.map_[0].map_,
+		sim_.velocity_.map_[1].map_,
+		sim_.velocity_.map_[2].map_,
+		sim_.density_.map_);
+}
 
+void OpenVDBHandler::LoadData(HashMap<float>*& v_x, HashMap<float>*& v_y, HashMap<float>*& v_z, HashMap<float>*& density) {
 	vector<openvdb::FloatGrid::Accessor> accessors = GetAccessors();
 	unsigned int y_current = 0, z_current = 0;
 
@@ -57,20 +63,27 @@ void OpenVDBHandler::LoadData() {
 			for (unsigned int i = 0; i < sim_.size_.x; i++) {
 				IndexPair current(i, y_current, z_current);
 				xyz.reset(i, y_current, z_current);
-				accessors.at(0).setValue(xyz, velocity.GetVectorMap()[0].map_->Get(current.IX(sim_.size_.x)));
-				accessors.at(1).setValue(xyz, velocity.GetVectorMap()[1].map_->Get(current.IX(sim_.size_.x)));
-				accessors.at(2).setValue(xyz, velocity.GetVectorMap()[2].map_->Get(current.IX(sim_.size_.x)));
-				accessors.at(3).setValue(xyz, density.map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(0).setValue(xyz, v_x->Get(current.IX(sim_.size_.x)));
+				accessors.at(1).setValue(xyz, v_y->Get(current.IX(sim_.size_.x)));
+				accessors.at(2).setValue(xyz, v_z->Get(current.IX(sim_.size_.x)));
+				accessors.at(3).setValue(xyz, density->Get(IndexPair(31, 31, 31).IX(sim_.size_.x)));
 			}
 		}
 	}
 }
 
 void OpenVDBHandler::WriteFile() {
+	WriteFile(sim_.velocity_.map_[0].map_,
+		sim_.velocity_.map_[1].map_,
+		sim_.velocity_.map_[2].map_,
+		sim_.density_.map_);
+}
+
+void OpenVDBHandler::WriteFile(HashMap<float>*& v_x, HashMap<float>*& v_y, HashMap<float>*& v_z, HashMap<float>*& density) {
 	string file_extension = file_name_ + std::format("{:04}", index_) + ".vdb";
 	openvdb::io::File file(file_extension);
 
-	LoadData();
+	LoadData(v_x, v_y, v_z, density);
 
 	file.write(grid_vec);
 	file.close();

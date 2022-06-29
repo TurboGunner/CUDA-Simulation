@@ -5,8 +5,6 @@
 
 #include <math.h>
 
-enum class Direction { Origin, Left, Right, Up, Down };
-
 struct FluidSim {
 	/// <summary> Default Constructor </summary>
 	FluidSim() = default;
