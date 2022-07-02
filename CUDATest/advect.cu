@@ -8,6 +8,7 @@ __device__ inline void AveragerLogic(float& value, float& current, float& previo
 		value = length + 0.5f;
 	}
 	current = floorf(value);
+	//current = value;
 	previous = current + 1.0f;
 }
 
@@ -31,9 +32,9 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 	float x_value, y_value, z_value;
 
 	if (x_bounds < length.x - 1 && y_bounds < length.y - 1 && z_bounds < length.z - 1) {
-		x_value = x_bounds - (x_dt * (*velocity_x).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
-		y_value = y_bounds - (y_dt * (*velocity_y).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
-		z_value = z_bounds - (z_dt * (*velocity_z).Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)));
+		x_value = x_bounds - (x_dt * (*velocity_x).Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)));
+		y_value = y_bounds - (y_dt * (*velocity_y).Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)));
+		z_value = z_bounds - (z_dt * (*velocity_z).Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)));
 
 		AveragerLogic(x_value, x_current, x_previous, length.x);
 		AveragerLogic(y_value, y_current, y_previous, length.y);
@@ -46,19 +47,27 @@ __global__ void AdvectKernel(HashMap<float>* data, HashMap<float>* data_prev, Ha
 		z_fac_prev = z_value - z_current;
 		z_fac_current = 1.0f - z_fac_prev;
 
-		float compute_x_current = (x_fac_current *
-			(y_fac_current * (((*data_prev)[IndexPair(x_current, y_current, z_current).IX(length.x)] * z_fac_current)
-				+ ((*data_prev)[IndexPair(x_current, y_previous, z_previous).IX(length.x)] * z_fac_prev)))
-			+ (y_fac_prev * (*data_prev)[IndexPair(x_current, y_current, z_previous).IX(length.x)] * z_fac_current)
-				+ (*data_prev)[IndexPair(x_current, y_current, z_previous).IX(length.x)] * z_fac_prev);
+		float compute_x_current_1 = y_fac_current *
+			((*data_prev)[IndexPair(x_current, y_current, z_current).IX(length.x)] * z_fac_current)
+			+ ((*data_prev)[IndexPair(x_current, y_current, z_previous).IX(length.x)] * z_fac_prev);
 
-		float compute_x_prev = (x_fac_prev *
-			(y_fac_current * (((*data_prev)[IndexPair(x_previous, y_current, z_current).IX(length.x)] * z_fac_current)
-				+ (*data_prev)[IndexPair(x_previous, y_current, z_previous).IX(length.x)] * z_fac_prev))
-			+ (y_fac_prev * ((*data_prev)[IndexPair(x_previous, y_previous, z_current).IX(length.x)] * z_fac_current))
-				+ (*data_prev)[IndexPair(x_previous, y_previous, z_previous).IX(length.x)] * z_fac_prev);
+		float compute_x_current_2  = y_fac_prev *
+			((*data_prev)[IndexPair(x_current, y_previous, z_current).IX(length.x)] * z_fac_current)
+			+ ((*data_prev)[IndexPair(x_current, y_previous, z_previous).IX(length.x)] * z_fac_prev);
 
-		data->Get(IndexPair(z_bounds, y_bounds, x_bounds).IX(length.x)) = compute_x_current + compute_x_prev;
+		float compute_x_current = x_fac_current * (compute_x_current_1 + compute_x_current_2);
+
+		float compute_x_prev_1 = y_fac_current *
+			((*data_prev)[IndexPair(x_previous, y_current, z_current).IX(length.x)] * z_fac_current)
+			+ ((*data_prev)[IndexPair(x_previous, y_current, z_previous).IX(length.x)] * z_fac_prev);
+
+		float compute_x_prev_2 = y_fac_prev *
+			((*data_prev)[IndexPair(x_previous, y_previous, z_current).IX(length.x)] * z_fac_current)
+			+ ((*data_prev)[IndexPair(x_previous, y_previous, z_previous).IX(length.x)] * z_fac_prev);
+
+		float compute_x_prev = x_fac_prev * (compute_x_prev_1 + compute_x_prev_2);
+
+		data->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)) = compute_x_current + compute_x_prev;
 	}
 }
 
@@ -77,7 +86,7 @@ cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, Vector
 	std::cout << "bidoof" << std::endl;
 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, v_map_z, dt, length, bounds);
-	BoundaryConditionsCuda(0, c_map, length);
+	BoundaryConditionsCuda(bounds, c_map, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");
 	return cuda_status;

@@ -63,9 +63,9 @@ void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, co
     unsigned int block_count = ((length + threads_per_dim) - 1) / (threads_per_dim);
 
     threads = dim3(threads_per_dim, threads_per_dim, threads_per_dim);
-    blocks = dim3(block_count, block_count, block_count);
+    blocks = dim3(block_count - 1, block_count - 1, block_count - 1);
 
-    std::cout << "Allocated " << threads.x * threads.y * threads.z * block_count * block_count * block_count << " threads!" << std::endl;
+    std::cout << "Allocated " << threads.x * threads.y * threads.z * (block_count - 1) * (block_count - 1) * (block_count - 1) << " threads!" << std::endl;
 }
 
 void ThreadAllocator2D(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block) {
@@ -73,9 +73,9 @@ void ThreadAllocator2D(dim3& blocks, dim3& threads, const unsigned int& length, 
     unsigned int block_count = ((length + threads_per_dim) - 1) / (threads_per_dim);
 
     threads = dim3(threads_per_dim, threads_per_dim);
-    blocks = dim3(block_count, block_count);
+    blocks = dim3(block_count - 1, block_count - 1);
 
-    std::cout << "Allocated " << threads.x * threads.y * block_count * block_count << " threads!" << std::endl;
+    std::cout << "Allocated " << threads.x * threads.y * (block_count - 1) * (block_count - 1) << " threads!" << std::endl;
 }
 
 

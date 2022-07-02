@@ -28,20 +28,20 @@ void FluidSim::AddDensity(IndexPair pair, float amount) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
-	density_.map_->Put(pair.IX(size_.x), amount);
+	density_.map_->Get(pair.IX(size_.x)) += amount;
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
-	velocity_.map_[0].map_->Put(pair.IX(size_.x), x);
-	velocity_.map_[1].map_->Put(pair.IX(size_.x), y);
-	velocity_.map_[2].map_->Put(pair.IX(size_.x), z);
+	velocity_.map_[0].map_->Get(pair.IX(size_.x)) += x;
+	velocity_.map_[1].map_->Get(pair.IX(size_.x)) += y;
+	velocity_.map_[2].map_->Get(pair.IX(size_.x)) += z;
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
-	float a = dt_ * visc * (size_.x - 2) * (size_.y - 2) * (size_.z - 2);
+	float a = dt_ * visc * (size_.x - 2) * (size_.y - 2);
 
 	LinearSolve(bounds, current, previous, a, 1 + 6 * a);
 }
@@ -51,7 +51,7 @@ void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
 }
 
 void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
-	AdvectCuda(0, current, previous, velocity, dt_, size_);
+	AdvectCuda(bounds, current, previous, velocity, dt_, size_);
 }
 
 void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
@@ -62,11 +62,11 @@ void FluidSim::Simulate() {
 	AddVelocity(IndexPair(0, 0, 0), 12, 10, 22);
 	AddVelocity(IndexPair(5, 5, 5), 12, 10, 22);
 	AddVelocity(IndexPair(4, 3, 3), 22, 22, 22);
-	AddVelocity(IndexPair(31, 31, 31), 220, 22, 22);
+	AddVelocity(IndexPair(63, 63, 63), 22, 22, 22);
 
 	AddDensity(IndexPair(0, 0, 0), 10.0f);
 	AddDensity(IndexPair(2, 2, 2), 10.0f);
-	AddDensity(IndexPair(31, 31, 31), 1000.0f);
+	AddDensity(IndexPair(63, 63, 63), 10.0f);
 
 	AllocateDeviceData();
 
@@ -86,7 +86,6 @@ void FluidSim::Simulate() {
 		Diffuse(3, viscosity_, velocity_prev_.map_[2], velocity_.map_[2]);
 
 		Project(velocity_prev_, velocity_);
-		//Project(velocity_, velocity_prev_);
 
 		Advect(1, velocity_.map_[0], velocity_prev_.map_[0], velocity_prev_);
 		Advect(2, velocity_.map_[1], velocity_prev_.map_[1], velocity_prev_);
@@ -95,9 +94,34 @@ void FluidSim::Simulate() {
 		Project(velocity_, velocity_prev_);
 
 		Diffuse(0, diffusion_, density_prev_, density_);
+
+		float max = 0.0f, min = .00000001f;
+		for (size_t i = 0; i < density_.map_->Size(); i++) {
+			if (density_.map_->Get(i) > max) {
+				max = density_.map_->Get(i);
+			}
+			if (density_.map_->Get(i) < min && density_.map_->Get(i) != 0.0f) {
+				min = density_.map_->Get(i);
+			}
+		}
+
+		std::cout << "Max: " << max << std::endl;
+		std::cout << "Min: " << min << std::endl;
+
 		Advect(0, density_, density_prev_, velocity_);
+		Project(velocity_, velocity_prev_);
 
 		ReallocateHostData();
+		for (size_t i = 0; i < density_.map_->Size(); i++) {
+			if (density_.map_->Get(i) > max) {
+				max = density_.map_->Get(i);
+			}
+			if (density_.map_->Get(i) < min && density_.map_->Get(i) != 0.0f) {
+				min = density_.map_->Get(i);
+			}
+		}
+		std::cout << "Max: " << max << std::endl;
+		std::cout << "Min: " << min << std::endl;
 	}
 }
 
@@ -141,7 +165,6 @@ void FluidSim::operator=(const FluidSim& copy) {
 	diffusion_ = copy.diffusion_;
 	viscosity_ = copy.viscosity_;
 	iterations_ = copy.iterations_;
-	std::cout << "A" << std::endl;
 }
 
 FluidSim& FluidSim::operator*() {
