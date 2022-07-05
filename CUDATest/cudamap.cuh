@@ -12,7 +12,6 @@
 
 using std::string;
 
-template <typename V>
 class HashMap {
 public:
     /// <summary> The default constructor for the HashMap. </summary>
@@ -32,10 +31,10 @@ public:
 
     /// <summary> Helper method to initialize unified memory with the values and the accompanying hash map. </summary>
     __host__ __device__ void Initialization() {
-        cudaMalloc(&table_, (size_t) sizeof(V) * hash_table_size_);
+        cudaMalloc(&table_, (size_t) sizeof(float) * hash_table_size_);
         cudaMalloc(&hashes_, (size_t) sizeof(int) * hash_table_size_);
 
-        cudaMallocHost(&table_host_, sizeof(V) * hash_table_size_);
+        cudaMallocHost(&table_host_, sizeof(float) * hash_table_size_);
         cudaMallocHost(&hashes_host_, (size_t)sizeof(int) * hash_table_size_);
 
         for (size_t i = 0; i < hash_table_size_; i++) {
@@ -59,7 +58,7 @@ public:
     /// <summary> Allocates new HashMap pointer, new keyword overload. </summary>
     __host__ __device__ void* operator new(size_t size) {
         void* ptr;
-        ptr = malloc(sizeof(HashMap<V>));
+        ptr = malloc(sizeof(HashMap));
         return ptr;
     }
 
@@ -82,7 +81,7 @@ public:
     }
 
     /// <summary> Accessor method when key is an input. </summary>
-    __host__ __device__ V& Get(const IndexPair& key) {
+    __host__ __device__ float& Get(const IndexPair& key) {
         size_t hash = hash_func_(key);
         long hash_pos = FindHash(hash);
 #ifdef __CUDA_ARCH__
@@ -93,7 +92,7 @@ public:
     }
 
     /// <summary> Accessor method when an integer index is an input. </summary>
-    __host__ __device__ V& Get(const int& index) {
+    __host__ __device__ float& Get(const int& index) {
 #ifdef __CUDA_ARCH__
         return table_[index];
 #else
@@ -105,7 +104,7 @@ public:
     }
 
     /// <summary> Accessor method when int index is an input. </summary>
-    __host__ __device__ void Put(const IndexPair& key, const V& value) {
+    __host__ __device__ void Put(const IndexPair& key, const float& value) {
 #ifdef __CUDA_ARCH__
 #else
         size_t hash = hash_func_(key);
@@ -127,7 +126,7 @@ public:
     }
 
     /// <summary> Accessor method when int index is an input. </summary>
-    __host__ __device__ void Put(int key, V value) {
+    __host__ __device__ void Put(int key, float value) {
 #ifdef __CUDA_ARCH__
             table_[key] = value;
 #else
@@ -136,13 +135,13 @@ public:
     }
 
     /// <summary> Device Transfer method, uses a toggle boolean to ensure that the device pointer equivalent is only allocated once. </summary
-    void DeviceTransfer(cudaError_t& cuda_status, HashMap<V>*& src, HashMap<V>*& ptr) {
-        cuda_status = CopyFunction("DeviceTransferTable", table_, table_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(V), hash_table_size_);
+    void DeviceTransfer(cudaError_t& cuda_status, HashMap*& src, HashMap*& ptr) {
+        cuda_status = CopyFunction("DeviceTransferTable", table_, table_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(float), hash_table_size_);
         cuda_status = CopyFunction("DeviceTransferHash", hashes_, hashes_host_, cudaMemcpyHostToDevice, cuda_status, sizeof(int), hash_table_size_);
         if (!device_allocated_status) {
-            cuda_status = cudaMalloc(&ptr, sizeof(HashMap<V>));
+            cuda_status = cudaMalloc(&ptr, sizeof(HashMap));
             device_allocated_status = true;
-            cuda_status = CopyFunction("DeviceTransferObject", ptr, src, cudaMemcpyHostToDevice, cuda_status, sizeof(HashMap<V>), 1);
+            cuda_status = CopyFunction("DeviceTransferObject", ptr, src, cudaMemcpyHostToDevice, cuda_status, sizeof(HashMap), 1);
             device_alloc_ = ptr;
         }
         else {
@@ -152,13 +151,13 @@ public:
     }
 
     __host__ void HostTransfer(cudaError_t& cuda_status) {
-        cuda_status = CopyFunction("HostTransferTable", table_host_, table_, cudaMemcpyDeviceToHost, cuda_status, sizeof(V), hash_table_size_);
+        cuda_status = CopyFunction("HostTransferTable", table_host_, table_, cudaMemcpyDeviceToHost, cuda_status, sizeof(float), hash_table_size_);
         cudaDeviceSynchronize();
     }
 
     /// <summary> Removes hash table value, treated as erased in the pointers logically. </summary>
     __host__ __device__ void Remove(const IndexPair& key) {
-        size_t hash = hash_func_(key, hash_table_size_);
+        size_t hash = hash_func_(key);
         unsigned long hash_pos = FindHash(hash);
         if (hash_pos == -1) {
             return;
@@ -176,14 +175,14 @@ public:
     }
 
     /// <summary> Calls get from operator overload based on the key input. </summary>
-    __host__ __device__ V& operator[](const IndexPair& key) {
-        V output = Get(key);
+    __host__ __device__ float& operator[](const IndexPair& key) {
+        float output = Get(key);
         return output;
     }
 
     /// <summary> Calls get from operator overload based on the integer index input. </summary>
-    __host__ __device__ V& operator[](const int& index) {
-        V output = Get(index);
+    __host__ __device__ float& operator[](const int& index) {
+        float output = Get(index);
         return output;
     }
 
@@ -201,10 +200,10 @@ public:
         return hash_table_size_;
     }
 
-    HashMap<V>* device_alloc_ = nullptr;
+    HashMap* device_alloc_ = nullptr;
 
 private:
-    V* table_, *table_host_;
+    float* table_, *table_host_;
     int* hashes_, *hashes_host_;
 
     long size_ = 0;

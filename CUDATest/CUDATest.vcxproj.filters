@@ -60,6 +60,9 @@
     <ClInclude Include="vector_field.hpp">
       <Filter>includes\data_structures</Filter>
     </ClInclude>
+    <ClInclude Include="diagnostic_statistics.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="handler_methods.cpp">
@@ -96,6 +99,9 @@
     </CudaCompile>
     <CudaCompile Include="boundary_conditions.cu">
       <Filter>cuda\navier_stokes_funcs</Filter>
+    </CudaCompile>
+    <CudaCompile Include="diagnostic_statistics.cu">
+      <Filter>cuda</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

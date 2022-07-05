@@ -95,6 +95,7 @@
   <ItemGroup>
     <CudaCompile Include="advect.cu" />
     <CudaCompile Include="boundary_conditions.cu" />
+    <CudaCompile Include="diagnostic_statistics.cu" />
     <CudaCompile Include="index_pair_cuda.cu" />
     <CudaCompile Include="linear_solver.cu" />
     <CudaCompile Include="kernel.cu" />
@@ -110,6 +111,7 @@
   <ItemGroup>
     <ClInclude Include="axis_data.hpp" />
     <ClInclude Include="cudamap.cuh" />
+    <ClInclude Include="diagnostic_statistics.cuh" />
     <ClInclude Include="fluid_sim.hpp" />
     <ClInclude Include="fluid_sim_cuda.cuh" />
     <ClInclude Include="handler_methods.hpp" />

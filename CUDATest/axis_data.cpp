@@ -14,7 +14,7 @@ AxisData::AxisData(uint3 size, Axis axis) {
 	}
 	size_ = size;
 	axis_ = axis;
-	map_ = new HashMap<float>(size_.x * size_.y * size_.z);
+	map_ = new HashMap(size_.x * size_.y * size_.z);
 	LoadDefaultDataSet();
 }
 

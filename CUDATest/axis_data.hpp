@@ -33,7 +33,7 @@ struct AxisData {
 	bool operator<(const AxisData& copy) const;
 
 	Axis axis_;
-	HashMap<float>* map_;
+	HashMap* map_;
 
 	private:
 		uint3 size_;

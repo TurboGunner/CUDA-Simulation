@@ -52,7 +52,7 @@ void OpenVDBHandler::LoadData() {
 		sim_.density_.map_);
 }
 
-void OpenVDBHandler::LoadData(HashMap<float>*& v_x, HashMap<float>*& v_y, HashMap<float>*& v_z, HashMap<float>*& density) {
+void OpenVDBHandler::LoadData(HashMap*& v_x, HashMap*& v_y, HashMap*& v_z, HashMap*& density) {
 	vector<openvdb::FloatGrid::Accessor> accessors = GetAccessors();
 	unsigned int y_current = 0, z_current = 0;
 
@@ -73,13 +73,14 @@ void OpenVDBHandler::LoadData(HashMap<float>*& v_x, HashMap<float>*& v_y, HashMa
 }
 
 void OpenVDBHandler::WriteFile() {
+	//cudaDeviceSynchronize();
 	WriteFile(sim_.velocity_.map_[0].map_,
 		sim_.velocity_.map_[1].map_,
 		sim_.velocity_.map_[2].map_,
 		sim_.density_.map_);
 }
 
-void OpenVDBHandler::WriteFile(HashMap<float>*& v_x, HashMap<float>*& v_y, HashMap<float>*& v_z, HashMap<float>*& density) {
+void OpenVDBHandler::WriteFile(HashMap*& v_x, HashMap*& v_y, HashMap*& v_z, HashMap*& density) {
 	string file_extension = file_name_ + std::format("{:04}", index_) + ".vdb";
 	openvdb::io::File file(file_extension);
 

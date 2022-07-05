@@ -59,14 +59,9 @@ void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, fl
 }
 
 void FluidSim::Simulate() {
-	AddVelocity(IndexPair(0, 0, 0), 12, 10, 22);
-	AddVelocity(IndexPair(5, 5, 5), 12, 10, 22);
-	AddVelocity(IndexPair(4, 3, 3), 22, 22, 22);
-	AddVelocity(IndexPair(63, 63, 63), 22, 22, 22);
+	AddVelocity(IndexPair(62, 62, 62), 5.0f, 5.0f, 0);
 
-	AddDensity(IndexPair(0, 0, 0), 10.0f);
-	AddDensity(IndexPair(2, 2, 2), 10.0f);
-	AddDensity(IndexPair(63, 63, 63), 10.0f);
+	AddDensity(IndexPair(62, 62, 62), 10.0f);
 
 	AllocateDeviceData();
 
@@ -78,8 +73,8 @@ void FluidSim::Simulate() {
 			velocity_.map_[2].map_,
 			density_.map_);
 
-		std::cout << "Density: " << density_.map_->Get(IndexPair(31, 31, 31).IX(size_.x)) << std::endl;
-		std::cout <<  "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(31, 31, 31).IX(size_.x)) << std::endl;
+		std::cout << "Density: " << density_.map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
+		std::cout <<  "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
 
 		Diffuse(1, viscosity_, velocity_prev_.map_[0], velocity_.map_[0]);
 		Diffuse(2, viscosity_, velocity_prev_.map_[1], velocity_.map_[1]);
@@ -95,33 +90,21 @@ void FluidSim::Simulate() {
 
 		Diffuse(0, diffusion_, density_prev_, density_);
 
-		float max = 0.0f, min = .00000001f;
-		for (size_t i = 0; i < density_.map_->Size(); i++) {
-			if (density_.map_->Get(i) > max) {
-				max = density_.map_->Get(i);
-			}
-			if (density_.map_->Get(i) < min && density_.map_->Get(i) != 0.0f) {
-				min = density_.map_->Get(i);
-			}
-		}
-
-		std::cout << "Max: " << max << std::endl;
-		std::cout << "Min: " << min << std::endl;
-
 		Advect(0, density_, density_prev_, velocity_);
-		Project(velocity_, velocity_prev_);
+		std::cout << "LS Max: " << MaximumCuda(density_, size_) << std::endl;
 
 		ReallocateHostData();
+
+		float max = 0.0f, max_v_x = 0.0f;
 		for (size_t i = 0; i < density_.map_->Size(); i++) {
-			if (density_.map_->Get(i) > max) {
-				max = density_.map_->Get(i);
-			}
-			if (density_.map_->Get(i) < min && density_.map_->Get(i) != 0.0f) {
-				min = density_.map_->Get(i);
-			}
+			max += density_.map_->Get(i);
+			max_v_x += velocity_.map_[0].map_->Get(i);
 		}
-		std::cout << "Max: " << max << std::endl;
-		std::cout << "Min: " << min << std::endl;
+		std::cout << "Total (Density): " << max << std::endl;
+		std::cout << "Total (V_X): " << max_v_x << std::endl;
+
+		AddVelocity(IndexPair(62, 62, 62), 2.5f, 2.5f, 0);
+		AddDensity(IndexPair(62, 62, 62), 10.0f);
 	}
 }
 

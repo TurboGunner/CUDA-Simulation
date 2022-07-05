@@ -21,8 +21,8 @@ struct OpenVDBHandler {
 
 	void WriteFile();
 
-	void LoadData(HashMap<float>*& v_x, HashMap<float>*& v_y, HashMap<float>*& v_z, HashMap<float>*& density);
-	void WriteFile(HashMap<float>*& v_x, HashMap<float>*& v_y, HashMap<float>*& v_z, HashMap<float>*& density);
+	void LoadData(HashMap*& v_x, HashMap*& v_y, HashMap*& v_z, HashMap*& density);
+	void WriteFile(HashMap*& v_x, HashMap*& v_y, HashMap*& v_z, HashMap*& density);
 
 	FluidSim sim_;
 	vector<openvdb::FloatGrid::Ptr> grids_;

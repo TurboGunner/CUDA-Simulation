@@ -51,7 +51,7 @@ struct FluidSim {
 
 	cudaError_t cuda_status = cudaSuccess;
 
-	HashMap<float>* d_map = nullptr, *d_prev_map = nullptr,
+	HashMap* d_map = nullptr, *d_prev_map = nullptr,
 		*v_map_x = nullptr, * v_map_y = nullptr, *v_map_z = nullptr,
 		*v_prev_map_x = nullptr, *v_prev_map_y = nullptr, *v_prev_map_z = nullptr;
 
