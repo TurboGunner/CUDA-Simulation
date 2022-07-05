@@ -46,7 +46,6 @@ __global__ void BoundaryConditions(int bounds, HashMap* c_map, uint3 size) {
 			+ c_map->Get(IndexPair(bound, 1, bound).IX(length))
 			+ c_map->Get(IndexPair(bound, 0, bound - 1).IX(length)));
 
-
 		c_map->Get(IndexPair(0, bound, bound).IX(length)) = .33f * //Max X, Min Y, Max Z
 			(c_map->Get(IndexPair(1, bound, bound).IX(length))
 			+ c_map->Get(IndexPair(0, bound - 1, bound).IX(length))

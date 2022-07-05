@@ -49,22 +49,22 @@ __global__ void AdvectKernel(HashMap* data, HashMap* data_prev, HashMap* velocit
 	z_fac_current = 1.0f - z_fac_prev;
 
 	float compute_x_current_1 = y_fac_current *
-		((*data_prev)[IndexPair(x_current, y_current, z_current).IX(length.x)] * z_fac_current)
-		+ ((*data_prev)[IndexPair(x_current, y_current, z_previous).IX(length.x)] * z_fac_prev);
+		(data->Get(IndexPair(x_current, y_current, z_current).IX(length.x)) * z_fac_current)
+		+ (data->Get(IndexPair(x_current, y_current, z_previous).IX(length.x)) * z_fac_prev);
 
 	float compute_x_current_2  = y_fac_prev *
-		((*data_prev)[IndexPair(x_current, y_previous, z_current).IX(length.x)] * z_fac_current)
-		+ ((*data_prev)[IndexPair(x_current, y_previous, z_previous).IX(length.x)] * z_fac_prev);
+		(data->Get(IndexPair(x_current, y_previous, z_current).IX(length.x)) * z_fac_current)
+		+ (data->Get(IndexPair(x_current, y_previous, z_previous).IX(length.x)) * z_fac_prev);
 
 	float compute_x_current = x_fac_current * (compute_x_current_1 + compute_x_current_2);
 
 	float compute_x_prev_1 = y_fac_current *
-		((*data_prev)[IndexPair(x_previous, y_current, z_current).IX(length.x)] * z_fac_current)
-		+ ((*data_prev)[IndexPair(x_previous, y_current, z_previous).IX(length.x)] * z_fac_prev);
+		(data->Get(IndexPair(x_previous, y_current, z_current).IX(length.x)) * z_fac_current)
+		+ (data->Get(IndexPair(x_previous, y_current, z_previous).IX(length.x)) * z_fac_prev);
 
 	float compute_x_prev_2 = y_fac_prev *
-		((*data_prev)[IndexPair(x_previous, y_previous, z_current).IX(length.x)] * z_fac_current)
-		+ ((*data_prev)[IndexPair(x_previous, y_previous, z_previous).IX(length.x)] * z_fac_prev);
+		(data->Get(IndexPair(x_previous, y_previous, z_current).IX(length.x)) * z_fac_current)
+		+ (data->Get(IndexPair(x_previous, y_previous, z_previous).IX(length.x)) * z_fac_prev);
 
 	float compute_x_prev = x_fac_prev * (compute_x_prev_1 + compute_x_prev_2);
 

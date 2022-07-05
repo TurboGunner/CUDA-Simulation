@@ -95,13 +95,13 @@ void FluidSim::Simulate() {
 
 		ReallocateHostData();
 
-		float max = 0.0f, max_v_x = 0.0f;
-		for (size_t i = 0; i < density_.map_->Size(); i++) {
-			max += density_.map_->Get(i);
-			max_v_x += velocity_.map_[0].map_->Get(i);
-		}
-		std::cout << "Total (Density): " << max << std::endl;
-		std::cout << "Total (V_X): " << max_v_x << std::endl;
+		//float max = 0.0f, max_v_x = 0.0f;
+		//for (size_t i = 0; i < density_.map_->Size(); i++) {
+			//max += density_.map_->Get(i);
+			//max_v_x += velocity_.map_[0].map_->Get(i);
+		//}
+		//std::cout << "Total (Density): " << max << std::endl;
+		//std::cout << "Total (V_X): " << max_v_x << std::endl;
 
 		AddVelocity(IndexPair(62, 62, 62), 2.5f, 2.5f, 0);
 		AddDensity(IndexPair(62, 62, 62), 10.0f);

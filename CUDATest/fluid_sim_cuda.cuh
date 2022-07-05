@@ -31,3 +31,5 @@ cudaError_t ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity
 __global__ void BoundaryConditions(int bounds, HashMap* c_map, uint3 length);
 
 cudaError_t BoundaryConditionsCuda(int bounds, HashMap* map, const uint3& length);
+
+__global__ void AddOnAxisCuda(AxisData& data, IndexPair origin, const uint3& length);
