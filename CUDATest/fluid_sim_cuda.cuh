@@ -32,4 +32,10 @@ __global__ void BoundaryConditions(int bounds, HashMap* c_map, uint3 length);
 
 cudaError_t BoundaryConditionsCuda(int bounds, HashMap* map, const uint3& length);
 
-__global__ void AddOnAxisCuda(AxisData& data, IndexPair origin, const uint3& length);
+__global__ void AddOnAxis(HashMap* data, IndexPair origin, float value, uint3 length);
+
+cudaError_t AddOnAxisCuda(AxisData& current, const IndexPair& origin, const float& value, const uint3& length);
+
+__global__ void AddOnVector(HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, IndexPair origin, float3 value, uint3 length);
+
+cudaError_t AddOnVectorCuda(VectorField& velocity, const IndexPair& origin, const float3& value, const uint3& length);

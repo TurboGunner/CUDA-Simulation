@@ -100,6 +100,7 @@
     <CudaCompile Include="linear_solver.cu" />
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="project.cu" />
+    <CudaCompile Include="simulation_effector.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="axis_data.cpp" />

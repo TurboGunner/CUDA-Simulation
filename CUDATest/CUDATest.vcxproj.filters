@@ -103,5 +103,8 @@
     <CudaCompile Include="diagnostic_statistics.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
+    <CudaCompile Include="simulation_effector.cu">
+      <Filter>cuda</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

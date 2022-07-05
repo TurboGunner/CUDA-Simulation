@@ -28,16 +28,20 @@ void FluidSim::AddDensity(IndexPair pair, float amount) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
-	density_.map_->Get(pair.IX(size_.x)) += amount;
+	AddOnAxisCuda(density_, pair, amount, size_);
 }
 
 void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
-	velocity_.map_[0].map_->Get(pair.IX(size_.x)) += x;
-	velocity_.map_[1].map_->Get(pair.IX(size_.x)) += y;
-	velocity_.map_[2].map_->Get(pair.IX(size_.x)) += z;
+	float3 float_vec;
+
+	float_vec.x = x;
+	float_vec.y = y;
+	float_vec.z = z;
+
+	AddOnVectorCuda(velocity_, pair, float_vec, size_);
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
@@ -59,22 +63,16 @@ void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, fl
 }
 
 void FluidSim::Simulate() {
+
+	AllocateDeviceData();
+
 	AddVelocity(IndexPair(62, 62, 62), 5.0f, 5.0f, 0);
 
 	AddDensity(IndexPair(62, 62, 62), 10.0f);
 
-	AllocateDeviceData();
-
 	OpenVDBHandler vdb_handler(*this);
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) { //Second bound condition is temporary!
-		vdb_handler.WriteFile(velocity_.map_[0].map_,
-			velocity_.map_[1].map_,
-			velocity_.map_[2].map_,
-			density_.map_);
-
-		std::cout << "Density: " << density_.map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
-		std::cout <<  "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
 
 		Diffuse(1, viscosity_, velocity_prev_.map_[0], velocity_.map_[0]);
 		Diffuse(2, viscosity_, velocity_prev_.map_[1], velocity_.map_[1]);
@@ -95,16 +93,16 @@ void FluidSim::Simulate() {
 
 		ReallocateHostData();
 
-		//float max = 0.0f, max_v_x = 0.0f;
-		//for (size_t i = 0; i < density_.map_->Size(); i++) {
-			//max += density_.map_->Get(i);
-			//max_v_x += velocity_.map_[0].map_->Get(i);
-		//}
-		//std::cout << "Total (Density): " << max << std::endl;
-		//std::cout << "Total (V_X): " << max_v_x << std::endl;
-
 		AddVelocity(IndexPair(62, 62, 62), 2.5f, 2.5f, 0);
 		AddDensity(IndexPair(62, 62, 62), 10.0f);
+
+		vdb_handler.WriteFile(velocity_.map_[0].map_,
+			velocity_.map_[1].map_,
+			velocity_.map_[2].map_,
+			density_.map_);
+
+		std::cout << "Density: " << density_.map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
+		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
 	}
 }
 
