@@ -27,7 +27,7 @@ int main()
     sim_dimensions.y = side_bound;
     sim_dimensions.z = side_bound;
 
-    FluidSim simulation(FPS_10, 1.0f, 1.0f, sim_dimensions, iter, 2.0f);
+    FluidSim simulation(FPS_60, 10.0f, 1.0f, sim_dimensions, iter, 0.332f);
 
     cudaError_t cuda_status = cudaSuccess;
 

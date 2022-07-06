@@ -46,13 +46,13 @@ vector<openvdb::FloatGrid::Accessor> OpenVDBHandler::GetAccessors() {
 }
 
 void OpenVDBHandler::LoadData() {
-	LoadData(sim_.velocity_.map_[0].map_,
-		sim_.velocity_.map_[1].map_,
-		sim_.velocity_.map_[2].map_,
-		sim_.density_.map_);
+	LoadData(sim_.velocity_.map_[0],
+		sim_.velocity_.map_[1],
+		sim_.velocity_.map_[2],
+		sim_.density_);
 }
 
-void OpenVDBHandler::LoadData(HashMap*& v_x, HashMap*& v_y, HashMap*& v_z, HashMap*& density) {
+void OpenVDBHandler::LoadData(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisData& density) {
 	vector<openvdb::FloatGrid::Accessor> accessors = GetAccessors();
 	unsigned int y_current = 0, z_current = 0;
 
@@ -63,24 +63,23 @@ void OpenVDBHandler::LoadData(HashMap*& v_x, HashMap*& v_y, HashMap*& v_z, HashM
 			for (unsigned int i = 0; i < sim_.size_.x; i++) {
 				IndexPair current(i, y_current, z_current);
 				xyz.reset(i, y_current, z_current);
-				accessors.at(0).setValue(xyz, v_x->Get(current.IX(sim_.size_.x)));
-				accessors.at(1).setValue(xyz, v_y->Get(current.IX(sim_.size_.x)));
-				accessors.at(2).setValue(xyz, v_z->Get(current.IX(sim_.size_.x)));
-				accessors.at(3).setValue(xyz, density->Get(IndexPair(31, 31, 31).IX(sim_.size_.x)));
+				accessors.at(0).setValue(xyz, v_x.map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(1).setValue(xyz, v_y.map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(2).setValue(xyz, v_z.map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(3).setValue(xyz, density.map_->Get(IndexPair(61, 61, 61).IX(sim_.size_.x)));
 			}
 		}
 	}
 }
 
 void OpenVDBHandler::WriteFile() {
-	//cudaDeviceSynchronize();
-	WriteFile(sim_.velocity_.map_[0].map_,
-		sim_.velocity_.map_[1].map_,
-		sim_.velocity_.map_[2].map_,
-		sim_.density_.map_);
+	WriteFile(sim_.velocity_.map_[0],
+		sim_.velocity_.map_[1],
+		sim_.velocity_.map_[2],
+		sim_.density_);
 }
 
-void OpenVDBHandler::WriteFile(HashMap*& v_x, HashMap*& v_y, HashMap*& v_z, HashMap*& density) {
+void OpenVDBHandler::WriteFile(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisData& density) {
 	string file_extension = file_name_ + std::format("{:04}", index_) + ".vdb";
 	openvdb::io::File file(file_extension);
 

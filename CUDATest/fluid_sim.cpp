@@ -28,6 +28,9 @@ void FluidSim::AddDensity(IndexPair pair, float amount) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
+
+	density_add_total_ += amount;
+
 	AddOnAxisCuda(density_, pair, amount, size_);
 }
 
@@ -40,6 +43,10 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 	float_vec.x = x;
 	float_vec.y = y;
 	float_vec.z = z;
+
+	v_add_total_.x += x;
+	v_add_total_.y += y;
+	v_add_total_.z += z;
 
 	AddOnVectorCuda(velocity_, pair, float_vec, size_);
 }
@@ -62,6 +69,26 @@ void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, fl
 	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_);
 }
 
+void FluidSim::VelocityStep() {
+	Diffuse(1, viscosity_, velocity_prev_.map_[0], velocity_.map_[0]);
+	Diffuse(2, viscosity_, velocity_prev_.map_[1], velocity_.map_[1]);
+	Diffuse(3, viscosity_, velocity_prev_.map_[2], velocity_.map_[2]);
+
+	Project(velocity_prev_, velocity_);
+
+	Advect(1, velocity_.map_[0], velocity_prev_.map_[0], velocity_prev_);
+	Advect(2, velocity_.map_[1], velocity_prev_.map_[1], velocity_prev_);
+	Advect(3, velocity_.map_[2], velocity_prev_.map_[2], velocity_prev_);
+
+	Project(velocity_, velocity_prev_);
+}
+
+void FluidSim::DensityStep() {
+	Diffuse(0, diffusion_, density_prev_, density_);
+
+	Advect(0, density_, density_prev_, velocity_);
+}
+
 void FluidSim::Simulate() {
 
 	AllocateDeviceData();
@@ -74,35 +101,19 @@ void FluidSim::Simulate() {
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) { //Second bound condition is temporary!
 
-		Diffuse(1, viscosity_, velocity_prev_.map_[0], velocity_.map_[0]);
-		Diffuse(2, viscosity_, velocity_prev_.map_[1], velocity_.map_[1]);
-		Diffuse(3, viscosity_, velocity_prev_.map_[2], velocity_.map_[2]);
+		VelocityStep();
 
-		Project(velocity_prev_, velocity_);
-
-		Advect(1, velocity_.map_[0], velocity_prev_.map_[0], velocity_prev_);
-		Advect(2, velocity_.map_[1], velocity_prev_.map_[1], velocity_prev_);
-		Advect(3, velocity_.map_[2], velocity_prev_.map_[2], velocity_prev_);
-
-		Project(velocity_, velocity_prev_);
-
-		Diffuse(0, diffusion_, density_prev_, density_);
-
-		Advect(0, density_, density_prev_, velocity_);
-		std::cout << "LS Max: " << MaximumCuda(density_, size_) << std::endl;
+		DensityStep();
 
 		ReallocateHostData();
 
-		AddVelocity(IndexPair(62, 62, 62), 2.5f, 2.5f, 0);
-		AddDensity(IndexPair(62, 62, 62), 10.0f);
+		AddVelocity(IndexPair(62, 62, 62), 25.0f, 25.0f, 0);
+		AddDensity(IndexPair(62, 62, 62), 100.0f);
 
-		vdb_handler.WriteFile(velocity_.map_[0].map_,
-			velocity_.map_[1].map_,
-			velocity_.map_[2].map_,
-			density_.map_);
+		vdb_handler.WriteFile(velocity_.map_[0], velocity_.map_[1], velocity_.map_[2], density_);
 
-		std::cout << "Density: " << density_.map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
-		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(62, 62, 62).IX(size_.x)) << std::endl;
+		std::cout << "Density: " << density_.map_->Get(IndexPair(61, 61, 61).IX(size_.x)) << std::endl;
+		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(61, 61, 61).IX(size_.x)) << std::endl;
 	}
 }
 

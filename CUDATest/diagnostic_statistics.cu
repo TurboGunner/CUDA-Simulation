@@ -7,7 +7,9 @@ __global__ void Maximum(HashMap* data, uint3 length, float* max) {
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 
-	if (data->Get(incident.IX(length.x)) > *max) {
+	//printf("%f\n", data->Get(incident.IX(length.x)));
+
+	if (data->Get(incident.IX(length.x)) >= *max) {
 		*max = data->Get(incident.IX(length.x));
 	}
 }
@@ -38,13 +40,13 @@ float MaximumCuda(AxisData& map, const uint3& length) {
 	return result;
 }
 
-__global__ void Total(HashMap* data, uint3 length, float* max) {
+__global__ void Total(HashMap* data, uint3 length, float* total) {
 	unsigned int z_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
 	unsigned int x_bounds = blockIdx.z * blockDim.z + threadIdx.z;
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
-	*max += data->Get(incident.IX(length.x));
+	*total = *total + data->Get(incident.IX(length.x));
 }
 
 float TotalCuda(AxisData& map, const uint3& length) {
@@ -64,6 +66,8 @@ float TotalCuda(AxisData& map, const uint3& length) {
 	cuda_status = CopyFunction("TotalCudaDevice", total_copy, total, cudaMemcpyDeviceToHost, cuda_status, sizeof(float), 1);
 
 	cuda_status = PostExecutionChecks(cuda_status, "TotalCudaKernel");
+
+	std::cout << *total_copy << std::endl;
 
 	float result = *total_copy;
 

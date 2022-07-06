@@ -68,7 +68,7 @@ __global__ void AdvectKernel(HashMap* data, HashMap* data_prev, HashMap* velocit
 
 	float compute_x_prev = x_fac_prev * (compute_x_prev_1 + compute_x_prev_2);
 
-	data->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)) = compute_x_current + compute_x_prev;
+	data->Put(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x), (compute_x_current + compute_x_prev));
 }
 
 cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const uint3& length) {
@@ -86,7 +86,7 @@ cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, Vector
 	std::cout << "bidoof" << std::endl;
 
 	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, v_map_z, dt, length, bounds);
-	BoundaryConditionsCuda(bounds, c_map, length);
+	BoundaryConditionsCuda(bounds, current, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");
 	cudaDeviceSynchronize();

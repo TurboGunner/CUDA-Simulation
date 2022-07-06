@@ -56,6 +56,12 @@ struct FluidSim {
 		*v_prev_map_x = nullptr, *v_prev_map_y = nullptr, *v_prev_map_z = nullptr;
 
 private:
-	/// <summary> Gauss-Siedel systems of linear equations solver. /summary>
+	/// <summary> Gauss-Siedel systems of linear equations solver. </summary>
 	void LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac);
+
+	void VelocityStep();
+	void DensityStep();
+
+	float3 v_add_total_;
+	float density_add_total_ = 0.0f;
 };
