@@ -25,7 +25,7 @@ It works in a standard host-device scheme- but differs as it is able to be acces
 
 >Specific GitHub Page Here: https://github.com/TurboGunner/CUDAMap (this served as the basis for the original plan to use a hybridized scheme, but that was scrapped due to the inherent lack of support of asynchronous page migration required to make the unified memory viable performance wise except on Linux.)
 
-### AxisData
+### Axis Data
 
 The VectorField data structure can be split into its constituent axes via the implementation of axis_data.hpp/cpp.
 >It stores data in a hash map, where it stores a uni-dimensional float as the value. Also used in density; where the quantity is scalar.
@@ -34,7 +34,7 @@ The VectorField data structure can be split into its constituent axes via the im
 HashMap* map_;
 ```
 
-### VectorField
+### Vector Field
 
 The multi-axis data (velocity) is stored within a VectorField; defined in vector_field.hpp/cpp.
 > The data member that is contained is an std::vector of AxisData objects, where the structure is:
