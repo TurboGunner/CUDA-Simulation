@@ -35,6 +35,6 @@ cudaError_t LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, 
 
 	BoundaryConditionsCuda(bounds, current, length);
 
-	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel", true);
+	cuda_status = PostExecutionChecks(cuda_status, "LinearSolverKernel");
 	return cuda_status;
 }

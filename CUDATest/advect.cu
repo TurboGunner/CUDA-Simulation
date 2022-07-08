@@ -89,6 +89,5 @@ cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, Vector
 	BoundaryConditionsCuda(bounds, current, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");
-	cudaDeviceSynchronize();
 	return cuda_status;
 }
