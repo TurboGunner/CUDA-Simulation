@@ -7,8 +7,6 @@ __global__ void Maximum(HashMap* data, uint3 length, float* max) {
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 
-	//printf("%f\n", data->Get(incident.IX(length.x)));
-
 	if (data->Get(incident.IX(length.x)) >= *max) {
 		*max = data->Get(incident.IX(length.x));
 	}

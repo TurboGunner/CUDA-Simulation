@@ -31,8 +31,7 @@ template <typename T>
 void CudaMemoryAllocator(vector<reference_wrapper<T*>>& ptrs, size_t size_alloc, size_t element_alloc = 1);
 
 /// <summary> Copies either CUDA memory into system RAM, or vice versa. Also includes error checking. </summary>
-cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type,
-    cudaError_t error, size_t size_alloc, size_t element_alloc = 1);
+cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type, cudaError_t error, size_t size_alloc, size_t element_alloc = 1);
 
 /// <summary> Wraps any cudaError_t returning call to handler internal error checking. </summary>
 cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name, string method_name, cudaError_t error, string optional_args = "");

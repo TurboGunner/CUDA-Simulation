@@ -29,8 +29,7 @@ void MemoryFreer(vector<reference_wrapper<T*>>& ptrs) {
     }
 }
 
-cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type,
-    cudaError_t error, size_t size_alloc, size_t element_alloc) {
+cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type, cudaError_t error, size_t size_alloc, size_t element_alloc) {
 
     if (error == cudaSuccess) {
         error = cudaMemcpy(tgt, src, size_alloc * element_alloc, mem_copy_type);
@@ -64,8 +63,6 @@ void ThreadAllocator(dim3& blocks, dim3& threads, const unsigned int& length, co
 
     threads = dim3(threads_per_dim, threads_per_dim, threads_per_dim);
     blocks = dim3(block_count - 1, block_count - 1, block_count - 1);
-
-    //std::cout << "Allocated " << threads.x * threads.y * threads.z * (block_count - 1) * (block_count - 1) * (block_count - 1) << " threads!" << std::endl;
 }
 
 void ThreadAllocator2D(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block) {
@@ -74,8 +71,6 @@ void ThreadAllocator2D(dim3& blocks, dim3& threads, const unsigned int& length, 
 
     threads = dim3(threads_per_dim, threads_per_dim);
     blocks = dim3(block_count - 1, block_count - 1);
-
-    //std::cout << "Allocated " << threads.x * threads.y * (block_count - 1) * (block_count - 1) << " threads!" << std::endl;
 }
 
 

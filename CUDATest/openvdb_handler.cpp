@@ -23,25 +23,29 @@ openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
 		grid_z = openvdb::FloatGrid::create(),
 		grid_density = openvdb::FloatGrid::create();
 
-	grid_x->setName(names_.at(0));
-	grid_y->setName(names_.at(1));
-	grid_z->setName(names_.at(2));
+	//grid_x->setName(names_.at(0));
+	//grid_y->setName(names_.at(1));
+	//grid_z->setName(names_.at(2));
 	grid_density->setName(names_.at(3));
 
-	grids.insert(grids.end(), { grid_x, grid_y, grid_z, grid_density });
-	grids_.insert(grids_.end(), { grid_x, grid_y, grid_z, grid_density });
+	//grids.insert(grids.end(), { grid_x, grid_y, grid_z, grid_density });
+	grids.insert(grids.end(), { grid_density });
+	//grids_.insert(grids_.end(), { grid_x, grid_y, grid_z, grid_density });
+	grids_.insert(grids_.end(), { grid_density });
 	return grids;
 }
 
 vector<openvdb::FloatGrid::Accessor> OpenVDBHandler::GetAccessors() {
 	vector<openvdb::FloatGrid::Accessor> accessors;
 
-	openvdb::FloatGrid::Accessor accessor_x = grids_.at(0)->getAccessor(),
-		accessor_y = grids_.at(1)->getAccessor(),
-		accessor_z = grids_.at(2)->getAccessor(),
-		accessor_density = grids_.at(3)->getAccessor();
+	openvdb::FloatGrid::Accessor
+		//accessor_x = grids_.at(0)->getAccessor(),
+		//accessor_y = grids_.at(1)->getAccessor(),
+		//accessor_z = grids_.at(2)->getAccessor(),
+		accessor_density = grids_.at(0)->getAccessor();
 
-	accessors.insert(accessors.end(), { accessor_x, accessor_y, accessor_z, accessor_density });
+	//accessors.insert(accessors.end(), { accessor_x, accessor_y, accessor_z, accessor_density });
+	accessors.insert(accessors.end(), { accessor_density });
 	return accessors;
 }
 
@@ -63,10 +67,10 @@ void OpenVDBHandler::LoadData(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisD
 			for (unsigned int i = 0; i < sim_.size_.x; i++) {
 				IndexPair current(i, y_current, z_current);
 				xyz.reset(i, y_current, z_current);
-				accessors.at(0).setValue(xyz, v_x.map_->Get(current.IX(sim_.size_.x)));
-				accessors.at(1).setValue(xyz, v_y.map_->Get(current.IX(sim_.size_.x)));
-				accessors.at(2).setValue(xyz, v_z.map_->Get(current.IX(sim_.size_.x)));
-				accessors.at(3).setValue(xyz, density.map_->Get(IndexPair(61, 61, 61).IX(sim_.size_.x)));
+				//accessors.at(0).setValue(xyz, v_x.map_->Get(current.IX(sim_.size_.x)));
+				//accessors.at(1).setValue(xyz, v_y.map_->Get(current.IX(sim_.size_.x)));
+				//accessors.at(2).setValue(xyz, v_z.map_->Get(current.IX(sim_.size_.x)));
+				accessors.at(0).setValue(xyz, density.map_->Get(IndexPair(61, 61, 61).IX(sim_.size_.x)));
 			}
 		}
 	}

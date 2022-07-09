@@ -93,9 +93,9 @@ void FluidSim::Simulate() {
 
 	AllocateDeviceData();
 
-	AddVelocity(IndexPair(62, 62, 62), 5.0f, 5.0f, 0);
+	AddVelocity(IndexPair(200, 127, 200), 5.0f, 5.0f, 0);
 
-	AddDensity(IndexPair(62, 62, 62), 10.0f);
+	AddDensity(IndexPair(200, 127, 200), 10.0f);
 
 	OpenVDBHandler vdb_handler(*this);
 
@@ -107,13 +107,13 @@ void FluidSim::Simulate() {
 
 		ReallocateHostData();
 
-		AddVelocity(IndexPair(62, 62, 62), 25.0f, 25.0f, 0);
-		AddDensity(IndexPair(62, 62, 62), 100.0f);
+		AddVelocity(IndexPair(200, 127, 200), 2.0f * dt_, 2.0f * dt_, -9.8f * dt_);
+		AddDensity(IndexPair(200, 127, 200), 100.0f * dt_);
 
 		vdb_handler.WriteFile(velocity_.map_[0], velocity_.map_[1], velocity_.map_[2], density_);
 
-		std::cout << "Density: " << density_.map_->Get(IndexPair(61, 61, 61).IX(size_.x)) << std::endl;
-		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(61, 61, 61).IX(size_.x)) << std::endl;
+		std::cout << "Density: " << density_.map_->Get(IndexPair(200, 127, 200).IX(size_.x)) << std::endl;
+		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(200, 127, 200).IX(size_.x)) << std::endl;
 	}
 }
 

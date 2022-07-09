@@ -6,12 +6,8 @@ __global__ void BoundaryConditions(int bounds, HashMap* c_map, uint3 size) {
 	unsigned int length = size.x;
 	unsigned int bound = length - 1;
 
-	//printf("%f | ", c_map->Get(IndexPair(x_bounds, y_bounds, 0).IX(length)));
-
 	c_map->Get(IndexPair(x_bounds, y_bounds, 0).IX(length)) = bounds == 3 ? -c_map->Get(IndexPair(x_bounds, y_bounds, 1).IX(length)) : c_map->Get(IndexPair(x_bounds, y_bounds, 1).IX(length));
 	c_map->Get(IndexPair(x_bounds, y_bounds, bound).IX(length)) = bounds == 3 ? -c_map->Get(IndexPair(x_bounds, y_bounds, bound - 1).IX(length)) : c_map->Get(IndexPair(x_bounds, y_bounds, bound - 1).IX(length));
-
-	//printf("%f | ", c_map->Get(IndexPair(x_bounds, y_bounds, 0).IX(length)));
 
 	c_map->Get(IndexPair(y_bounds, 0, x_bounds).IX(length)) = bounds == 2 ? -c_map->Get(IndexPair(x_bounds, 1, y_bounds).IX(length)) : c_map->Get(IndexPair(x_bounds, 1, y_bounds).IX(length));
 	c_map->Get(IndexPair(y_bounds, bound, x_bounds).IX(length)) = bounds == 2 ? -c_map->Get(IndexPair(x_bounds, bound - 1, y_bounds).IX(length)) : c_map->Get(IndexPair(x_bounds, bound - 1, y_bounds).IX(length));
