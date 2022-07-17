@@ -33,9 +33,6 @@ __global__ void AdvectKernel(HashMap* data, HashMap* data_prev, HashMap* velocit
 	x_value = x_bounds - (x_dt * velocity_x->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)));
 	y_value = y_bounds - (y_dt * velocity_y->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)));
 	z_value = z_bounds - (z_dt * velocity_z->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x)));
-	//printf("%f\n", (x_dt * velocity_x->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x))));
-	//printf("%f\n", (y_dt * velocity_y->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x))));
-	//printf("%f\n", (z_dt * velocity_z->Get(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x))));
 
 	AveragerLogic(x_value, x_current, x_previous, length.x);
 	AveragerLogic(y_value, y_current, y_previous, length.y);
@@ -77,11 +74,11 @@ cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, Vector
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
-	HashMap*& v_map_x = velocity.map_[0].map_->device_alloc_,
-		*&v_map_y = velocity.map_[1].map_->device_alloc_,
-		*&v_map_z = velocity.map_[2].map_->device_alloc_,
-		*&c_map = current.map_->device_alloc_,
-		*&p_map = previous.map_->device_alloc_;
+	HashMap* v_map_x = velocity.map_[0].map_->device_alloc_,
+		*v_map_y = velocity.map_[1].map_->device_alloc_,
+		*v_map_z = velocity.map_[2].map_->device_alloc_,
+		*c_map = current.map_->device_alloc_,
+		*p_map = previous.map_->device_alloc_;
 
 	std::cout << "bidoof" << std::endl;
 

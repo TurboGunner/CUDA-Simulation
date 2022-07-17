@@ -29,23 +29,23 @@ __global__ void ProjectKernel2(HashMap* velocity_x, HashMap* velocity_y, HashMap
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 
 	float compute_x = velocity_x->Get(incident.IX(length.x)) - (0.5f *
-			(data->Get(incident.Right().IX(length.x))
-			- data->Get(incident.Left().IX(length.x)))
-			* length.x);
+		(data->Get(incident.Right().IX(length.x))
+		- data->Get(incident.Left().IX(length.x)))
+		* length.x);
 
-		float compute_y = velocity_y->Get(incident.IX(length.x)) - (0.5f *
-			(data->Get(incident.Up().IX(length.x))
-			- data->Get(incident.Down().IX(length.x)))
-			* length.x);
+	float compute_y = velocity_y->Get(incident.IX(length.x)) - (0.5f *
+		(data->Get(incident.Up().IX(length.x))
+		- data->Get(incident.Down().IX(length.x)))
+		* length.x);
 
-		float compute_z = velocity_z->Get(incident.IX(length.x)) - (0.5f *
-			(data->Get(incident.Front().IX(length.x))
-			- data->Get(incident.Back().IX(length.x)))
-			* length.x);
+	float compute_z = velocity_z->Get(incident.IX(length.x)) - (0.5f *
+		(data->Get(incident.Front().IX(length.x))
+		- data->Get(incident.Back().IX(length.x)))
+		* length.x);
 
-		velocity_x->Put(incident.IX(length.x), compute_x);
-		velocity_y->Put(incident.IX(length.x), compute_y);
-		velocity_z->Put(incident.IX(length.x), compute_z);
+	velocity_x->Put(incident.IX(length.x), compute_x);
+	velocity_y->Put(incident.IX(length.x), compute_y);
+	velocity_z->Put(incident.IX(length.x), compute_z);
 }
 
 cudaError_t ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const uint3& length, const unsigned int& iter) {

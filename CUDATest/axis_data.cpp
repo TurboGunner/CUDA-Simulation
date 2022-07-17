@@ -1,6 +1,7 @@
 #include "axis_data.hpp"
 
 #include <iostream>
+#include <random>
 #include <stdexcept>
 
 AxisData::AxisData(Axis axis) {
@@ -19,11 +20,13 @@ AxisData::AxisData(uint3 size, Axis axis) {
 }
 
 void AxisData::LoadDefaultDataSet() {
+	std::mt19937 generator(0);
+	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
 	unsigned int y_current = 0, z_current = 0;
 	for (z_current; z_current < size_.z; z_current++) {
 		for (y_current; y_current < size_.y; y_current++) {
 			for (unsigned int i = 0; i < size_.x; i++) {
-				map_->Put(IndexPair(i, y_current, z_current).IX(size_.x), 0.0f);
+				map_->Put(IndexPair(i, y_current, z_current).IX(size_.x), distribution(generator));
 			}
 		}
 	}

@@ -50,7 +50,7 @@ vector<openvdb::FloatGrid::Accessor> OpenVDBHandler::GetAccessors() {
 }
 
 void OpenVDBHandler::LoadData() {
-	LoadData(sim_.velocity_.map_[0],
+	LoadData(sim_.density_,
 		sim_.velocity_.map_[1],
 		sim_.velocity_.map_[2],
 		sim_.density_);
@@ -70,14 +70,14 @@ void OpenVDBHandler::LoadData(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisD
 				//accessors.at(0).setValue(xyz, v_x.map_->Get(current.IX(sim_.size_.x)));
 				//accessors.at(1).setValue(xyz, v_y.map_->Get(current.IX(sim_.size_.x)));
 				//accessors.at(2).setValue(xyz, v_z.map_->Get(current.IX(sim_.size_.x)));
-				accessors.at(0).setValue(xyz, density.map_->Get(IndexPair(61, 61, 61).IX(sim_.size_.x)));
+				accessors.at(0).setValue(xyz, density.map_->Get(IndexPair(i, y_current, z_current).IX(sim_.size_.x)));
 			}
 		}
 	}
 }
 
 void OpenVDBHandler::WriteFile() {
-	WriteFile(sim_.velocity_.map_[0],
+	WriteFile(sim_.density_,
 		sim_.velocity_.map_[1],
 		sim_.velocity_.map_[2],
 		sim_.density_);

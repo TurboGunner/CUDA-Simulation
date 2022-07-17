@@ -64,7 +64,7 @@ cudaError_t BoundaryConditionsCuda(int bounds, AxisData& current, const uint3& l
 	dim3 blocks, threads;
 	ThreadAllocator2D(blocks, threads, length.x);
 
-	HashMap*& c_map = current.map_->device_alloc_;
+	HashMap* c_map = current.map_->device_alloc_;
 
 	BoundaryConditions<<<blocks, threads>>> (bounds, c_map, length);
 	cuda_status = PostExecutionChecks(cuda_status, "BoundaryConditionsKernel");
