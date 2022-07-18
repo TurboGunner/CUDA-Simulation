@@ -4,39 +4,26 @@
 #include <iostream>
 #include <math.h>
 
-void CudaExceptionHandler(cudaError_t cuda_status, string error_message) {
+void CudaExceptionHandler(cudaError_t& cuda_status, string error_message) {
     if (cuda_status != cudaSuccess) {
         throw std::invalid_argument(error_message);
     }
 }
 
-template <typename T>
-void CudaMemoryFreer(vector<reference_wrapper<T*>>& ptrs) {
-    try {
-        for (size_t i = 0; i < ptrs.size(); i++) {
-            cudaFree(ptrs.at(i).get());
+void ErrorLog(cudaError_t cuda_status, string operation_name, string method_name, string optional_args) {
+    if (cuda_status != cudaSuccess) {
+        std::cout << operation_name << " returned error code " << cuda_status << " after launching " << method_name << "\n" << std::endl;
+        std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
+        if (optional_args.size() > 0) {
+            std::cout << "Additional Stacktrace: " << optional_args << std::endl;
         }
-    }
-    catch (std::exception e) {
-        printf(e.what());
-    }
-}
-
-template <typename T>
-void MemoryFreer(vector<reference_wrapper<T*>>& ptrs) {
-    for (size_t i = 0; i < ptrs.size(); i++) {
-        free(ptrs.at(i).get());
     }
 }
 
 cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type, cudaError_t error, size_t size_alloc, size_t element_alloc) {
-
     if (error == cudaSuccess) {
         error = cudaMemcpy(tgt, src, size_alloc * element_alloc, mem_copy_type);
-        if (error != cudaSuccess) {
-            std::cout << err_msg << " due to error code " << error << "\n" << std::endl;
-            std::cout << "Error Stacktrace: " << cudaGetErrorString(error) << "\n" << std::endl;
-        }
+        ErrorLog(error, "Copy", "CopyFunction", err_msg);
     }
     return error;
 }
@@ -47,13 +34,7 @@ cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name,
         return cuda_status;
     }
     cuda_status = func();
-    if (cuda_status != cudaSuccess) {
-        std::cout << operation_name << " returned error code " << cuda_status << " after launching " << method_name << "\n" << std::endl;
-        std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
-        if (optional_args.size() > 0) {
-            std::cout << "Additional Stacktrace: " << optional_args << std::endl;
-        }
-    }
+    ErrorLog(error, operation_name, method_name, optional_args);
     return cuda_status;
 }
 

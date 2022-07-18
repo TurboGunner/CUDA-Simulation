@@ -33,6 +33,8 @@ struct OpenVDBHandler {
 	string file_name_;
 
 private:
-	unsigned int index_ = 0;
 	openvdb::GridPtrVec grid_vec;
+	openvdb::math::Transform::Ptr transform_ = openvdb::math::Transform::createLinearTransform(2.0);
+	
+	unsigned int index_ = 0;
 };

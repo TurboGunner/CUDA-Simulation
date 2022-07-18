@@ -12,18 +12,9 @@ using std::vector;
 using std::function;
 
 /// <summary> Throws an invalid argument with the supplied error message when CUDA status is invalid. </summary>
-void CudaExceptionHandler(cudaError_t cuda_status, string error_message);
+void CudaExceptionHandler(cudaError_t& cuda_status, string error_message);
 
-/// <summary> Polymorphism, frees a referenced std::vector of referenced wrapped float pointers in GPU memory. </summary>
-template <typename T>
-void CudaMemoryFreer(vector<reference_wrapper<T*>>& ptrs);
-
-/// <summary> Polymorphism, frees a vector of void pointers in system memory. </summary>
-void MemoryFreer(void* ptrs[], size_t element_alloc);
-
-/// <summary> Polymorphism, frees a referenced std::vector of referenced wrapped type generic pointers in system memory. </summary>
-template <typename T>
-void MemoryFreer(vector<reference_wrapper<T*>>& ptrs);
+void ErrorLog(cudaError_t cuda_status, string operation_name, string method_name, string optional_args = "");
 
 /// <summary> Allocates memory to a referenced std::vector of referenced wrapped generic pointers.
 /// <para> Note: element_alloc does not have to be supplied if size_alloc contains the combined size of the elements. </para> </summary>

@@ -24,7 +24,7 @@ openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
 		grid_density = openvdb::FloatGrid::create();
 
 	grid_density->setName(names_.at(0));
-	grid_density->setTransform(openvdb::math::Transform::createLinearTransform(0.5));
+	grid_density->setTransform(transform_);
 
 	grids.insert(grids.end(), { grid_density });
 	grids_.insert(grids_.end(), { grid_density });
@@ -55,7 +55,8 @@ void OpenVDBHandler::LoadData(AxisData& density) {
 			for (unsigned int i = 0; i < sim_.size_.x; i++) {
 				IndexPair current(i, y_current, z_current);
 				xyz.reset(i, y_current, z_current);
-				accessors.at(0).setValue(xyz, density.map_->Get(IndexPair(i, y_current, z_current).IX(sim_.size_.x)));
+				accessors.at(0).setValue(xyz,
+					density.map_->Get(IndexPair(i, y_current, z_current).IX(sim_.size_.x)));
 			}
 		}
 	}
