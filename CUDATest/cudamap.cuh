@@ -209,7 +209,7 @@ private:
     long size_ = 0;
     size_t hash_table_size_;
 
-    const size_t DEFAULT_SIZE = 10000;
+    const size_t DEFAULT_SIZE = 20000;
 
     bool device_allocated_status = false; //Ensures that the device pointer equivalent is only allocated once
 };

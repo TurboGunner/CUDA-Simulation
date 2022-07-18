@@ -6,7 +6,7 @@
 
 OpenVDBHandler::OpenVDBHandler(FluidSim& sim, string file_name) {
 	sim_ = sim;
-	names_.insert(names_.end(), {"VelocityVectorX", "VelocityVectorY", "VelocityVectorZ", "Density"});
+	names_.insert(names_.end(), {"Density"});
 	file_name_ = file_name;
 
 	openvdb::initialize();
@@ -23,14 +23,10 @@ openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
 		grid_z = openvdb::FloatGrid::create(),
 		grid_density = openvdb::FloatGrid::create();
 
-	//grid_x->setName(names_.at(0));
-	//grid_y->setName(names_.at(1));
-	//grid_z->setName(names_.at(2));
-	grid_density->setName(names_.at(3));
+	grid_density->setName(names_.at(0));
+	grid_density->setTransform(openvdb::math::Transform::createLinearTransform(0.5));
 
-	//grids.insert(grids.end(), { grid_x, grid_y, grid_z, grid_density });
 	grids.insert(grids.end(), { grid_density });
-	//grids_.insert(grids_.end(), { grid_x, grid_y, grid_z, grid_density });
 	grids_.insert(grids_.end(), { grid_density });
 	return grids;
 }
@@ -38,25 +34,17 @@ openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
 vector<openvdb::FloatGrid::Accessor> OpenVDBHandler::GetAccessors() {
 	vector<openvdb::FloatGrid::Accessor> accessors;
 
-	openvdb::FloatGrid::Accessor
-		//accessor_x = grids_.at(0)->getAccessor(),
-		//accessor_y = grids_.at(1)->getAccessor(),
-		//accessor_z = grids_.at(2)->getAccessor(),
-		accessor_density = grids_.at(0)->getAccessor();
+	openvdb::FloatGrid::Accessor accessor_density = grids_.at(0)->getAccessor();
 
-	//accessors.insert(accessors.end(), { accessor_x, accessor_y, accessor_z, accessor_density });
 	accessors.insert(accessors.end(), { accessor_density });
 	return accessors;
 }
 
 void OpenVDBHandler::LoadData() {
-	LoadData(sim_.density_,
-		sim_.velocity_.map_[1],
-		sim_.velocity_.map_[2],
-		sim_.density_);
+	LoadData(sim_.density_);
 }
 
-void OpenVDBHandler::LoadData(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisData& density) {
+void OpenVDBHandler::LoadData(AxisData& density) {
 	vector<openvdb::FloatGrid::Accessor> accessors = GetAccessors();
 	unsigned int y_current = 0, z_current = 0;
 
@@ -67,9 +55,6 @@ void OpenVDBHandler::LoadData(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisD
 			for (unsigned int i = 0; i < sim_.size_.x; i++) {
 				IndexPair current(i, y_current, z_current);
 				xyz.reset(i, y_current, z_current);
-				//accessors.at(0).setValue(xyz, v_x.map_->Get(current.IX(sim_.size_.x)));
-				//accessors.at(1).setValue(xyz, v_y.map_->Get(current.IX(sim_.size_.x)));
-				//accessors.at(2).setValue(xyz, v_z.map_->Get(current.IX(sim_.size_.x)));
 				accessors.at(0).setValue(xyz, density.map_->Get(IndexPair(i, y_current, z_current).IX(sim_.size_.x)));
 			}
 		}
@@ -77,24 +62,21 @@ void OpenVDBHandler::LoadData(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisD
 }
 
 void OpenVDBHandler::WriteFile() {
-	WriteFile(sim_.density_,
-		sim_.velocity_.map_[1],
-		sim_.velocity_.map_[2],
-		sim_.density_);
+	WriteFile(sim_.density_);
 }
 
-void OpenVDBHandler::WriteFile(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisData& density) {
+void OpenVDBHandler::WriteFile(AxisData& density) {
 	string file_extension = file_name_ + std::format("{:04}", index_) + ".vdb";
 	openvdb::io::File file(file_extension);
 
-	LoadData(v_x, v_y, v_z, density);
+	LoadData(density);
 
 	file.write(grid_vec);
 	file.close();
 	index_++;
 }
 
-void OpenVDBHandler::FreeFieldPointers(openvdb::GridPtrVec grid_vec) {
+void OpenVDBHandler::FreeFieldPointers() {
 	for (int i = 0; i < grid_vec.size(); i++) {
 		grid_vec.at(i).~shared_ptr();
 	}

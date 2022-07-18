@@ -93,14 +93,14 @@ void FluidSim::Simulate() {
 
 	AllocateDeviceData();
 
-	AddVelocity(IndexPair(100, 127, 100), 5.0f, 5.0f, 0);
+	AddVelocity(IndexPair(200, 127, 200), 5.0f, 5.0f, 0);
 
-	AddDensity(IndexPair(100, 127, 100), 10.0f);
+	AddDensity(IndexPair(200, 127, 200), 10.0f);
 
 	OpenVDBHandler vdb_handler(*this);
 	ReallocateHostData();
 
-	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) { //Second bound condition is temporary!
+	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) {
 
 		VelocityStep();
 
@@ -108,14 +108,15 @@ void FluidSim::Simulate() {
 
 		ReallocateHostData();
 
-		AddVelocity(IndexPair(100, 127, 100), 2.0f * dt_, 2.0f * dt_, -9.8f * dt_);
-		AddDensity(IndexPair(100, 127, 100), 100.0f * dt_);
+		AddVelocity(IndexPair(200, 127, 200), 2.0f * dt_, 2.0f * dt_, -9.8f * dt_);
+		AddDensity(IndexPair(200, 127, 200), 200.0f * dt_);
 
-		vdb_handler.WriteFile(density_, velocity_.map_[1], velocity_.map_[2], density_);
+		vdb_handler.WriteFile(density_);
 
-		std::cout << "Density: " << density_.map_->Get(IndexPair(100, 127, 100).IX(size_.x)) << std::endl;
-		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(100, 127, 100).IX(size_.x)) << std::endl;
+		std::cout << "Density: " << density_.map_->Get(IndexPair(200, 127, 200).IX(size_.x)) << std::endl;
+		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(200, 127, 200).IX(size_.x)) << std::endl;
 	}
+	vdb_handler.FreeFieldPointers();
 	std::cout << "Done!" << std::endl;
 }
 

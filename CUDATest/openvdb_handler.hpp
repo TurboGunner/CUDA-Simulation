@@ -21,8 +21,10 @@ struct OpenVDBHandler {
 
 	void WriteFile();
 
-	void LoadData(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisData& density);
-	void WriteFile(AxisData& v_x, AxisData& v_y, AxisData& v_z, AxisData& density);
+	void LoadData(AxisData& density);
+	void WriteFile(AxisData& density);
+
+	void FreeFieldPointers();
 
 	FluidSim sim_;
 	vector<openvdb::FloatGrid::Ptr> grids_;
@@ -33,5 +35,4 @@ struct OpenVDBHandler {
 private:
 	unsigned int index_ = 0;
 	openvdb::GridPtrVec grid_vec;
-	void FreeFieldPointers(openvdb::GridPtrVec grid_vec);
 };
