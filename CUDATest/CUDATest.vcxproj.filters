@@ -106,5 +106,8 @@
     <CudaCompile Include="simulation_effector.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
+    <CudaCompile Include="cudamap.cu">
+      <Filter>cuda\data_structures</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

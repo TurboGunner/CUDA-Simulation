@@ -12,21 +12,6 @@ VectorField::VectorField(uint3 size) {
 	size_ = size;
 	AxisData axis_x(size_, Axis::X), axis_y(size_, Axis::Y), axis_z(size_, Axis::Z);
 	map_.insert(map_.begin(), {axis_x, axis_y, axis_z});
-	//LoadDefaultVectorSet();
-}
-
-void VectorField::LoadDefaultVectorSet() {
-	unsigned int y_current = 0, z_current = 0;
-	for (z_current; z_current < size_.z; z_current++) {
-		for (y_current; y_current < size_.y; y_current++) {
-			for (unsigned int i = 0; i < size_.x; i++) {
-				IndexPair pair(i, y_current, z_current);
-				map_[0].map_->Put(pair.IX(size_.x), 0);
-				map_[1].map_->Put(pair.IX(size_.x), 0);
-				map_[2].map_->Put(pair.IX(size_.x), 0);
-			}
-		}
-	}
 }
 
 string VectorField::ToString() {

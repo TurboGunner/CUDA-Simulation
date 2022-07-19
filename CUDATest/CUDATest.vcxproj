@@ -95,6 +95,7 @@
   <ItemGroup>
     <CudaCompile Include="advect.cu" />
     <CudaCompile Include="boundary_conditions.cu" />
+    <CudaCompile Include="cudamap.cu" />
     <CudaCompile Include="diagnostic_statistics.cu" />
     <CudaCompile Include="index_pair_cuda.cu" />
     <CudaCompile Include="linear_solver.cu" />

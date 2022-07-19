@@ -14,6 +14,8 @@ using std::string;
 using std::vector;
 using std::reference_wrapper;
 
+/// <summary> Is a container for vector quantities.
+/// <para> Is stored as an std::vector of AxisData objects. </para> </summary>
 class VectorField {
 	public:
 		/// <summary> Default constructor. </summary>
@@ -34,7 +36,4 @@ class VectorField {
 
 	private:
 		uint3 size_;
-
-		/// <summary> Loads in zeroes for all data. Made to be sparse. </summary>
-		void LoadDefaultVectorSet();
 };

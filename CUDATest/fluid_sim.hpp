@@ -18,10 +18,12 @@ struct FluidSim {
 	/// <summary> Adding velocity to the simulation at a specific IndexPair point. </summary>
 	void AddVelocity(IndexPair pair, float x, float y, float z);
 
-	/// <summary> Diffusion method for simulation. Should either be used with the viscocity or diffusion float in the "visc" argument. </summary>
+	/// <summary> Diffusion method for simulation. Should either be used with the viscocity or diffusion float in the "visc" argument.
+	/// <para> Uses the Gauss-Siedel method for linear systems of equations numerical solving. </para> </summary>
 	void Diffuse(int bounds, float visc, AxisData& current, AxisData& previous);
 
-	/// <summary>  Projection method for simulation. Works with velocity exclusively. </summary>
+	/// <summary>  Projection method for simulation. Works with velocity exclusively.
+	/// <para> Uses the Helmholtz-Hodge decomposition to impose incompressibility on the simulation. </para> </summary>
 	void Project(VectorField& v_current, VectorField& v_previous);
 
 	/// <summary>  Advection method for simulation. </summary>

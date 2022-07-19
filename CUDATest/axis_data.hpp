@@ -6,6 +6,7 @@
 
 enum class Axis { X, Y, Z };
 
+/// <summary> Acts as either a container for scalar quantities (density), or as a constituent axis for a vector quantity (velocity). </summary>
 struct AxisData {
 	/// <summary> Default constructor. </summary>
 	AxisData() = default;

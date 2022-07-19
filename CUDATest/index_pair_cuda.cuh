@@ -51,5 +51,29 @@ struct IndexPair {
 	/// <summary> Shifts the IndexPair incident backwards one on the grid. </summary>
 	__host__ __device__ IndexPair Back();
 
+	__host__ __device__ IndexPair CornerLUpFront();
+
+	__host__ __device__ IndexPair CornerLDownFront();
+
+	__host__ __device__ IndexPair CornerRUpFront();
+
+	__host__ __device__ IndexPair CornerRDownFront();
+
+	__host__ __device__ IndexPair CornerLUpBack();
+
+	__host__ __device__ IndexPair CornerLDownBack();
+
+	__host__ __device__ IndexPair CornerRUpBack();
+
+	__host__ __device__ IndexPair CornerRDownBack();
+
+	__host__ __device__ IndexPair CornerLMidFront();
+
+	__host__ __device__ IndexPair CornerRMidFront();
+
+	__host__ __device__ IndexPair CornerLMidBack();
+
+	__host__ __device__ IndexPair CornerRMidBack();
+
 	unsigned int x = 0, y = 0, z = 0; //Spots
 };

@@ -58,3 +58,51 @@ __host__ __device__ IndexPair IndexPair::Front() {
 __host__ __device__ IndexPair IndexPair::Back() {
 	return IndexPair(x, y, z - 1);
 }
+
+__host__ __device__ IndexPair IndexPair::CornerLUpFront() {
+	return IndexPair(x - 1, y + 1, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerLDownFront() {
+	return IndexPair(x - 1, y + 1, z - 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerRUpFront() {
+	return IndexPair(x + 1, y + 1, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerRDownFront() {
+	return IndexPair(x - 1, y + 1, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerLUpBack() {
+	return IndexPair(x - 1, y - 1, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerLDownBack() {
+	return IndexPair(x - 1, y - 1, z - 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerRUpBack() {
+	return IndexPair(x + 1, y - 1, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerRDownBack() {
+	return IndexPair(x + 1, y - 1, z - 1);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerLMidFront() {
+	return IndexPair(x - 1, y + 1, z);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerRMidFront() {
+	return IndexPair(x + 1, y + 1, z);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerLMidBack() {
+	return IndexPair(x - 1, y - 1, z);
+}
+
+__host__ __device__ IndexPair IndexPair::CornerRMidBack() {
+	return IndexPair(x + 1, y - 1, z);
+}
