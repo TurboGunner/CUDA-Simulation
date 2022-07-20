@@ -37,74 +37,96 @@ string IndexPair::ToString() const {
 	return "X Component: " + std::to_string(x) + " | Y Component: " + std::to_string(y);
 }
 
+//Inner Neighbor Weights
+
+//X Direction
+
 __host__ __device__ IndexPair IndexPair::Left() {
-	return IndexPair(x - 1, y, z, first_n_weight);
+	return IndexPair(x - 1, y, z, 0.05556f);
 }
 
 __host__ __device__ IndexPair IndexPair::Right() {
-	return IndexPair(x + 1, y, z, first_n_weight);
+	return IndexPair(x + 1, y, z, 0.05556f);
 }
 
-__host__ __device__ IndexPair IndexPair::Up() {
-	return IndexPair(x, y + 1, z, first_n_weight);
-}
-
-__host__ __device__ IndexPair IndexPair::Down() {
-	return IndexPair(x, y - 1, z, first_n_weight);
-}
+//Y Direction
 
 __host__ __device__ IndexPair IndexPair::Front() {
-	return IndexPair(x, y, z + 1, first_n_weight);
+	return IndexPair(x, y, z + 1, 0.05556f);
 }
 
 __host__ __device__ IndexPair IndexPair::Back() {
-	return IndexPair(x, y, z - 1, first_n_weight);
+	return IndexPair(x, y, z - 1, 0.05556f);
 }
 
+//Z Direction
+
+__host__ __device__ IndexPair IndexPair::Up() {
+	return IndexPair(x, y + 1, z, 0.05556f);
+}
+
+__host__ __device__ IndexPair IndexPair::Down() {
+	return IndexPair(x, y - 1, z, 0.05556f);
+}
+
+//Outer Neighbor Weights
+
+//Front Left Corners
+
 __host__ __device__ IndexPair IndexPair::CornerLUpFront() {
-	return IndexPair(x - 1, y + 1, z + 1, second_n_weight);
+	return IndexPair(x - 1, y + 1, z + 1, 0.027778f);
 }
 
 __host__ __device__ IndexPair IndexPair::CornerLDownFront() {
-	return IndexPair(x - 1, y + 1, z - 1, second_n_weight);
+	return IndexPair(x - 1, y + 1, z - 1, 0.027778f);
 }
 
+//Front Right Corners
+
 __host__ __device__ IndexPair IndexPair::CornerRUpFront() {
-	return IndexPair(x + 1, y + 1, z + 1, second_n_weight);
+	return IndexPair(x + 1, y + 1, z + 1, 0.027778f);
 }
 
 __host__ __device__ IndexPair IndexPair::CornerRDownFront() {
-	return IndexPair(x - 1, y + 1, z + 1, second_n_weight);
+	return IndexPair(x - 1, y + 1, z + 1, 0.027778f);
 }
 
+//Back Left Corners
+
 __host__ __device__ IndexPair IndexPair::CornerLUpBack() {
-	return IndexPair(x - 1, y - 1, z + 1, second_n_weight);
+	return IndexPair(x - 1, y - 1, z + 1, 0.027778f);
 }
 
 __host__ __device__ IndexPair IndexPair::CornerLDownBack() {
-	return IndexPair(x - 1, y - 1, z - 1, second_n_weight);
+	return IndexPair(x - 1, y - 1, z - 1, 0.027778f);
 }
 
+//Back Right Corners
+
 __host__ __device__ IndexPair IndexPair::CornerRUpBack() {
-	return IndexPair(x + 1, y - 1, z + 1, second_n_weight);
+	return IndexPair(x + 1, y - 1, z + 1, 0.027778f);
 }
 
 __host__ __device__ IndexPair IndexPair::CornerRDownBack() {
-	return IndexPair(x + 1, y - 1, z - 1, second_n_weight);
+	return IndexPair(x + 1, y - 1, z - 1, 0.027778f);
 }
 
+//Front Mid Corners
+
 __host__ __device__ IndexPair IndexPair::CornerLMidFront() {
-	return IndexPair(x - 1, y + 1, z, second_n_weight);
+	return IndexPair(x - 1, y + 1, z, 0.027778f);
 }
 
 __host__ __device__ IndexPair IndexPair::CornerRMidFront() {
-	return IndexPair(x + 1, y + 1, z, second_n_weight);
+	return IndexPair(x + 1, y + 1, z, 0.027778f);
 }
 
+//Back Mid Corners
+
 __host__ __device__ IndexPair IndexPair::CornerLMidBack() {
-	return IndexPair(x - 1, y - 1, z, second_n_weight);
+	return IndexPair(x - 1, y - 1, z, 0.027778f);
 }
 
 __host__ __device__ IndexPair IndexPair::CornerRMidBack() {
-	return IndexPair(x + 1, y - 1, z, second_n_weight);
+	return IndexPair(x + 1, y - 1, z, 0.027778f);
 }

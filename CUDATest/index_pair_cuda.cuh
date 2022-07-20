@@ -11,7 +11,7 @@ struct IndexPair {
 	__host__ __device__ IndexPair() = default;
 
 	/// <summary> Loaded constructor, takes in an unsigned int for each dimension. </summary>
-	__host__ __device__ IndexPair(unsigned int x_in, unsigned int y_in, unsigned int z_in, float weight_in = (1/3));
+	__host__ __device__ IndexPair(unsigned int x_in, unsigned int y_in, unsigned int z_in, float weight_in = 0.33332f);
 
 	/// <summary> Returns the effective linearized index of the grid. 
 	/// <para> Made mostly for global/device accesses due to CUDA being rather finicky with references. </para> </summary>
@@ -39,46 +39,55 @@ struct IndexPair {
 	/// <summary> Shifts the IndexPair incident to the right on the grid. </summary>
 	__host__ __device__ IndexPair Right();
 
-	/// <summary> Shifts the IndexPair incident upwards one on the grid. </summary>
-	__host__ __device__ IndexPair Up();
-
-	/// <summary> Shifts the IndexPair incident downwards one on the grid. </summary>
-	__host__ __device__ IndexPair Down();
-
 	/// <summary> Shifts the IndexPair incident frontwards one on the grid. </summary>
 	__host__ __device__ IndexPair Front();
 
 	/// <summary> Shifts the IndexPair incident backwards one on the grid. </summary>
 	__host__ __device__ IndexPair Back();
 
+	/// <summary> Shifts the IndexPair incident upwards one on the grid. </summary>
+	__host__ __device__ IndexPair Up();
+
+	/// <summary> Shifts the IndexPair incident downwards one on the grid. </summary>
+	__host__ __device__ IndexPair Down();
+
+	/// <summary> Shifts the IndexPair incident to the left, frontwards, and up one on the grid. </summary>
 	__host__ __device__ IndexPair CornerLUpFront();
 
+	/// <summary> Shifts the IndexPair incident to the left, frontwards, and down one on the grid. </summary>
 	__host__ __device__ IndexPair CornerLDownFront();
 
+	/// <summary> Shifts the IndexPair incident to the right, frontwards, and up one on the grid. </summary>
 	__host__ __device__ IndexPair CornerRUpFront();
 
+	/// <summary> Shifts the IndexPair incident to the right, frontwards, and down one on the grid. </summary>
 	__host__ __device__ IndexPair CornerRDownFront();
 
+	/// <summary> Shifts the IndexPair incident to the left, backwards, and up one on the grid. </summary>
 	__host__ __device__ IndexPair CornerLUpBack();
 
+	/// <summary> Shifts the IndexPair incident to the left, backwards, and down one on the grid. </summary>
 	__host__ __device__ IndexPair CornerLDownBack();
 
+	/// <summary> Shifts the IndexPair incident to the right, backwards, and up one on the grid. </summary>
 	__host__ __device__ IndexPair CornerRUpBack();
 
+	/// <summary> Shifts the IndexPair incident to the right, backwards, and down one on the grid. </summary>
 	__host__ __device__ IndexPair CornerRDownBack();
 
+	/// <summary> Shifts the IndexPair incident to the left and forward on the grid. </summary>
 	__host__ __device__ IndexPair CornerLMidFront();
 
+	/// <summary> Shifts the IndexPair incident to the right and forward on the grid. </summary>
 	__host__ __device__ IndexPair CornerRMidFront();
 
+	/// <summary> Shifts the IndexPair incident to the left and backward on the grid. </summary>
 	__host__ __device__ IndexPair CornerLMidBack();
 
+	/// <summary> Shifts the IndexPair incident to the right and backward on the grid. </summary>
 	__host__ __device__ IndexPair CornerRMidBack();
 
 	unsigned int x = 0, y = 0, z = 0; //Spots
 
-	float weight = 1 / 3;
-
-	const float first_n_weight = 0.05556f,
-		second_n_weight = 0.027778f;
+	float weight;
 };

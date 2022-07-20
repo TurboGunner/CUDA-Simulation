@@ -109,5 +109,11 @@
     <CudaCompile Include="cudamap.cu">
       <Filter>cuda\data_structures</Filter>
     </CudaCompile>
+    <CudaCompile Include="lbm_streaming.cu">
+      <Filter>cuda\navier_stokes_funcs</Filter>
+    </CudaCompile>
+    <CudaCompile Include="lbm_advect.cu">
+      <Filter>cuda\navier_stokes_funcs</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>
