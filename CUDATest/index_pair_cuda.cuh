@@ -11,7 +11,7 @@ struct IndexPair {
 	__host__ __device__ IndexPair() = default;
 
 	/// <summary> Loaded constructor, takes in an unsigned int for each dimension. </summary>
-	__host__ __device__ IndexPair(unsigned int x_in, unsigned int y_in, unsigned int z_in);
+	__host__ __device__ IndexPair(unsigned int x_in, unsigned int y_in, unsigned int z_in, float weight_in = (1/3));
 
 	/// <summary> Returns the effective linearized index of the grid. 
 	/// <para> Made mostly for global/device accesses due to CUDA being rather finicky with references. </para> </summary>
@@ -76,4 +76,9 @@ struct IndexPair {
 	__host__ __device__ IndexPair CornerRMidBack();
 
 	unsigned int x = 0, y = 0, z = 0; //Spots
+
+	float weight = 1 / 3;
+
+	const float first_n_weight = 0.05556f,
+		second_n_weight = 0.027778f;
 };

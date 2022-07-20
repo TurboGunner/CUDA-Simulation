@@ -1,5 +1,7 @@
 #include "diagnostic_statistics.cuh"
 
+#include <iostream>
+
 __global__ void Maximum(HashMap* data, uint3 length, float* max) {
 	unsigned int z_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;

@@ -7,7 +7,7 @@ __global__ void LinearSolverKernel(HashMap* data, HashMap* data_prev, float a_fa
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 	float temp = data->Get(incident.IX(length.x));
-	for (int i = 0; i < iter; i++) {
+	for (int i = 0; i < iter; i++) { //Iterative loop
 		float compute = data_prev->Get(incident.IX(length.x)) +
 			a_fac *
 			(data->Get(incident.Right().IX(length.x))
