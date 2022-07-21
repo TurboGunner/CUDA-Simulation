@@ -1,7 +1,7 @@
 #include "fluid_sim_cuda.cuh"
 #include "lbm_sim_cuda.cuh"
 
-__device__ inline float EquilibriumFunction(HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, float total_density, IndexPair incident, float* total_v, uint3 length) {
+__device__ float EquilibriumFunction(HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, float total_density, IndexPair incident, float* total_v, uint3 length) {
 
 	float shared_step = (velocity_x->Get(incident.IX(length.x)) * total_v[0] +
 		velocity_y->Get(incident.IX(length.x)) * total_v[1] +

@@ -30,9 +30,6 @@ public:
 	/// <summary> Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct. </summary>
 	string ToString();
 
-	/// <summary> Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct. </summary>
-	void NormalizeField();
-
 	vector<AxisData> map_;
 
 private:

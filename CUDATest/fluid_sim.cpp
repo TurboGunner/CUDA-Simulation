@@ -118,7 +118,8 @@ void FluidSim::Simulate() {
 			DensityStep();
 		}
 		else {
-			velocity_.NormalizeField();
+			VectorNormalCuda(velocity_, size_);
+
 			StreamCuda(1, velocity_.map_[0], size_);
 			StreamCuda(2, velocity_.map_[1], size_);
 			StreamCuda(3, velocity_.map_[2], size_);

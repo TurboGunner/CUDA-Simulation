@@ -45,22 +45,3 @@ void VectorField::operator=(const VectorField& copy) {
 
 	size_ = copy.size_;
 }
-
-void VectorField::NormalizeField() {
-	unsigned int y_current = 0, z_current = 0;
-
-	for (z_current; z_current < size_.z; z_current++) {
-		for (y_current; y_current < size_.y; y_current++) {
-			for (unsigned int i = 0; i < size_.x; i++) {
-				IndexPair current(i, y_current, z_current);
-				unsigned int length = map_[0].map_->Get(current.IX(size_.x)) +
-					map_[1].map_->Get(current.IX(size_.x)) +
-					map_[2].map_->Get(current.IX(size_.x));
-
-				map_[0].map_->Get(current.IX(size_.x)) = powf(map_[0].map_->Get(current.IX(size_.x)), 2) / length;
-				map_[1].map_->Get(current.IX(size_.x)) = powf(map_[1].map_->Get(current.IX(size_.x)), 2) / length;
-				map_[2].map_->Get(current.IX(size_.x)) = powf(map_[2].map_->Get(current.IX(size_.x)), 2) / length;
-			}
-		}
-	}
-}
