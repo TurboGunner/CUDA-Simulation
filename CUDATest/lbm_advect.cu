@@ -57,7 +57,7 @@ __global__ void LBMAdvectKernel(HashMap* data, HashMap* velocity_x, HashMap* vel
 	}
 }
 
-cudaError_t LBMAdvectCuda(int bounds, AxisData& current, VectorField& velocity, const float& visc, const float& dt, const uint3& length) {
+cudaError_t LBMAdvectCuda(AxisData& current, VectorField& velocity, const float& visc, const float& dt, const uint3& length) {
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;
@@ -78,7 +78,9 @@ cudaError_t LBMAdvectCuda(int bounds, AxisData& current, VectorField& velocity, 
 
 	LBMAdvectKernel<<<blocks, threads>>> (c_map, v_map_x, v_map_y, v_map_z, total_v, current.total_, visc, dt, length);
 
-	BoundaryConditionsCuda(bounds, current, length);
+	BoundaryConditionsCuda(1, velocity.map_[0], length);
+	BoundaryConditionsCuda(2, velocity.map_[1], length);
+	BoundaryConditionsCuda(3, velocity.map_[2], length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "LBMAdvectKernel");
 

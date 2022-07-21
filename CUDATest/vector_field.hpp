@@ -24,13 +24,14 @@ public:
 	/// <summary> Loaded constructor for the size initialization of the vector field. </summary>
 	VectorField(uint3 size);
 
-	/// <summary> Gets a reference of the vector field map that contains the data. </summary>
-
 	/// <summary> Operator overload for copying the data of an existing vector field. </summary>
 	void operator=(const VectorField& copy);
 
 	/// <summary> Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct. </summary>
 	string ToString();
+
+	/// <summary> Returns an std::string of the corresponding keys (IndexPair) struct and the values (F_Vector) struct. </summary>
+	void NormalizeField();
 
 	vector<AxisData> map_;
 

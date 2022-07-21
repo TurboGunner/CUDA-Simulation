@@ -9,10 +9,9 @@
 
 #include <math.h>
 
+enum class SimMethod { Standard, LBM };
+
 struct FluidSim {
-
-	enum class SimMethod { Standard, LBM };
-
 	/// <summary> Default Constructor </summary>
 	FluidSim() = default;
 

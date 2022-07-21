@@ -25,10 +25,12 @@ FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned 
 	method_ = mode;
 
 	velocity_ = VectorField(size_);
-	velocity_prev_ = VectorField(size_);
 
 	density_ = AxisData(size_);
-	density_prev_ = AxisData(size_);
+	if (method_ == SimMethod::Standard) {
+		density_prev_ = AxisData(size_);
+		velocity_prev_ = VectorField(size_);
+	}
 }
 
 void FluidSim::AddDensity(IndexPair pair, float amount) {
@@ -59,34 +61,20 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
-	if (method_ == SimMethod::LBM) {
-		StreamCuda(bounds, current, size_);
-		return;
-	}
 	float a = dt_ * visc * (size_.x - 2) * (size_.y - 2);
 
 	LinearSolve(bounds, current, previous, a, 1 + 6 * a);
 }
 
 void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
-	if (method_ == SimMethod::LBM) {
-		return;
-	}
 	ProjectCuda(0, v_current, v_previous, size_, iterations_);
 }
 
 void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
-	if (method_ == SimMethod::LBM) {
-		LBMAdvectCuda(bounds, current, velocity, viscosity_, dt_, size_);
-		return;
-	}
 	AdvectCuda(bounds, current, velocity, dt_, size_);
 }
 
 void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
-	if (method_ == SimMethod::LBM) {
-		return;
-	}
 	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_);
 }
 
@@ -125,10 +113,18 @@ void FluidSim::Simulate() {
 	ReallocateHostData();
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) {
+		if (method_ == SimMethod::Standard) {
+			VelocityStep();
+			DensityStep();
+		}
+		else {
+			velocity_.NormalizeField();
+			StreamCuda(1, velocity_.map_[0], size_);
+			StreamCuda(2, velocity_.map_[1], size_);
+			StreamCuda(3, velocity_.map_[2], size_);
 
-		VelocityStep();
-
-		DensityStep();
+			LBMAdvectCuda(density_, velocity_, viscosity_, dt_, size_);
+		}
 
 		ReallocateHostData();
 
@@ -146,28 +142,35 @@ void FluidSim::Simulate() {
 
 void FluidSim::AllocateDeviceData() {
 	density_.map_->DeviceTransfer(cuda_status, density_.map_, d_map);
-	density_prev_.map_->DeviceTransfer(cuda_status, density_prev_.map_, d_prev_map);
+
+	if (method_ == SimMethod::Standard) {
+		density_prev_.map_->DeviceTransfer(cuda_status, density_prev_.map_, d_prev_map);
+
+		velocity_prev_.map_[0].map_->DeviceTransfer(cuda_status, velocity_prev_.map_[0].map_, v_prev_map_x);
+		velocity_prev_.map_[1].map_->DeviceTransfer(cuda_status, velocity_prev_.map_[1].map_, v_prev_map_y);
+		velocity_prev_.map_[2].map_->DeviceTransfer(cuda_status, velocity_prev_.map_[2].map_, v_prev_map_z);
+	}
 
 	velocity_.map_[0].map_->DeviceTransfer(cuda_status, velocity_.map_[0].map_, v_map_x);
 	velocity_.map_[1].map_->DeviceTransfer(cuda_status, velocity_.map_[1].map_, v_map_y);
 	velocity_.map_[2].map_->DeviceTransfer(cuda_status, velocity_.map_[2].map_, v_map_z);
-
-	velocity_prev_.map_[0].map_->DeviceTransfer(cuda_status, velocity_prev_.map_[0].map_, v_prev_map_x);
-	velocity_prev_.map_[1].map_->DeviceTransfer(cuda_status, velocity_prev_.map_[1].map_, v_prev_map_y);
-	velocity_prev_.map_[2].map_->DeviceTransfer(cuda_status, velocity_prev_.map_[2].map_, v_prev_map_z);
 }
 
 void FluidSim::ReallocateHostData() {
 	density_.map_->HostTransfer(cuda_status);
-	density_prev_.map_->HostTransfer(cuda_status);
+
+	if (method_ == SimMethod::Standard) {
+		density_prev_.map_->HostTransfer(cuda_status);
+
+		velocity_prev_.map_[0].map_->HostTransfer(cuda_status);
+		velocity_prev_.map_[1].map_->HostTransfer(cuda_status);
+		velocity_prev_.map_[2].map_->HostTransfer(cuda_status);
+	}
 
 	velocity_.map_[0].map_->HostTransfer(cuda_status);
 	velocity_.map_[1].map_->HostTransfer(cuda_status);
 	velocity_.map_[2].map_->HostTransfer(cuda_status);
 
-	velocity_prev_.map_[0].map_->HostTransfer(cuda_status);
-	velocity_prev_.map_[1].map_->HostTransfer(cuda_status);
-	velocity_prev_.map_[2].map_->HostTransfer(cuda_status);
 	cudaDeviceSynchronize();
 }
 
