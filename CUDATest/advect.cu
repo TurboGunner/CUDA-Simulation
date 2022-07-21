@@ -11,7 +11,8 @@ __device__ inline void AveragerLogic(float& value, float& current, float& previo
 	previous = current + 1.0f;
 }
 
-__global__ void AdvectKernel(HashMap* data, HashMap* data_prev, HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, float dt, uint3 length, int bounds) {
+//Remove data_prev
+__global__ void AdvectKernel(HashMap* data, HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, float dt, uint3 length) {
 	unsigned int z_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 	unsigned int x_bounds = blockIdx.z * blockDim.z + threadIdx.z + 1;
@@ -68,21 +69,20 @@ __global__ void AdvectKernel(HashMap* data, HashMap* data_prev, HashMap* velocit
 	data->Put(IndexPair(x_bounds, y_bounds, z_bounds).IX(length.x), (compute_x_current + compute_x_prev));
 }
 
-cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const uint3& length) {
+cudaError_t AdvectCuda(int bounds, AxisData& current, VectorField& velocity, const float& dt, const uint3& length) {
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
 	HashMap* v_map_x = velocity.map_[0].map_->device_alloc_,
-		*v_map_y = velocity.map_[1].map_->device_alloc_,
-		*v_map_z = velocity.map_[2].map_->device_alloc_,
-		*c_map = current.map_->device_alloc_,
-		*p_map = previous.map_->device_alloc_;
+		* v_map_y = velocity.map_[1].map_->device_alloc_,
+		* v_map_z = velocity.map_[2].map_->device_alloc_,
+		* c_map = current.map_->device_alloc_;
 
 	std::cout << "bidoof" << std::endl;
 
-	AdvectKernel<<<blocks, threads>>> (c_map, p_map, v_map_x, v_map_y, v_map_z, dt, length, bounds);
+	AdvectKernel<<<blocks, threads>>> (c_map, v_map_x, v_map_y, v_map_z, dt, length);
 	BoundaryConditionsCuda(bounds, current, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectCudaKernel");

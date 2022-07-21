@@ -36,6 +36,8 @@ struct AxisData {
 	Axis axis_;
 	HashMap* map_;
 
+	float total_;
+
 private:
 	/// <summary> Loads in zeroes for all data. Made to be sparse. </summary>
 	void LoadDefaultDataSet();

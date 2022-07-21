@@ -63,7 +63,4 @@ private:
 
 	void VelocityStep();
 	void DensityStep();
-
-	float3 v_add_total_;
-	float density_add_total_ = 0.0f;
 };

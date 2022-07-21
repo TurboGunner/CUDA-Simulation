@@ -16,15 +16,9 @@
 
 //Gauss-Siedel Relaxation
 
-__global__ void LinearSolverKernel(HashMap* data, HashMap* data_prev, float a_fac, float c_fac, uint3 length, unsigned int iter, int bounds);
+__global__ void LinearSolverKernel(HashMap* data, HashMap* data_prev, float a_fac, float c_fac, uint3 length, unsigned int iter);
 
 cudaError_t LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, const float& a_fac, const float& c_fac, const unsigned int& iter, const uint3& length);
-
-//Advection
-
-__global__ void AdvectKernel(HashMap* data, HashMap* data_prev, HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, float dt, uint3 length, int bounds);
-
-cudaError_t AdvectCuda(int bounds, AxisData& current, AxisData& previous, VectorField& velocity, const float& dt, const uint3& length);
 
 //Helmholtz Decomposition
 
@@ -34,11 +28,11 @@ __global__ void ProjectKernel2(HashMap* velocity_x, HashMap* velocity_y, HashMap
 
 cudaError_t ProjectCuda(int bounds, VectorField& velocity, VectorField& velocity_prev, const uint3& length, const unsigned int& iter);
 
-//LBM Streaming
+//Advection
 
-__global__ void StreamKernel(HashMap* data, HashMap* data_prev, uint3 length);
+__global__ void AdvectKernel(HashMap* data, HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, float dt, uint3 length);
 
-cudaError_t StreamCuda(int bounds, AxisData& current, AxisData& previous, const uint3& length);
+cudaError_t AdvectCuda(int bounds, AxisData& current, VectorField& velocity, const float& dt, const uint3& length);
 
 //Boundary Conditions
 

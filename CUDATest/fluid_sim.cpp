@@ -29,7 +29,7 @@ void FluidSim::AddDensity(IndexPair pair, float amount) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
 
-	density_add_total_ += amount;
+	density_.total_ += amount;
 
 	AddOnAxisCuda(density_, pair, amount, size_);
 }
@@ -44,9 +44,9 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 	float_vec.y = y;
 	float_vec.z = z;
 
-	v_add_total_.x += x;
-	v_add_total_.y += y;
-	v_add_total_.z += z;
+	velocity_.map_[0].total_ += x;
+	velocity_.map_[1].total_ += y;
+	velocity_.map_[2].total_ += z;
 
 	AddOnVectorCuda(velocity_, pair, float_vec, size_);
 }
@@ -62,7 +62,7 @@ void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
 }
 
 void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
-	AdvectCuda(bounds, current, previous, velocity, dt_, size_);
+	AdvectCuda(bounds, current, velocity, dt_, size_);
 }
 
 void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
@@ -70,17 +70,19 @@ void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, fl
 }
 
 void FluidSim::VelocityStep() {
+	//Diffuses velocity
 	Diffuse(1, viscosity_, velocity_prev_.map_[0], velocity_.map_[0]);
 	Diffuse(2, viscosity_, velocity_prev_.map_[1], velocity_.map_[1]);
 	Diffuse(3, viscosity_, velocity_prev_.map_[2], velocity_.map_[2]);
 
-	Project(velocity_prev_, velocity_);
+	Project(velocity_prev_, velocity_); //Projection 1
 
+	//Advect Velocities
 	Advect(1, velocity_.map_[0], velocity_prev_.map_[0], velocity_prev_);
 	Advect(2, velocity_.map_[1], velocity_prev_.map_[1], velocity_prev_);
 	Advect(3, velocity_.map_[2], velocity_prev_.map_[2], velocity_prev_);
 
-	Project(velocity_, velocity_prev_);
+	Project(velocity_, velocity_prev_); //Projection 2
 }
 
 void FluidSim::DensityStep() {
@@ -98,6 +100,7 @@ void FluidSim::Simulate() {
 	AddDensity(IndexPair(200, 127, 200), 10.0f);
 
 	OpenVDBHandler vdb_handler(*this);
+
 	ReallocateHostData();
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) {

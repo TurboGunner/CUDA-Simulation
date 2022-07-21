@@ -1,6 +1,6 @@
 #include "fluid_sim_cuda.cuh"
 
-__global__ void LinearSolverKernel(HashMap* data, HashMap* data_prev, float a_fac, float c_fac, uint3 length, unsigned int iter, int bounds) {
+__global__ void LinearSolverKernel(HashMap* data, HashMap* data_prev, float a_fac, float c_fac, uint3 length, unsigned int iter) {
 	unsigned int z_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 	unsigned int x_bounds = blockIdx.z * blockDim.z + threadIdx.z + 1;
@@ -31,7 +31,7 @@ cudaError_t LinearSolverCuda(int bounds, AxisData& current, AxisData& previous, 
 	HashMap* c_map = current.map_->device_alloc_,
 		*p_map = previous.map_->device_alloc_;
 
-	LinearSolverKernel<<<blocks, threads>>> (current.map_->device_alloc_, p_map, a_fac, c_fac, length, iter, bounds);
+	LinearSolverKernel<<<blocks, threads>>> (current.map_->device_alloc_, p_map, a_fac, c_fac, length, iter);
 
 	BoundaryConditionsCuda(bounds, current, length);
 
