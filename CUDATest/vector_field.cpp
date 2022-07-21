@@ -13,7 +13,9 @@ VectorField::VectorField(uint3 size) {
 	size_ = size;
 	AxisData axis_x(size_, Axis::X), axis_y(size_, Axis::Y), axis_z(size_, Axis::Z);
 
-	map_.insert(map_.begin(), {axis_x, axis_y, axis_z});
+	std::cout << axis_x.total_ << std::endl;
+
+	map_.insert(map_.begin(), { axis_x, axis_y, axis_z });
 }
 
 string VectorField::ToString() {

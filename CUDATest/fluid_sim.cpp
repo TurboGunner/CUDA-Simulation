@@ -26,7 +26,9 @@ FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned 
 
 	velocity_ = VectorField(size_);
 
-	density_ = AxisData(size_);
+	density_ = AxisData(size_, Axis::X);
+	density_.total_ = velocity_.map_[0].total_;
+
 	if (method_ == SimMethod::Standard) {
 		density_prev_ = AxisData(size_);
 		velocity_prev_ = VectorField(size_);
@@ -104,13 +106,7 @@ void FluidSim::Simulate() {
 
 	AllocateDeviceData();
 
-	AddVelocity(IndexPair(200, 127, 200), 5.0f, 5.0f, 0);
-
-	AddDensity(IndexPair(200, 127, 200), 10.0f);
-
 	OpenVDBHandler vdb_handler(*this);
-
-	ReallocateHostData();
 
 	for (time_elapsed_ = 0; time_elapsed_ < time_max_; time_elapsed_ += dt_) {
 		if (method_ == SimMethod::Standard) {
@@ -127,15 +123,15 @@ void FluidSim::Simulate() {
 			LBMAdvectCuda(density_, velocity_, viscosity_, dt_, size_);
 		}
 
-		ReallocateHostData();
+		AddVelocity(IndexPair(50, 32, 50), 2.0f * dt_, 2.0f * dt_, -9.8f * dt_);
+		AddDensity(IndexPair(50, 32, 50), 50.0f * dt_);
 
-		AddVelocity(IndexPair(200, 127, 200), 2.0f * dt_, 2.0f * dt_, -9.8f * dt_);
-		AddDensity(IndexPair(200, 127, 200), 200.0f * dt_);
+		ReallocateHostData();
 
 		vdb_handler.WriteFile(density_);
 
-		std::cout << "Density: " << density_.map_->Get(IndexPair(200, 127, 200).IX(size_.x)) << std::endl;
-		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(200, 127, 200).IX(size_.x)) << std::endl;
+		std::cout << "Density: " << density_.map_->Get(IndexPair(50, 32, 50).IX(size_.x)) << std::endl;
+		std::cout << "Velocity: " << velocity_.map_[0].map_->Get(IndexPair(50, 32, 50).IX(size_.x)) << std::endl;
 	}
 	vdb_handler.FreeFieldPointers();
 	std::cout << "Done!" << std::endl;

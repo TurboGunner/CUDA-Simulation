@@ -11,11 +11,15 @@ __device__ float EquilibriumFunction(HashMap* velocity_x, HashMap* velocity_y, H
 
 	float intermediate_2 = (9.0f / 2.0f) * (shared_step * shared_step);
 
-	float intermediate_3 = (3.0f / 2.0f) * (powf(velocity_x->Get(incident.IX(length.x)), 2)
-		+ powf(velocity_y->Get(incident.IX(length.x)), 2)
-		+ powf(velocity_z->Get(incident.IX(length.x)), 2));
+	float intermediate_3 = (3.0f / 2.0f) * (powf(velocity_x->Get(incident.IX(length.x)), 2.0f)
+		+ powf(velocity_y->Get(incident.IX(length.x)), 2.0f)
+		+ powf(velocity_z->Get(incident.IX(length.x)), 2.0f));
 
-	return total_density * incident.weight * ((intermediate_1 + intermediate_2) - intermediate_3);
+	float output = (total_density / ((length.x * length.y * length.z) / 19.0f)) * incident.weight * ((intermediate_1 + intermediate_2) - intermediate_3);
+
+	//printf("%f , ", output);
+
+	return output;
 }
 
 __global__ inline void SumFunction(HashMap* data, HashMap* velocity_x, HashMap* velocity_y, HashMap* velocity_z, float* total_v, float total_density, uint3 length) {
@@ -25,14 +29,19 @@ __global__ inline void SumFunction(HashMap* data, HashMap* velocity_x, HashMap* 
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 
+	if (data->Get(incident.IX(length.x)) <= 0.0f) {
+		data->Get(incident.IX(length.x)) = .00001f;
+	}
+
 	total_v[0] += data->Get(incident.IX(length.x)) * velocity_x->Get(incident.IX(length.x));
 	total_v[1] += data->Get(incident.IX(length.x)) * velocity_y->Get(incident.IX(length.x));
 	total_v[2] += data->Get(incident.IX(length.x)) * velocity_z->Get(incident.IX(length.x));
 
 	if (x_bounds == length.x - 2 && y_bounds == length.y - 2 && z_bounds == length.z - 2) {
-		total_v[0] /= total_density;
-		total_v[1] /= total_density;
-		total_v[2] /= total_density;
+		total_v[0] = total_v[0] / (total_density);
+		total_v[1] = total_v[1] / (total_density);
+		total_v[2] = total_v[2] / (total_density);
+		//printf("%f , ", total_v[0]);
 	}
 }
 
@@ -52,8 +61,8 @@ __global__ void LBMAdvectKernel(HashMap* data, HashMap* velocity_x, HashMap* vel
 
 	for (size_t i = 0; i < 19; i++) {
 		float f_eq = EquilibriumFunction(velocity_x, velocity_y, velocity_z, total_density, incidents[i], total_v, length);
-
 		data->Get(incidents[i].IX(length.x)) += -(1.0f / visc) * (data->Get(incidents[i].IX(length.x)) - f_eq);
+		//printf("%f , ", data->Get(incidents[i].IX(length.x)));
 	}
 }
 
@@ -72,6 +81,8 @@ cudaError_t LBMAdvectCuda(AxisData& current, VectorField& velocity, const float&
 	
 	cuda_status = cudaMalloc(&total_v, sizeof(float) * 3);
 
+	std::cout << "Density Total: " << current.total_ << std::endl;
+
 	SumFunction<<<blocks, threads>>> (c_map, v_map_x, v_map_y, v_map_z, total_v, current.total_, length);
 
 	cuda_status = PostExecutionChecks(cuda_status, "LBMAdvectSumKernel");
@@ -82,7 +93,7 @@ cudaError_t LBMAdvectCuda(AxisData& current, VectorField& velocity, const float&
 	BoundaryConditionsCuda(2, velocity.map_[1], length);
 	BoundaryConditionsCuda(3, velocity.map_[2], length);
 
-	cuda_status = PostExecutionChecks(cuda_status, "LBMAdvectKernel");
+	cuda_status = PostExecutionChecks(cuda_status, "LBMAdvectKernel", true);
 
 	cuda_status = cudaFree(total_v);
 

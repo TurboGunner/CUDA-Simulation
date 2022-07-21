@@ -8,7 +8,6 @@ inline int count = 0;
 
 AxisData::AxisData(Axis axis) {
 	axis_ = axis;
-	LoadDefaultDataSet();
 }
 
 AxisData::AxisData(uint3 size, Axis axis) {
@@ -24,7 +23,7 @@ AxisData::AxisData(uint3 size, Axis axis) {
 }
 
 void AxisData::LoadDefaultDataSet() {
-	std::mt19937 generator(time(nullptr));
+	std::mt19937 generator(0);
 	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
 	unsigned int y_current = 0, z_current = 0;
 
@@ -32,11 +31,12 @@ void AxisData::LoadDefaultDataSet() {
 		for (y_current; y_current < size_.y; y_current++) {
 			for (unsigned int i = 0; i < size_.x; i++) {
 				float rand_float = distribution(generator);
-				map_->Put(IndexPair(i, y_current, z_current).IX(size_.x), rand_float);
+				map_->Get(IndexPair(i, y_current, z_current).IX(size_.x)) = rand_float;
 				total_ += rand_float;
 			}
 		}
 	}
+	std::cout << "AxisData Total: " << total_ << std::endl;
 }
 
 string AxisData::ToString() {

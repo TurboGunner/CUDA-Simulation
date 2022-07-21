@@ -8,9 +8,7 @@ enum class Axis { X, Y, Z };
 
 /// <summary> Acts as either a container for scalar quantities (density), or as a constituent axis for a vector quantity (velocity). </summary>
 struct AxisData {
-	/// <summary> Default constructor. </summary>
 	AxisData() = default;
-
 	/// <summary> Loaded constructor, has no size allocation, meant to be initialized later for the size. </summary>
 	AxisData(Axis axis);
 
@@ -36,7 +34,7 @@ struct AxisData {
 	Axis axis_;
 	HashMap* map_;
 
-	float total_;
+	float total_ = 0.0f;
 
 private:
 	/// <summary> Loads in zeroes for all data. Made to be sparse. </summary>

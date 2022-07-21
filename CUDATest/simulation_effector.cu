@@ -42,13 +42,19 @@ __global__ void VectorNormalKernel(HashMap* velocity_x, HashMap* velocity_y, Has
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 
-	unsigned int v_length = velocity_x->Get(incident.IX(length.x)) +
-		velocity_y->Get(incident.IX(length.x)) +
-		velocity_z->Get(incident.IX(length.x));
+	if (abs(velocity_x->Get(incident.IX(length.x))) <= 0.0f) {
+		velocity_x->Get(incident.IX(length.x)) = .01f;
+		velocity_y->Get(incident.IX(length.x)) = .01f;
+		velocity_z->Get(incident.IX(length.x)) = .01f;
+	}
 
-	velocity_x->Get(incident.IX(length.x)) = powf(velocity_x->Get(incident.IX(length.x)), 2) / v_length;
-	velocity_y->Get(incident.IX(length.x)) = powf(velocity_y->Get(incident.IX(length.x)), 2) / v_length;
-	velocity_z->Get(incident.IX(length.x)) = powf(velocity_z->Get(incident.IX(length.x)), 2) / v_length;
+	float v_length = sqrt(powf(velocity_x->Get(incident.IX(length.x)), 2.0f) +
+		powf(velocity_y->Get(incident.IX(length.x)), 2.0f) +
+		powf(velocity_z->Get(incident.IX(length.x)), 2.0f));
+
+	velocity_x->Get(incident.IX(length.x)) = velocity_x->Get(incident.IX(length.x)) / v_length;
+	velocity_y->Get(incident.IX(length.x)) = velocity_y->Get(incident.IX(length.x)) / v_length;
+	velocity_z->Get(incident.IX(length.x)) = velocity_z->Get(incident.IX(length.x)) / v_length;
 }
 
 cudaError_t VectorNormalCuda(VectorField& velocity, const uint3& length) {
@@ -57,12 +63,12 @@ cudaError_t VectorNormalCuda(VectorField& velocity, const uint3& length) {
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
-	HashMap*& v_map_x = velocity.map_[0].map_->device_alloc_,
-		*& v_map_y = velocity.map_[1].map_->device_alloc_,
-		*& v_map_z = velocity.map_[2].map_->device_alloc_;
+	HashMap* v_map_x = velocity.map_[0].map_->device_alloc_,
+		* v_map_y = velocity.map_[1].map_->device_alloc_,
+		* v_map_z = velocity.map_[2].map_->device_alloc_;
 
 	VectorNormalKernel<<<blocks, threads>>> (v_map_x, v_map_y, v_map_z, length);
 
-	cuda_status = PostExecutionChecks(cuda_status, "AddOnVectorKernel");
+	cuda_status = PostExecutionChecks(cuda_status, "VectorNormalKernel", true);
 	return cuda_status;
 }
