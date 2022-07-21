@@ -1,7 +1,7 @@
 #include "fluid_sim_cuda.cuh"
 #include "lbm_sim_cuda.cuh"
 
-__global__ void StreamKernel(HashMap* data, HashMap* data_prev, uint3 length) {
+__global__ void StreamKernel(HashMap* data, uint3 length) {
 	unsigned int z_bounds = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y + 1;
 	unsigned int x_bounds = blockIdx.z * blockDim.z + threadIdx.z + 1;
@@ -53,16 +53,15 @@ __global__ void StreamKernel(HashMap* data, HashMap* data_prev, uint3 length) {
 	data->Get(incident.CornerRMidFront().IX(length.x)) = l_mid_back_value;
 }
 
-cudaError_t StreamCuda(int bounds, AxisData& current, AxisData& previous, const uint3& length) {
+cudaError_t StreamCuda(int bounds, AxisData& current, const uint3& length) {
 	cudaError_t cuda_status = cudaSuccess;
 
 	dim3 blocks, threads;
 	ThreadAllocator(blocks, threads, length.x);
 
-	HashMap* c_map = current.map_->device_alloc_,
-		* p_map = previous.map_->device_alloc_;
+	HashMap* c_map = current.map_->device_alloc_;
 
-	StreamKernel<<<blocks, threads>>> (c_map, p_map, length);
+	StreamKernel<<<blocks, threads>>> (c_map, length);
 
 	BoundaryConditionsCuda(bounds, current, length);
 

@@ -1,16 +1,23 @@
 #pragma once
 
-#include "vector_field.hpp"
 #include "cudamap.cuh"
+#include "fluid_sim_cuda.cuh"
+#include "lbm_sim_cuda.cuh"
+
+#include "axis_data.hpp"
+#include "vector_field.hpp"
 
 #include <math.h>
 
 struct FluidSim {
+
+	enum class SimMethod { Standard, LBM };
+
 	/// <summary> Default Constructor </summary>
 	FluidSim() = default;
 
 	/// <summary> Loaded Constructor, allocates with all corresponding simulation arguments. </summary>
-	FluidSim(float timestep, float diff, float visc, uint3 size, unsigned int iter, float time_max = 1);
+	FluidSim(float timestep, float diff, float visc, uint3 size, unsigned int iter, float time_max = 1, SimMethod mode = SimMethod::Standard);
 
 	/// <summary> Adding density to the simulation at a specific IndexPair point. </summary>
 	void AddDensity(IndexPair pair, float amount);
@@ -50,6 +57,8 @@ struct FluidSim {
 
 	uint3 size_;
 	unsigned int iterations_;
+
+	SimMethod method_ = SimMethod::Standard;
 
 	cudaError_t cuda_status = cudaSuccess;
 

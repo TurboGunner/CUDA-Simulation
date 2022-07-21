@@ -1,11 +1,11 @@
-#include "fluid_sim_cuda.cuh"
 #include "fluid_sim.hpp"
+
 #include "openvdb_handler.hpp"
 
 #include <stdexcept>
 #include <iostream>
 
-FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned int iter, float time_max) {
+FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned int iter, float time_max, SimMethod mode) {
 	dt_ = timestep;
 	diffusion_ = diff;
 	viscosity_ = visc;
@@ -14,8 +14,15 @@ FluidSim::FluidSim(float timestep, float diff, float visc, uint3 size, unsigned 
 	if (iter == 0) {
 		throw std::invalid_argument("Error: The number of iterations must be at least greater than or equal to 1!");
 	}
+
+	else if (time_max <= 0) {
+		throw std::invalid_argument("Error: The time must be a positive value greater than 0!");
+	}
+
 	iterations_ = iter;
 	time_max_ = time_max;
+
+	method_ = mode;
 
 	velocity_ = VectorField(size_);
 	velocity_prev_ = VectorField(size_);
@@ -38,7 +45,7 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 	if (pair.x >= size_.y || pair.y >= size_.y || pair.z >= size_.z) {
 		throw std::invalid_argument("Error: The IndexPair arguments for the fluid simulation are out of bounds!");
 	}
-	float3 float_vec;
+	float3 float_vec{};
 
 	float_vec.x = x;
 	float_vec.y = y;
@@ -52,20 +59,34 @@ void FluidSim::AddVelocity(IndexPair pair, float x, float y, float z) {
 }
 
 void FluidSim::Diffuse(int bounds, float visc, AxisData& current, AxisData& previous) {
+	if (method_ == SimMethod::LBM) {
+		StreamCuda(bounds, current, size_);
+		return;
+	}
 	float a = dt_ * visc * (size_.x - 2) * (size_.y - 2);
 
 	LinearSolve(bounds, current, previous, a, 1 + 6 * a);
 }
 
 void FluidSim::Project(VectorField& v_current, VectorField& v_previous) {
+	if (method_ == SimMethod::LBM) {
+		return;
+	}
 	ProjectCuda(0, v_current, v_previous, size_, iterations_);
 }
 
 void FluidSim::Advect(int bounds, AxisData& current, AxisData& previous, VectorField& velocity) {
+	if (method_ == SimMethod::LBM) {
+		LBMAdvectCuda(bounds, current, velocity, viscosity_, dt_, size_);
+		return;
+	}
 	AdvectCuda(bounds, current, velocity, dt_, size_);
 }
 
 void FluidSim::LinearSolve(int bounds, AxisData& current, AxisData& previous, float a_fac, float c_fac) {
+	if (method_ == SimMethod::LBM) {
+		return;
+	}
 	LinearSolverCuda(bounds, current, previous, a_fac, c_fac, iterations_, size_);
 }
 
