@@ -67,29 +67,32 @@ A central struct called FluidSim; contained within fluid_sim.hpp/cpp holds the d
 >The constructor for FluidSim takes in these parameters:
 
 ```c++
-FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter, float time_max = 1);
+FluidSim(float timestep, float diff, float visc, unsigned int size_x, unsigned int size_y, unsigned int iter, float time_max = 1, SimMethod mode = SimMethod::Standard);
 ```
 
-As for the structure of the global kernel methods and accompanying helper methods, all of them are defined in one central CUDA header file called fluid_sim_cuda.cuh. This contains all relevant definitions for the CUDA calculations.
+As for the structure of the global kernel methods and accompanying helper methods, all of them are defined in one central CUDA header file called fluid_sim_cuda.cuh in regards to the generalized methods for fluid simulation or the default standard method for simulation. This contains all relevant definitions for the CUDA calculations. For LBM, the counterpart for a centralized CUDA header file is named lbm_sim_cuda.cuh.
 
 There are three main steps for fluid simulations that are defined for Navier-Stokes. They are:
 
 ### Diffusion
-> Diffusion is not directly handled. Instead, it is defined internally with boundary conditions in the FluidSim struct, and then runs a linear solve based on the diffusion parameters. The linear solver definitions are defined in linear_solver.cu.
+> Diffusion is not directly handled. Instead, it is defined internally with boundary conditions in the FluidSim struct and then runs a linear solve based on the diffusion parameters. The linear solver definitions are defined in linear_solver.cu.
+> LBM diffusion is implemented in lbm_streaming.cu.
 
 ### Projection
 > Projection is implemented in project.cu. It is implemented to be in accordance with the Helmholtz-Hodge Composition.
 
 ### Advection
 > Advection is implemented in advect.cu. This governs the movement of the density and velocity throughout the field.
+> LBM advection/collision step is implemented in lbm_advect.cu.
 
 ### Boundary Conditions
 > Boundary conditions are calculated using boundary_conditions.cu. This enforces it so that way the outer perimeter will be corrected for, as all CFD methods here operate with bounds that exclude the left and right most elements.
 
 
+
 ## To-do:
 
-Move from Gauss-Siedel to a conjugate gradient solver for the linear systems solver to improve accuracy and quality of the projection and diffusion.
+Stabilize LBM further.
 
 Add a custom GUI and render engine (huge undertaking, will be in the works for a long time)!
 
