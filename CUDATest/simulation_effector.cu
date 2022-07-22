@@ -43,11 +43,10 @@ __global__ void VectorNormalKernel(HashMap* velocity_x, HashMap* velocity_y, Has
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 
 	if (abs(velocity_x->Get(incident.IX(length.x))) <= 0.0f) {
-		velocity_x->Get(incident.IX(length.x)) = .01f;
-		velocity_y->Get(incident.IX(length.x)) = .01f;
-		velocity_z->Get(incident.IX(length.x)) = .01f;
+		velocity_x->Get(incident.IX(length.x)) = 1.0f;
+		velocity_y->Get(incident.IX(length.x)) = -1.0f;
+		velocity_z->Get(incident.IX(length.x)) = 1.0f;
 	}
-
 	float v_length = sqrt(powf(velocity_x->Get(incident.IX(length.x)), 2.0f) +
 		powf(velocity_y->Get(incident.IX(length.x)), 2.0f) +
 		powf(velocity_z->Get(incident.IX(length.x)), 2.0f));

@@ -24,7 +24,7 @@ AxisData::AxisData(uint3 size, Axis axis) {
 
 void AxisData::LoadDefaultDataSet() {
 	std::mt19937 generator(0);
-	std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+	std::uniform_real_distribution<float> distribution(0.0f, 10.0f);
 	unsigned int y_current = 0, z_current = 0;
 
 	for (z_current; z_current < size_.z; z_current++) {
