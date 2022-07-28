@@ -96,5 +96,12 @@ Stabilize LBM further.
 
 Add a custom GUI and render engine (huge undertaking, will be in the works for a long time)!
 
-Perform more tests and rigorous quality control checks in regards to accuracy. Adding more to diagnostic_statics.cuh/cu for better debugging experiences within device code contexts without having to deal with unnecessary syncs to host memory.
+Perform more tests and rigorous quality control checks in regards to accuracy.
 
+Get a meshing system.
+
+## Relevant Papers Used:
+
+Stam, J. (n.d.). Real-Time Fluid Dynamics for Games. University of Toronto. Retrieved July 27, 2022, from https://www.dgp.toronto.edu/public_user/stam/reality/Research/pdf/GDC03.pdf
+
+Tran, N.-P., Lee, M., & Hong, S. (2017). Performance Optimization of 3D Lattice Boltzmann Flow Solver on a GPU. Scientific Programming, 2017, e1205892. https://doi.org/10.1155/2017/1205892
