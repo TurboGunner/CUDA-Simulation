@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -43,8 +43,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Program Files (x86)\stdgpu\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Program Files (x86)\stdgpu\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -58,7 +58,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;stdgpu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
@@ -108,9 +108,15 @@
   <ItemGroup>
     <ClCompile Include="axis_data.cpp" />
     <ClCompile Include="fluid_sim.cpp" />
+    <ClCompile Include="gui_display.cpp" />
+    <ClCompile Include="imgui_rendering.cpp" />
     <ClCompile Include="handler_methods.cpp" />
+    <ClCompile Include="imgui_initialization.cpp" />
     <ClCompile Include="openvdb_handler.cpp" />
     <ClCompile Include="vector_field.cpp" />
+    <ClCompile Include="vulkan_debugging.cpp" />
+    <ClCompile Include="vulkan_initialization.cpp" />
+    <ClCompile Include="vulkan_rendering.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="axis_data.hpp" />
@@ -118,6 +124,7 @@
     <ClInclude Include="diagnostic_statistics.cuh" />
     <ClInclude Include="fluid_sim.hpp" />
     <ClInclude Include="fluid_sim_cuda.cuh" />
+    <ClInclude Include="gui_driver.hpp" />
     <ClInclude Include="handler_methods.hpp" />
     <ClInclude Include="index_pair_cuda.cuh" />
     <ClInclude Include="lbm_sim_cuda.cuh" />
