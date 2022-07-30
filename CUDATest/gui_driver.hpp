@@ -2,14 +2,18 @@
 
 //Graphics Libraries
 
+//IMGUI
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_vulkan.h"
 
 #include <stdio.h>
 
+//SDL
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
+
+//Vulkan
 #include <vulkan/vulkan.h>
 
 //Standard Imports

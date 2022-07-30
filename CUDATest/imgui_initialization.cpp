@@ -1,11 +1,5 @@
 #include "gui_driver.hpp"
 
-#define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
-
-#include "vulkan/vulkan.hpp"
-
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
-
 
 void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info, ImGui_ImplVulkanH_Window* window) {
     init_info.Instance = instance_;

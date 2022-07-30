@@ -1,7 +1,5 @@
 #include "gui_driver.hpp"
 
-#include "vulkan/vulkan.hpp"
-
 void VulkanGUIDriver::LoadInstanceProperties(const char** extensions, const uint32_t& ext_count) {
     instance_info_.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_info_.enabledExtensionCount = ext_count;
@@ -9,27 +7,6 @@ void VulkanGUIDriver::LoadInstanceProperties(const char** extensions, const uint
 }
 
 void VulkanGUIDriver::VulkanInitialization(const char** extensions, uint32_t ext_count) {
-    // Create Vulkan Instance
-
-    vk::DynamicLoader dl;
-
-    PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
-
-    vk::Instance instance = vk::createInstance({}, nullptr);
-
-    // initialize function pointers for instance
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(instance);
-
-    // create a dispatcher, based on additional vkDevice/vkGetDeviceProcAddr
-    std::vector<vk::PhysicalDevice> physicalDevices = instance.enumeratePhysicalDevices();
-    assert(!physicalDevices.empty());
-
-    vk::Device device = physicalDevices[0].createDevice({}, nullptr);
-
-    // function pointer specialization for device
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(device);
-
     LoadInstanceProperties(extensions, ext_count);
 
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
