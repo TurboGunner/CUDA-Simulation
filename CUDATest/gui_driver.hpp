@@ -42,6 +42,8 @@ VKAPI_ATTR static VkBool32 VKAPI_CALL DebugReport(VkDebugReportFlagsEXT flags, V
 
 class VulkanGUIDriver {
 public:
+    VulkanGUIDriver() = default;
+
     ~VulkanGUIDriver() {
         vulkan_status = vkDeviceWaitIdle(device_);
         VulkanErrorHandler(vulkan_status);
@@ -103,7 +105,7 @@ public:
 
     void CreateFrame();
 
-    void InitializeVulkan();
+    void InitializeVulkan(SDL_Window* window);
 
     void GUIPollLogic(bool& exit_condition);
 
@@ -136,7 +138,7 @@ public:
 
     PFN_vkCreateDebugReportCallbackEXT InstanceDebugCallbackEXT;
 
-    SDL_Window* window = nullptr;
+    SDL_Window* window;
     ImGui_ImplVulkanH_Window* wd_;
 
     ImVec4 clear_color_ = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);

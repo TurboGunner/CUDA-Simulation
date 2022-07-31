@@ -1,4 +1,5 @@
 #include "gui_driver.hpp"
+#include <fstream>
 
 void VulkanGUIDriver::DebugErrorCallback() {
     debug_info_callback_.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -27,12 +28,19 @@ void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const u
 
     // Create Vulkan Instance
     vulkan_status = vkCreateInstance(&instance_info_, allocators_, &instance_);
+
     VulkanErrorHandler(vulkan_status);
     free(extensions_ext);
 
     // Get the function pointer (required for any extensions)
     InstanceDebugCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)
-        vkGetInstanceProcAddr(instance_, "InstanceDebugCallbackEXT");
+        vkGetInstanceProcAddr(instance_, "vkCreateDebugReportCallbackEXT");
+
+    std::ofstream myfile;
+    myfile.open("example.txt");
+    myfile << "Address: " << InstanceDebugCallbackEXT;
+    myfile.close();
+
     IM_ASSERT(InstanceDebugCallbackEXT != NULL);
 
     DebugErrorCallback();

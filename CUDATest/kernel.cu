@@ -7,6 +7,8 @@
 #include "vector_field.hpp"
 #include "fluid_sim.hpp"
 
+#include "gui_driver.hpp"
+
 #include <iostream>
 #include <functional>
 
@@ -16,7 +18,7 @@ using std::vector;
 using std::reference_wrapper;
 using std::function;
 
-int main() {
+int WinMain(int argc, char* argv[]) {
     const float FPS_10 = .1f, FPS_24 = 0.04166f, FPS_60 = 0.0166f;
 
     unsigned int iter = 32, side_bound = 128;
@@ -25,6 +27,10 @@ int main() {
     sim_dimensions.x = side_bound;
     sim_dimensions.y = side_bound;
     sim_dimensions.z = side_bound;
+
+    VulkanGUIDriver gui_driver;
+
+    gui_driver.RunGUI();
 
     FluidSim simulation(FPS_60, 1.0f, 0.6f, sim_dimensions, iter, 0.332f, SimMethod::LBM);
 

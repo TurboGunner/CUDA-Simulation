@@ -1,5 +1,7 @@
 #include "gui_driver.hpp"
 
+#include <fstream>
+
 void VulkanGUIDriver::LoadInstanceProperties(const char** extensions, const uint32_t& ext_count) {
     instance_info_.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_info_.enabledExtensionCount = ext_count;
@@ -23,6 +25,11 @@ void VulkanGUIDriver::VulkanInitialization(const char** extensions, uint32_t ext
     LogicalDeviceInitialization();
 
     PoolDescriptionInitialization();
+
+    std::ofstream myfile;
+    myfile.open("example.txt");
+    myfile << "Address2: " << device_;
+    myfile.close();
 }
 
 void VulkanGUIDriver::SelectQueueFamily() {

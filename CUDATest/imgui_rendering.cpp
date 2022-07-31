@@ -1,6 +1,6 @@
 #include "gui_driver.hpp"
 
-#include "vulkan/vulkan.hpp"
+#include <fstream>
 
 void VulkanGUIDriver::RunGUI() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
@@ -12,7 +12,7 @@ void VulkanGUIDriver::RunGUI() {
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     window = SDL_CreateWindow("ImGui SDL2+Vulkan example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 
-    InitializeVulkan();
+    InitializeVulkan(window);
 
     // Create Window Surface
     VkSurfaceKHR surface;
@@ -24,7 +24,7 @@ void VulkanGUIDriver::RunGUI() {
     int width, height;
     CreateFrameBuffers(width, height, surface);
 
-    //Here
+    IMGUIRenderLogic();
 
     vulkan_status = vkDeviceWaitIdle(device_);
     VulkanErrorHandler(vulkan_status);
@@ -108,15 +108,15 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     MinimizeRenderCondition(draw_data);
 }
 
-void VulkanGUIDriver::InitializeVulkan() {
+void VulkanGUIDriver::InitializeVulkan(SDL_Window* window_) {
     uint32_t ext_count = 0;
-    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, NULL);
+    SDL_Vulkan_GetInstanceExtensions(window_, &ext_count, NULL);
 
     const char** extensions = new const char* [ext_count];
-    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, extensions);
+    SDL_Vulkan_GetInstanceExtensions(window_, &ext_count, extensions);
 
     VulkanInitialization(extensions, ext_count);
-    delete[] extensions;
+    //delete[] extensions;
 }
 
 void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer) {

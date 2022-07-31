@@ -1,7 +1,5 @@
 #include "gui_driver.hpp"
 
-#include "vulkan/vulkan.hpp"
-
 void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR surface, int width, int height) {
     wd_->Surface = surface;
     // Check for WSI support
