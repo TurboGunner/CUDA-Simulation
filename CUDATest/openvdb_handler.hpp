@@ -15,6 +15,8 @@ public:
 	/// <summary> Default constructor. </summary>
 	OpenVDBHandler() = default;
 
+	~OpenVDBHandler();
+
 	/// <summary> Loaded constructor, Takes in a FluidSim object address, and an optional std::string.
 	/// <para> The string defaults to FluidSim as a name for the file extension. </para> </summary>
 	OpenVDBHandler(FluidSim& sim, string file_name = "FluidSim");

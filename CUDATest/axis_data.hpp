@@ -4,7 +4,11 @@
 
 #include "cudamap.cuh"
 
+#include "handler_classes.hpp"
+
 enum class Axis { X, Y, Z };
+
+static RandomFloat random(0.0f, 10.0f);
 
 /// <summary> Acts as either a container for scalar quantities (density), or as a constituent axis for a vector quantity (velocity). </summary>
 struct AxisData {

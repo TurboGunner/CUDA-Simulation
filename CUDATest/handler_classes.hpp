@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <sstream>
 #include <random>
 #include <string>
 
@@ -17,14 +18,33 @@ public:
 	}
 
 	static ProgramLog& Get() {
+		static ProgramLog instance_;
 		return instance_;
 	}
 
-	static void OutputLine(string line, bool is_separate) {
+	static void OutputLine(string line, bool is_separate = true) {
+		if (Get().line_count == 0) {
+			Get().file_log.open(Get().file_name);
+		}
+
 		Get().file_log << line;
+		Get().line_count++;
 		if (is_separate) {
 			Get().file_log << std::endl;
 		}
+	}
+
+	static void OutputLine(std::stringstream& line, bool is_separate = true) {
+		if (Get().line_count == 0) {
+			Get().file_log.open(Get().file_name);
+		}
+
+		Get().file_log << line.str();
+		Get().line_count++;
+		if (is_separate) {
+			Get().file_log << std::endl;
+		}
+		line.clear();
 	}
 
 	static void Close() {
@@ -33,9 +53,10 @@ public:
 
 private:
 	ProgramLog() = default;
-	static ProgramLog instance_;
 
 	ofstream file_log;
+	const std::string file_name = "example.txt";
+	unsigned int line_count = 0;
 };
 
 class RandomFloat {

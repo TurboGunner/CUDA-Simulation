@@ -15,6 +15,10 @@ OpenVDBHandler::OpenVDBHandler(FluidSim& sim, string file_name) {
 	std::cout << sim_.density_.map_->Get(IndexPair(32, 32, 32).IX(sim_.size_.x)) << std::endl;
 }
 
+OpenVDBHandler::~OpenVDBHandler() {
+	FreeFieldPointers();
+}
+
 openvdb::GridPtrVec OpenVDBHandler::CreateGrids() {
 	openvdb::GridPtrVec grids;
 

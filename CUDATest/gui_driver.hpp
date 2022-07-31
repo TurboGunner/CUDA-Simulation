@@ -16,9 +16,14 @@
 //Vulkan
 #include <vulkan/vulkan.h>
 
+//Logging
+#include "handler_classes.hpp"
+
 //Standard Imports
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
 
 using std::string;
 
@@ -42,8 +47,10 @@ VKAPI_ATTR static VkBool32 VKAPI_CALL DebugReport(VkDebugReportFlagsEXT flags, V
 
 class VulkanGUIDriver {
 public:
+    //Default Constructor
     VulkanGUIDriver() = default;
 
+    //Destructor
     ~VulkanGUIDriver() {
         vulkan_status = vkDeviceWaitIdle(device_);
         VulkanErrorHandler(vulkan_status);
@@ -61,7 +68,7 @@ public:
 
     void LoadInstanceProperties(const char** extensions, const uint32_t& ext_count);
 
-    void VulkanInitialization(const char** extensions, uint32_t ext_count);
+    void VulkanInstantiation(const char** extensions, uint32_t ext_count);
 
     void DebugOptionInitialization(const char** extensions, const uint32_t& ext_count);
 
@@ -105,7 +112,7 @@ public:
 
     void CreateFrame();
 
-    void InitializeVulkan(SDL_Window* window);
+    void InitializeVulkan();
 
     void GUIPollLogic(bool& exit_condition);
 

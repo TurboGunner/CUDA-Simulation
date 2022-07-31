@@ -8,7 +8,7 @@ void VulkanGUIDriver::LoadInstanceProperties(const char** extensions, const uint
     instance_info_.ppEnabledExtensionNames = extensions;
 }
 
-void VulkanGUIDriver::VulkanInitialization(const char** extensions, uint32_t ext_count) {
+void VulkanGUIDriver::VulkanInstantiation(const char** extensions, uint32_t ext_count) {
     LoadInstanceProperties(extensions, ext_count);
 
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
@@ -25,11 +25,7 @@ void VulkanGUIDriver::VulkanInitialization(const char** extensions, uint32_t ext
     LogicalDeviceInitialization();
 
     PoolDescriptionInitialization();
-
-    std::ofstream myfile;
-    myfile.open("example.txt");
-    myfile << "Address2: " << device_;
-    myfile.close();
+    ProgramLog::OutputLine("Vulkan instance successfully created!");
 }
 
 void VulkanGUIDriver::SelectQueueFamily() {
@@ -47,7 +43,8 @@ void VulkanGUIDriver::SelectQueueFamily() {
         }
 
     free(queues);
-    IM_ASSERT(queue_family_ != (uint32_t)-1);
+    IM_ASSERT(queue_family_ != (uint32_t) - 1);
+    ProgramLog::OutputLine("No errors detected while selecting Vulkan queue family. ");
 }
 
 void VulkanGUIDriver::SelectGPU() {
@@ -58,7 +55,7 @@ void VulkanGUIDriver::SelectGPU() {
 
     IM_ASSERT(gpu_count > 0);
 
-    VkPhysicalDevice* gpus = (VkPhysicalDevice*)malloc(sizeof(VkPhysicalDevice) * gpu_count);
+    VkPhysicalDevice* gpus = (VkPhysicalDevice*) malloc(sizeof(VkPhysicalDevice) * gpu_count);
     vulkan_status = vkEnumeratePhysicalDevices(instance_, &gpu_count, gpus);
 
     VulkanErrorHandler(vulkan_status);
@@ -73,6 +70,9 @@ void VulkanGUIDriver::SelectGPU() {
         }
     }
     physical_device_ = gpus[use_gpu];
+    std::stringstream stream;
+    stream << "GPU Device #" << use_gpu << " has been selected for Vulkan Rendering successfully!";
+    ProgramLog::OutputLine(stream);
     free(gpus);
 }
 

@@ -1,7 +1,6 @@
 #include "axis_data.hpp"
 
 #include <iostream>
-#include <random>
 #include <stdexcept>
 
 inline int count = 0;
@@ -23,14 +22,12 @@ AxisData::AxisData(uint3 size, Axis axis) {
 }
 
 void AxisData::LoadDefaultDataSet() {
-	std::mt19937 generator(0);
-	std::uniform_real_distribution<float> distribution(0.0f, 10.0f);
 	unsigned int y_current = 0, z_current = 0;
 
 	for (z_current; z_current < size_.z; z_current++) {
 		for (y_current; y_current < size_.y; y_current++) {
 			for (unsigned int i = 0; i < size_.x; i++) {
-				float rand_float = distribution(generator);
+				float rand_float = random.Generate();
 				map_->Get(IndexPair(i, y_current, z_current).IX(size_.x)) = rand_float;
 				total_ += rand_float;
 			}

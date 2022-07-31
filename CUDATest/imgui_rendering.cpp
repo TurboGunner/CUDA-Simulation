@@ -4,20 +4,20 @@
 
 void VulkanGUIDriver::RunGUI() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
-        std::cout << SDL_GetError() << std::endl;
+        ProgramLog::OutputLine(SDL_GetError());
         return;
     }
 
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("ImGui SDL2+Vulkan example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    window = SDL_CreateWindow("ImGui SDL2+Vulkan example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 2560, 1080, window_flags);
 
-    InitializeVulkan(window);
+    InitializeVulkan();
 
     // Create Window Surface
     VkSurfaceKHR surface;
     if (SDL_Vulkan_CreateSurface(window, instance_, &surface) == 0) {
-        std::cout << "Error: Failed to create Vulkan surface." << std::endl;
+        ProgramLog::OutputLine("Error: Failed to create Vulkan surface.");
         return;
     }
 
@@ -30,7 +30,6 @@ void VulkanGUIDriver::RunGUI() {
     VulkanErrorHandler(vulkan_status);
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 
-    // Our state
     bool exit_condition = false;
 
     while (!exit_condition) {
@@ -108,15 +107,17 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     MinimizeRenderCondition(draw_data);
 }
 
-void VulkanGUIDriver::InitializeVulkan(SDL_Window* window_) {
+void VulkanGUIDriver::InitializeVulkan() {
     uint32_t ext_count = 0;
-    SDL_Vulkan_GetInstanceExtensions(window_, &ext_count, NULL);
+    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, NULL);
 
     const char** extensions = new const char* [ext_count];
-    SDL_Vulkan_GetInstanceExtensions(window_, &ext_count, extensions);
+    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, extensions);
 
-    VulkanInitialization(extensions, ext_count);
-    //delete[] extensions;
+    VulkanInstantiation(extensions, ext_count);
+    if (ext_count > 0) {
+        delete[] extensions;
+    }
 }
 
 void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer) {
@@ -148,6 +149,22 @@ void VulkanGUIDriver::BeginRendering(VkCommandBufferBeginInfo& begin_info, VkCom
     ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
 }
 
+void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {
+    VkRenderPassBeginInfo info = {};
+
+    info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    info.renderPass = wd_->RenderPass;
+    info.framebuffer = frame_draw->Framebuffer;
+
+    info.renderArea.extent.width = wd_->Width;
+    info.renderArea.extent.height = wd_->Height;
+
+    info.clearValueCount = 1;
+    info.pClearValues = &wd_->ClearValue;
+
+    vkCmdBeginRenderPass(frame_draw->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+}
+
 void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemaphore image_semaphore, VkSemaphore render_semaphore) {
     vkCmdEndRenderPass(frame_draw->CommandBuffer);
     VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -170,22 +187,6 @@ void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemap
 
     vulkan_status = vkQueueSubmit(queue_, 1, &info, frame_draw->Fence);
     VulkanErrorHandler(vulkan_status);
-}
-
-void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {
-    VkRenderPassBeginInfo info = {};
-
-    info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    info.renderPass = wd_->RenderPass;
-    info.framebuffer = frame_draw->Framebuffer;
-
-    info.renderArea.extent.width = wd_->Width;
-    info.renderArea.extent.height = wd_->Height;
-
-    info.clearValueCount = 1;
-    info.pClearValues = &wd_->ClearValue;
-
-    vkCmdBeginRenderPass(frame_draw->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {

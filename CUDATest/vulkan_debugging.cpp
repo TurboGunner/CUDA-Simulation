@@ -1,5 +1,4 @@
 #include "gui_driver.hpp"
-#include <fstream>
 
 void VulkanGUIDriver::DebugErrorCallback() {
     debug_info_callback_.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -10,6 +9,7 @@ void VulkanGUIDriver::DebugErrorCallback() {
 
     vulkan_status = InstanceDebugCallbackEXT(instance_, &debug_info_callback_, allocators_, &debug_report_callback_);
     VulkanErrorHandler(vulkan_status);
+    ProgramLog::OutputLine("\nShout out to Bidoof on the beat!\n");
 }
 
 void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const uint32_t& ext_count) {
@@ -36,10 +36,9 @@ void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const u
     InstanceDebugCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)
         vkGetInstanceProcAddr(instance_, "vkCreateDebugReportCallbackEXT");
 
-    std::ofstream myfile;
-    myfile.open("example.txt");
-    myfile << "Address: " << InstanceDebugCallbackEXT;
-    myfile.close();
+    std::stringstream stream;
+    stream << "Address: " << InstanceDebugCallbackEXT;
+    ProgramLog::OutputLine(stream);
 
     IM_ASSERT(InstanceDebugCallbackEXT != NULL);
 
