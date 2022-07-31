@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <fstream>
 
 using std::string;
 using std::reference_wrapper;

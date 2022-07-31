@@ -10,7 +10,8 @@
 using std::vector;
 using std::string;
 
-struct OpenVDBHandler {
+class OpenVDBHandler {
+public:
 	/// <summary> Default constructor. </summary>
 	OpenVDBHandler() = default;
 

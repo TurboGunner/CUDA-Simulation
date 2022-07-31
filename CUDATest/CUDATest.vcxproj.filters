@@ -22,12 +22,6 @@
     <Filter Include="cuda\navier_stokes_funcs">
       <UniqueIdentifier>{6a67e2ef-e4e2-429b-a791-03ea68c0b85b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cpp\wrapper_structs">
-      <UniqueIdentifier>{62da08cc-babc-4180-b885-aa9e61f611cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="includes\wrapper_structs">
-      <UniqueIdentifier>{5197f1dd-411c-4d5f-b5bd-85e859134f15}</UniqueIdentifier>
-    </Filter>
     <Filter Include="includes\cuda\data_structures">
       <UniqueIdentifier>{cf673e69-8e1d-49d1-bf99-4c0ee985f46c}</UniqueIdentifier>
     </Filter>
@@ -49,11 +43,17 @@
     <Filter Include="cpp\gui\vulkan">
       <UniqueIdentifier>{345cb56b-b4b3-45a6-98f0-69b162daf94d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="includes\utility_structures">
+      <UniqueIdentifier>{5197f1dd-411c-4d5f-b5bd-85e859134f15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\utility_structures">
+      <UniqueIdentifier>{62da08cc-babc-4180-b885-aa9e61f611cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\gui">
+      <UniqueIdentifier>{fc2daf44-a324-47d7-8ed5-d29b5d20b196}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="handler_methods.hpp">
-      <Filter>includes</Filter>
-    </ClInclude>
     <ClInclude Include="fluid_sim_cuda.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
@@ -64,7 +64,7 @@
       <Filter>includes\data_structures</Filter>
     </ClInclude>
     <ClInclude Include="openvdb_handler.hpp">
-      <Filter>includes\wrapper_structs</Filter>
+      <Filter>includes\utility_structures</Filter>
     </ClInclude>
     <ClInclude Include="cudamap.cuh">
       <Filter>includes\cuda\data_structures</Filter>
@@ -81,8 +81,14 @@
     <ClInclude Include="lbm_sim_cuda.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="handler_methods.hpp">
+      <Filter>includes\utility_structures</Filter>
+    </ClInclude>
+    <ClInclude Include="handler_classes.hpp">
+      <Filter>includes\utility_structures</Filter>
+    </ClInclude>
     <ClInclude Include="gui_driver.hpp">
-      <Filter>includes</Filter>
+      <Filter>includes\gui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -96,7 +102,7 @@
       <Filter>cpp\data_structures</Filter>
     </ClCompile>
     <ClCompile Include="openvdb_handler.cpp">
-      <Filter>cpp\wrapper_structs</Filter>
+      <Filter>cpp\utility_structures</Filter>
     </ClCompile>
     <ClCompile Include="imgui_rendering.cpp">
       <Filter>cpp\gui\imgui</Filter>
