@@ -24,6 +24,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <memory>
 
 using std::string;
 
@@ -161,5 +162,5 @@ public:
 
     //IMGUI
     const string program_name = "CUDA CFD Simulator";
-    int screen_width, screen_height;
+    float screen_width, screen_height;
 };

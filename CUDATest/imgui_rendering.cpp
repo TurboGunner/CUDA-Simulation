@@ -16,7 +16,7 @@ void VulkanGUIDriver::RunGUI() {
     }
 
     screen_width = display_mode.w;
-    screen_height = display_mode.h;
+    screen_height = display_mode.h * 0.95f;
 
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
