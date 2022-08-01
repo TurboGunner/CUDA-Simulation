@@ -110,7 +110,7 @@ public:
 
     void SwapChainCondition();
 
-    void CreateFrame();
+    void CreateMainFrame();
 
     void InitializeVulkan();
 
@@ -131,26 +131,35 @@ public:
 
     VkPipelineCache          pipeline_cache_ = VK_NULL_HANDLE;
 
+    //Descriptor Pool
     VkDescriptorPoolCreateInfo pool_info_ = {};
     VkDescriptorPool         descriptor_pool_ = VK_NULL_HANDLE;
-
-    ImGui_ImplVulkanH_Window main_window_data_;
 
     uint32_t                 min_image_count_ = 2;
     bool                     swap_chain_rebuilding_ = false;
 
+    //Callbacks
     VkAllocationCallbacks* allocators_ = nullptr;
     VkDebugReportCallbackEXT debug_report_callback_ = VK_NULL_HANDLE;
     VkDebugReportCallbackCreateInfoEXT debug_info_callback_ = {};
 
     PFN_vkCreateDebugReportCallbackEXT InstanceDebugCallbackEXT;
 
+    //Windows
     SDL_Window* window;
     ImGui_ImplVulkanH_Window* wd_;
 
+    ImGui_ImplVulkanH_Window main_window_data_;
+
     ImVec4 clear_color_ = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    //Internal Booleans
     bool show_demo_window_, show_another_window_;
 
+    //Error Management
     VkResult vulkan_status;
+
+    //IMGUI
+    const string program_name = "CUDA CFD Simulator";
+    int screen_width, screen_height;
 };

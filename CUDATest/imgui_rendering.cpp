@@ -4,13 +4,26 @@
 
 void VulkanGUIDriver::RunGUI() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
-        ProgramLog::OutputLine(SDL_GetError());
+        ProgramLog::OutputLine("SDL_Init failed %s", SDL_GetError());
         return;
     }
 
+    SDL_DisplayMode display_mode;
+
+    if (SDL_GetDesktopDisplayMode(0, &display_mode) != 0) {
+        ProgramLog::OutputLine("SDL_GetDesktopDisplayMode failed %s", SDL_GetError());
+        return;
+    }
+
+    screen_width = display_mode.w;
+    screen_height = display_mode.h;
+
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("ImGui SDL2+Vulkan example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 2560, 1080, window_flags);
+    window = SDL_CreateWindow(program_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width, screen_height, window_flags);
+
+    s_stream << "Created a window with size " << screen_width << " X " << screen_height;
+    ProgramLog::OutputLine(s_stream);
 
     InitializeVulkan();
 
@@ -86,13 +99,15 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    if (show_demo_window_) {
+    /*
+    *   if (show_demo_window_) {
         ImGui::ShowDemoWindow(&show_demo_window_);
     }
+    */
 
-    CreateFrame();
-
-    if (show_another_window_) {
+    CreateMainFrame();
+    /*
+    *     if (show_another_window_) {
         ImGui::Begin("Another Window", &show_another_window_);   // Pass a pointer to the bool variable (the window will have a closing button that will clear the bool when clicked)
         ImGui::Text("Hello from another window!");
         if (ImGui::Button("Close Me")) {
@@ -100,6 +115,7 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
         }
         ImGui::End();
     }
+    */
 
     // Rendering
     ImGui::Render();

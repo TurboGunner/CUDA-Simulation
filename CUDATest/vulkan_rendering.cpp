@@ -5,7 +5,7 @@ void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR surface, int width, int hei
     VkBool32 res;
     vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, queue_family_, wd_->Surface, &res);
     if (res != VK_TRUE) {
-        ProgramLog::OutputLine("Error no WSI support on physical device 0!");
+        ProgramLog::OutputLine("Error: no WSI support on physical device 0!");
     }
 
     // Select Surface Format

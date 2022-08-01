@@ -3,8 +3,6 @@
 #include <iostream>
 #include <stdexcept>
 
-inline int count = 0;
-
 AxisData::AxisData(Axis axis) {
 	axis_ = axis;
 }

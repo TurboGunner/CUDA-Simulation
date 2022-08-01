@@ -70,9 +70,8 @@ void VulkanGUIDriver::SelectGPU() {
         }
     }
     physical_device_ = gpus[use_gpu];
-    std::stringstream stream;
-    stream << "GPU Device #" << use_gpu << " has been selected for Vulkan Rendering successfully!";
-    ProgramLog::OutputLine(stream);
+    s_stream << "GPU Device #" << use_gpu << " has been selected for Vulkan Rendering successfully!";
+    ProgramLog::OutputLine(s_stream);
     free(gpus);
 }
 

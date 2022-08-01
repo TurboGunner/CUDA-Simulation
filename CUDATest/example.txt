@@ -1,6 +1,7 @@
-Address: 00007FFFFAEA17C0
+Created a window with size 2560 X 1080
+Address: 00007FFFF27617C0
 
-Shout out to Bidoof on the beat
+Shout out to Bidoof on the beat!
 
 GPU Device #0 has been selected for Vulkan Rendering successfully!
 No errors detected while selecting Vulkan queue family. 

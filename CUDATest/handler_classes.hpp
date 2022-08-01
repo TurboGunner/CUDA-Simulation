@@ -7,6 +7,9 @@
 
 using std::ofstream;
 using std::string;
+using std::stringstream;
+
+static stringstream s_stream;
 
 //Singleton
 class ProgramLog {

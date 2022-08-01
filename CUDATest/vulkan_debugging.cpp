@@ -36,9 +36,8 @@ void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const u
     InstanceDebugCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)
         vkGetInstanceProcAddr(instance_, "vkCreateDebugReportCallbackEXT");
 
-    std::stringstream stream;
-    stream << "Address: " << InstanceDebugCallbackEXT;
-    ProgramLog::OutputLine(stream);
+    s_stream << "Address: " << InstanceDebugCallbackEXT;
+    ProgramLog::OutputLine(s_stream);
 
     IM_ASSERT(InstanceDebugCallbackEXT != NULL);
 
