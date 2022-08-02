@@ -131,6 +131,7 @@
     <ClInclude Include="lbm_sim_cuda.cuh" />
     <ClInclude Include="handler_classes.hpp" />
     <ClInclude Include="openvdb_handler.hpp" />
+    <ClInclude Include="raypath.cuh" />
     <ClInclude Include="vector_field.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -99,23 +99,8 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    /*
-    *   if (show_demo_window_) {
-        ImGui::ShowDemoWindow(&show_demo_window_);
-    }
-    */
-
+    CreateMenuBar();
     CreateMainFrame();
-    /*
-    *     if (show_another_window_) {
-        ImGui::Begin("Another Window", &show_another_window_);   // Pass a pointer to the bool variable (the window will have a closing button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me")) {
-            show_another_window_ = false;
-        }
-        ImGui::End();
-    }
-    */
 
     // Rendering
     ImGui::Render();

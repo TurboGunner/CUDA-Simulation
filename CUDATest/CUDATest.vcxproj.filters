@@ -52,6 +52,9 @@
     <Filter Include="includes\gui">
       <UniqueIdentifier>{fc2daf44-a324-47d7-8ed5-d29b5d20b196}</UniqueIdentifier>
     </Filter>
+    <Filter Include="includes\cuda\rendering">
+      <UniqueIdentifier>{02388b29-095f-4b50-85c6-cf7ed7097173}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fluid_sim_cuda.cuh">
@@ -89,6 +92,9 @@
     </ClInclude>
     <ClInclude Include="gui_driver.hpp">
       <Filter>includes\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="raypath.cuh">
+      <Filter>includes\cuda\rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

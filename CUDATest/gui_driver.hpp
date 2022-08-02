@@ -111,6 +111,8 @@ public:
 
     void SwapChainCondition();
 
+    void CreateMenuBar();
+
     void CreateMainFrame();
 
     void InitializeVulkan();
@@ -152,7 +154,7 @@ public:
 
     ImGui_ImplVulkanH_Window main_window_data_;
 
-    ImVec4 clear_color_ = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color_ = ImVec4(0.075f, 0.0875f, 0.1f, 1.00f);
 
     //Internal Booleans
     bool show_demo_window_, show_another_window_;
