@@ -121,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="axis_data.hpp" />
+    <ClInclude Include="camera.cuh" />
     <ClInclude Include="cudamap.cuh" />
     <ClInclude Include="diagnostic_statistics.cuh" />
     <ClInclude Include="fluid_sim.hpp" />
@@ -130,9 +131,13 @@
     <ClInclude Include="index_pair_cuda.cuh" />
     <ClInclude Include="lbm_sim_cuda.cuh" />
     <ClInclude Include="handler_classes.hpp" />
+    <ClInclude Include="material.cuh" />
     <ClInclude Include="openvdb_handler.hpp" />
+    <ClInclude Include="rayhit_logic.cuh" />
     <ClInclude Include="raypath.cuh" />
+    <ClInclude Include="sphere_primitive.cuh" />
     <ClInclude Include="vector_field.hpp" />
+    <ClInclude Include="vector_helpers.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

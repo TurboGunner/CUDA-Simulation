@@ -96,6 +96,21 @@
     <ClInclude Include="raypath.cuh">
       <Filter>includes\cuda\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="rayhit_logic.cuh">
+      <Filter>includes\cuda\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere_primitive.cuh">
+      <Filter>includes\cuda\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_helpers.cuh">
+      <Filter>includes\cuda\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="material.cuh">
+      <Filter>includes\cuda\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.cuh">
+      <Filter>includes\cuda\rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fluid_sim.cpp">
