@@ -10,7 +10,7 @@
 #endif
 #include "vector_helpers.cuh"
 
-inline Vector3D UnitDiskRandom(curandState* rand_state) {
+__device__ inline Vector3D UnitDiskRandom(curandState* rand_state) {
     Vector3D p;
     while (DotProduct(p, p) >= 1.0) {
         p = Vector3D(curand_uniform(rand_state), curand_uniform(rand_state), 0.0f);
@@ -22,7 +22,7 @@ inline Vector3D UnitDiskRandom(curandState* rand_state) {
 
 class Camera {
 public:
-    Camera(Vector3D lookfrom, Vector3D lookat, Vector3D vup, float vfov, float aspect, float aperture, float focus_dist) { // vfov is top to bottom in degrees
+    __device__ Camera(Vector3D lookfrom, Vector3D lookat, Vector3D vup, float vfov, float aspect, float aperture, float focus_dist) { // vfov is top to bottom in degrees
         lens_radius = aperture / 2;
 
         float theta = vfov * Pi / 180;
@@ -46,7 +46,7 @@ public:
         horizontal = MultiplyByScalar(u, half_width * focus_dist * 2.0f);
         vertical = MultiplyByScalar(v, half_height * focus_dist * 2.0f);
     }
-    Ray GetRay(float s, float t, curandState* rand_state) {
+    __device__ Ray GetRay(float s, float t, curandState* rand_state) {
         Vector3D rd = MultiplyByScalar(UnitDiskRandom(rand_state), lens_radius);
         Vector3D offset = AddVector(MultiplyByScalar(u, rd.x), MultiplyByScalar(v, rd.y));
 

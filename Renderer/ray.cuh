@@ -3,7 +3,17 @@
 #include <cuda_runtime.h>
 #include "device_launch_parameters.h"
 
+class Material;
+
 #include "raypath.cuh"
+#include "material.cuh"
+
+struct RayHit {
+	float t;
+	Vector3D p;
+	Vector3D normal;
+	Material* mat_ptr;
+};
 
 struct Ray {
 	__host__ __device__ Ray() { };

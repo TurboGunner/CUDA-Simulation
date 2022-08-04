@@ -80,6 +80,20 @@ __global__ void AssignRandom(uint2 size, curandState* rand_state) {
 	curand_init(1984 + pixel_index, 0, 0, &rand_state[pixel_index]);
 }
 
+__global__ inline void CreateWorld(MaterialData* data, Camera* camera, uint2 size) {
+
+	Material* mat1 = new Lambertian(Vector3D(0.1f, 0.2f, 0.5f));
+	data->Put(0, Sphere(Vector3D(0.0f, -1.0f, 0.0f), 0.5f, mat1));
+
+	Vector3D lookfrom(3.0f, 3.0f, 2.0f);
+	Vector3D lookat(0.0f, 0.0f, -1.0f);
+	float dist_to_focus = Length(SubtractVector(lookfrom, lookat));
+	float aperture = 2.0;
+
+	camera = new Camera(lookfrom, lookat, Vector3D(0.0f, 1.0f, 0.0f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
+	printf("%f\n", camera->lens_radius);
+}
+
 inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	size_t frame_buffer_size = 3 * (size.x * size.y) * sizeof(Vector3D);
 
@@ -90,35 +104,23 @@ inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	cuda_status = cudaMalloc(&frame_buffer, frame_buffer_size);
 	cuda_status = cudaMallocHost(&frame_buffer_host, frame_buffer_size);
 
-	Hitable* hitable_list, *world;
-
-	cuda_status = cudaMalloc((void**)&hitable_list, 2 * sizeof(Hitable*));
-	cuda_status = cudaMalloc((void**)&world, sizeof(Hitable*));
-
-	MaterialData* data = new MaterialData(2);
+	MaterialData* data = new MaterialData(1);
 
 	Camera* camera;
+
+	cuda_status = cudaMalloc(&camera, sizeof(Camera));
 
 	dim3 blocks, threads;
 	ThreadAllocator2D(blocks, threads, size.x);
 	AssignRandom<<<blocks, threads>>> (size, rand_states);
-	Render<<<blocks, threads>>> (frame_buffer, size, 50, rand_states, camera, world);
+
+	CreateWorld<<<1, 1>>> (data, camera, size);
+
+	Render<<<blocks, threads>>> (frame_buffer, size, 50, rand_states, camera, data);
 
 	cuda_status = PostExecutionChecks(cuda_status, "RenderKernel", true);
 
 	cuda_status = CopyFunction("RenderKernel", frame_buffer_host, frame_buffer, cudaMemcpyDeviceToHost, cuda_status, frame_buffer_size);
 
-	return frame_buffer;
-}
-
-__global__ inline void CreateWorld(MaterialData* data, Camera* camera, uint2 size) {
-
-	Material* mat1 = new Lambertian(Vector3D(0.1f, 0.2f, 0.5f));
-
-	Vector3D lookfrom(3.0f, 3.0f, 2.0f);
-	Vector3D lookat(0.0f, 0.0f, -1.0f);
-	float dist_to_focus = Length(SubtractVector(lookfrom, lookat));
-	float aperture = 2.0;
-
-	camera = new Camera(lookfrom, lookat, Vector3D(0.0f, 1.0f, 0.0f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
+	return frame_buffer_host;
 }

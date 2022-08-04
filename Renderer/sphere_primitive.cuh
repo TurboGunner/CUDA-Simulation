@@ -7,17 +7,17 @@
 
 class Sphere : public Hitable {
 public:
-    __host__ __device__ Sphere() {};
+    __device__ Sphere() {};
 
-    __host__ __device__ Sphere(Vector3D cen, float r, Material* m) {
+    __device__ Sphere(Vector3D cen, float r, Material* m) {
         center = cen;
         radius = r;
         mat_ptr = m;
     }
 
-    __host__ __device__ virtual bool Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const;
+    __device__ virtual bool Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const;
 
-    __host__ __device__ void AssignOnHit(RayHit& hit, const float& t, Vector3D point, Vector3D normal, Material* mat) const {
+    __device__ void AssignOnHit(RayHit& hit, const float& t, Vector3D point, Vector3D normal, Material* mat) const {
         hit.t = t;
         hit.p = point;
         hit.normal = normal;
@@ -29,7 +29,7 @@ public:
     Material* mat_ptr;
 };
 
-__host__ __device__ bool Sphere::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
+__device__ bool Sphere::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
     Vector3D oc = SubtractVector(ray.Origin(), center);
 
     float a = DotProduct(ray.Direction(), ray.Direction());

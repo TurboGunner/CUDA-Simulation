@@ -11,7 +11,7 @@
 using std::function;
 
 int main() {
-    cudaError_t cuda_status;
+    cudaError_t cuda_status = cudaSuccess;
 
     function<cudaError_t()> set_device_func = []() { return cudaSetDevice(0); };
     cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main",
@@ -27,9 +27,9 @@ int main() {
     for (int j = size.y - 1; j >= 0; j--) {
         for (int i = 0; i < size.x; i++) {
             size_t pixel_index = j * size.x + i;
-            int ir = int(255.99 * fb[pixel_index].r());
-            int ig = int(255.99 * fb[pixel_index].g());
-            int ib = int(255.99 * fb[pixel_index].b());
+            int ir = int(255.99 * frame_buffer[pixel_index].x);
+            int ig = int(255.99 * frame_buffer[pixel_index].y);
+            int ib = int(255.99 * frame_buffer[pixel_index].z);
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }

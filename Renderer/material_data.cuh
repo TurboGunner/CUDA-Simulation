@@ -8,6 +8,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "../CUDATest/handler_methods.hpp"
+
 class MaterialData {
 public:
     __host__ __device__ MaterialData(int init_size) {
@@ -65,8 +67,7 @@ public:
             return;
         }
 #ifdef __CUDA_ARCH__
-        printf("%f", key.IX(cbrt(hash_table_size_)));
-        table_[key.IX(cbrt(hash_table_size_))] = value;
+        table_[key] = value;
 #else
         table_host_[key] = value;
 #endif
