@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="includes">
+      <UniqueIdentifier>{3f1cb58c-bad6-4eb6-8bed-f9d66fa162fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\cuda">
+      <UniqueIdentifier>{f0820e72-ed50-4c1b-bca9-64ed151e6eae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp">
+      <UniqueIdentifier>{01c788f9-4c90-4f95-8174-e3e3b31544e2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\CUDATest\handler_methods.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="ray.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="material.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="rayhit_logic.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="raypath.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere_primitive.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="vector_helpers.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="material_data.cuh">
+      <Filter>includes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\CUDATest\handler_methods.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
