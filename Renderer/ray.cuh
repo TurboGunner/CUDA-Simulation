@@ -6,22 +6,22 @@
 #include "raypath.cuh"
 
 struct Ray {
-	__device__ Ray() { };
+	__host__ __device__ Ray() { };
 
-	__device__ Ray(const Vector3D& start_in, const Vector3D& end_in) {
+	__host__ __device__ Ray(const Vector3D& start_in, const Vector3D& end_in) {
 		start = start_in;
 		end = end_in;
 	}
 
-	__device__ Vector3D Origin() const {
+	__host__ __device__ Vector3D Origin() const {
 		return start;
 	}
 
-	__device__ Vector3D Direction() const {
+	__host__ __device__ Vector3D Direction() const {
 		return end;
 	}
 
-	__device__ Vector3D PointTowards(const float& t) const {
+	__host__ __device__ Vector3D PointTowards(const float& t) const {
 		Vector3D multiplier = MultiplyByScalar(end, t);
 
 		multiplier.x += start.x;

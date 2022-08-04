@@ -17,17 +17,17 @@ public:
 
     __host__ __device__ virtual bool Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const;
 
+    __host__ __device__ void AssignOnHit(RayHit& hit, const float& t, Vector3D point, Vector3D normal, Material* mat) const {
+        hit.t = t;
+        hit.p = point;
+        hit.normal = normal;
+        hit.mat_ptr = mat;
+    }
+
     Vector3D center;
     float radius;
     Material* mat_ptr;
 };
-
-__host__ __device__ inline void AssignOnHit(RayHit& hit, const float& t, Vector3D point, Vector3D normal, Material* mat) {
-    hit.t = t;
-    hit.p = point;
-    hit.normal = normal;
-    hit.mat_ptr = mat;
-}
 
 __host__ __device__ bool Sphere::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
     Vector3D oc = SubtractVector(ray.Origin(), center);
