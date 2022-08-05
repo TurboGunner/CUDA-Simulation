@@ -20,20 +20,19 @@ __device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState
 
 	for (int i = 0; i < 50; i++) {
 		RayHit hit;
-		if ((*data->Get())->Hit(ray, 0.001f, FLT_MAX, hit)) {
+		if ((*data->Get())->Hit(ray_current, 0.001f, FLT_MAX, hit)) {
 			Ray scatter;
 			Vector3D attenuation;
 			if (hit.mat_ptr->Scatter(ray_current, hit, attenuation, scatter, rand_state)) {
 				cur_attenuation = MultiplyVector(cur_attenuation, attenuation);
 				ray_current = scatter;
-				printf("%f\n", scatter);
 			}
 			else {
 				return Vector3D(0.0f, 0.0f, 0.0f);
 			}
 		}
 		else {
-			float t = 0.5f * (UnitVector(ray.Direction()).y() + 1.0f);
+			float t = 0.5f * (UnitVector(ray_current.Direction()).y() + 1.0f);
 			Vector3D intermediate1 = MultiplyByScalar(Vector3D(1.0f, 1.0f, 1.0f), 1.0f - t);
 			Vector3D intermediate2 = MultiplyByScalar(Vector3D(0.5f, 0.7f, 1.0f), t);
 
@@ -88,7 +87,7 @@ __global__ inline void CreateWorld(MaterialData* data, Camera** camera, uint2 si
 	data->Put(0, sphere);
 
 	Vector3D lookfrom(3.0f, 3.0f, 2.0f);
-	Vector3D lookat(0.0f, 0.0f, -1.0f);
+	Vector3D lookat(-1.0f, 0.0f, -1.0f);
 	float dist_to_focus = Length(SubtractVector(lookfrom, lookat));
 	float aperture = 2.0;
 

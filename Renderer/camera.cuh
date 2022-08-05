@@ -23,10 +23,10 @@ __device__ inline Vector3D UnitDiskRandom(curandState* rand_state) {
 class Camera {
 public:
     __device__ Camera(Vector3D lookfrom, Vector3D lookat, Vector3D vup, float vfov, float aspect, float aperture, float focus_dist) { // vfov is top to bottom in degrees
-        lens_radius = aperture / 2;
+        lens_radius = aperture / 2.0f;
 
-        float theta = vfov * Pi / 180;
-        float half_height = tan(theta / 2);
+        float theta = vfov * Pi / 180.0f;
+        float half_height = tan(theta / 2.0f);
         float half_width = aspect * half_height;
 
         origin = lookfrom;
