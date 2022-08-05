@@ -10,11 +10,11 @@
 
 #include "../CUDATest/handler_methods.hpp"
 
-class MaterialData {
+class MaterialData : public Hitable {
 public:
     __host__ __device__ MaterialData(int init_size) {
         table_size_ = init_size;
-        cudaMalloc(&table_, (size_t)sizeof(Hitable) * table_size_ * BUFFER_MULTIPLIER_);
+        cudaMalloc(&table_, sizeof(Hitable) * table_size_ * BUFFER_MULTIPLIER_);
         cudaMallocHost(&table_host_, sizeof(Hitable) * table_size_ * BUFFER_MULTIPLIER_);
     }
 
@@ -53,7 +53,7 @@ public:
 #endif
     }
 
-    __host__ __device__ Hitable* Get() {
+    __host__ __device__ Hitable*& Get() {
 #ifdef __CUDA_ARCH__
         return table_;
 #else
@@ -71,6 +71,20 @@ public:
 #else
         table_host_[key] = value;
 #endif
+    }
+
+    __device__ bool Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
+        RayHit temp_hit;
+        bool successful_hit = false;
+        double closest_so_far = t_max;
+        for (size_t i = 0; i < table_size_; i++) {
+            if (table_[i].Hit(ray, t_min, closest_so_far, temp_hit)) {
+                successful_hit = true;
+                closest_so_far = temp_hit.t;
+                hit = temp_hit;
+            }
+        }
+        return successful_hit;
     }
 
     MaterialData* device_alloc_ = nullptr;

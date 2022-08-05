@@ -16,23 +16,24 @@
 
 __device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState* rand_state) {
 	Ray ray_current = ray;
-	RayHit hit;
 	Vector3D cur_attenuation(1.0f, 1.0f, 1.0f);
 
 	for (int i = 0; i < 50; i++) {
-		if (data->Get()->Hit(ray, 0.001f, FLT_MAX, hit)) {
+		RayHit hit;
+		if (data->Hit(ray, 0.001f, FLT_MAX, hit)) {
 			Ray scatter;
 			Vector3D attenuation;
 			if (hit.mat_ptr->Scatter(ray_current, hit, attenuation, scatter, rand_state)) {
 				cur_attenuation = MultiplyVector(cur_attenuation, attenuation);
 				ray_current = scatter;
+				printf("%f\n", scatter);
 			}
 			else {
 				return Vector3D(0.0f, 0.0f, 0.0f);
 			}
 		}
 		else {
-			float t = 0.5f * (UnitVector(ray.Direction()).y + 1.0f);
+			float t = 0.5f * (UnitVector(ray.Direction()).y() + 1.0f);
 			Vector3D intermediate1 = MultiplyByScalar(Vector3D(1.0f, 1.0f, 1.0f), 1.0f - t);
 			Vector3D intermediate2 = MultiplyByScalar(Vector3D(0.5f, 0.7f, 1.0f), t);
 
@@ -53,7 +54,7 @@ __global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curand
 	int IX = y_bounds * size.x + x_bounds;
 	curandState rand_state = rand_states[IX];
 
-	Vector3D color;
+	Vector3D color(0.0f, 0.0f, 0.0f);
 
 	float u, v;
 	Ray ray;
@@ -65,6 +66,8 @@ __global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curand
 		ray = camera->GetRay(u, v, &rand_state);
 		color = AddVector(color, Color(ray, data, &rand_state));
 	}
+
+	//printf("%f\n", ray.Origin().x());
 
 	frame_buffer[IX] = Color(ray, data, &rand_state);
 }
@@ -81,9 +84,10 @@ __global__ void AssignRandom(uint2 size, curandState* rand_state) {
 }
 
 __global__ inline void CreateWorld(MaterialData* data, Camera* camera, uint2 size) {
-
 	Material* mat1 = new Lambertian(Vector3D(0.1f, 0.2f, 0.5f));
-	data->Put(0, Sphere(Vector3D(0.0f, -1.0f, 0.0f), 0.5f, mat1));
+	Sphere sphere = Sphere(Vector3D(0.0f, -1.0f, 0.0f), 0.5f, mat1);
+
+	data->Put(0, sphere);
 
 	Vector3D lookfrom(3.0f, 3.0f, 2.0f);
 	Vector3D lookat(0.0f, 0.0f, -1.0f);
@@ -91,7 +95,9 @@ __global__ inline void CreateWorld(MaterialData* data, Camera* camera, uint2 siz
 	float aperture = 2.0;
 
 	camera = new Camera(lookfrom, lookat, Vector3D(0.0f, 1.0f, 0.0f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
-	printf("%f\n", camera->lens_radius);
+	RayHit hit;
+	Ray ray;
+	printf("%d\n", sphere.Hit(ray, 0.001f, FLT_MAX, hit));
 }
 
 inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
@@ -105,6 +111,9 @@ inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	cuda_status = cudaMallocHost(&frame_buffer_host, frame_buffer_size);
 
 	MaterialData* data = new MaterialData(1);
+	MaterialData* data_device = nullptr;
+
+	data->DeviceTransfer(cuda_status, data, data_device);
 
 	Camera* camera;
 
@@ -114,9 +123,9 @@ inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	ThreadAllocator2D(blocks, threads, size.x);
 	AssignRandom<<<blocks, threads>>> (size, rand_states);
 
-	CreateWorld<<<1, 1>>> (data, camera, size);
+	CreateWorld<<<1, 1>>> (data->device_alloc_, camera, size);
 
-	Render<<<blocks, threads>>> (frame_buffer, size, 50, rand_states, camera, data);
+	Render<<<blocks, threads>>> (frame_buffer, size, 50, rand_states, camera, data->device_alloc_);
 
 	cuda_status = PostExecutionChecks(cuda_status, "RenderKernel", true);
 

@@ -34,9 +34,9 @@ struct Ray {
 	__host__ __device__ Vector3D PointTowards(const float& t) const {
 		Vector3D multiplier = MultiplyByScalar(end, t);
 
-		multiplier.x += start.x;
-		multiplier.y += start.y;
-		multiplier.z += start.z;
+		multiplier.dim[0] += start.x();
+		multiplier.dim[1] += start.y();
+		multiplier.dim[2] += start.z();
 
 		return multiplier;
 	}

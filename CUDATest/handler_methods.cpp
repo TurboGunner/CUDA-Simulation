@@ -30,7 +30,7 @@ cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyK
 
 cudaError_t WrapperFunction(function<cudaError_t()> func, string operation_name, string method_name, cudaError_t error, string optional_args) {
     cudaError_t cuda_status = error;
-    if (cuda_status != cudaSuccess) {
+    if (cuda_status == cudaSuccess) {
         return cuda_status;
     }
     cuda_status = func();

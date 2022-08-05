@@ -48,7 +48,7 @@ public:
     }
     __device__ Ray GetRay(float s, float t, curandState* rand_state) {
         Vector3D rd = MultiplyByScalar(UnitDiskRandom(rand_state), lens_radius);
-        Vector3D offset = AddVector(MultiplyByScalar(u, rd.x), MultiplyByScalar(v, rd.y));
+        Vector3D offset = AddVector(MultiplyByScalar(u, rd.x()), MultiplyByScalar(v, rd.y()));
 
         Vector3D intermediate1 = MultiplyByScalar(horizontal, s);
         Vector3D intermediate2 = MultiplyByScalar(vertical, t);
