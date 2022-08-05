@@ -9,6 +9,7 @@ class Material;
 #include "material.cuh"
 
 struct RayHit {
+	__host__ __device__ RayHit() {};
 	float t;
 	Vector3D p;
 	Vector3D normal;

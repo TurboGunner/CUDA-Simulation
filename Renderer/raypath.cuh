@@ -20,7 +20,7 @@ __device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState
 
 	for (int i = 0; i < 50; i++) {
 		RayHit hit;
-		if (data->Hit(ray, 0.001f, FLT_MAX, hit)) {
+		if ((*data->Get())->Hit(ray, 0.001f, FLT_MAX, hit)) {
 			Ray scatter;
 			Vector3D attenuation;
 			if (hit.mat_ptr->Scatter(ray_current, hit, attenuation, scatter, rand_state)) {
@@ -43,7 +43,7 @@ __device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState
 	return Vector3D(0.0f, 0.0f, 0.0f);
 }
 
-__global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curandState* rand_states, Camera* camera, MaterialData* data) {
+__global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curandState* rand_states, Camera** camera, MaterialData* data) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -63,11 +63,9 @@ __global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curand
 		u = float(x_bounds + curand_uniform(&rand_state)) / float(size.x);
 		v = float(y_bounds + curand_uniform(&rand_state)) / float(size.y);
 
-		ray = camera->GetRay(u, v, &rand_state);
+		ray = (*camera)->GetRay(u, v, &rand_state);
 		color = AddVector(color, Color(ray, data, &rand_state));
 	}
-
-	//printf("%f\n", ray.Origin().x());
 
 	frame_buffer[IX] = Color(ray, data, &rand_state);
 }
@@ -83,9 +81,9 @@ __global__ void AssignRandom(uint2 size, curandState* rand_state) {
 	curand_init(1984 + pixel_index, 0, 0, &rand_state[pixel_index]);
 }
 
-__global__ inline void CreateWorld(MaterialData* data, Camera* camera, uint2 size) {
+__global__ inline void CreateWorld(MaterialData* data, Camera** camera, uint2 size) {
 	Material* mat1 = new Lambertian(Vector3D(0.1f, 0.2f, 0.5f));
-	Sphere sphere = Sphere(Vector3D(0.0f, -1.0f, 0.0f), 0.5f, mat1);
+	Sphere* sphere = new Sphere(Vector3D(0.0f, -1.0f, 0.0f), 0.5f, mat1);
 
 	data->Put(0, sphere);
 
@@ -94,10 +92,8 @@ __global__ inline void CreateWorld(MaterialData* data, Camera* camera, uint2 siz
 	float dist_to_focus = Length(SubtractVector(lookfrom, lookat));
 	float aperture = 2.0;
 
-	camera = new Camera(lookfrom, lookat, Vector3D(0.0f, 1.0f, 0.0f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
-	RayHit hit;
-	Ray ray;
-	printf("%d\n", sphere.Hit(ray, 0.001f, FLT_MAX, hit));
+	*camera = new Camera(lookfrom, lookat, Vector3D(0.0f, 1.0f, 0.0f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
+	printf("%f\n", sphere->center);
 }
 
 inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
@@ -106,7 +102,8 @@ inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	curandState* rand_states;
 	cuda_status = cudaMalloc((void**)&rand_states, (size.x * size.y) * sizeof(curandState));
 
-	Vector3D* frame_buffer, * frame_buffer_host;
+	Vector3D* frame_buffer, *frame_buffer_host;
+
 	cuda_status = cudaMalloc(&frame_buffer, frame_buffer_size);
 	cuda_status = cudaMallocHost(&frame_buffer_host, frame_buffer_size);
 
@@ -115,21 +112,25 @@ inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 
 	data->DeviceTransfer(cuda_status, data, data_device);
 
-	Camera* camera;
+	Camera** camera;
 
-	cuda_status = cudaMalloc(&camera, sizeof(Camera));
+	cuda_status = cudaMalloc((void**)&camera, sizeof(Camera*));
 
 	dim3 blocks, threads;
 	ThreadAllocator2D(blocks, threads, size.x);
 	AssignRandom<<<blocks, threads>>> (size, rand_states);
 
+	cudaDeviceSynchronize();
+
 	CreateWorld<<<1, 1>>> (data->device_alloc_, camera, size);
+	
+	cuda_status = PostExecutionChecks(cuda_status, "InitRenderKernel", true);
 
 	Render<<<blocks, threads>>> (frame_buffer, size, 50, rand_states, camera, data->device_alloc_);
 
 	cuda_status = PostExecutionChecks(cuda_status, "RenderKernel", true);
 
-	cuda_status = CopyFunction("RenderKernel", frame_buffer_host, frame_buffer, cudaMemcpyDeviceToHost, cuda_status, frame_buffer_size);
+	cuda_status = CopyFunction("RenderCopyKernel", frame_buffer_host, frame_buffer, cudaMemcpyDeviceToHost, cuda_status, frame_buffer_size);
 
 	return frame_buffer_host;
 }

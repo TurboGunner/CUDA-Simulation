@@ -18,8 +18,8 @@ int main() {
         cuda_status, "Do you have a CUDA-capable GPU installed?");
 
     uint2 size;
-    size.x = 50;
-    size.y = 50;
+    size.x = 64;
+    size.y = 64;
 
     Vector3D* frame_buffer = AllocateTexture(size, cuda_status);
 
@@ -29,9 +29,9 @@ int main() {
     for (int j = size.y - 1; j >= 0; j--) {
         for (int i = 0; i < size.x; i++) {
             size_t pixel_index = j * size.x + i;
-            int ir = int(255.99 * frame_buffer[pixel_index].x());
-            int ig = int(255.99 * frame_buffer[pixel_index].y());
-            int ib = int(255.99 * frame_buffer[pixel_index].z());
+            float ir = 255.99 * frame_buffer[pixel_index].x();
+            float ig = 255.99 * frame_buffer[pixel_index].y();
+            float ib = 255.99 * frame_buffer[pixel_index].z();
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }

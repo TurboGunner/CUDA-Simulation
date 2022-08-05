@@ -35,8 +35,11 @@ __host__ __device__ size_t HashMap::hash_func_(IndexPair i1) {
 HashMap::~HashMap() {
     cudaFree(table_);
     free((void*)table_host_);
+
     cudaFree(hashes_);
     free((void*)hashes_host_);
+
+    cudaFree(device_alloc_);
 }
 
 __host__ __device__ void* HashMap::operator new(size_t size) {
@@ -47,7 +50,7 @@ __host__ __device__ void* HashMap::operator new(size_t size) {
 
 __host__ __device__ void HashMap::operator delete(void* ptr) {
     cudaDeviceSynchronize();
-    cudaFree(ptr);
+    free(ptr);
 }
 
 __host__ __device__ long HashMap::FindHash(const int& hash) {
