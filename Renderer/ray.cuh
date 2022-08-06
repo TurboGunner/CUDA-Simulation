@@ -32,12 +32,10 @@ struct Ray {
 		return end;
 	}
 
-	__host__ __device__ Vector3D PointTowards(const float& t) const {
+	__host__ __device__ Vector3D PointTowards(const float& t) const { //Good
 		Vector3D multiplier = MultiplyByScalar(end, t);
 
-		multiplier.dim[0] += start.x();
-		multiplier.dim[1] += start.y();
-		multiplier.dim[2] += start.z();
+		multiplier = AddVector(multiplier, start);
 
 		return multiplier;
 	}

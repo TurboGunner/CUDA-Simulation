@@ -96,7 +96,20 @@ public:
 #endif
     }
 
-    __device__ virtual bool Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const;
+    __device__ bool MaterialData::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
+        RayHit temp_hit;
+        bool successful_hit = false;
+        double closest_so_far = t_max;
+
+        for (size_t i = 0; i < table_size_; i++) {
+            if (table_[i]->Hit(ray, t_min, closest_so_far, temp_hit)) {
+                successful_hit = true;
+                closest_so_far = temp_hit.t;
+                hit = temp_hit;
+            }
+        }
+        return successful_hit;
+    }
 
     MaterialData* device_alloc_ = nullptr;
 
@@ -107,18 +120,3 @@ private:
     bool is_initialized = false;
     bool device_allocated_status = false;
 };
-
-__device__ bool MaterialData::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
-    RayHit temp_hit;
-    bool successful_hit = false;
-    double closest_so_far = t_max;
-
-    for (size_t i = 0; i < table_size_; i++) {
-        if (table_[i]->Hit(ray, t_min, closest_so_far, temp_hit)) {
-            successful_hit = true;
-            closest_so_far = temp_hit.t;
-            hit = temp_hit;
-        }
-    }
-    return successful_hit;
-}

@@ -40,18 +40,6 @@ int main() {
     }
 
     img.save_bmp("filename.bmp");
-    /*
-    std::cout << "P3\n" << size.x << " " << size.y << "\n255\n";
-    for (int j = size.y - 1; j >= 0; j--) {
-        for (int i = 0; i < size.x; i++) {
-            size_t pixel_index = j * size.x + i;
-            float ir = 255.99f * frame_buffer[pixel_index].x();
-            float ig = 255.99f * frame_buffer[pixel_index].y();
-            float ib = 255.99f * frame_buffer[pixel_index].z();
-            std::cout << ir << " " << ig << " " << ib << "\n";
-        }
-    }
-    */
 
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

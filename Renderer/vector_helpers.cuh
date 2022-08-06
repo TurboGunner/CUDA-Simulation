@@ -105,13 +105,17 @@ __host__ __device__ inline Vector3D MultiplyVector(const Vector3D& vector1, cons
 	return output;
 }
 
-__host__ __device__ inline Vector3D UnitVector(const Vector3D& vector) {
-	Vector3D output;
-	float length = vector.x() + vector.y() + vector.z();
+__host__ __device__ inline float SquaredLength(const Vector3D& vector1) {
+	return vector1.dim[0] * vector1.dim[0] + vector1.dim[1] * vector1.dim[1] + vector1.dim[2] * vector1.dim[2];
+}
 
-	output.dim[0] = vector.x() / length;
-	output.dim[1] = vector.y() / length;
-	output.dim[2] = vector.z() / length;
+__host__ __device__ inline float Length(const Vector3D& vector1) {
+	return sqrt(vector1.dim[0] * vector1.dim[0] + vector1.dim[1] * vector1.dim[1] + vector1.dim[2] * vector1.dim[2]);
+}
+
+__host__ __device__ inline Vector3D UnitVector(const Vector3D& vector) {
+	Vector3D output = vector;
+	output = DivideByScalar(vector, Length(vector));
 
 	return output;
 }
@@ -124,12 +128,4 @@ __host__ __device__ inline Vector3D CrossProduct(const Vector3D& vector1, const 
 	return Vector3D((vector1.dim[1] * vector2.dim[2] - vector1.dim[2] * vector2.dim[1]),
 		(-(vector1.dim[0] * vector2.dim[2] - vector1.dim[2] * vector2.dim[0])),
 		(vector1.dim[0] * vector2.dim[1] - vector1.dim[1] * vector2.dim[0]));
-}
-
-__host__ __device__ inline float SquaredLength(const Vector3D& vector1) {
-	return vector1.dim[0] * vector1.dim[0] + vector1.dim[1] * vector1.dim[1] + vector1.dim[2] * vector1.dim[2];
-}
-
-__host__ __device__ inline float Length(const Vector3D& vector1) {
-	return sqrt(vector1.dim[0] * vector1.dim[0] + vector1.dim[1] * vector1.dim[1] + vector1.dim[2] * vector1.dim[2]);
 }

@@ -34,7 +34,7 @@ __device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState
 		else {
 			float t = 0.5f * (UnitVector(ray_current.Direction()).y() + 1.0f);
 			Vector3D intermediate1 = MultiplyByScalar(Vector3D(1.0f, 1.0f, 1.0f), 1.0f - t);
-			Vector3D intermediate2 = MultiplyByScalar(Vector3D(0.5f, 0.7f, 1.0f), t);
+			Vector3D intermediate2 = MultiplyByScalar(Vector3D(0.3f, 0.5f, 1.0f), t);
 
 			return MultiplyVector(cur_attenuation, AddVector(intermediate1, intermediate2));
 		}
@@ -65,8 +65,14 @@ __global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curand
 		ray = (*camera)->GetRay(u, v, &rand_state);
 		color = AddVector(color, Color(ray, data, &rand_state));
 	}
+	rand_states[IX] = rand_state;
 
-	frame_buffer[IX] = Color(ray, data, &rand_state);
+	color = DivideByScalar(color, float(ns));
+	color.dim[0] = sqrt(color.dim[0]);
+	color.dim[1] = sqrt(color.dim[1]);
+	color.dim[2] = sqrt(color.dim[2]);
+
+	frame_buffer[IX] = color;
 }
 
 __global__ void AssignRandom(uint2 size, curandState* rand_state) {
@@ -81,18 +87,17 @@ __global__ void AssignRandom(uint2 size, curandState* rand_state) {
 }
 
 __global__ inline void CreateWorld(MaterialData* data, Camera** camera, uint2 size) {
-	Material* mat1 = new Lambertian(Vector3D(0.1f, 0.2f, 0.5f));
-	Sphere* sphere = new Sphere(Vector3D(0.0f, -1.0f, 0.0f), 0.5f, mat1);
+	Material* mat1 = new Lambertian(Vector3D(0.1f, 0.5f, 0.5f));
+	Sphere* sphere = new Sphere(Vector3D(0.01f, 0.01f, -3.0f), 3.0f, mat1);
 
 	data->Put(0, sphere);
 
-	Vector3D lookfrom(3.0f, 3.0f, 2.0f);
-	Vector3D lookat(-1.0f, 0.0f, -1.0f);
+	Vector3D lookfrom(3.0f, 3.0f, 5.0f);
+	Vector3D lookat(0.01f, 0.01f, -3.0f);
 	float dist_to_focus = Length(SubtractVector(lookfrom, lookat));
-	float aperture = 2.0;
+	float aperture = 2.0f;
 
-	*camera = new Camera(lookfrom, lookat, Vector3D(0.0f, 1.0f, 0.0f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
-	printf("%f\n", sphere->center);
+	*camera = new Camera(lookfrom, lookat, Vector3D(0.01f, 1.0f, 0.01f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
 }
 
 inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
@@ -125,7 +130,9 @@ inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	
 	cuda_status = PostExecutionChecks(cuda_status, "InitRenderKernel", true);
 
-	Render<<<blocks, threads>>> (frame_buffer, size, 50, rand_states, camera, data->device_alloc_);
+	cudaDeviceSynchronize();
+
+	Render<<<blocks, threads>>> (frame_buffer, size, 128, rand_states, camera, data->device_alloc_);
 
 	cuda_status = PostExecutionChecks(cuda_status, "RenderKernel", true);
 

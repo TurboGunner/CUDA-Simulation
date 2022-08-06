@@ -17,7 +17,7 @@ public:
 
     __device__ virtual bool Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const;
 
-    __device__ void AssignOnHit(RayHit& hit, const float& t, Vector3D point, Vector3D normal, Material* mat) const {
+    __device__ void AssignOnHit(RayHit& hit, const float& t, Vector3D point, Vector3D normal, Material* mat) const { //Good
         hit.t = t;
         hit.p = point;
         hit.normal = normal;
@@ -29,7 +29,7 @@ public:
     Material* mat_ptr;
 };
 
-__device__ bool Sphere::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
+__device__ bool Sphere::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const { //Good!
     Vector3D oc = SubtractVector(ray.Origin(), center);
 
     float a = DotProduct(ray.Direction(), ray.Direction());
