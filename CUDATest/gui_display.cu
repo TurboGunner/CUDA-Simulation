@@ -4,8 +4,8 @@
 
 #include "swap_chain_handler.cuh"
 
-static inline float f = 0.0f;
-static inline int counter = 0;
+static float f = 0.0f;
+static int counter = 0;
 
 void VulkanGUIDriver::CreateMenuBar() {
     std::string menu_name = "Main";

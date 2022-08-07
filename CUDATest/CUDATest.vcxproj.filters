@@ -125,9 +125,6 @@
     <ClCompile Include="handler_methods.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="gui_display.cpp">
-      <Filter>cpp\gui\imgui</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="linear_solver.cu">
@@ -162,6 +159,9 @@
     </CudaCompile>
     <CudaCompile Include="simulation_effector.cu">
       <Filter>cuda\navier_stokes_funcs\sim_funcs</Filter>
+    </CudaCompile>
+    <CudaCompile Include="gui_display.cu">
+      <Filter>cpp\gui\imgui</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

@@ -12,6 +12,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\CUDATest\handler_methods.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
     <ClInclude Include="vector_helpers.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
@@ -36,9 +39,6 @@
     <ClInclude Include="sphere_primitive.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="..\CUDATest\handler_methods.hpp">
-      <Filter>includes</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CUDATest\handler_methods.cpp">
@@ -46,6 +46,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="renderer.cu" />
   </ItemGroup>
 </Project>
