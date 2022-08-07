@@ -52,7 +52,7 @@ void VulkanGUIDriver::RenderImage(uint2 size, cudaError_t& cuda_status) {
 
     ImVec2 uv0 = ImVec2(10.0f / float(size.x), 10.0f / float(size.y));
 
-    SwapChainHandler handler(device_);
+    SwapChainHandler handler(device_, physical_device_);
 
     auto tuple = handler.CreateTextureImage(size, cuda_status);
 

@@ -96,7 +96,7 @@ public:
 #endif
     }
 
-    __device__ bool MaterialData::Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
+    __device__ bool Hit(const Ray& ray, float t_min, float t_max, RayHit& hit) const {
         RayHit temp_hit;
         bool successful_hit = false;
         double closest_so_far = t_max;

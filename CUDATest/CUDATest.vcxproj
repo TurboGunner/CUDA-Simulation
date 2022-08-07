@@ -71,7 +71,7 @@
       <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
     </CudaCompile>
     <CudaLink>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\Renderer.lib;%(AdditionalDependencies);$(SolutionDir)Dependencies</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\Renderer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </CudaLink>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -100,7 +100,7 @@
       <Include>%(Include);</Include>
     </CudaCompile>
     <CudaLink>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\Renderer.lib;%(AdditionalDependencies);$(SolutionDir)Dependencies</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\Renderer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </CudaLink>
   </ItemDefinitionGroup>
   <ItemGroup>

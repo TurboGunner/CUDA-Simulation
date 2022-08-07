@@ -153,11 +153,11 @@ Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	return frame_buffer_host;
 }
 
-vector<Vector3D> OutputImage(Vector3D* input, uint2 size) {
+vector<Vector3D> OutputImage(Vector3D*& input, uint2 size) {
 	vector<Vector3D> output;
 	for (size_t i = 0; i < size.x * size.y; i++) {
 		output.push_back(input[i]);
 	}
-	free(input);
+	//free(input);
 	return output;
 }
