@@ -11,23 +11,21 @@
 //Renderer
 #include "../Renderer/raypath.cuh"
 
-#include <functional>
 #include <tuple>
-#include <vector>
 
 using std::tuple;
-using std::vector;
-using std::reference_wrapper;
 
 class SwapChainHandler {
 public:
     SwapChainHandler(VkDevice& device_in, VkPhysicalDevice& physical_in) {
-        device_.push_back(reference_wrapper<VkDevice>(device_in));
+        device_ = device_in;
         physical_device_ = physical_in;
     }
 
     ~SwapChainHandler() {
-        vkDestroyImageView(device_[0].get(), swap_chain_image_view, nullptr);
+        vkDestroyImageView(device_, swap_chain_image_view, nullptr);
+        vkDestroyBuffer(device_, staging_buffer, nullptr);
+        vkFreeMemory(device_, staging_buffer_memory, nullptr);
     }
 
     tuple<VkImageView, VkSampler> CreateTextureImage(uint2 size, cudaError_t& cuda_status) {
@@ -38,14 +36,15 @@ public:
 
         CreateBuffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
 
-        vkMapMemory(device_[0].get(), staging_buffer_memory, 0, image_size, 0, &data);
-        vkUnmapMemory(device_[0].get(), staging_buffer_memory);
+        vkMapMemory(device_, staging_buffer_memory, 0, image_size, 0, &data);
+        vkUnmapMemory(device_, staging_buffer_memory);
 
         //free(image_ptr);
 
         VkMemoryPropertyFlags alloc_flags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-        InitializeImage(size, alloc_flags);
+        InitializeImage(image_, size, alloc_flags);
+        InitializeImage(swap_chain_image, size, alloc_flags);
         InitializeImageViews();
         InitializeImageSampler();
 
@@ -65,21 +64,21 @@ public:
 
     void AllocateImageMemory() {
         VkMemoryRequirements mem_requirements;
-        vkGetImageMemoryRequirements(device_[0].get(), swap_chain_image, &mem_requirements);
+        vkGetImageMemoryRequirements(device_, image_, &mem_requirements);
 
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = mem_requirements.size;
-        allocInfo.memoryTypeIndex = FindMemoryType(mem_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        VkMemoryAllocateInfo alloc_info{};
+        alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc_info.allocationSize = mem_requirements.size;
+        alloc_info.memoryTypeIndex = FindMemoryType(mem_requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        if (vkAllocateMemory(device_[0].get(), &allocInfo, nullptr, &texture_image_memory) != VK_SUCCESS) {
+        if (vkAllocateMemory(device_, &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to allocate image memory!");
         }
 
-        vkBindImageMemory(device_[0].get(), swap_chain_image, texture_image_memory, 0);
+        vkBindImageMemory(device_, image_, texture_image_memory, 0);
     }
 
-    void InitializeImage(uint2 size, VkMemoryPropertyFlags properties) {
+    void InitializeImage(VkImage image, uint2 size, VkMemoryPropertyFlags properties) {
         VkImageCreateInfo image_info {};
 
         image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -99,15 +98,15 @@ public:
         image_info.samples = VK_SAMPLE_COUNT_1_BIT;
         image_info.flags = 0;
 
-        if (vkCreateImage(device_[0].get(), &image_info, nullptr, &swap_chain_image) != VK_SUCCESS) {
+        if (vkCreateImage(device_, &image_info, nullptr, &image) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to create image!");
         }
 
         VkMemoryRequirements mem_requirements;
-        vkGetImageMemoryRequirements(device_[0], swap_chain_image, &mem_requirements);
+        vkGetImageMemoryRequirements(device_, image_, &mem_requirements);
 
         VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(mem_requirements, properties);
-        if (vkAllocateMemory(device_[0], &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {
+        if (vkAllocateMemory(device_, &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to allocate image memory!");
         }
     }
@@ -135,7 +134,7 @@ public:
         create_info.subresourceRange.baseArrayLayer = 0;
         create_info.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(device_[0].get(), &create_info, nullptr, &swap_chain_image_view) != VK_SUCCESS) {
+        if (vkCreateImageView(device_, &create_info, nullptr, &swap_chain_image_view) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to create image views!");
         }
     }
@@ -146,42 +145,48 @@ public:
         sampler_info.magFilter = VK_FILTER_LINEAR;
         sampler_info.minFilter = VK_FILTER_LINEAR;
 
-        if (vkCreateSampler(device_[0].get(), &sampler_info, nullptr, &image_sampler) != VK_SUCCESS) {
+        if (vkCreateSampler(device_, &sampler_info, nullptr, &image_sampler) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to create image sampler!");
         }
     }
 
-    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
-        VkBufferCreateInfo bufferInfo{};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = size;
-        bufferInfo.usage = usage;
-        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
+        VkBufferCreateInfo buffer_info {};
 
-        if (vkCreateBuffer(device_[0].get(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+        buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        buffer_info.size = size;
+        buffer_info.usage = usage;
+        buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        if (vkCreateBuffer(device_, &buffer_info, nullptr, &buffer) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to properly allocate buffer!");
         }
 
-        VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(device_[0].get(), buffer, &memRequirements);
+        VkMemoryRequirements mem_requirements;
+        vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
 
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
+        VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(mem_requirements, properties);
 
-        if (vkAllocateMemory(device_[0].get(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+        if (vkAllocateMemory(device_, &alloc_info, nullptr, &buffer_memory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate buffer memory!");
         }
 
-        vkBindBufferMemory(device_[0].get(), buffer, bufferMemory, 0);
+        vkBindBufferMemory(device_, buffer, buffer_memory, 0);
     }
 
-    vector<reference_wrapper<VkDevice>> device_;
+    void AllocateBufferCommand() {
+        VkCommandBufferAllocateInfo alloc_info {};
+        alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        alloc_info.commandPool = command_pool;
+        alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        alloc_info.commandBufferCount = 1;
+    }
+
+    VkDevice device_;
     VkPhysicalDevice physical_device_ = VK_NULL_HANDLE;
 
-    VkImage swap_chain_image;
-    VkImageView swap_chain_image_view;
+    VkImage swap_chain_image, image_;
+    VkImageView swap_chain_image_view, image_view_;
     VkSampler image_sampler;
 
     VkBuffer staging_buffer;
