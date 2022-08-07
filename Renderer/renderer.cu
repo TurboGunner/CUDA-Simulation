@@ -5,14 +5,10 @@
 
 #include <stdio.h>
 
-#include <CImg.h>
-
 #include <functional>
 #include <iostream>
 
 using std::function;
-
-using namespace cimg_library;
 
 int main() {
     cudaError_t cuda_status = cudaSuccess;
@@ -29,6 +25,7 @@ int main() {
 
     cudaDeviceSynchronize();
 
+    /*
     CImg<float> img(size.x, size.y, 1, 3, 0);
     cimg_forXY(img, x, y) {
         size_t pixel_index = y * size.x + x;
@@ -40,6 +37,7 @@ int main() {
     }
 
     img.save_bmp("filename.bmp");
+    */
 
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

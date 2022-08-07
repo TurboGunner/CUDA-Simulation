@@ -62,7 +62,7 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     LoadInitializationInfo(init_info, wd_);
 
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
-    VkCommandPool command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
+    command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
     VkCommandBuffer command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);

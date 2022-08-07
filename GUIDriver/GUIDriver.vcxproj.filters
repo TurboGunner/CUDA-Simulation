@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="gui.cu" />
+    <CudaCompile Include="gui_display.cu">
+      <Filter>includes\gui\imgui</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="includes">
+      <UniqueIdentifier>{0d97b4cb-a173-432b-82bf-c862c1fbe94a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\gui">
+      <UniqueIdentifier>{42077edd-554a-4a29-96bf-2b3462363d08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\gui\imgui">
+      <UniqueIdentifier>{6cffcd95-f401-4a17-ad2e-1d582e45f410}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\gui\vulkan">
+      <UniqueIdentifier>{129f7550-eb81-42d1-8c6f-0296eb640637}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="imgui_rendering.cpp">
+      <Filter>includes\gui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkan_debugging.cpp">
+      <Filter>includes\gui\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkan_initialization.cpp">
+      <Filter>includes\gui\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkan_rendering.cpp">
+      <Filter>includes\gui\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_initialization.cpp">
+      <Filter>includes\gui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CUDATest\handler_methods.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="gui_driver.hpp" />
+    <ClInclude Include="swap_chain_handler.cuh" />
+    <ClInclude Include="..\CUDATest\handler_methods.hpp" />
+  </ItemGroup>
+</Project>

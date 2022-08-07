@@ -6,7 +6,7 @@
 #include <vulkan/vulkan.h>
 
 //Logging
-#include "handler_classes.hpp"
+#include "../CUDATest/handler_classes.hpp"
 
 //Renderer
 #include "../Renderer/raypath.cuh"
@@ -17,9 +17,10 @@ using std::tuple;
 
 class SwapChainHandler {
 public:
-    SwapChainHandler(VkDevice& device_in, VkPhysicalDevice& physical_in) {
+    SwapChainHandler(VkDevice& device_in, VkPhysicalDevice& physical_in, VkCommandPool& pool_in) {
         device_ = device_in;
         physical_device_ = physical_in;
+        command_pool = pool_in;
     }
 
     ~SwapChainHandler() {
@@ -195,4 +196,5 @@ public:
     VkSwapchainKHR swap_chain;
     VkFormat swap_chain_image_format;
     VkExtent2D swap_chain_extent;
+    VkCommandPool command_pool;
 };

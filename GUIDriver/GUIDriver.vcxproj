@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -11,10 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F4E9BE34-26A5-4B4E-AAEA-E046456E6B07}</ProjectGuid>
-    <RootNamespace>CUDATest</RootNamespace>
+    <ProjectGuid>{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}</ProjectGuid>
+    <RootNamespace>GUIDriver</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>FluidSim</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -43,36 +42,24 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir); %(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir);</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(CudaToolkitLibDir);$(SolutionDir)Dependencies</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Include>%(Include);</Include>
-      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
     </CudaCompile>
-    <CudaLink>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\Renderer.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </CudaLink>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -81,9 +68,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir); %(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -91,50 +77,28 @@
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(CudaToolkitLibDir);$(SolutionDir)Dependencies</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <ExtensibleWholeProgramCompilation>false</ExtensibleWholeProgramCompilation>
-      <Include>%(Include);</Include>
     </CudaCompile>
-    <CudaLink>
-      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\Renderer.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </CudaLink>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="advect.cu" />
-    <CudaCompile Include="boundary_conditions.cu" />
-    <CudaCompile Include="cudamap.cu" />
-    <CudaCompile Include="diagnostic_statistics.cu" />
-    <CudaCompile Include="index_pair_cuda.cu" />
-    <CudaCompile Include="lbm_advect.cu" />
-    <CudaCompile Include="lbm_streaming.cu" />
-    <CudaCompile Include="linear_solver.cu" />
-    <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="project.cu" />
-    <CudaCompile Include="simulation_effector.cu" />
+    <CudaCompile Include="gui_display.cu" />
+    <CudaCompile Include="gui.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="axis_data.cpp" />
-    <ClCompile Include="fluid_sim.cpp" />
-    <ClCompile Include="handler_methods.cpp" />
-    <ClCompile Include="openvdb_handler.cpp" />
-    <ClCompile Include="vector_field.cpp" />
+    <ClCompile Include="..\CUDATest\handler_methods.cpp" />
+    <ClCompile Include="imgui_initialization.cpp" />
+    <ClCompile Include="imgui_rendering.cpp" />
+    <ClCompile Include="vulkan_debugging.cpp" />
+    <ClCompile Include="vulkan_initialization.cpp" />
+    <ClCompile Include="vulkan_rendering.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="axis_data.hpp" />
-    <ClInclude Include="cudamap.cuh" />
-    <ClInclude Include="diagnostic_statistics.cuh" />
-    <ClInclude Include="fluid_sim.hpp" />
-    <ClInclude Include="fluid_sim_cuda.cuh" />
-    <ClInclude Include="handler_methods.hpp" />
-    <ClInclude Include="index_pair_cuda.cuh" />
-    <ClInclude Include="lbm_sim_cuda.cuh" />
-    <ClInclude Include="handler_classes.hpp" />
-    <ClInclude Include="openvdb_handler.hpp" />
-    <ClInclude Include="vector_field.hpp" />
+    <ClInclude Include="..\CUDATest\handler_methods.hpp" />
+    <ClInclude Include="gui_driver.hpp" />
+    <ClInclude Include="swap_chain_handler.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

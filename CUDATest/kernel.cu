@@ -7,7 +7,7 @@
 #include "vector_field.hpp"
 #include "fluid_sim.hpp"
 
-#include "gui_driver.hpp"
+//#include "gui_driver.hpp"
 
 #include <iostream>
 #include <functional>
@@ -27,10 +27,6 @@ int WinMain(int argc, char* argv[]) {
     sim_dimensions.x = side_bound;
     sim_dimensions.y = side_bound;
     sim_dimensions.z = side_bound;
-
-    VulkanGUIDriver gui_driver;
-
-    gui_driver.RunGUI();
 
     FluidSim simulation(FPS_60, 1.0f, 0.6f, sim_dimensions, iter, 0.332f, SimMethod::LBM);
 

@@ -34,23 +34,11 @@
     <Filter Include="cuda\navier_stokes_funcs\sim_funcs">
       <UniqueIdentifier>{823f9a3d-99a3-4fff-ae4a-25606781a7d0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cpp\gui">
-      <UniqueIdentifier>{a8a38d4a-4c3c-470b-99f6-6d3f3f466d70}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\gui\imgui">
-      <UniqueIdentifier>{cf5e340c-8809-4bd8-ba22-cc4844230a2f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cpp\gui\vulkan">
-      <UniqueIdentifier>{345cb56b-b4b3-45a6-98f0-69b162daf94d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="includes\utility_structures">
       <UniqueIdentifier>{5197f1dd-411c-4d5f-b5bd-85e859134f15}</UniqueIdentifier>
     </Filter>
     <Filter Include="cpp\utility_structures">
       <UniqueIdentifier>{62da08cc-babc-4180-b885-aa9e61f611cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="includes\gui">
-      <UniqueIdentifier>{fc2daf44-a324-47d7-8ed5-d29b5d20b196}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -87,12 +75,6 @@
     <ClInclude Include="handler_classes.hpp">
       <Filter>includes\utility_structures</Filter>
     </ClInclude>
-    <ClInclude Include="gui_driver.hpp">
-      <Filter>includes\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="swap_chain_handler.cuh">
-      <Filter>includes\gui</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fluid_sim.cpp">
@@ -106,21 +88,6 @@
     </ClCompile>
     <ClCompile Include="openvdb_handler.cpp">
       <Filter>cpp\utility_structures</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_rendering.cpp">
-      <Filter>cpp\gui\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_initialization.cpp">
-      <Filter>cpp\gui\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="vulkan_initialization.cpp">
-      <Filter>cpp\gui\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="vulkan_debugging.cpp">
-      <Filter>cpp\gui\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="vulkan_rendering.cpp">
-      <Filter>cpp\gui\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="handler_methods.cpp">
       <Filter>cpp</Filter>
@@ -159,9 +126,6 @@
     </CudaCompile>
     <CudaCompile Include="simulation_effector.cu">
       <Filter>cuda\navier_stokes_funcs\sim_funcs</Filter>
-    </CudaCompile>
-    <CudaCompile Include="gui_display.cu">
-      <Filter>cpp\gui\imgui</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

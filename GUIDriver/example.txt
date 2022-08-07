@@ -1,0 +1,8 @@
+Created a window with size 2560 X 1026
+Address: 00007FFF856717C0
+
+Shout out to Bidoof on the beat!
+
+GPU Device #0 has been selected for Vulkan Rendering successfully!
+No errors detected while selecting Vulkan queue family. 
+Vulkan instance successfully created!

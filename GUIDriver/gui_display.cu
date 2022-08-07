@@ -47,12 +47,9 @@ void VulkanGUIDriver::CreateMainFrame() {
 void VulkanGUIDriver::RenderImage(uint2 size, cudaError_t& cuda_status) {
     VkDeviceSize image_size = size.x * size.y * 4;
 
-    //Vector3D* image_ptr = AllocateTexture(size, cuda_status);
-    //vector<Vector3D> image = OutputImage(image_ptr, size);
-
     ImVec2 uv0 = ImVec2(10.0f / float(size.x), 10.0f / float(size.y));
 
-    SwapChainHandler handler(device_, physical_device_);
+    SwapChainHandler handler(device_, physical_device_, command_pool);
 
     auto tuple = handler.CreateTextureImage(size, cuda_status);
 

@@ -20,7 +20,7 @@
 #include <vulkan/vulkan.h>
 
 //Logging
-#include "handler_classes.hpp"
+#include "../CUDATest/handler_classes.hpp"
 
 //Standard Imports
 #include <iostream>
@@ -28,6 +28,7 @@
 #include <fstream>
 #include <sstream>
 #include <memory>
+#include <vector>
 
 using std::string;
 using std::vector;
@@ -146,6 +147,8 @@ public:
 
     uint32_t                 min_image_count_ = 2;
     bool                     swap_chain_rebuilding_ = false;
+
+    VkCommandPool command_pool = VK_NULL_HANDLE;
 
     //Callbacks
     VkAllocationCallbacks* allocators_ = nullptr;
