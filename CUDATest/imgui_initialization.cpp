@@ -1,6 +1,5 @@
 #include "gui_driver.hpp"
 
-
 void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info, ImGui_ImplVulkanH_Window* window) {
     init_info.Instance = instance_;
     init_info.PhysicalDevice = physical_device_;

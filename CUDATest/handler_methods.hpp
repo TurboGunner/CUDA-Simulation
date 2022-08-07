@@ -7,6 +7,8 @@
 #include <functional>
 #include <fstream>
 
+#include "vulkan/vulkan.h"
+
 using std::string;
 using std::reference_wrapper;
 using std::vector;
@@ -16,6 +18,8 @@ using std::function;
 void CudaExceptionHandler(cudaError_t& cuda_status, string error_message);
 
 void ErrorLog(cudaError_t cuda_status, string operation_name, string method_name, string optional_args = "");
+
+void ErrorLog(VkResult vk_status, string operation_name, string method_name, string optional_args = "");
 
 /// <summary> Allocates memory to a referenced std::vector of referenced wrapped generic pointers.
 /// <para> Note: element_alloc does not have to be supplied if size_alloc contains the combined size of the elements. </para> </summary>

@@ -20,6 +20,16 @@ void ErrorLog(cudaError_t cuda_status, string operation_name, string method_name
     }
 }
 
+void ErrorLog(VkResult vk_status, string operation_name, string method_name, string optional_args) {
+    if (vk_status != VK_SUCCESS) {
+        std::cout << operation_name << " returned error code " << vk_status << " after launching " << method_name << "\n" << std::endl;
+        std::cout << "Error Stacktrace: " << vk_status << "\n" << std::endl;
+        if (optional_args.size() > 0) {
+            std::cout << "Additional Stacktrace: " << optional_args << std::endl;
+        }
+    }
+}
+
 cudaError_t CopyFunction(string err_msg, void* tgt, const void* src, cudaMemcpyKind mem_copy_type, cudaError_t error, size_t size_alloc, size_t element_alloc) {
     if (error == cudaSuccess) {
         error = cudaMemcpy(tgt, src, size_alloc * element_alloc, mem_copy_type);

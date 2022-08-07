@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cuda_runtime.h>
+#include "device_launch_parameters.h"
+
 //Graphics Libraries
 
 //IMGUI
@@ -27,6 +30,7 @@
 #include <memory>
 
 using std::string;
+using std::vector;
 
 #ifdef _DEBUG
 #define IMGUI_VULKAN_DEBUG_REPORT
@@ -114,6 +118,8 @@ public:
     void CreateMenuBar();
 
     void CreateMainFrame();
+
+    void RenderImage(uint2 size, cudaError_t& cuda_status);
 
     void InitializeVulkan();
 

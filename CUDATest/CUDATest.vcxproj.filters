@@ -90,6 +90,9 @@
     <ClInclude Include="gui_driver.hpp">
       <Filter>includes\gui</Filter>
     </ClInclude>
+    <ClInclude Include="swap_chain_handler.cuh">
+      <Filter>includes\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fluid_sim.cpp">

@@ -14,6 +14,12 @@
 
 #include "../CUDATest/handler_methods.hpp"
 
+#include <vector>
+
+using std::vector;
+
+static bool run_init = true;
+
 __device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState* rand_state) {
 	Ray ray_current = ray;
 	Vector3D cur_attenuation(1.0f, 1.0f, 1.0f);
@@ -59,8 +65,8 @@ __global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curand
 	Ray ray;
 
 	for (int i = 0; i < ns; i++) {
-		u = float(x_bounds + curand_uniform(&rand_state)) / float(size.x);
-		v = float(y_bounds + curand_uniform(&rand_state)) / float(size.y);
+		u = (float(x_bounds) + curand_uniform(&rand_state)) / float(size.x);
+		v = (float(y_bounds) + curand_uniform(&rand_state)) / float(size.y);
 
 		ray = (*camera)->GetRay(u, v, &rand_state);
 		color = AddVector(color, Color(ray, data, &rand_state));
@@ -138,5 +144,19 @@ inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 
 	cuda_status = CopyFunction("RenderCopyKernel", frame_buffer_host, frame_buffer, cudaMemcpyDeviceToHost, cuda_status, frame_buffer_size);
 
+	cuda_status = cudaFree(frame_buffer);
+	cuda_status = cudaFree(camera);
+	cuda_status = cudaFree(rand_states);
+
+	//delete data;
+
 	return frame_buffer_host;
+}
+
+inline vector<Vector3D> OutputImage(Vector3D* input, uint2 size) {
+	vector<Vector3D> output;
+	for (size_t i = 0; i < size.x * size.y; i++) {
+		output.push_back(input[i]);
+	}
+	free(input);
 }

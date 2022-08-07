@@ -4,13 +4,13 @@
 #include "device_launch_parameters.h"
 
 #include "raypath.cuh"
+#include "vector_helpers.cuh"
 
 #ifndef Pi
 #define Pi 3.14159265358979323846f
 #endif
-#include "vector_helpers.cuh"
 
-__device__ inline Vector3D UnitDiskRandom(curandState* rand_state) { //Good
+__device__ Vector3D UnitDiskRandom(curandState* rand_state) { //Good
     Vector3D p;
     while (DotProduct(p, p) >= 1.0f) {
         p = Vector3D(curand_uniform(rand_state), curand_uniform(rand_state), 0.0f);
