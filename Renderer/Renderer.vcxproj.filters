@@ -12,32 +12,32 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\CUDATest\vector_helpers.cuh">
+    <ClInclude Include="vector_helpers.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="..\CUDATest\camera.cuh">
+    <ClInclude Include="camera.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="material.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="material_data.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="ray.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="rayhit_logic.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="raypath.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere_primitive.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\CUDATest\handler_methods.hpp">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CUDATest\material.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CUDATest\material_data.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CUDATest\ray.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CUDATest\rayhit_logic.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CUDATest\raypath.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CUDATest\sphere_primitive.cuh">
-      <Filter>includes\cuda</Filter>
+      <Filter>includes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

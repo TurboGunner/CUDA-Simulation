@@ -61,6 +61,7 @@
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <Include>
       </Include>
+      <CudaRuntime>Shared</CudaRuntime>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -85,18 +86,19 @@
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <Include>
       </Include>
+      <CudaRuntime>Shared</CudaRuntime>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\CUDATest\camera.cuh" />
+    <ClInclude Include="camera.cuh" />
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
-    <ClInclude Include="..\CUDATest\material.cuh" />
-    <ClInclude Include="..\CUDATest\material_data.cuh" />
-    <ClInclude Include="..\CUDATest\ray.cuh" />
-    <ClInclude Include="..\CUDATest\rayhit_logic.cuh" />
-    <ClInclude Include="..\CUDATest\raypath.cuh" />
-    <ClInclude Include="..\CUDATest\sphere_primitive.cuh" />
-    <ClInclude Include="..\CUDATest\vector_helpers.cuh" />
+    <ClInclude Include="material.cuh" />
+    <ClInclude Include="material_data.cuh" />
+    <ClInclude Include="ray.cuh" />
+    <ClInclude Include="rayhit_logic.cuh" />
+    <ClInclude Include="raypath.cuh" />
+    <ClInclude Include="sphere_primitive.cuh" />
+    <ClInclude Include="vector_helpers.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CUDATest\handler_methods.cpp" />

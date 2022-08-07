@@ -20,7 +20,7 @@ using std::vector;
 
 static bool run_init = true;
 
-__device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState* rand_state) {
+__device__ Vector3D Color(const Ray& ray, MaterialData* data, curandState* rand_state) {
 	Ray ray_current = ray;
 	Vector3D cur_attenuation(1.0f, 1.0f, 1.0f);
 
@@ -48,7 +48,7 @@ __device__ inline Vector3D Color(const Ray& ray, MaterialData* data, curandState
 	return Vector3D(0.0f, 0.0f, 0.0f);
 }
 
-__global__ inline void Render(Vector3D* frame_buffer, uint2 size, int ns, curandState* rand_states, Camera** camera, MaterialData* data) {
+__global__ void Render(Vector3D* frame_buffer, uint2 size, int ns, curandState* rand_states, Camera** camera, MaterialData* data) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -92,7 +92,7 @@ __global__ void AssignRandom(uint2 size, curandState* rand_state) {
 	curand_init(1984 + pixel_index, 0, 0, &rand_state[pixel_index]);
 }
 
-__global__ inline void CreateWorld(MaterialData* data, Camera** camera, uint2 size) {
+__global__ void CreateWorld(MaterialData* data, Camera** camera, uint2 size) {
 	Material* mat1 = new Lambertian(Vector3D(0.1f, 0.5f, 0.5f));
 	Sphere* sphere = new Sphere(Vector3D(0.01f, 0.01f, -3.0f), 3.0f, mat1);
 
@@ -106,7 +106,7 @@ __global__ inline void CreateWorld(MaterialData* data, Camera** camera, uint2 si
 	*camera = new Camera(lookfrom, lookat, Vector3D(0.01f, 1.0f, 0.01f), 20.0f, float(size.x) / float(size.y), aperture, dist_to_focus);
 }
 
-inline Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
+Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 	size_t frame_buffer_size = 3 * (size.x * size.y) * sizeof(Vector3D);
 
 	curandState* rand_states;

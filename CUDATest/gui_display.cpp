@@ -1,6 +1,6 @@
 #include "gui_driver.hpp"
 
-#include "raypath.cuh"
+#include "../Renderer/raypath.cuh"
 
 #include "swap_chain_handler.cuh"
 

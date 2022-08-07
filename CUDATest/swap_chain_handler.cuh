@@ -9,7 +9,7 @@
 #include "handler_classes.hpp"
 
 //Renderer
-#include "raypath.cuh"
+#include "../Renderer/raypath.cuh"
 
 #include <functional>
 #include <tuple>
