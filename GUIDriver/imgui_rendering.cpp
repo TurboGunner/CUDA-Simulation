@@ -61,19 +61,14 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     ImGui::StyleColorsDark();
 
     ImGui_ImplSDL2_InitForVulkan(window);
-
-    ProgramLog::OutputLine("\nSuccessfully initialized Vulkan window!");
-
     ImGui_ImplVulkan_InitInfo init_info = {};
     LoadInitializationInfo(init_info, wd_);
-
-    ProgramLog::OutputLine("Loaded initialization info successfully!");
 
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
     command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
     command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
-    texture_handler_ = SwapChainHandler(device_, physical_device_, queue_family_);
+    //texture_handler_ = SwapChainHandler(device_, physical_device_, queue_family_);
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
@@ -82,24 +77,14 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     BeginRendering(begin_info);
 
     VkSubmitInfo end_info = {};
-    /*
-    for (size_t i = 0; i < command_buffers.size(); i++) {
-        if (i == 1) {
-            vulkan_status = texture_handler_.StartRenderCommand();
-            VulkanErrorHandler(vulkan_status);
-
-            command_buffers.push_back(texture_handler_.command_buffer);
-        }
-    }
-    */
     EndRendering(end_info, command_buffer);
+
     vulkan_status = vkEndCommandBuffer(command_buffer);
     VulkanErrorHandler(vulkan_status);
 
     vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
 
     VulkanErrorHandler(vulkan_status);
-    ProgramLog::OutputLine("Submitted command buffer to queue.");
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -152,7 +137,7 @@ void VulkanGUIDriver::BeginRendering(VkCommandBufferBeginInfo& begin_info) {
     ProgramLog::OutputLine("Started commands buffers.");
 }
 
-void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer command_buffer) {
+void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer) {
     end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     end_info.commandBufferCount = 1;
     end_info.pCommandBuffers = &command_buffer;

@@ -114,7 +114,7 @@ public:
 
     void BeginRendering(VkCommandBufferBeginInfo& begin_info);
 
-    void EndRendering(VkSubmitInfo& end_info, VkCommandBuffer command_buffer);
+    void EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer);
 
     void MinimizeRenderCondition(ImDrawData* draw_data);
 
