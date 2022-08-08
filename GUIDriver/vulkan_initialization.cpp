@@ -36,8 +36,7 @@ void VulkanGUIDriver::SelectQueueFamily() {
     vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &count, queues);
 
     for (uint32_t i = 0; i < count; i++)
-        if (queues[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-        {
+        if (queues[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             queue_family_ = i;
             break;
         }
@@ -76,8 +75,7 @@ void VulkanGUIDriver::SelectGPU() {
 }
 
 void VulkanGUIDriver::PoolDescriptionInitialization() {
-    VkDescriptorPoolSize pool_sizes[] =
-    {
+    VkDescriptorPoolSize pool_sizes[] = {
         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
         { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },

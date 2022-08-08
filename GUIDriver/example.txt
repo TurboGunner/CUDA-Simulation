@@ -6,3 +6,11 @@ Shout out to Bidoof on the beat!
 GPU Device #0 has been selected for Vulkan Rendering successfully!
 No errors detected while selecting Vulkan queue family. 
 Vulkan instance successfully created!
+Successfully created Vulkan surface for window!
+
+Successfully initialized Vulkan window!
+Loaded initialization info successfully!
+Initialized texture handler.
+
+Started commands buffers.
+Ended command buffers.

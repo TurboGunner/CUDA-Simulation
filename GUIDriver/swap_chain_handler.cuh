@@ -15,10 +15,10 @@ using std::tuple;
 class SwapChainHandler {
 public:
     SwapChainHandler() = default;
-    SwapChainHandler(VkDevice& device_in, VkPhysicalDevice& physical_in, VkCommandPool& pool_in) {
+    SwapChainHandler(VkDevice& device_in, VkPhysicalDevice& physical_in, uint32_t family_in) {
         device_ = device_in; 
         physical_device_ = physical_in;
-        command_pool = pool_in;
+        ProgramLog::OutputLine("Initialized texture handler.\n");
     }
 
     ~SwapChainHandler() {
@@ -39,7 +39,7 @@ public:
         VkMemoryPropertyFlags alloc_flags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
         InitializeImage(image_, size, alloc_flags);
-        InitializeImage(swap_chain_image, size, alloc_flags);
+        //InitializeImage(swap_chain_image, size, alloc_flags);
         InitializeImageViews();
         InitializeImageSampler();
 
@@ -104,9 +104,10 @@ public:
         if (vkAllocateMemory(device_, &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to allocate image memory!");
         }
+        vkBindImageMemory(device_, image, texture_image_memory, 0);
     }
 
-    VkMemoryAllocateInfo CreateAllocationInfo(VkMemoryRequirements mem_requirements, VkMemoryPropertyFlags properties) {
+    VkMemoryAllocateInfo CreateAllocationInfo(VkMemoryRequirements& mem_requirements, VkMemoryPropertyFlags properties) {
         VkMemoryAllocateInfo alloc_info {};
         alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         alloc_info.allocationSize = mem_requirements.size;
@@ -170,18 +171,28 @@ public:
     }
 
     VkResult StartRenderCommand() {
-        VkCommandBufferAllocateInfo alloc_info = AllocateBufferCommandInfo();
+        VkCommandPoolCreateInfo pool_info {};
+
+        pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        pool_info.queueFamilyIndex = queue_family_;
+
+        if (vkCreateCommandPool(device_, &pool_info, nullptr, &command_pool) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create command pool!");
+        }
+
+        VkCommandBufferAllocateInfo alloc_info = AllocateBufferCommandInfo(command_pool);
 
         vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
 
-        VkCommandBufferBeginInfo begin_info{};
+        VkCommandBufferBeginInfo begin_info {};
         begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
         return vkBeginCommandBuffer(command_buffer, &begin_info);
     }
 
-    VkCommandBufferAllocateInfo AllocateBufferCommandInfo() {
+    VkCommandBufferAllocateInfo AllocateBufferCommandInfo(VkCommandPool command_pool) {
         VkCommandBufferAllocateInfo alloc_info {};
 
         alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -192,14 +203,15 @@ public:
         return alloc_info;
     }
 
-    VkDevice device_;
+    VkDevice device_ = VK_NULL_HANDLE;
     VkPhysicalDevice physical_device_ = VK_NULL_HANDLE;
 
     VkImage swap_chain_image, image_;
     VkImageView swap_chain_image_view, image_view_;
     VkSampler image_sampler;
 
-    VkCommandBuffer command_buffer;
+    VkCommandBuffer command_buffer = VK_NULL_HANDLE;
+    VkCommandPool command_pool = VK_NULL_HANDLE;
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory, texture_image_memory;
@@ -207,5 +219,6 @@ public:
     VkSwapchainKHR swap_chain;
     VkFormat swap_chain_image_format;
     VkExtent2D swap_chain_extent;
-    VkCommandPool command_pool;
+
+    uint32_t queue_family_;
 };

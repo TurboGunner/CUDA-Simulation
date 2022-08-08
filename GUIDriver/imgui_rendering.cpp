@@ -33,6 +33,9 @@ void VulkanGUIDriver::RunGUI() {
         ProgramLog::OutputLine("Error: Failed to create Vulkan surface.");
         return;
     }
+    else {
+        ProgramLog::OutputLine("Successfully created Vulkan surface for window!");
+    }
 
     int width, height;
     CreateFrameBuffers(width, height, surface);
@@ -58,14 +61,19 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     ImGui::StyleColorsDark();
 
     ImGui_ImplSDL2_InitForVulkan(window);
+
+    ProgramLog::OutputLine("\nSuccessfully initialized Vulkan window!");
+
     ImGui_ImplVulkan_InitInfo init_info = {};
     LoadInitializationInfo(init_info, wd_);
 
+    ProgramLog::OutputLine("Loaded initialization info successfully!");
+
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
     command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
-    command_buffers.push_back(wd_->Frames[wd_->FrameIndex].CommandBuffer);
+    command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
-    texture_handler_ = SwapChainHandler(device_, physical_device_, command_pool);
+    texture_handler_ = SwapChainHandler(device_, physical_device_, queue_family_);
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
@@ -74,14 +82,24 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     BeginRendering(begin_info);
 
     VkSubmitInfo end_info = {};
-    EndRendering(end_info);
+    /*
+    for (size_t i = 0; i < command_buffers.size(); i++) {
+        if (i == 1) {
+            vulkan_status = texture_handler_.StartRenderCommand();
+            VulkanErrorHandler(vulkan_status);
 
-    vulkan_status = vkEndCommandBuffer(command_buffers[0]);
+            command_buffers.push_back(texture_handler_.command_buffer);
+        }
+    }
+    */
+    EndRendering(end_info, command_buffer);
+    vulkan_status = vkEndCommandBuffer(command_buffer);
     VulkanErrorHandler(vulkan_status);
 
-    vulkan_status = vkQueueSubmit(queue_, command_buffers.size(), &end_info, VK_NULL_HANDLE);
+    vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
 
     VulkanErrorHandler(vulkan_status);
+    ProgramLog::OutputLine("Submitted command buffer to queue.");
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -123,11 +141,22 @@ void VulkanGUIDriver::InitializeVulkan() {
     }
 }
 
-void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info) {
-    VkCommandBuffer buffers[] = { command_buffers[0], command_buffers[1] };
+void VulkanGUIDriver::BeginRendering(VkCommandBufferBeginInfo& begin_info) {
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vulkan_status = vkBeginCommandBuffer(command_buffer, &begin_info);
+    VulkanErrorHandler(vulkan_status);
+
+    ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+    ProgramLog::OutputLine("Started commands buffers.");
+}
+
+void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer command_buffer) {
     end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    end_info.commandBufferCount = command_buffers.size();
-    end_info.pCommandBuffers = buffers;
+    end_info.commandBufferCount = 1;
+    end_info.pCommandBuffers = &command_buffer;
+    ProgramLog::OutputLine("Ended command buffers.");
 }
 
 void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data) {
@@ -141,21 +170,6 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data) {
     wd_->ClearValue.color.float32[3] = clear_color_.w;
     FrameRender(draw_data);
     FramePresent();
-}
-
-void VulkanGUIDriver::BeginRendering(VkCommandBufferBeginInfo& begin_info) {
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vulkan_status = vkBeginCommandBuffer(command_buffers[0], &begin_info);
-    VulkanErrorHandler(vulkan_status);
-
-    vulkan_status = texture_handler_.StartRenderCommand();
-    VulkanErrorHandler(vulkan_status);
-
-    command_buffers.push_back(texture_handler_.command_buffer);
-
-    ImGui_ImplVulkan_CreateFontsTexture(command_buffers[0]);
 }
 
 void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {

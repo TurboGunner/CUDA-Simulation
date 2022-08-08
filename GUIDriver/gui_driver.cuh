@@ -31,9 +31,11 @@
 #include <sstream>
 #include <memory>
 #include <vector>
+#include <tuple>
 
 using std::string;
 using std::vector;
+using std::tuple;
 
 #ifdef _DEBUG
 #define IMGUI_VULKAN_DEBUG_REPORT
@@ -112,7 +114,7 @@ public:
 
     void BeginRendering(VkCommandBufferBeginInfo& begin_info);
 
-    void EndRendering(VkSubmitInfo& end_info);
+    void EndRendering(VkSubmitInfo& end_info, VkCommandBuffer command_buffer);
 
     void MinimizeRenderCondition(ImDrawData* draw_data);
 
@@ -122,6 +124,7 @@ public:
 
     void CreateMainFrame();
 
+    void RenderCall(uint2 size, cudaError_t& cuda_status);
     void RenderImage(uint2 size, cudaError_t& cuda_status);
 
     void InitializeVulkan();
@@ -133,6 +136,8 @@ public:
     void RunGUI();
 
     SwapChainHandler texture_handler_;
+
+    tuple<VkImageView, VkSampler> image_alloc_;
 
     VkInstance               instance_ = VK_NULL_HANDLE;
     VkInstanceCreateInfo     instance_info_ = {};
@@ -153,7 +158,8 @@ public:
     bool                     swap_chain_rebuilding_ = false;
 
     VkCommandPool command_pool;
-    vector<VkCommandBuffer> command_buffers;
+    VkCommandBuffer command_buffer;
+    //vector<VkCommandBuffer> command_buffers;
 
     //Callbacks
     VkAllocationCallbacks* allocators_ = nullptr;
