@@ -4,7 +4,7 @@
 
 #include "../CUDATest/handler_methods.hpp"
 
-#include "gui_driver.hpp"
+#include "gui_driver.cuh"
 
 #include <stdio.h>
 

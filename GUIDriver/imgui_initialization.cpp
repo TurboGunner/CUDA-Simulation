@@ -1,4 +1,4 @@
-#include "gui_driver.hpp"
+#include "gui_driver.cuh"
 
 void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info, ImGui_ImplVulkanH_Window* window) {
     init_info.Instance = instance_;

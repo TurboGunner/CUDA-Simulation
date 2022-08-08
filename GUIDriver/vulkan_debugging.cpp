@@ -1,4 +1,4 @@
-#include "gui_driver.hpp"
+#include "gui_driver.cuh"
 
 void VulkanGUIDriver::DebugErrorCallback() {
     debug_info_callback_.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;

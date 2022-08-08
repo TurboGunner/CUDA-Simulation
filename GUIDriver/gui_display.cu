@@ -1,8 +1,9 @@
-#include "gui_driver.hpp"
+#include "gui_driver.cuh"
 
 #include "../Renderer/raypath.cuh"
 
 #include "swap_chain_handler.cuh"
+
 
 static float f = 0.0f;
 static int counter = 0;
@@ -45,13 +46,13 @@ void VulkanGUIDriver::CreateMainFrame() {
 }
 
 void VulkanGUIDriver::RenderImage(uint2 size, cudaError_t& cuda_status) {
-    VkDeviceSize image_size = size.x * size.y * 4;
+    VkDeviceSize image_size = size.x * size.y * sizeof(Vector3D);
 
     ImVec2 uv0 = ImVec2(10.0f / float(size.x), 10.0f / float(size.y));
 
-    SwapChainHandler handler(device_, physical_device_, command_pool);
+    void* data = (void*)AllocateTexture(size, cuda_status);
 
-    auto tuple = handler.CreateTextureImage(size, cuda_status);
+    auto tuple = texture_handler_.CreateTextureImage(data, image_size, size, cuda_status);
 
     auto texture = (ImTextureID)ImGui_ImplVulkan_AddTexture(std::get<1>(tuple), std::get<0>(tuple), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 

@@ -1,4 +1,4 @@
-#include "gui_driver.hpp"
+#include "gui_driver.cuh"
 
 #include <fstream>
 
@@ -63,21 +63,23 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
     command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
-    VkCommandBuffer command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
+    command_buffers.push_back(wd_->Frames[wd_->FrameIndex].CommandBuffer);
+
+    texture_handler_ = SwapChainHandler(device_, physical_device_, command_pool);
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
 
     VkCommandBufferBeginInfo begin_info = {};
-    BeginRendering(begin_info, command_buffer);
+    BeginRendering(begin_info);
 
     VkSubmitInfo end_info = {};
-    EndRendering(end_info, command_buffer);
+    EndRendering(end_info);
 
-    vulkan_status = vkEndCommandBuffer(command_buffer);
+    vulkan_status = vkEndCommandBuffer(command_buffers[0]);
     VulkanErrorHandler(vulkan_status);
 
-    vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
+    vulkan_status = vkQueueSubmit(queue_, command_buffers.size(), &end_info, VK_NULL_HANDLE);
 
     VulkanErrorHandler(vulkan_status);
 }
@@ -121,10 +123,11 @@ void VulkanGUIDriver::InitializeVulkan() {
     }
 }
 
-void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer) {
+void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info) {
+    VkCommandBuffer buffers[] = { command_buffers[0], command_buffers[1] };
     end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    end_info.commandBufferCount = 1;
-    end_info.pCommandBuffers = &command_buffer;
+    end_info.commandBufferCount = command_buffers.size();
+    end_info.pCommandBuffers = buffers;
 }
 
 void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data) {
@@ -140,14 +143,19 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data) {
     FramePresent();
 }
 
-void VulkanGUIDriver::BeginRendering(VkCommandBufferBeginInfo& begin_info, VkCommandBuffer& command_buffer) {
+void VulkanGUIDriver::BeginRendering(VkCommandBufferBeginInfo& begin_info) {
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vulkan_status = vkBeginCommandBuffer(command_buffer, &begin_info);
+    vulkan_status = vkBeginCommandBuffer(command_buffers[0], &begin_info);
     VulkanErrorHandler(vulkan_status);
 
-    ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+    vulkan_status = texture_handler_.StartRenderCommand();
+    VulkanErrorHandler(vulkan_status);
+
+    command_buffers.push_back(texture_handler_.command_buffer);
+
+    ImGui_ImplVulkan_CreateFontsTexture(command_buffers[0]);
 }
 
 void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {
@@ -198,8 +206,7 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     vulkan_status = vkAcquireNextImageKHR(device_, wd_->Swapchain, UINT64_MAX, image_semaphore, VK_NULL_HANDLE, &wd_->FrameIndex);
 
-    if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR)
-    {
+    if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
         swap_chain_rebuilding_ = true;
         return;
     }

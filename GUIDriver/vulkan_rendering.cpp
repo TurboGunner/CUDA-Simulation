@@ -1,4 +1,4 @@
-#include "gui_driver.hpp"
+#include "gui_driver.cuh"
 
 void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR surface, int width, int height) {
     wd_->Surface = surface;

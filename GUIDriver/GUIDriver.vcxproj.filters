@@ -1,46 +1,65 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="gui.cu" />
     <CudaCompile Include="gui_display.cu">
-      <Filter>includes\gui\imgui</Filter>
+      <Filter>cpp\imgui</Filter>
+    </CudaCompile>
+    <CudaCompile Include="gui.cu">
+      <Filter>cuda</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="cpp">
+      <UniqueIdentifier>{4ce7af23-2f17-47b0-a610-f71701c19e5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\imgui">
+      <UniqueIdentifier>{6cffcd95-f401-4a17-ad2e-1d582e45f410}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\vulkan">
+      <UniqueIdentifier>{129f7550-eb81-42d1-8c6f-0296eb640637}</UniqueIdentifier>
+    </Filter>
     <Filter Include="includes">
       <UniqueIdentifier>{0d97b4cb-a173-432b-82bf-c862c1fbe94a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="includes\gui">
-      <UniqueIdentifier>{42077edd-554a-4a29-96bf-2b3462363d08}</UniqueIdentifier>
+    <Filter Include="includes\cuda">
+      <UniqueIdentifier>{0494c9b4-3e90-4f46-8cdc-b0e229a9eb38}</UniqueIdentifier>
     </Filter>
-    <Filter Include="includes\gui\imgui">
-      <UniqueIdentifier>{6cffcd95-f401-4a17-ad2e-1d582e45f410}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="includes\gui\vulkan">
-      <UniqueIdentifier>{129f7550-eb81-42d1-8c6f-0296eb640637}</UniqueIdentifier>
+    <Filter Include="cuda">
+      <UniqueIdentifier>{a17feea3-34f1-4ff8-a2d1-f44dbe014f77}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui_rendering.cpp">
-      <Filter>includes\gui\imgui</Filter>
+      <Filter>cpp\imgui</Filter>
     </ClCompile>
     <ClCompile Include="vulkan_debugging.cpp">
-      <Filter>includes\gui\vulkan</Filter>
+      <Filter>cpp\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan_initialization.cpp">
-      <Filter>includes\gui\vulkan</Filter>
+      <Filter>cpp\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="vulkan_rendering.cpp">
-      <Filter>includes\gui\vulkan</Filter>
+      <Filter>cpp\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="imgui_initialization.cpp">
-      <Filter>includes\gui\imgui</Filter>
+      <Filter>cpp\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\CUDATest\handler_methods.cpp" />
+    <ClCompile Include="..\CUDATest\handler_methods.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gui_driver.hpp" />
-    <ClInclude Include="swap_chain_handler.cuh" />
-    <ClInclude Include="..\CUDATest\handler_methods.hpp" />
+    <ClInclude Include="swap_chain_handler.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CUDATest\handler_methods.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="vertex_data.cuh">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_driver.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

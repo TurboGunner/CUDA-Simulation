@@ -8,17 +8,15 @@
 //Logging
 #include "../CUDATest/handler_classes.hpp"
 
-//Renderer
-#include "../Renderer/raypath.cuh"
-
 #include <tuple>
 
 using std::tuple;
 
 class SwapChainHandler {
 public:
+    SwapChainHandler() = default;
     SwapChainHandler(VkDevice& device_in, VkPhysicalDevice& physical_in, VkCommandPool& pool_in) {
-        device_ = device_in;
+        device_ = device_in; 
         physical_device_ = physical_in;
         command_pool = pool_in;
     }
@@ -29,11 +27,7 @@ public:
         vkFreeMemory(device_, staging_buffer_memory, nullptr);
     }
 
-    tuple<VkImageView, VkSampler> CreateTextureImage(uint2 size, cudaError_t& cuda_status) {
-
-        VkDeviceSize image_size = size.x * size.y * sizeof(Vector3D);
-
-        void* data = (void*)AllocateTexture(size, cuda_status);
+    tuple<VkImageView, VkSampler> CreateTextureImage(void* data, VkDeviceSize image_size, uint2 size, cudaError_t& cuda_status) {
 
         CreateBuffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
 
@@ -175,12 +169,27 @@ public:
         vkBindBufferMemory(device_, buffer, buffer_memory, 0);
     }
 
-    void AllocateBufferCommand() {
+    VkResult StartRenderCommand() {
+        VkCommandBufferAllocateInfo alloc_info = AllocateBufferCommandInfo();
+
+        vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
+
+        VkCommandBufferBeginInfo begin_info{};
+        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        return vkBeginCommandBuffer(command_buffer, &begin_info);
+    }
+
+    VkCommandBufferAllocateInfo AllocateBufferCommandInfo() {
         VkCommandBufferAllocateInfo alloc_info {};
+
         alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         alloc_info.commandPool = command_pool;
         alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         alloc_info.commandBufferCount = 1;
+
+        return alloc_info;
     }
 
     VkDevice device_;
@@ -189,6 +198,8 @@ public:
     VkImage swap_chain_image, image_;
     VkImageView swap_chain_image_view, image_view_;
     VkSampler image_sampler;
+
+    VkCommandBuffer command_buffer;
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory, texture_image_memory;

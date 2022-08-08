@@ -110,9 +110,9 @@ public:
 
     void CreateFrameBuffers(int& width, int& height, VkSurfaceKHR& surface);
 
-    void BeginRendering(VkCommandBufferBeginInfo& begin_info, VkCommandBuffer& command_buffer);
+    void BeginRendering(VkCommandBufferBeginInfo& begin_info);
 
-    void EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer);
+    void EndRendering(VkSubmitInfo& end_info);
 
     void MinimizeRenderCondition(ImDrawData* draw_data);
 
@@ -140,7 +140,7 @@ public:
     VkDevice                 device_ = VK_NULL_HANDLE;
 
     //Queuing
-    uint32_t queue_family_ = (uint32_t) - 1;
+    uint32_t queue_family_ = (uint32_t)-1;
     VkQueue                  queue_ = VK_NULL_HANDLE;
 
     VkPipelineCache          pipeline_cache_ = VK_NULL_HANDLE;
@@ -153,7 +153,7 @@ public:
     bool                     swap_chain_rebuilding_ = false;
 
     VkCommandPool command_pool;
-    VkCommandBuffer command_buffer;
+    vector<VkCommandBuffer> command_buffers;
 
     //Callbacks
     VkAllocationCallbacks* allocators_ = nullptr;

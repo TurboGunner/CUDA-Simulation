@@ -1,4 +1,4 @@
-#include "gui_driver.hpp"
+#include "gui_driver.cuh"
 
 #include <fstream>
 
