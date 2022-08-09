@@ -68,7 +68,7 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
     command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
-    //texture_handler_ = SwapChainHandler(device_, physical_device_, queue_family_);
+    texture_handler_ = TextureLoader(device_, physical_device_, queue_family_);
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);

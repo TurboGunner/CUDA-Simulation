@@ -2,7 +2,7 @@
 
 #include "../Renderer/raypath.cuh"
 
-#include "swap_chain_handler.cuh"
+#include "texture_loader.cuh"
 
 #include <tuple>
 
@@ -50,9 +50,11 @@ void VulkanGUIDriver::CreateMainFrame() {
 }
 
 void VulkanGUIDriver::RenderCall(uint2 size, cudaError_t& cuda_status) {
-    VkDeviceSize image_size = size.x * size.y * sizeof(Vector3D);
+    VkDeviceSize image_size = size.x * size.y * 4;
 
     void* data = (void*)AllocateTexture(size, cuda_status);
+
+    texture_handler_.device_ = device_;
 
     image_alloc_ = texture_handler_.CreateTextureImage(data, image_size, size, cuda_status);
 }

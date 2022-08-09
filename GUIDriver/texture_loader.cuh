@@ -12,17 +12,20 @@
 
 using std::tuple;
 
-class SwapChainHandler {
+class TextureLoader {
 public:
-    SwapChainHandler() = default;
-    SwapChainHandler(VkDevice& device_in, VkPhysicalDevice& physical_in, uint32_t family_in) {
+    TextureLoader() = default;
+    TextureLoader(VkDevice& device_in, VkPhysicalDevice& physical_in, uint32_t family_in) {
         device_ = device_in; 
         physical_device_ = physical_in;
+
+        image_format_ = VK_FORMAT_R8G8B8_UINT;
+
         ProgramLog::OutputLine("Initialized texture handler.\n");
     }
 
-    ~SwapChainHandler() {
-        vkDestroyImageView(device_, swap_chain_image_view, nullptr);
+    ~TextureLoader() {
+        vkDestroyImageView(device_, image_view_, nullptr);
         vkDestroyBuffer(device_, staging_buffer, nullptr);
         vkFreeMemory(device_, staging_buffer_memory, nullptr);
     }
@@ -39,11 +42,10 @@ public:
         VkMemoryPropertyFlags alloc_flags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
         InitializeImage(image_, size, alloc_flags);
-        //InitializeImage(swap_chain_image, size, alloc_flags);
         InitializeImageViews();
         InitializeImageSampler();
 
-        return tuple<VkImageView, VkSampler>(swap_chain_image_view, image_sampler);
+        return tuple<VkImageView, VkSampler>(image_view_, image_sampler);
     }
 
     uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
@@ -84,7 +86,7 @@ public:
         image_info.mipLevels = 1;
         image_info.arrayLayers = 1;
 
-        image_info.format = VK_FORMAT_R8G8B8A8_SRGB;
+        image_info.format = image_format_;
         image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
         image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         image_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -100,7 +102,7 @@ public:
         VkMemoryRequirements mem_requirements;
         vkGetImageMemoryRequirements(device_, image_, &mem_requirements);
 
-        VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(mem_requirements, properties);
+        VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(mem_requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         if (vkAllocateMemory(device_, &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to allocate image memory!");
         }
@@ -119,10 +121,10 @@ public:
     void InitializeImageViews() {
         VkImageViewCreateInfo create_info{};
         create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        create_info.image = swap_chain_image;
+        create_info.image = image_;
 
         create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        create_info.format = swap_chain_image_format;
+        create_info.format = image_format_;
 
         create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         create_info.subresourceRange.baseMipLevel = 0;
@@ -130,7 +132,7 @@ public:
         create_info.subresourceRange.baseArrayLayer = 0;
         create_info.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(device_, &create_info, nullptr, &swap_chain_image_view) != VK_SUCCESS) {
+        if (vkCreateImageView(device_, &create_info, nullptr, &image_view_) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to create image views!");
         }
     }
@@ -206,8 +208,8 @@ public:
     VkDevice device_ = VK_NULL_HANDLE;
     VkPhysicalDevice physical_device_ = VK_NULL_HANDLE;
 
-    VkImage swap_chain_image, image_;
-    VkImageView swap_chain_image_view, image_view_;
+    VkImage image_;
+    VkImageView image_view_;
     VkSampler image_sampler;
 
     VkCommandBuffer command_buffer = VK_NULL_HANDLE;
@@ -216,9 +218,7 @@ public:
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory, texture_image_memory;
 
-    VkSwapchainKHR swap_chain;
-    VkFormat swap_chain_image_format;
-    VkExtent2D swap_chain_extent;
+    VkFormat image_format_;
 
     uint32_t queue_family_;
 };

@@ -49,16 +49,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="swap_chain_handler.cuh">
+    <ClInclude Include="texture_loader.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\CUDATest\handler_methods.hpp">
       <Filter>includes</Filter>
     </ClInclude>
-    <ClInclude Include="vertex_data.cuh">
-      <Filter>includes</Filter>
-    </ClInclude>
     <ClInclude Include="gui_driver.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="vertex_data.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="shader_loader.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
   </ItemGroup>
