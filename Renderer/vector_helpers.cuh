@@ -5,7 +5,9 @@
 
 class Vector3D {
 public:
-	__host__ __device__ Vector3D() {};
+	__host__ __device__ Vector3D() {
+		dim[3] = 1.0f;
+	};
 
 	__host__ __device__ Vector3D(float x_in, float y_in, float z_in) {
 		dim[0] = x_in;
@@ -31,7 +33,7 @@ public:
 		return dim[2];
 	}
 
-	float dim[3];
+	float dim[4];
 };
 
 __host__ __device__ inline Vector3D AddByScalar(const Vector3D& multiplier, const float& t) {

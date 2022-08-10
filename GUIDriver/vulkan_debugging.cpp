@@ -9,6 +9,7 @@ void VulkanGUIDriver::DebugErrorCallback() {
 
     vulkan_status = InstanceDebugCallbackEXT(instance_, &debug_info_callback_, allocators_, &debug_report_callback_);
     VulkanErrorHandler(vulkan_status);
+
     ProgramLog::OutputLine("\nShout out to Bidoof on the beat!\n");
 }
 
@@ -36,10 +37,10 @@ void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const u
     InstanceDebugCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)
         vkGetInstanceProcAddr(instance_, "vkCreateDebugReportCallbackEXT");
 
-    s_stream << "Address: " << InstanceDebugCallbackEXT;
-    ProgramLog::OutputLine(s_stream);
-
     IM_ASSERT(InstanceDebugCallbackEXT != NULL);
+
+    s_stream << "Address for Vulkan debug callback: " << InstanceDebugCallbackEXT << ". Debug callback successful!";
+    ProgramLog::OutputLine(s_stream);
 
     DebugErrorCallback();
 }

@@ -8,9 +8,7 @@
 
 using std::tuple;
 
-
 static float f = 0.0f;
-static int counter = 0;
 
 void VulkanGUIDriver::CreateMenuBar() {
     std::string menu_name = "Main";
@@ -44,7 +42,7 @@ void VulkanGUIDriver::CreateMainFrame() {
 
     cudaError_t cuda_status = cudaSuccess;
 
-    //RenderImage(size, cuda_status);
+    RenderImage(size, cuda_status);
 
     ImGui::End();
 }

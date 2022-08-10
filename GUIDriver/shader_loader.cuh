@@ -1,7 +1,5 @@
 #pragma once
 
-#include "rasterizer.cuh"
-
 #include <vulkan/vulkan.h>
 
 #include <string>
@@ -39,7 +37,7 @@ public:
         vkDestroyShaderModule(device_, frag_shader_module, nullptr);
         vkDestroyShaderModule(device_, vert_shader_module, nullptr);
 
-        auto pipeline_layout_info = PipelineLayoutInfo();
+        //auto pipeline_layout_info = PipelineLayoutInfo();
 
         if (vkCreatePipelineLayout(device_, &pipeline_layout_info, nullptr, &pipeline_layout_) != VK_SUCCESS) {
             throw std::runtime_error("failed to create pipeline layout!");
@@ -77,6 +75,4 @@ public:
     }
 
     VkDevice device_;
-
-    VkPipelineLayout pipeline_layout_;
 };

@@ -19,7 +19,7 @@ public:
         device_ = device_in; 
         physical_device_ = physical_in;
 
-        image_format_ = VK_FORMAT_R8G8B8_UINT;
+        image_format_ = VK_FORMAT_R8G8B8A8_SRGB;
 
         ProgramLog::OutputLine("Initialized texture handler.\n");
     }
@@ -37,13 +37,11 @@ public:
         vkMapMemory(device_, staging_buffer_memory, 0, image_size, 0, &data);
         vkUnmapMemory(device_, staging_buffer_memory);
 
-        //free(image_ptr);
-
         VkMemoryPropertyFlags alloc_flags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
         InitializeImage(image_, size, alloc_flags);
         InitializeImageViews();
-        InitializeImageSampler();
+        //InitializeImageSampler();
 
         return tuple<VkImageView, VkSampler>(image_view_, image_sampler);
     }
@@ -75,7 +73,7 @@ public:
         vkBindImageMemory(device_, image_, texture_image_memory, 0);
     }
 
-    void InitializeImage(VkImage image, uint2 size, VkMemoryPropertyFlags properties) {
+    void InitializeImage(VkImage& image, uint2 size, VkMemoryPropertyFlags properties) {
         VkImageCreateInfo image_info {};
 
         image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -100,7 +98,7 @@ public:
         }
 
         VkMemoryRequirements mem_requirements;
-        vkGetImageMemoryRequirements(device_, image_, &mem_requirements);
+        mem_requirements.size = size.x * size.y * 4;
 
         VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(mem_requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         if (vkAllocateMemory(device_, &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {

@@ -22,7 +22,7 @@ void VulkanGUIDriver::RunGUI() {
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     window = SDL_CreateWindow(program_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width, screen_height, window_flags);
 
-    s_stream << "Created a window with size " << screen_width << " X " << screen_height;
+    s_stream << "Created a window with size " << screen_width << " X " << screen_height << ".";
     ProgramLog::OutputLine(s_stream);
 
     InitializeVulkan();
@@ -33,9 +33,7 @@ void VulkanGUIDriver::RunGUI() {
         ProgramLog::OutputLine("Error: Failed to create Vulkan surface.");
         return;
     }
-    else {
-        ProgramLog::OutputLine("Successfully created Vulkan surface for window!");
-    }
+    ProgramLog::OutputLine("Successfully created Vulkan surface for window!");
 
     int width, height;
     CreateFrameBuffers(width, height, surface);
@@ -56,7 +54,7 @@ void VulkanGUIDriver::RunGUI() {
 void VulkanGUIDriver::IMGUIRenderLogic() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
 
     ImGui::StyleColorsDark();
 
@@ -73,8 +71,12 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
 
+    ProgramLog::OutputLine("Reset IMGUI command pool successfully.");
+
     VkCommandBufferBeginInfo begin_info = {};
     BeginRendering(begin_info);
+
+    ProgramLog::OutputLine("Started command recording!");
 
     VkSubmitInfo end_info = {};
     EndRendering(end_info, command_buffer);
@@ -82,9 +84,12 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     vulkan_status = vkEndCommandBuffer(command_buffer);
     VulkanErrorHandler(vulkan_status);
 
-    vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
+    ProgramLog::OutputLine("Ended command recording!");
 
+    vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
     VulkanErrorHandler(vulkan_status);
+
+    ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -110,6 +115,7 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     // Rendering
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
+
     MinimizeRenderCondition(draw_data);
 }
 
@@ -157,7 +163,7 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data) {
     FramePresent();
 }
 
-void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {
+void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) { //RASTERIZER::SUBPASS
     VkRenderPassBeginInfo info = {};
 
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -171,6 +177,7 @@ void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {
     info.pClearValues = &wd_->ClearValue;
 
     vkCmdBeginRenderPass(frame_draw->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+    ProgramLog::OutputLine("Began render pass!");
 }
 
 void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemaphore image_semaphore, VkSemaphore render_semaphore) {

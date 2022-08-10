@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include "device_launch_parameters.h"
 
-#include "swap_chain_handler.cuh"
+#include "texture_loader.cuh"
 
 //Logging
 #include "../CUDATest/handler_classes.hpp"
@@ -132,7 +132,7 @@ public:
 
     void RunGUI();
 
-    SwapChainHandler texture_handler_;
+    TextureLoader texture_handler_;
 
     VkInstance               instance_ = VK_NULL_HANDLE;
     VkInstanceCreateInfo     instance_info_ = {};
