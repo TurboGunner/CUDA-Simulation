@@ -138,7 +138,7 @@ Vector3D* AllocateTexture(uint2 size, cudaError_t& cuda_status) {
 
 	cudaDeviceSynchronize();
 
-	Render<<<blocks, threads>>> (frame_buffer, size, 128, rand_states, camera, data->device_alloc_);
+	Render<<<blocks, threads>>> (frame_buffer, size, 4, rand_states, camera, data->device_alloc_);
 
 	cuda_status = PostExecutionChecks(cuda_status, "RenderKernel", true);
 

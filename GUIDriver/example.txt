@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFF9EA317C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFFAC7D17C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -17,5 +17,94 @@ Ended command recording!
 
 Successfully submitted item to queue!
 
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
+Began render pass!
 Began render pass!
 Began render pass!

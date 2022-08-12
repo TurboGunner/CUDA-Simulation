@@ -1,6 +1,10 @@
 #include "gui_driver.cuh"
+#include "rasterizer.cuh"
 
+#include <array>
 #include <fstream>
+
+using std::array;
 
 void VulkanGUIDriver::RunGUI() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
@@ -61,12 +65,23 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     ImGui_ImplSDL2_InitForVulkan(window);
     ImGui_ImplVulkan_InitInfo init_info = {};
     LoadInitializationInfo(init_info, wd_);
+    /*
+    VkRenderPass subpass;
+
+    auto info = RenderPassInitializer::RenderPassInfo(
+        RenderPassInitializer::RenderPassDescriptions(wd_->SurfaceFormat.format));
+
+    if (vkCreateRenderPass(device_, &info, nullptr, &subpass) != VK_SUCCESS) {
+        throw std::runtime_error("Could not create Dear ImGui's render pass");
+    }
+    */
 
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
+
     command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
     command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
-    texture_handler_ = TextureLoader(device_, physical_device_, queue_family_);
+    texture_handler_ = TextureLoader(device_, physical_device_, command_pool, queue_family_);
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
@@ -90,6 +105,18 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     VulkanErrorHandler(vulkan_status);
 
     ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
+    //AAA
+    vulkan_status = vkResetCommandPool(device_, command_pool, 0);
+    VulkanErrorHandler(vulkan_status);
+
+    vulkan_status = texture_handler_.StartRenderCommand();
+    VulkanErrorHandler(vulkan_status);
+
+    vulkan_status = vkEndCommandBuffer(texture_handler_.command_buffer);
+    VulkanErrorHandler(vulkan_status);
+
+    vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
+    VulkanErrorHandler(vulkan_status);
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -104,6 +131,14 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
         }
     }
     SwapChainCondition();
+
+    uint2 size;
+    size.x = 1024;
+    size.y = 1024;
+
+    cudaError_t cuda_status = cudaSuccess;
+
+    RenderCall(size, cuda_status);
 
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -163,7 +198,7 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data) {
     FramePresent();
 }
 
-void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) { //RASTERIZER::SUBPASS
+void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {
     VkRenderPassBeginInfo info = {};
 
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -182,6 +217,10 @@ void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) { //R
 
 void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemaphore image_semaphore, VkSemaphore render_semaphore) {
     vkCmdEndRenderPass(frame_draw->CommandBuffer);
+
+    vulkan_status = vkEndCommandBuffer(frame_draw->CommandBuffer);
+    VulkanErrorHandler(vulkan_status);
+
     VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo info = {};
 
@@ -191,14 +230,14 @@ void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemap
 
     info.pWaitDstStageMask = &wait_stage;
 
-    info.commandBufferCount = 1;
-    info.pCommandBuffers = &frame_draw->CommandBuffer;
+    array<VkCommandBuffer, 2> command_buffers =
+    { command_buffer, texture_handler_.command_buffer };
+
+    info.commandBufferCount = command_buffers.size();
+    info.pCommandBuffers = command_buffers.data();
 
     info.signalSemaphoreCount = 1;
     info.pSignalSemaphores = &render_semaphore;
-
-    vulkan_status = vkEndCommandBuffer(frame_draw->CommandBuffer);
-    VulkanErrorHandler(vulkan_status);
 
     vulkan_status = vkQueueSubmit(queue_, 1, &info, frame_draw->Fence);
     VulkanErrorHandler(vulkan_status);
@@ -216,8 +255,8 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
         swap_chain_rebuilding_ = true;
         return;
     }
-    VulkanErrorHandler(vulkan_status);
 
+    VulkanErrorHandler(vulkan_status);
     ImGui_ImplVulkanH_Frame* fd = &wd_->Frames[wd_->FrameIndex];
     vulkan_status = vkWaitForFences(device_, 1, &fd->Fence, VK_TRUE, UINT64_MAX); //Has indefinite wait instead of periodic checks
     VulkanErrorHandler(vulkan_status);

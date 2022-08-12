@@ -36,13 +36,6 @@ void VulkanGUIDriver::CreateMainFrame() {
     ImVec2 window_pos(0.0f, (screen_height - height_ratio) - ((screen_height / 10.0f) * 0.75f));
 
     ImGui::SetWindowPos(window_pos);
-    uint2 size;
-    size.x = 1024;
-    size.y = 1024;
-
-    cudaError_t cuda_status = cudaSuccess;
-
-    RenderImage(size, cuda_status);
 
     ImGui::End();
 }
@@ -58,8 +51,6 @@ void VulkanGUIDriver::RenderCall(uint2 size, cudaError_t& cuda_status) {
 }
 
 void VulkanGUIDriver::RenderImage(uint2 size, cudaError_t& cuda_status) {
-
-    RenderCall(size, cuda_status);
     auto texture = (ImTextureID)ImGui_ImplVulkan_AddTexture(std::get<1>(image_alloc_), std::get<0>(image_alloc_), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     ImVec2 uv0 = ImVec2(10.0f / float(size.x), 10.0f / float(size.y));

@@ -154,12 +154,14 @@ public:
     VkDescriptorPoolCreateInfo pool_info_ = {};
     VkDescriptorPool         descriptor_pool_ = VK_NULL_HANDLE;
 
-    uint32_t                 min_image_count_ = 2;
+    uint32_t                 min_image_count_ = 3;
     bool                     swap_chain_rebuilding_ = false;
 
     VkCommandPool command_pool;
     VkCommandBuffer command_buffer;
-    //vector<VkCommandBuffer> command_buffers;
+    
+    vector<VkImageView> swap_chain_image_views_;
+    vector<VkFramebuffer> swap_chain_frame_buffers_;
 
     //Callbacks
     VkAllocationCallbacks* allocators_ = nullptr;

@@ -15,9 +15,11 @@ using std::tuple;
 class TextureLoader {
 public:
     TextureLoader() = default;
-    TextureLoader(VkDevice& device_in, VkPhysicalDevice& physical_in, uint32_t family_in) {
+
+    TextureLoader(VkDevice& device_in, VkPhysicalDevice& physical_in, VkCommandPool& pool_in, uint32_t family_in) {
         device_ = device_in; 
         physical_device_ = physical_in;
+        command_pool = pool_in;
 
         image_format_ = VK_FORMAT_R8G8B8A8_SRGB;
 
@@ -41,7 +43,7 @@ public:
 
         InitializeImage(image_, size, alloc_flags);
         InitializeImageViews();
-        //InitializeImageSampler();
+        InitializeImageSampler();
 
         return tuple<VkImageView, VkSampler>(image_view_, image_sampler);
     }
@@ -97,7 +99,7 @@ public:
             ProgramLog::OutputLine("Error: Failed to create image!");
         }
 
-        VkMemoryRequirements mem_requirements;
+        VkMemoryRequirements mem_requirements; //NOTE
         mem_requirements.size = size.x * size.y * 4;
 
         VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(mem_requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -171,19 +173,15 @@ public:
     }
 
     VkResult StartRenderCommand() {
-        VkCommandPoolCreateInfo pool_info {};
-
-        pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        pool_info.queueFamilyIndex = queue_family_;
-
-        if (vkCreateCommandPool(device_, &pool_info, nullptr, &command_pool) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create command pool!");
-        }
+        VkResult vulkan_status;
 
         VkCommandBufferAllocateInfo alloc_info = AllocateBufferCommandInfo(command_pool);
 
-        vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
+        vulkan_status = vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
+
+        if (vulkan_status != VK_SUCCESS) {
+            ProgramLog::OutputLine("Failed to create texture loader buffer command!");
+        }
 
         VkCommandBufferBeginInfo begin_info {};
         begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
