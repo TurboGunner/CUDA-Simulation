@@ -106,10 +106,14 @@
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
     <ClInclude Include="gui_driver.cuh" />
     <ClInclude Include="rasterizer.cuh" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="shader_loader.cuh" />
     <ClInclude Include="swap_chain_manager.cuh" />
     <ClInclude Include="texture_loader.cuh" />
     <ClInclude Include="vertex_data.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GUIDriver.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

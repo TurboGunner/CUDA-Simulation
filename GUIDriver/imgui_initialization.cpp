@@ -12,8 +12,6 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
 
     init_info.DescriptorPool = descriptor_pool_;
 
-    //init_info.Subpass = 0; //NOTE!
-
     init_info.MinImageCount = min_image_count_;
     init_info.ImageCount = window->ImageCount;
 

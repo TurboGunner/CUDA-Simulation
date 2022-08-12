@@ -70,5 +70,9 @@
     <ClInclude Include="swap_chain_manager.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GUIDriver.rc" />
   </ItemGroup>
 </Project>

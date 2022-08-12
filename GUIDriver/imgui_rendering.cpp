@@ -61,20 +61,9 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     ImGuiIO& io = ImGui::GetIO();
 
     ImGui::StyleColorsDark();
-
     ImGui_ImplSDL2_InitForVulkan(window);
     ImGui_ImplVulkan_InitInfo init_info = {};
     LoadInitializationInfo(init_info, wd_);
-    /*
-    VkRenderPass subpass;
-
-    auto info = RenderPassInitializer::RenderPassInfo(
-        RenderPassInitializer::RenderPassDescriptions(wd_->SurfaceFormat.format));
-
-    if (vkCreateRenderPass(device_, &info, nullptr, &subpass) != VK_SUCCESS) {
-        throw std::runtime_error("Could not create Dear ImGui's render pass");
-    }
-    */
 
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
 
@@ -227,6 +216,7 @@ void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemap
     info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     info.waitSemaphoreCount = 1;
     info.pWaitSemaphores = &image_semaphore;
+
 
     info.pWaitDstStageMask = &wait_stage;
 
