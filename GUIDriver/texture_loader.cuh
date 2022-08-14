@@ -126,6 +126,11 @@ public:
         create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
         create_info.format = image_format_;
 
+        create_info.components.r = VK_COMPONENT_SWIZZLE_R;
+        create_info.components.g = VK_COMPONENT_SWIZZLE_G;
+        create_info.components.b = VK_COMPONENT_SWIZZLE_B;
+        create_info.components.a = VK_COMPONENT_SWIZZLE_A;
+
         create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         create_info.subresourceRange.baseMipLevel = 0;
         create_info.subresourceRange.levelCount = 1;

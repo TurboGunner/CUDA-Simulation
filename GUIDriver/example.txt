@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFF9D9117C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFE3BAC17C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -7,25 +7,3 @@ GPU Device #0 has been selected for Vulkan Rendering successfully!
 No errors detected while selecting Vulkan queue family. 
 Vulkan instance successfully created!
 Successfully created Vulkan surface for window!
-Initialized texture handler.
-
-Reset IMGUI command pool successfully.
-Started commands buffers.
-Started command recording!
-Ended command buffers.
-Ended command recording!
-
-Successfully submitted item to queue!
-
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!
-Began render pass!

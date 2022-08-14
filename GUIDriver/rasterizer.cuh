@@ -25,6 +25,8 @@ struct RenderPassInitializer {
 		rasterizer.depthBiasConstantFactor = 0.0f;
 		rasterizer.depthBiasClamp = 0.0f;
 		rasterizer.depthBiasSlopeFactor = 0.0f;
+
+		return rasterizer;
 	}
 
 	static VkPipelineMultisampleStateCreateInfo MultiSamplingInfo() {

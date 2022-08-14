@@ -67,10 +67,13 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
 
+    shader_handler_.CreateGraphicsPipeline();
+
     command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
     command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
     texture_handler_ = TextureLoader(device_, physical_device_, command_pool, queue_family_);
+    shader_handler_ = ShaderLoader(device_, wd_, pipeline_cache_);
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
@@ -106,6 +109,8 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
     VulkanErrorHandler(vulkan_status);
+
+    //vkCmdBindPipeline(texture_handler_.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {

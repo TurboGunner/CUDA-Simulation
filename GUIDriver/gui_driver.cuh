@@ -3,6 +3,7 @@
 #include <cuda_runtime.h>
 #include "device_launch_parameters.h"
 
+#include "shader_loader.cuh"
 #include "texture_loader.cuh"
 
 //Logging
@@ -136,6 +137,7 @@ public:
     void RunGUI();
 
     TextureLoader texture_handler_;
+    ShaderLoader shader_handler_;
 
     tuple<VkImageView, VkSampler> image_alloc_;
 
