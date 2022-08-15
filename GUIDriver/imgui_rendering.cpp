@@ -67,13 +67,15 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
 
-    shader_handler_.CreateGraphicsPipeline();
+    s_stream << "Address for Vulkan Render Pipeline: " << wd_->Pipeline << ".";
 
     command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
     command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
     texture_handler_ = TextureLoader(device_, physical_device_, command_pool, queue_family_);
-    shader_handler_ = ShaderLoader(device_, wd_, pipeline_cache_);
+    shader_handler_ = ShaderLoader(device_, wd_, pipeline_cache_, allocators_);
+
+    shader_handler_.CreateGraphicsPipeline();
 
     vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);

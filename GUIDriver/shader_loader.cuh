@@ -24,22 +24,27 @@ class ShaderLoader {
 public:
     ShaderLoader() = default;
 
-    ShaderLoader(VkDevice device_in, ImGui_ImplVulkanH_Window* wd_in, VkPipelineCache cache_in) {
+    ShaderLoader(VkDevice& device_in, ImGui_ImplVulkanH_Window* wd_in, VkPipelineCache& cache_in, VkAllocationCallbacks* allocators = nullptr) {
         device_ = device_in;
         wd_ = wd_in;
 
         pipeline_cache_ = cache_in;
+
+        allocators_ = allocators;
     }
 
-    static vector<char> ReadFile(const string& filename) {
+    vector<char> ReadFile(const string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
             throw std::runtime_error("failed to open file!");
         }
 
-        size_t fileSize = (size_t) file.tellg();
-        vector<char> buffer(fileSize);
+        size_t file_size = (size_t) file.tellg();
+        vector<char> buffer(file_size / sizeof(uint32_t));
+
+        file.seekg(0);
+        file.read((char*) buffer.data(), file_size);
 
         file.close();
 
@@ -67,7 +72,8 @@ public:
         color_blend_attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
         color_blend_attachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
-        VkPipelineColorBlendStateCreateInfo color_blending{};
+        VkPipelineColorBlendStateCreateInfo color_blending {};
+
         color_blending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         color_blending.logicOpEnable = VK_FALSE;
         color_blending.logicOp = VK_LOGIC_OP_COPY; 
@@ -129,18 +135,20 @@ public:
         pipeline_info.pViewportState = &viewport_state;
         pipeline_info.pRasterizationState = &rasterization_info;
         pipeline_info.pMultisampleState = &multi_sampling_info;
+        pipeline_info.pDepthStencilState = nullptr;
         pipeline_info.pColorBlendState = &std::get<0>(blend_states);
         pipeline_info.pDynamicState = &std::get<1>(blend_states);
         pipeline_info.layout = pipeline_layout_;
         pipeline_info.renderPass = wd_->RenderPass;
         pipeline_info.subpass = 0;
         pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
+        pipeline_info.basePipelineIndex = -1;
 
         vulkan_status = vkCreateGraphicsPipelines(device_, pipeline_cache_, 1, &pipeline_info, VK_NULL_HANDLE, &render_pipeline_);
     }
 
     VkPipelineShaderStageCreateInfo PipelineStageInfo(VkShaderModule shader_module, VkShaderStageFlagBits flag) {
-        VkPipelineShaderStageCreateInfo shader_stage_info{};
+        VkPipelineShaderStageCreateInfo shader_stage_info {};
         shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shader_stage_info.stage = flag;
 
@@ -152,20 +160,10 @@ public:
     VkShaderModule CreateShaderModule(const vector<char>& code) {
         VkShaderModuleCreateInfo create_info = ShaderModuleInfo(code);
         VkShaderModule shader_module {};
-
-        if (vkCreateShaderModule(device_, &create_info, nullptr, &shader_module) != VK_SUCCESS) {
+        if (vkCreateShaderModule(device_, &create_info, allocators_, &shader_module) != VK_SUCCESS) {
             throw std::runtime_error("failed to create shader module!");
         }
         return shader_module;
-    }
-
-    VkPipelineShaderStageCreateInfo ShaderStageInfo(VkShaderModule& shader_module) {
-        VkPipelineShaderStageCreateInfo frag_shader_stage_info {};
-
-        frag_shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        frag_shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        frag_shader_stage_info.module = shader_module;
-        frag_shader_stage_info.pName = "main";
     }
 
     VkShaderModuleCreateInfo ShaderModuleInfo(const vector<char>& code) {
@@ -178,6 +176,17 @@ public:
         return create_info;
     }
 
+    VkPipelineShaderStageCreateInfo ShaderStageInfo(VkShaderModule& shader_module) {
+        VkPipelineShaderStageCreateInfo shader_stage_info {};
+
+        shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        shader_stage_info.module = shader_module;
+        shader_stage_info.pName = "main";
+
+        return shader_stage_info;
+    }
+
     VkDevice device_;
     VkPipelineCache pipeline_cache_;
     VkPipelineLayout pipeline_layout_;
@@ -187,4 +196,6 @@ public:
     ImGui_ImplVulkanH_Window* wd_;
 
     VkResult vulkan_status;
+
+    VkAllocationCallbacks* allocators_;
 };
