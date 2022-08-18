@@ -12,7 +12,7 @@
 using std::vector;
 
 struct VulkanHelper {
-	VulkanHelper() { }
+	VulkanHelper() = default;
 
 	VulkanHelper(VkDevice& device_in, VkRenderPass& pass_in) {
 		device_ = device_in;
