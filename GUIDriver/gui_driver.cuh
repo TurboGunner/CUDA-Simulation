@@ -6,6 +6,8 @@
 #include "shader_loader.cuh"
 #include "texture_loader.cuh"
 
+#include "vulkan_helpers.hpp"
+
 //Logging
 #include "../CUDATest/handler_classes.hpp"
 
@@ -33,10 +35,12 @@
 #include <memory>
 #include <vector>
 #include <tuple>
+#include <map>
 
 using std::string;
 using std::vector;
 using std::tuple;
+using std::map;
 
 #ifdef _DEBUG
 #define IMGUI_VULKAN_DEBUG_REPORT
@@ -125,9 +129,6 @@ public:
 
     void CreateMainFrame();
 
-    void RenderCall(uint2 size, cudaError_t& cuda_status);
-    void RenderImage(uint2 size, cudaError_t& cuda_status);
-
     void InitializeVulkan();
 
     void GUIPollLogic(bool& exit_condition);
@@ -136,8 +137,11 @@ public:
 
     void RunGUI();
 
+    VkRenderPass Draw(ImGui_ImplVulkanH_Frame* frame_draw);
+
     TextureLoader texture_handler_;
     ShaderLoader shader_handler_;
+    VulkanHelper vulkan_helper_;
 
     tuple<VkImageView, VkSampler> image_alloc_;
 
@@ -159,8 +163,8 @@ public:
     uint32_t                 min_image_count_ = 3;
     bool                     swap_chain_rebuilding_ = false;
 
-    VkCommandPool command_pool;
-    VkCommandBuffer command_buffer;
+    VkCommandPool command_pool_;
+    map<string, VkCommandBuffer> command_buffers_;
     
     vector<VkImageView> swap_chain_image_views_;
     vector<VkFramebuffer> swap_chain_frame_buffers_;

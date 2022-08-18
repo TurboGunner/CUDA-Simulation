@@ -39,22 +39,3 @@ void VulkanGUIDriver::CreateMainFrame() {
 
     ImGui::End();
 }
-
-void VulkanGUIDriver::RenderCall(uint2 size, cudaError_t& cuda_status) {
-    VkDeviceSize image_size = size.x * size.y * 4;
-
-    void* data = (void*)AllocateTexture(size, cuda_status);
-
-    texture_handler_.device_ = device_;
-
-    image_alloc_ = texture_handler_.CreateTextureImage(data, image_size, size, cuda_status);
-}
-
-void VulkanGUIDriver::RenderImage(uint2 size, cudaError_t& cuda_status) {
-    auto texture = (ImTextureID)ImGui_ImplVulkan_AddTexture(std::get<1>(image_alloc_), std::get<0>(image_alloc_), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-    ImVec2 uv0 = ImVec2(10.0f / float(size.x), 10.0f / float(size.y));
-    ImVec2 uv1 = ImVec2((10.0f + 1000.0f) / size.x, (10.0f + 1000.0f) / size.y);
-
-    ImGui::Image(texture, ImVec2(size.x, size.y), uv0, uv1);
-}

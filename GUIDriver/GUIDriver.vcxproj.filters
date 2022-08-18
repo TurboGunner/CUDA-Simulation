@@ -67,10 +67,10 @@
     <ClInclude Include="shader_loader.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="swap_chain_manager.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="vulkan_helpers.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GUIDriver.rc" />

@@ -24,13 +24,15 @@ class ShaderLoader {
 public:
     ShaderLoader() = default;
 
-    ShaderLoader(VkDevice& device_in, ImGui_ImplVulkanH_Window* wd_in, VkPipelineCache& cache_in, VkAllocationCallbacks* allocators = nullptr) {
+    ShaderLoader(VkDevice& device_in, ImGui_ImplVulkanH_Window* wd_in, VkRenderPass& pass_in, VkPipelineCache& cache_in, VkAllocationCallbacks* allocators = nullptr) {
         device_ = device_in;
         wd_ = wd_in;
 
         pipeline_cache_ = cache_in;
 
         allocators_ = allocators;
+
+        render_pass_ = pass_in;
     }
 
     vector<char> ReadFile(const string& filename) {
@@ -107,14 +109,17 @@ public:
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info {};
 
+        vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertex_input_info.vertexBindingDescriptionCount = 0;
+        vertex_input_info.vertexAttributeDescriptionCount = 0;
+        vertex_input_info.pNext = VK_NULL_HANDLE;
+
         VkPipelineInputAssemblyStateCreateInfo input_assembly {};
+
         input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
 
-        vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertex_input_info.vertexBindingDescriptionCount = 0;
-        vertex_input_info.vertexAttributeDescriptionCount = 0;
 
         VkPipelineViewportStateCreateInfo viewport_state {};
         viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -139,12 +144,15 @@ public:
         pipeline_info.pColorBlendState = &std::get<0>(blend_states);
         pipeline_info.pDynamicState = &std::get<1>(blend_states);
         pipeline_info.layout = pipeline_layout_;
-        pipeline_info.renderPass = wd_->RenderPass;
+        pipeline_info.renderPass = render_pass_;
         pipeline_info.subpass = 0;
         pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
         pipeline_info.basePipelineIndex = -1;
 
         vulkan_status = vkCreateGraphicsPipelines(device_, pipeline_cache_, 1, &pipeline_info, VK_NULL_HANDLE, &render_pipeline_);
+
+        vkDestroyShaderModule(device_, frag_shader_module, nullptr);
+        vkDestroyShaderModule(device_, vert_shader_module, nullptr);
     }
 
     VkPipelineShaderStageCreateInfo PipelineStageInfo(VkShaderModule shader_module, VkShaderStageFlagBits flag) {
@@ -191,6 +199,7 @@ public:
     VkPipelineCache pipeline_cache_;
     VkPipelineLayout pipeline_layout_;
 
+    VkRenderPass render_pass_;
     VkPipeline render_pipeline_;
 
     ImGui_ImplVulkanH_Window* wd_;

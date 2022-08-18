@@ -19,7 +19,7 @@ public:
     TextureLoader(VkDevice& device_in, VkPhysicalDevice& physical_in, VkCommandPool& pool_in, uint32_t family_in) {
         device_ = device_in; 
         physical_device_ = physical_in;
-        command_pool = pool_in;
+        command_pool_ = pool_in;
 
         image_format_ = VK_FORMAT_R8G8B8A8_SRGB;
 
@@ -180,7 +180,7 @@ public:
     VkResult StartRenderCommand() {
         VkResult vulkan_status;
 
-        VkCommandBufferAllocateInfo alloc_info = AllocateBufferCommandInfo(command_pool);
+        VkCommandBufferAllocateInfo alloc_info = AllocateBufferCommandInfo(command_pool_);
 
         vulkan_status = vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
 
@@ -195,11 +195,11 @@ public:
         return vkBeginCommandBuffer(command_buffer, &begin_info);
     }
 
-    VkCommandBufferAllocateInfo AllocateBufferCommandInfo(VkCommandPool command_pool) {
+    VkCommandBufferAllocateInfo AllocateBufferCommandInfo(VkCommandPool command_pool_) {
         VkCommandBufferAllocateInfo alloc_info {};
 
         alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        alloc_info.commandPool = command_pool;
+        alloc_info.commandPool = command_pool_;
         alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         alloc_info.commandBufferCount = 1;
 
@@ -214,7 +214,7 @@ public:
     VkSampler image_sampler;
 
     VkCommandBuffer command_buffer = VK_NULL_HANDLE;
-    VkCommandPool command_pool = VK_NULL_HANDLE;
+    VkCommandPool command_pool_ = VK_NULL_HANDLE;
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory, texture_image_memory;

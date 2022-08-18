@@ -18,7 +18,7 @@ struct RenderPassInitializer {
 
 		rasterizer.lineWidth = 1.0f;
 		
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+		rasterizer.cullMode = VK_CULL_MODE_NONE;
 		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 
 		rasterizer.depthBiasEnable = VK_FALSE;
@@ -104,17 +104,4 @@ struct RenderPassInitializer {
 
 		return render_pass_info;
 	}
-	/*
-	VkFramebufferCreateInfo FrameBufferInfo(VkRenderPass render_pass) {
-		VkFramebufferCreateInfo frame_buffer_info{};
-		frame_buffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		frame_buffer_info.renderPass = render_pass;
-		frame_buffer_info.attachmentCount = 1;
-		frame_buffer_info.pAttachments = attachments;
-		frame_buffer_info.width = swapChainExtent.width;
-		frame_buffer_info.height = swapChainExtent.height;
-		frame_buffer_info.layers = 1;
-	}
-	*/
-	
 };
