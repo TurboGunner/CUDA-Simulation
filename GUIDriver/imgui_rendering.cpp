@@ -31,6 +31,9 @@ void VulkanGUIDriver::RunGUI() {
 
     InitializeVulkan();
 
+    size_.x = 1024;
+    size_.y = 1024;
+
     // Create Window Surface
     VkSurfaceKHR surface;
     if (SDL_Vulkan_CreateSurface(window, instance_, &surface) == 0) {
@@ -41,6 +44,18 @@ void VulkanGUIDriver::RunGUI() {
 
     int width, height;
     CreateFrameBuffers(width, height, surface);
+
+    VkFormat format = VK_FORMAT_A8B8G8R8_SRGB_PACK32;
+
+    auto subpass = CreateSubpass(format);
+
+    vulkan_helper_ = VulkanHelper(device_, subpass);
+    shader_handler_ = ShaderLoader(device_, subpass, pipeline_cache_, allocators_);
+
+    shader_handler_.CreateGraphicsPipeline();
+    vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
+
+    vulkan_helper_.CreateFrameBuffers();
 
     IMGUIRenderLogic();
 
@@ -64,14 +79,14 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     ImGui::StyleColorsDark();
     ImGui_ImplSDL2_InitForVulkan(window);
     ImGui_ImplVulkan_InitInfo init_info = {};
-    LoadInitializationInfo(init_info, wd_);
+    LoadInitializationInfo(init_info);
 
-    ImGui_ImplVulkan_Init(&init_info, Draw(&wd_->Frames[wd_->FrameIndex]));
+    ImGui_ImplVulkan_Init(&init_info, shader_handler_.render_pass_);
 
-    s_stream << "Address for Vulkan Render Pipeline: " << wd_->Pipeline << ".";
+    s_stream << "Address for Vulkan Render Pipeline: " << vulkan_helper_.render_pass_ << ".";
 
-    command_pool_ = wd_->Frames[wd_->FrameIndex].CommandPool;
-    command_buffers_.emplace("GUI", wd_->Frames[wd_->FrameIndex].CommandBuffer);
+    //NOTE!
+    //command_buffers_.emplace("GUI", wd_->Frames[wd_->FrameIndex].CommandBuffer);
 
     texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
 
@@ -80,10 +95,10 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     ProgramLog::OutputLine("Reset IMGUI command pool successfully.");
 
+    //One time commands
+
     VkCommandBufferBeginInfo begin_info = {};
     BeginRendering(begin_info);
-
-    Draw(&wd_->Frames[wd_->FrameIndex]);
 
     ProgramLog::OutputLine("Started command recording!");
 
@@ -99,17 +114,9 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     VulkanErrorHandler(vulkan_status);
     
     ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
-    //AAA
 
     VkCommandBufferAllocateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    info.pNext = nullptr;
-
-    info.commandPool = command_pool_;
-    info.commandBufferCount = 1;
-    info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    vkAllocateCommandBuffers(device_, &info, &texture_handler_.command_buffer);
-    VulkanErrorHandler(vulkan_status);
+    VulkanHelper::AllocateCommandBuffer(command_pool_);
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -174,42 +181,42 @@ void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& comm
     ProgramLog::OutputLine("Ended command buffers.");
 }
 
-void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data) {
+void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
     const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
     if (is_minimized) {
         return;
     }
 
-    wd_->ClearValue.color.float32[0] = clear_color_.x * clear_color_.w;
-    wd_->ClearValue.color.float32[1] = clear_color_.y * clear_color_.w;
-    wd_->ClearValue.color.float32[2] = clear_color_.z * clear_color_.w;
-    wd_->ClearValue.color.float32[3] = clear_color_.w;
+    clear_values_[0].color.float32[0] = clear_color_.x * clear_color_.w;
+    clear_values_[0].color.float32[1] = clear_color_.y * clear_color_.w;
+    clear_values_[0].color.float32[2] = clear_color_.z * clear_color_.w;
+    clear_values_[0].color.float32[3] = clear_color_.w;
 
-    FrameRender(draw_data);
+    FrameRender(draw_data, command_buffer);
     FramePresent();
 }
 
-void VulkanGUIDriver::StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw) {
+void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebuffer& frame_buffer) {
     VkRenderPassBeginInfo info = {};
 
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    info.renderPass = wd_->RenderPass;
-    info.framebuffer = frame_draw->Framebuffer;
+    info.renderPass = render_pass_;
+    info.framebuffer = frame_buffer;
 
-    info.renderArea.extent.width = wd_->Width;
-    info.renderArea.extent.height = wd_->Height;
+    info.renderArea.extent.width = size_.x;
+    info.renderArea.extent.height = size_.y;
 
-    info.clearValueCount = 1;
-    info.pClearValues = &wd_->ClearValue;
+    info.clearValueCount = clear_values_.size();
+    info.pClearValues = clear_values_.data();
 
-    vkCmdBeginRenderPass(frame_draw->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(command_buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
     ProgramLog::OutputLine("Began render pass!");
 }
 
-void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemaphore image_semaphore, VkSemaphore render_semaphore) {
-    vkCmdEndRenderPass(frame_draw->CommandBuffer);
+void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore& image_semaphore, VkSemaphore& render_semaphore) {
+    vkCmdEndRenderPass(command_buffer);
 
-    vulkan_status = vkEndCommandBuffer(frame_draw->CommandBuffer);
+    vulkan_status = vkEndCommandBuffer(command_buffer);
     VulkanErrorHandler(vulkan_status);
 
     VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -221,8 +228,8 @@ void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemap
 
     info.pWaitDstStageMask = &wait_stage;
 
-    array<VkCommandBuffer, 2> command_buffers =
-    { command_buffers_["GUI"], texture_handler_.command_buffer };
+    array<VkCommandBuffer, 1> command_buffers =
+    { command_buffers_["GUI"] };
 
     info.commandBufferCount = command_buffers.size();
     info.pCommandBuffers = command_buffers.data();
@@ -230,17 +237,15 @@ void VulkanGUIDriver::EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemap
     info.signalSemaphoreCount = 1;
     info.pSignalSemaphores = &render_semaphore;
 
-    vulkan_status = vkQueueSubmit(queue_, 1, &info, frame_draw->Fence);
+    vulkan_status = vkQueueSubmit(queue_, 1, &info, render_fence_);
     VulkanErrorHandler(vulkan_status);
 }
 
-void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
+void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
     VkResult vulkan_status;
 
-    VkSemaphore image_semaphore = wd_->FrameSemaphores[wd_->SemaphoreIndex].ImageAcquiredSemaphore;
-    VkSemaphore render_semaphore = wd_->FrameSemaphores[wd_->SemaphoreIndex].RenderCompleteSemaphore;
-
-    vulkan_status = vkAcquireNextImageKHR(device_, wd_->Swapchain, UINT64_MAX, image_semaphore, VK_NULL_HANDLE, &wd_->FrameIndex);
+    uint32_t image_index;
+    vulkan_status = vkAcquireNextImageKHR(device_, swap_chain_, UINT64_MAX, image_semaphore_, VK_NULL_HANDLE, &frame_index_);
 
     if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
         swap_chain_rebuilding_ = true;
@@ -248,71 +253,33 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
     }
 
     VulkanErrorHandler(vulkan_status);
-    ImGui_ImplVulkanH_Frame* fd = &wd_->Frames[wd_->FrameIndex];
-    vulkan_status = vkWaitForFences(device_, 1, &fd->Fence, VK_TRUE, UINT64_MAX); //Has indefinite wait instead of periodic checks
+    vulkan_status = vkWaitForFences(device_, 1, &render_fence_, VK_TRUE, UINT64_MAX); //Has indefinite wait instead of periodic checks
     VulkanErrorHandler(vulkan_status);
 
-    vulkan_status = vkResetFences(device_, 1, &fd->Fence);
+    vulkan_status = vkResetFences(device_, 1, &render_fence_);
     VulkanErrorHandler(vulkan_status);
 
-    ManageCommandBuffer(fd);
+    ManageCommandBuffer(command_pool_, command_buffers_["GUI"]);
 
-    StartRenderPass(fd);
+    StartRenderPass(command_buffer, vulkan_helper_.frame_buffers_[image_index_]);
 
-    ImGui_ImplVulkan_RenderDrawData(draw_data, fd->CommandBuffer); // Record imgui primitives into command buffer
+    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer); // Record imgui primitives into command buffer
     //Note!
-    EndRenderPass(fd, image_semaphore, render_semaphore);
+    EndRenderPass(command_buffer, image_semaphore_, render_semaphore_);
 }
 
-VkRenderPass VulkanGUIDriver::Draw(ImGui_ImplVulkanH_Frame* frame_draw) {
-    VkSubmitInfo end_info = {};
-    EndRendering(end_info, texture_handler_.command_buffer);
-
+VkRenderPass VulkanGUIDriver::CreateSubpass(VkFormat& format) {
     VkRenderPass subpass{};
     auto render_info = RenderPassInitializer::RenderPassInfo(
-        RenderPassInitializer::RenderPassDescriptions(wd_->SurfaceFormat.format));
+        RenderPassInitializer::RenderPassDescriptions(format));
 
     if (vkCreateRenderPass(device_, &render_info, nullptr, &subpass) != VK_SUCCESS) {
         throw std::runtime_error("Could not create Dear ImGui's render pass");
     }
 
-    vulkan_helper_ = VulkanHelper(device_, subpass);
-
-    shader_handler_ = ShaderLoader(device_, wd_, subpass, pipeline_cache_, allocators_);
-
-    VkRenderPassBeginInfo pass_info = {};
-    pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    pass_info.pNext = nullptr;
-
-    pass_info.renderPass = subpass;
-    pass_info.renderArea.offset.x = 0;
-    pass_info.renderArea.offset.y = 0;
-    pass_info.renderArea.extent.width = wd_->Width;
-    pass_info.renderArea.extent.height = wd_->Height;
-    pass_info.clearValueCount = 1;
-    pass_info.pClearValues = nullptr;
-    pass_info.framebuffer = vulkan_helper_.frame_buffers_[wd_->FrameIndex];
-
     return subpass;
-
-    //shader_handler_.CreateGraphicsPipeline();
-    vkCmdBeginRenderPass(texture_handler_.command_buffer, &pass_info, VK_SUBPASS_CONTENTS_INLINE);
-
-    vkCmdBindPipeline(texture_handler_.command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
-    vkCmdDraw(texture_handler_.command_buffer, 3, 1, 1, 0);
-
-    vkCmdEndRenderPass(texture_handler_.command_buffer);
-
-    vulkan_status = vkEndCommandBuffer(texture_handler_.command_buffer);
-    VulkanErrorHandler(vulkan_status);
-
-    vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
-    VulkanErrorHandler(vulkan_status);
-
-    vkEndCommandBuffer(texture_handler_.command_buffer);
-    vkResetCommandBuffer(texture_handler_.command_buffer, 0);
 }
 
 void VulkanGUIDriver::CleanupVulkanWindow() {
-    ImGui_ImplVulkanH_DestroyWindow(instance_, device_, &main_window_data_, allocators_);
+    //NOTE!
 }

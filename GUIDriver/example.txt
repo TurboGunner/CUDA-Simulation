@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFEC2E717C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFE4E0117C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -7,4 +7,3 @@ GPU Device #0 has been selected for Vulkan Rendering successfully!
 No errors detected while selecting Vulkan queue family. 
 Vulkan instance successfully created!
 Successfully created Vulkan surface for window!
-Ended command buffers.

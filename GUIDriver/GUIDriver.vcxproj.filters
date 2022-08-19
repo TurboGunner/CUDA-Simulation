@@ -71,6 +71,7 @@
     <ClInclude Include="vulkan_helpers.hpp">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="swap_chain_manager.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GUIDriver.rc" />

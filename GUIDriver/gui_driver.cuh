@@ -103,17 +103,17 @@ public:
 
     void CleanupVulkanWindow();
 
-    void FrameRender(ImDrawData* draw_data);
+    void FrameRender(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
 
-    void ManageCommandBuffer(ImGui_ImplVulkanH_Frame* frame_draw);
+    void ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer);
 
-    void StartRenderPass(ImGui_ImplVulkanH_Frame* frame_draw);
+    void StartRenderPass(VkCommandBuffer& command_buffer, VkFramebuffer& frame_buffer);
 
-    void EndRenderPass(ImGui_ImplVulkanH_Frame* frame_draw, VkSemaphore image_semaphore, VkSemaphore render_semaphore);
+    void EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore& image_semaphore, VkSemaphore& render_semaphore);
 
     void FramePresent();
 
-    void LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info, ImGui_ImplVulkanH_Window* window);
+    void LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info);
 
     void CreateFrameBuffers(int& width, int& height, VkSurfaceKHR& surface);
 
@@ -121,7 +121,7 @@ public:
 
     void EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer);
 
-    void MinimizeRenderCondition(ImDrawData* draw_data);
+    void MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
 
     void SwapChainCondition();
 
@@ -137,7 +137,7 @@ public:
 
     void RunGUI();
 
-    VkRenderPass Draw(ImGui_ImplVulkanH_Frame* frame_draw);
+    VkRenderPass CreateSubpass(VkFormat& format);
 
     TextureLoader texture_handler_;
     ShaderLoader shader_handler_;
@@ -163,11 +163,18 @@ public:
     uint32_t                 min_image_count_ = 3;
     bool                     swap_chain_rebuilding_ = false;
 
+    VkRenderPass render_pass_;
+
     VkCommandPool command_pool_;
     map<string, VkCommandBuffer> command_buffers_;
-    
-    vector<VkImageView> swap_chain_image_views_;
-    vector<VkFramebuffer> swap_chain_frame_buffers_;
+
+    VkSwapchainKHR swap_chain_;
+
+    uint32_t image_index_, current_frame_, frame_index_;
+
+    const uint32_t MAX_FRAMES_IN_FLIGHT_ = 2;
+
+    uint2 size_;
 
     //Callbacks
     VkAllocationCallbacks* allocators_ = nullptr;
@@ -176,11 +183,13 @@ public:
 
     PFN_vkCreateDebugReportCallbackEXT InstanceDebugCallbackEXT;
 
+    VkSemaphore image_semaphore_, render_semaphore_;
+    VkFence render_fence_;
+
+    vector<VkClearValue> clear_values_;
+
     //Windows
     SDL_Window* window;
-    ImGui_ImplVulkanH_Window* wd_;
-
-    ImGui_ImplVulkanH_Window main_window_data_;
 
     ImVec4 clear_color_ = ImVec4(0.075f, 0.0875f, 0.1f, 1.00f);
 

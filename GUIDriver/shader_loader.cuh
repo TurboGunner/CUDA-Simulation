@@ -24,9 +24,8 @@ class ShaderLoader {
 public:
     ShaderLoader() = default;
 
-    ShaderLoader(VkDevice& device_in, ImGui_ImplVulkanH_Window* wd_in, VkRenderPass& pass_in, VkPipelineCache& cache_in, VkAllocationCallbacks* allocators = nullptr) {
+    ShaderLoader(VkDevice& device_in, VkRenderPass& pass_in, VkPipelineCache& cache_in, VkAllocationCallbacks* allocators = nullptr) {
         device_ = device_in;
-        wd_ = wd_in;
 
         pipeline_cache_ = cache_in;
 
@@ -237,8 +236,6 @@ public:
 
     VkRenderPass render_pass_;
     VkPipeline render_pipeline_;
-
-    ImGui_ImplVulkanH_Window* wd_;
 
     VkResult vulkan_status;
 

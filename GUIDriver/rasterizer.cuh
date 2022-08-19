@@ -9,7 +9,9 @@ using std::tuple;
 
 struct RenderPassInitializer {
 	static VkPipelineRasterizationStateCreateInfo RasterizationInfo() {
+
 		VkPipelineRasterizationStateCreateInfo rasterizer {};
+
 		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 		rasterizer.depthClampEnable = VK_FALSE;
 

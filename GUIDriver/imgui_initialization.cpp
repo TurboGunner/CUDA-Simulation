@@ -1,6 +1,6 @@
 #include "gui_driver.cuh"
 
-void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info, ImGui_ImplVulkanH_Window* window) {
+void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info) {
     init_info.Instance = instance_;
     init_info.PhysicalDevice = physical_device_;
     init_info.Device = device_;
@@ -12,8 +12,8 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
 
     init_info.DescriptorPool = descriptor_pool_;
 
-    init_info.MinImageCount = min_image_count_;
-    init_info.ImageCount = window->ImageCount;
+    init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT_;
+    init_info.ImageCount = static_cast<uint32_t>(vulkan_helper_.swapchain_images_.size());
 
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -23,7 +23,6 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
 
 void VulkanGUIDriver::CreateFrameBuffers(int& width, int& height, VkSurfaceKHR& surface) {
     SDL_GetWindowSize(window, &width, &height);
-    wd_ = &main_window_data_;
     SetupVulkanWindow(surface, width, height);
 }
 
@@ -31,7 +30,10 @@ void VulkanGUIDriver::FramePresent() {
     if (swap_chain_rebuilding_) {
         return;
     }
-    VkSemaphore render_complete_semaphore = wd_->FrameSemaphores[wd_->SemaphoreIndex].RenderCompleteSemaphore;
+
+    //NOTE
+
+    VkSemaphore render_complete_semaphore;
     VkPresentInfoKHR info = {};
 
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -41,8 +43,8 @@ void VulkanGUIDriver::FramePresent() {
 
     info.swapchainCount = 1;
 
-    info.pSwapchains = &wd_->Swapchain;
-    info.pImageIndices = &wd_->FrameIndex;
+    info.pSwapchains = &swap_chain_;
+    info.pImageIndices = &image_index_;
 
     vulkan_status = vkQueuePresentKHR(queue_, &info);
     if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR)
@@ -51,7 +53,7 @@ void VulkanGUIDriver::FramePresent() {
         return;
     }
     VulkanErrorHandler(vulkan_status);
-    wd_->SemaphoreIndex = (wd_->SemaphoreIndex + 1) % wd_->ImageCount;
+    current_frame_ = (current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT_;
 }
 
 void VulkanGUIDriver::SwapChainCondition() {
@@ -62,21 +64,21 @@ void VulkanGUIDriver::SwapChainCondition() {
     SDL_GetWindowSize(window, &width, &height);
     if (width > 0 && height > 0) {
         ImGui_ImplVulkan_SetMinImageCount(min_image_count_);
-        ImGui_ImplVulkanH_CreateOrResizeWindow(instance_, physical_device_, device_, &main_window_data_, queue_family_, allocators_, width, height, min_image_count_);
+        //ImGui_ImplVulkanH_CreateOrResizeWindow(instance_, physical_device_, device_, &main_window_data_, queue_family_, allocators_, width, height, min_image_count_);
 
-        main_window_data_.FrameIndex = 0;
+        //main_window_data_.FrameIndex = 0;
         swap_chain_rebuilding_ = false;
     }
 }
 
-void VulkanGUIDriver::ManageCommandBuffer(ImGui_ImplVulkanH_Frame* frame_draw) {
-    vulkan_status = vkResetCommandPool(device_, frame_draw->CommandPool, 0);
+void VulkanGUIDriver::ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer) {
+    vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
 
     VkCommandBufferBeginInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vulkan_status = vkBeginCommandBuffer(frame_draw->CommandBuffer, &info);
+    vulkan_status = vkBeginCommandBuffer(command_buffer, &info);
     VulkanErrorHandler(vulkan_status);
 }
