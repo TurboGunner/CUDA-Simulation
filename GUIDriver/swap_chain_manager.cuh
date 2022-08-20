@@ -93,7 +93,6 @@ public:
                 return availableFormat;
             }
         }
-
         return formats_[0];
     }
 

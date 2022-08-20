@@ -97,7 +97,7 @@ public:
 
     void SelectGPU();
 
-    void SetupVulkanWindow(VkSurfaceKHR surface, int width, int height);
+    void SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height);
 
     void CleanupVulkan();
 
@@ -173,6 +173,11 @@ public:
     uint32_t image_index_, current_frame_, frame_index_;
 
     const uint32_t MAX_FRAMES_IN_FLIGHT_ = 2;
+    
+    VkSurfaceKHR surface_;
+    VkSurfaceFormatKHR surface_format_;
+
+    VkPresentModeKHR present_mode_;
 
     uint2 size_;
 

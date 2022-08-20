@@ -2,6 +2,7 @@
 
 #include "gui_driver.cuh"
 
+//Logging
 #include "../CUDATest/handler_classes.hpp"
 
 #include <cuda_runtime.h>
@@ -105,8 +106,7 @@ struct VulkanHelper {
 		pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		pool_info.queueFamilyIndex = queue_family;
 
-		if (vkCreateCommandPool(device_, &pool_info, nullptr, &command_pool) != VK_SUCCESS)
-		{
+		if (vkCreateCommandPool(device_, &pool_info, nullptr, &command_pool) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create command pool!");
 		}
 	}

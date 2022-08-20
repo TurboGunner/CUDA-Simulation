@@ -72,6 +72,12 @@
       <Filter>includes</Filter>
     </ClInclude>
     <ClInclude Include="swap_chain_manager.cuh" />
+    <ClInclude Include="sync_structs.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_parameters.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GUIDriver.rc" />
