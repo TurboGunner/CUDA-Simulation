@@ -5,3 +5,7 @@
 struct VulkanParameters {
 	VkDevice device_;
 };
+
+struct VulkanMemoryManager {
+	
+};

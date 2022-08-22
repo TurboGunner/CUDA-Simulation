@@ -5,9 +5,10 @@
 
 #include <vulkan/vulkan.h>
 
-struct SyncStructs {
+struct SyncStruct {
+	SyncStruct() = default;
 
-	SyncStructs(VkDevice& device_in) {
+	SyncStruct(VkDevice& device_in) {
 		device_ = device_in;
 	}
 
@@ -39,8 +40,6 @@ struct SyncStructs {
 	}
 
 	VkResult CreateSemaphore(VkSemaphore& semaphore, VkSemaphoreCreateInfo& semaphore_info) {
-		VkSemaphoreCreateInfo semaphore_info = semaphore_info;
-
 		vulkan_status = vkCreateSemaphore(device_, &semaphore_info, nullptr, &semaphore);
 		ProgramLog::OutputLine("\nSuccessfully created render semaphore!\n");
 

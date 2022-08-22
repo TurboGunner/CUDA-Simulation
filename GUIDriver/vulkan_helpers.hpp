@@ -34,7 +34,9 @@ struct VulkanHelper {
 		return info;
 	}
 
-	void CreateFrameBuffers() {
+	void CreateFrameBuffers(vector<VkImageView>& swapchain_image_views) {
+		frame_buffers_.resize(swapchain_image_views.size());
+
 		VkFramebufferCreateInfo frame_buffer_info = {};
 		frame_buffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		frame_buffer_info.pNext = nullptr;
@@ -45,10 +47,10 @@ struct VulkanHelper {
 		frame_buffer_info.height = size_.y;
 		frame_buffer_info.layers = 1;
 
-		frame_buffers_ = vector<VkFramebuffer>(swapchain_image_views_.size());
+		frame_buffers_ = vector<VkFramebuffer>(swapchain_image_views.size());
 
-		for (size_t i = 0; i < swapchain_image_views_.size(); i++) {
-			frame_buffer_info.pAttachments = &swapchain_image_views_[i];
+		for (size_t i = 0; i < swapchain_image_views.size(); i++) {
+			frame_buffer_info.pAttachments = &swapchain_image_views[i];
 			vulkan_status = vkCreateFramebuffer(device_, &frame_buffer_info, nullptr, &frame_buffers_[i]);
 		}
 	}
@@ -77,11 +79,11 @@ struct VulkanHelper {
 		return image_view;
 	}
 
-	void CreateImageViews() {
-		swapchain_image_views_.resize(swapchain_image_views_.size());
+	void CreateImageViews(vector<VkImage> swapchain_images, vector<VkImageView>& swapchain_image_views) {
+		swapchain_image_views.resize(swapchain_image_views.size());
 
-		for (uint32_t i = 0; i < swapchain_image_views_.size(); i++) {
-			swapchain_image_views_[i] = CreateImageView(swapchain_images_[i], swapchain_format_, VK_IMAGE_ASPECT_COLOR_BIT);
+		for (uint32_t i = 0; i < swapchain_image_views.size(); i++) {
+			swapchain_image_views[i] = CreateImageView(swapchain_images[i], swapchain_format_, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
 	}
 
@@ -100,15 +102,28 @@ struct VulkanHelper {
 		return pass_info;
 	}
 
-	VkCommandPool CreateCommandPool(VkCommandPool& command_pool, const uint32_t& queue_family) {
+	VkCommandPoolCreateInfo CommandPoolInfo(const uint32_t& queue_family) {
 		VkCommandPoolCreateInfo pool_info {};
+
 		pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		pool_info.queueFamilyIndex = queue_family;
 
+		return pool_info;
+	}
+
+	void CreateCommandPool(VkCommandPool& command_pool, VkCommandPoolCreateInfo& pool_info) {
 		if (vkCreateCommandPool(device_, &pool_info, nullptr, &command_pool) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create command pool!");
 		}
+	}
+
+	void InitializeCommands(VkCommandPool& command_pool, VkCommandBuffer& buffer, const uint32_t& queue_family) {
+		VkCommandPoolCreateInfo pool_info = CommandPoolInfo(queue_family);
+		CreateCommandPool(command_pool, pool_info);
+
+		auto command_alloc_info = AllocateCommandBuffer(command_pool);
+		vkAllocateCommandBuffers(device_, &command_alloc_info, &buffer);
 	}
 
 	VkDevice device_;
@@ -117,8 +132,6 @@ struct VulkanHelper {
 
 	vector<VkFramebuffer> frame_buffers_;
 
-	vector<VkImage> swapchain_images_;
-	vector<VkImageView> swapchain_image_views_;
 	VkFormat swapchain_format_;
 	VkExtent2D swapchain_extent_;
 

@@ -16,7 +16,8 @@ void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR& surface, int width, int he
 
     // Select Present Mode
 #ifdef IMGUI_UNLIMITED_FRAME_RATE
-    VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
+    VkPresentModeKHR 
+        s[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
 #else
     VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
 #endif

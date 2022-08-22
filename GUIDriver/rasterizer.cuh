@@ -60,22 +60,22 @@ struct RenderPassInitializer {
 		return pipeline_layout_info;
 	}
 
-	static tuple<VkSubpassDescription, VkAttachmentDescription> RenderPassDescriptions(VkFormat format) {
-		VkAttachmentDescription attachment {};
+	static tuple<VkSubpassDescription, VkAttachmentDescription> RenderPassDescriptions(const VkFormat& format) {
+		VkAttachmentDescription attachment = {};
 		attachment.format = format;
 		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-		VkAttachmentReference color_attachment_ref {};
+		VkAttachmentReference color_attachment_ref = {};
 		color_attachment_ref.attachment = 0;
 		color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-		VkSubpassDescription subpass {};
+		VkSubpassDescription subpass = {};
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass.colorAttachmentCount = 1;
 		subpass.pColorAttachments = &color_attachment_ref;
@@ -91,8 +91,8 @@ struct RenderPassInitializer {
 		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependency.dstSubpass = 0;
 		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		dependency.srcAccessMask = 0;
+		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 		VkRenderPassCreateInfo render_pass_info = {};

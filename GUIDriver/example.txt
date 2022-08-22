@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFE4E0117C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFE9E1117C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -7,3 +7,10 @@ GPU Device #0 has been selected for Vulkan Rendering successfully!
 No errors detected while selecting Vulkan queue family. 
 Vulkan instance successfully created!
 Successfully created Vulkan surface for window!
+Address for Vulkan debug callback: 00007FFE9E1117C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x1e728693bc0, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pInputAttachments[0].layout (1231385697) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+

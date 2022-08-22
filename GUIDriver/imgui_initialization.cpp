@@ -13,7 +13,7 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
     init_info.DescriptorPool = descriptor_pool_;
 
     init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT_;
-    init_info.ImageCount = static_cast<uint32_t>(vulkan_helper_.swapchain_images_.size());
+    init_info.ImageCount = static_cast<uint32_t>(swap_chain_helper_.swapchain_images_.size());
 
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 

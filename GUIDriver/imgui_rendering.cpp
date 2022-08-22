@@ -1,5 +1,5 @@
 #include "gui_driver.cuh"
-#include "rasterizer.cuh"
+#include "vulkan_helpers.hpp"
 
 #include <array>
 #include <fstream>
@@ -45,17 +45,39 @@ void VulkanGUIDriver::RunGUI() {
     int width, height;
     CreateFrameBuffers(width, height, surface);
 
-    VkFormat format = VK_FORMAT_A8B8G8R8_SRGB_PACK32;
+    swap_chain_helper_ = SwapChainProperties(device_, physical_device_);
 
-    auto subpass = CreateSubpass(format);
+    auto swapchain_tuple = swap_chain_helper_.CreateSwapChain(surface, size_);
+
+    swap_chain_ = std::get<0>(swapchain_tuple);
+    swap_chain_helper_.AllocateImages(swap_chain_, std::get<1>(swapchain_tuple));
+
+    surface_format_ = swap_chain_helper_.surface_format_;
+
+    auto subpass = CreateSubpass(surface_format_.format);
 
     vulkan_helper_ = VulkanHelper(device_, subpass);
     shader_handler_ = ShaderLoader(device_, subpass, pipeline_cache_, allocators_);
+    sync_struct_ = SyncStruct(device_);
+
+    auto pool_info = vulkan_helper_.CommandPoolInfo(queue_family_);
+    vulkan_helper_.CreateCommandPool(command_pool_, pool_info);
+
+    vulkan_helper_.CreateFrameBuffers(swap_chain_helper_.swapchain_image_views_);
+    
+    VkCommandBuffer buffer;
+    auto buffer_info = VulkanHelper::AllocateCommandBuffer(command_pool_);
+    vkAllocateCommandBuffers(device_, &buffer_info, &buffer);
+    //NOTE!
+    command_buffers_.emplace("GUI", buffer);
+
+    sync_struct_.StartSyncStructs();
+    image_semaphore_ = sync_struct_.present_semaphore_;
+    render_semaphore_ = sync_struct_.render_semaphore_;
+
+    render_fence_ = sync_struct_.fence_;
 
     shader_handler_.CreateGraphicsPipeline();
-    vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
-
-    vulkan_helper_.CreateFrameBuffers();
 
     IMGUIRenderLogic();
 
@@ -85,9 +107,6 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     s_stream << "Address for Vulkan Render Pipeline: " << vulkan_helper_.render_pass_ << ".";
 
-    //NOTE!
-    //command_buffers_.emplace("GUI", wd_->Frames[wd_->FrameIndex].CommandBuffer);
-
     texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
 
     vulkan_status = vkResetCommandPool(device_, command_pool_, 0);
@@ -114,9 +133,6 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     VulkanErrorHandler(vulkan_status);
     
     ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
-
-    VkCommandBufferAllocateInfo info = {};
-    VulkanHelper::AllocateCommandBuffer(command_pool_);
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -147,7 +163,7 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
 
-    MinimizeRenderCondition(draw_data);
+    MinimizeRenderCondition(draw_data, command_buffers_["GUI"]);
 }
 
 void VulkanGUIDriver::InitializeVulkan() {
@@ -211,6 +227,10 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
 
     vkCmdBeginRenderPass(command_buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
     ProgramLog::OutputLine("Began render pass!");
+
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
+
+    vkCmdDraw(command_buffer, 3, 1, 0, 0);
 }
 
 void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore& image_semaphore, VkSemaphore& render_semaphore) {
@@ -268,8 +288,8 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
     EndRenderPass(command_buffer, image_semaphore_, render_semaphore_);
 }
 
-VkRenderPass VulkanGUIDriver::CreateSubpass(VkFormat& format) {
-    VkRenderPass subpass{};
+VkRenderPass VulkanGUIDriver::CreateSubpass(const VkFormat& format) {
+    VkRenderPass subpass {};
     auto render_info = RenderPassInitializer::RenderPassInfo(
         RenderPassInitializer::RenderPassDescriptions(format));
 

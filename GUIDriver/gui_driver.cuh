@@ -5,6 +5,8 @@
 
 #include "shader_loader.cuh"
 #include "texture_loader.cuh"
+#include "swap_chain_manager.cuh"
+#include "sync_structs.hpp"
 
 #include "vulkan_helpers.hpp"
 
@@ -46,16 +48,44 @@ using std::map;
 #define IMGUI_VULKAN_DEBUG_REPORT
 #endif
 
+static inline vector<string> Split(string str, char seperator)
+{
+    vector<string> strings;
+    int currIndex = 0, i = 0;
+    int startIndex = 0, endIndex = 0;
+    while (i <= str.length()) {
+        if (str[i] == seperator || i == str.length()) {
+            endIndex = i;
+            string subStr = "";
+            subStr.append(str, startIndex, endIndex - startIndex);
+            strings.push_back(subStr);
+            currIndex += 1;
+            startIndex = endIndex + 1;
+        }
+        i++;
+    }
+    return strings;
+}
+
 static void VulkanErrorHandler(VkResult vulkan_status) {
-    if (vulkan_status == 0)
-        return;
-    fprintf(stderr, "[vulkan] Error: VkResult = %d\n", vulkan_status);
+    if (vulkan_status != 0) {
+        ProgramLog::OutputLine("[vulkan] Error: VkResult = %d\n", vulkan_status);
+    }
 }
 
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
 VKAPI_ATTR static VkBool32 VKAPI_CALL DebugReport(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData) {
     (void)flags; (void)object; (void)location; (void)messageCode; (void)pUserData; (void)pLayerPrefix; // Unused arguments
-    fprintf(stderr, "[vulkan] Debug report from ObjectType: %i\nMessage: %s\n\n", objectType, pMessage);
+    string message = pMessage;
+    auto parts = Split(message, '|');
+
+
+    s_stream << "[vulkan] Debug report from ObjectType: " << objectType << "\nMessage: \n\n";
+    for (const string& part : parts) {
+        s_stream << part << "\n";
+    }
+    ProgramLog::OutputLine(s_stream);
+    throw std::runtime_error("");
     return VK_FALSE;
 }
 #endif
@@ -137,11 +167,13 @@ public:
 
     void RunGUI();
 
-    VkRenderPass CreateSubpass(VkFormat& format);
+    VkRenderPass CreateSubpass(const VkFormat& format);
 
     TextureLoader texture_handler_;
     ShaderLoader shader_handler_;
     VulkanHelper vulkan_helper_;
+    SwapChainProperties swap_chain_helper_;
+    SyncStruct sync_struct_;
 
     tuple<VkImageView, VkSampler> image_alloc_;
 

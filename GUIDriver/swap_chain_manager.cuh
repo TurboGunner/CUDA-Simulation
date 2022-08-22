@@ -1,31 +1,41 @@
 #pragma once
 
+#include "gui_driver.cuh"
+
 #include <cuda_runtime.h>
 #include "device_launch_parameters.h"
 
 #include <vulkan/vulkan.h>
-#include "gui_driver.hpp"
 
 #include <algorithm>
-#include <limits> 
+#include <limits>
+#include <tuple>
 #include <vector>
 
+using std::tuple;
 using std::vector;
 
 class SwapChainProperties {
 public:
+    SwapChainProperties() = default;
+
     SwapChainProperties(VkDevice device_in, VkPhysicalDevice& phys_device_in) {
         device_ = device_in;
         physical_device_ = phys_device_in;
     }
 
-    void CreateSwapChain(VkSurfaceKHR& surface) {
-        VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat();
+    tuple<VkSwapchainKHR, uint32_t> CreateSwapChain(VkSurfaceKHR& surface, uint2 size) {
+        InitializeSurfaceCapabilities(surface);
+        surface_format_ = ChooseSwapSurfaceFormat();
 
         uint32_t image_count = capabilities_.minImageCount + 1;
         if (capabilities_.maxImageCount > 0 && image_count > capabilities_.maxImageCount) {
             image_count = capabilities_.maxImageCount;
         }
+
+        extent_ = ChooseSwapExtent(size);
+
+        present_mode_ = ChooseSwapPresentMode();
 
         VkSwapchainCreateInfoKHR create_info = SwapChainInfo(surface, image_count);
 
@@ -34,6 +44,14 @@ public:
         if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swap_chain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
         }
+
+        return tuple<VkSwapchainKHR, uint32_t>(swap_chain, image_count);
+    }
+
+    void AllocateImages(VkSwapchainKHR& swapchain, uint32_t image_count) {
+        vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain, &image_count, nullptr);
+        swapchain_images_.resize(image_count);
+        vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain, &image_count, swapchain_images_.data());
     }
 
     VkSwapchainCreateInfoKHR SwapChainInfo(VkSurfaceKHR& surface, uint32_t image_count) {
@@ -52,38 +70,37 @@ public:
         create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         create_info.preTransform = capabilities_.currentTransform;
-
         create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-
         create_info.presentMode = present_mode_;
         create_info.clipped = VK_TRUE;
 
         create_info.oldSwapchain = VK_NULL_HANDLE;
+
         return create_info;
     }
 
     void InitializeSurfaceCapabilities(VkSurfaceKHR& surface) {
-        vk_status = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities_);
-        VulkanErrorHandler(vk_status);
+        vulkan_status = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities_);
+        //VulkanErrorHandler(vulkan_status);
 
         uint32_t formatCount;
-        vk_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, nullptr);
-        VulkanErrorHandler(vk_status);
+        vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, nullptr);
+        //VulkanErrorHandler(vulkan_status);
 
         if (formatCount != 0) {
             formats_.resize(formatCount);
-            vk_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, formats_.data());
-            VulkanErrorHandler(vk_status);
+            vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, formats_.data());
+            //VulkanErrorHandler(vulkan_status);
         }
 
         uint32_t present_mode_count;
-        vk_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count, nullptr);
-        VulkanErrorHandler(vk_status);
+        vulkan_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count, nullptr);
+        //VulkanErrorHandler(vulkan_status);
 
         if (present_mode_count != 0) {
              present_modes_.resize(present_mode_count);
-            vk_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count,  present_modes_.data());
-            VulkanErrorHandler(vk_status);
+            vulkan_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count,  present_modes_.data());
+            //VulkanErrorHandler(vulkan_status);
         }
     }
 
@@ -102,7 +119,6 @@ public:
                 return availablePresentMode;
             }
         }
-
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
@@ -115,10 +131,14 @@ public:
             static_cast<uint32_t>(size.y)
         };
 
-        actualExtent.width = std::clamp(actualExtent.width, capabilities_.minImageExtent.width, capabilities_.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);
+        actualExtent.width = ClampNum(actualExtent.width, capabilities_.minImageExtent.width, capabilities_.maxImageExtent.width);
+        actualExtent.height = ClampNum(actualExtent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);
 
         return actualExtent;
+    }
+    
+    uint32_t ClampNum(const uint32_t& value, const uint32_t& min, const uint32_t& max) {
+        return std::max(min, std::min(max, value));
     }
 
     VkDevice device_;
@@ -134,7 +154,8 @@ public:
 
     VkExtent2D extent_;
 
-    vector<VkImage> swap_chain_images_;
+    vector<VkImage> swapchain_images_;
+    vector<VkImageView> swapchain_image_views_;
 
-    VkResult vk_status;
+    VkResult vulkan_status;
 };
