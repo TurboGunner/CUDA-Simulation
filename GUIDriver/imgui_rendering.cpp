@@ -289,7 +289,7 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
 }
 
 VkRenderPass VulkanGUIDriver::CreateSubpass(const VkFormat& format) {
-    VkRenderPass subpass {};
+    VkRenderPass subpass = {};
     auto render_info = RenderPassInitializer::RenderPassInfo(
         RenderPassInitializer::RenderPassDescriptions(format));
 

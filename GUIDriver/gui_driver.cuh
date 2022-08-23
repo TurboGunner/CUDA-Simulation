@@ -30,6 +30,7 @@
 #include <vulkan/vulkan.h>
 
 //Standard Imports
+#include <array>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -39,6 +40,7 @@
 #include <tuple>
 #include <map>
 
+using std::array;
 using std::string;
 using std::vector;
 using std::tuple;

@@ -2,9 +2,11 @@
 
 #include <vulkan/vulkan.h>
 
+#include <array>
 #include <stdexcept>
 #include <tuple>
 
+using std::array;
 using std::tuple;
 
 struct RenderPassInitializer {
@@ -60,33 +62,92 @@ struct RenderPassInitializer {
 		return pipeline_layout_info;
 	}
 
-	static tuple<VkSubpassDescription, VkAttachmentDescription> RenderPassDescriptions(const VkFormat& format) {
-		VkAttachmentDescription attachment = {};
-		attachment.format = format;
-		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	static tuple<VkSubpassDescription, array<VkAttachmentDescription, 2>> RenderPassDescriptions(const VkFormat& format) {
+		VkAttachmentDescription color_attachment = CreateColorAttachment(format);
+
+		VkAttachmentDescription depth_attachment = CreateDepthAttachment(VK_FORMAT_D32_SFLOAT);
 
 		VkAttachmentReference color_attachment_ref = {};
 		color_attachment_ref.attachment = 0;
 		color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-		VkSubpassDescription subpass = {};
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &color_attachment_ref;
+		VkAttachmentReference depth_attachment_ref = {};
+		depth_attachment_ref.attachment = 1;
+		depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-		return tuple<VkSubpassDescription, VkAttachmentDescription>(subpass, attachment);
+		VkSubpassDescription subpass = CreateSubpassDescription(color_attachment_ref, depth_attachment_ref);
+
+		array<VkAttachmentDescription, 2> attachments = { color_attachment, depth_attachment };
+
+		return tuple<VkSubpassDescription, array<VkAttachmentDescription, 2>>(subpass, attachments);
 	}
 
-	static VkRenderPassCreateInfo RenderPassInfo(tuple<VkSubpassDescription, VkAttachmentDescription> descriptions) {
-		VkSubpassDescription subpass = std::get<0>(descriptions);
-		VkAttachmentDescription color_attachment = std::get<1>(descriptions);
+	static VkAttachmentDescription CreateColorAttachment(const VkFormat& color_format) {
+		VkAttachmentDescription color_attachment = {};
 
+		//color_attachment.flags = 0;
+		color_attachment.format = color_format;
+		color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		return color_attachment;
+	}
+
+	static VkAttachmentDescription CreateDepthAttachment(const VkFormat& depth_format) {
+		VkAttachmentDescription depth_attachment = {};
+
+		depth_attachment.flags = 0;
+		depth_attachment.format = depth_format;
+		depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		return depth_attachment;
+	}
+
+	static VkSubpassDescription CreateSubpassDescription(VkAttachmentReference& color_attachment_ref, VkAttachmentReference& depth_attachment_ref) {
+		VkSubpassDescription subpass = {};
+
+		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpass.colorAttachmentCount = 1;
+		subpass.inputAttachmentCount = 0;
+		subpass.preserveAttachmentCount = 0;
+		subpass.pColorAttachments = &color_attachment_ref;
+		subpass.pDepthStencilAttachment = &depth_attachment_ref;
+		subpass.pPreserveAttachments = nullptr;
+		subpass.pInputAttachments = nullptr;
+		subpass.pResolveAttachments = nullptr;
+
+		return subpass;
+	}
+
+	static VkRenderPassCreateInfo RenderPassInfo(tuple<VkSubpassDescription, array<VkAttachmentDescription, 2>> descriptions) {
+		VkSubpassDescription subpass = std::get<0>(descriptions);
+
+		array<VkSubpassDependency, 2> dependencies = RenderPassDependencies();
+
+		VkRenderPassCreateInfo render_pass_info = {};
+		render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		render_pass_info.attachmentCount = 2;
+		render_pass_info.pAttachments = std::get<1>(descriptions).data();
+		render_pass_info.subpassCount = 1;
+		render_pass_info.pSubpasses = &subpass;
+		render_pass_info.dependencyCount = 2;
+		render_pass_info.pDependencies = dependencies.data();
+
+		return render_pass_info;
+	}
+
+	static array<VkSubpassDependency, 2> RenderPassDependencies() {
 		VkSubpassDependency dependency = {};
 		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependency.dstSubpass = 0;
@@ -95,15 +156,14 @@ struct RenderPassInitializer {
 		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-		VkRenderPassCreateInfo render_pass_info = {};
-		render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		render_pass_info.attachmentCount = 1;
-		render_pass_info.pAttachments = &color_attachment;
-		render_pass_info.subpassCount = 1;
-		render_pass_info.pSubpasses = &subpass;
-		render_pass_info.dependencyCount = 1;
-		render_pass_info.pDependencies = &dependency;
+		VkSubpassDependency depth_dependency = {};
+		depth_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		depth_dependency.dstSubpass = 0;
+		depth_dependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+		depth_dependency.srcAccessMask = 0;
+		depth_dependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+		depth_dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-		return render_pass_info;
+		return { dependency, depth_dependency };
 	}
 };
