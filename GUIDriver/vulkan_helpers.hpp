@@ -34,7 +34,16 @@ struct VulkanHelper {
 		return info;
 	}
 
-	void CreateFrameBuffers(vector<VkImageView>& swapchain_image_views) {
+	static VkCommandBufferBeginInfo BeginCommandBufferInfo() {
+		VkCommandBufferBeginInfo begin_info = {};
+
+		begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		return begin_info;
+	}
+
+	void CreateSwapchainFrameBuffers(vector<VkImageView>& swapchain_image_views) {
 		frame_buffers_.resize(swapchain_image_views.size());
 
 		VkFramebufferCreateInfo frame_buffer_info = {};
@@ -85,21 +94,6 @@ struct VulkanHelper {
 		for (uint32_t i = 0; i < swapchain_image_views.size(); i++) {
 			swapchain_image_views[i] = CreateImageView(swapchain_images[i], swapchain_format_, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
-	}
-
-	VkRenderPassBeginInfo SubpassBeginInfo(VkRenderPass& subpass, VkFramebuffer& frame_buffer) {
-		VkRenderPassBeginInfo pass_info = {};
-
-		pass_info.renderPass = subpass;
-		pass_info.renderArea.offset.x = 0;
-		pass_info.renderArea.offset.y = 0;
-		pass_info.renderArea.extent.width = size_.x;
-		pass_info.renderArea.extent.height = size_.y;
-		pass_info.clearValueCount = 1;
-		pass_info.pClearValues = nullptr;
-		pass_info.framebuffer = frame_buffer;
-;
-		return pass_info;
 	}
 
 	VkCommandPoolCreateInfo CommandPoolInfo(const uint32_t& queue_family) {

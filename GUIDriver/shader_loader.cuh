@@ -52,9 +52,9 @@ public:
         return buffer;
     }
 
-    tuple<VkPipelineColorBlendStateCreateInfo, VkPipelineDynamicStateCreateInfo> BlendStates() {
+    tuple<VkPipelineColorBlendStateCreateInfo, VkPipelineDynamicStateCreateInfo> BlendStates(VkViewport& viewport, VkRect2D& scissor) {
 
-        VkPipelineDynamicStateCreateInfo dynamic_state = DynamicStateInfo();
+        VkPipelineDynamicStateCreateInfo dynamic_state = DynamicStateInfo(viewport, scissor);
 
         VkPipelineColorBlendAttachmentState color_blend_attachment {};
 
@@ -82,7 +82,7 @@ public:
         return tuple<VkPipelineColorBlendStateCreateInfo, VkPipelineDynamicStateCreateInfo>(color_blending, dynamic_state);
     }
 
-    VkPipelineDynamicStateCreateInfo DynamicStateInfo() {
+    VkPipelineDynamicStateCreateInfo& DynamicStateInfo(VkViewport& viewport, VkRect2D& scissor) {
         array<VkDynamicState, 2> dynamic_states = {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR
@@ -97,16 +97,18 @@ public:
         return dynamic_state;
     }
 
-    VkPipelineViewportStateCreateInfo CreateViewportInfo() {
+    VkPipelineViewportStateCreateInfo CreateViewportInfo(VkViewport& viewport, VkRect2D& scissor) {
         VkPipelineViewportStateCreateInfo viewport_state {};
         viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewport_state.pScissors = &scissor;
+        viewport_state.pViewports = &viewport;
         viewport_state.viewportCount = 1;
         viewport_state.scissorCount = 1;
 
         return viewport_state;
     }
 
-    void CreateGraphicsPipeline() {
+    void CreateGraphicsPipeline(VkViewport& viewport, VkRect2D& scissor) {
         auto vert_shader_code = ReadFile("Shaders/vert.spv");
         auto frag_shader_code = ReadFile("Shaders/frag.spv");
 
@@ -128,12 +130,12 @@ public:
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly = InputAssemblyInfo();
 
-        VkPipelineViewportStateCreateInfo viewport_state = CreateViewportInfo();
+        VkPipelineViewportStateCreateInfo viewport_state = CreateViewportInfo(viewport, scissor);
 
         auto rasterization_info = RenderPassInitializer::RasterizationInfo();
         auto multi_sampling_info = RenderPassInitializer::MultiSamplingInfo();
 
-        auto blend_states = BlendStates();
+        auto blend_states = BlendStates(viewport, scissor);
 
         VkGraphicsPipelineCreateInfo pipeline_info = GraphicsPipelineInfo(blend_states, shader_stages, vertex_input_info, input_assembly, viewport_state, rasterization_info, multi_sampling_info);
 
@@ -201,16 +203,23 @@ public:
     }
 
     VkShaderModule CreateShaderModule(const vector<char>& code) {
-        VkShaderModuleCreateInfo create_info = ShaderModuleInfo(code);
-        VkShaderModule shader_module {};
-        if (vkCreateShaderModule(device_, &create_info, allocators_, &shader_module) != VK_SUCCESS) {
+        //VkShaderModuleCreateInfo create_info = ShaderModuleInfo(code);
+
+        VkShaderModuleCreateInfo create_info = {};
+
+        create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        create_info.codeSize = 4 * code.size();
+        create_info.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+        VkShaderModule shader_module = {};
+        if (vkCreateShaderModule(device_, &create_info, nullptr, &shader_module) != VK_SUCCESS) {
             throw std::runtime_error("failed to create shader module!");
         }
         return shader_module;
     }
 
     VkShaderModuleCreateInfo ShaderModuleInfo(const vector<char>& code) {
-        VkShaderModuleCreateInfo create_info{};
+        VkShaderModuleCreateInfo create_info = {};
 
         create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         create_info.codeSize = code.size();

@@ -21,7 +21,7 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
     init_info.CheckVkResultFn = VulkanErrorHandler;
 }
 
-void VulkanGUIDriver::CreateFrameBuffers(int& width, int& height, VkSurfaceKHR& surface) {
+void VulkanGUIDriver::CreateWindow(int& width, int& height, VkSurfaceKHR& surface) {
     SDL_GetWindowSize(window, &width, &height);
     SetupVulkanWindow(surface, width, height);
 }
@@ -31,15 +31,12 @@ void VulkanGUIDriver::FramePresent() {
         return;
     }
 
-    //NOTE
-
-    VkSemaphore render_complete_semaphore;
     VkPresentInfoKHR info = {};
 
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
     info.waitSemaphoreCount = 1;
-    info.pWaitSemaphores = &render_complete_semaphore;
+    info.pWaitSemaphores = &render_semaphore_;
 
     info.swapchainCount = 1;
 
@@ -82,4 +79,17 @@ void VulkanGUIDriver::ManageCommandBuffer(VkCommandPool& command_pool, VkCommand
 
     vulkan_status = vkBeginCommandBuffer(command_buffer, &info);
     VulkanErrorHandler(vulkan_status);
+}
+
+void VulkanGUIDriver::InitializeVulkan() {
+    uint32_t ext_count = 0;
+    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, NULL);
+
+    const char** extensions = new const char* [ext_count];
+    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, extensions);
+
+    VulkanInstantiation(extensions, ext_count);
+    if (ext_count > 0) {
+        delete[] extensions;
+    }
 }

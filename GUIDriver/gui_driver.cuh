@@ -81,13 +81,11 @@ VKAPI_ATTR static VkBool32 VKAPI_CALL DebugReport(VkDebugReportFlagsEXT flags, V
     string message = pMessage;
     auto parts = Split(message, '|');
 
-
     s_stream << "[vulkan] Debug report from ObjectType: " << objectType << "\nMessage: \n\n";
     for (const string& part : parts) {
         s_stream << part << "\n";
     }
     ProgramLog::OutputLine(s_stream);
-    throw std::runtime_error("");
     return VK_FALSE;
 }
 #endif
@@ -147,13 +145,13 @@ public:
 
     void LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info);
 
-    void CreateFrameBuffers(int& width, int& height, VkSurfaceKHR& surface);
-
-    void BeginRendering(VkCommandBufferBeginInfo& begin_info);
-
-    void EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer);
+    void CreateWindow(int& width, int& height, VkSurfaceKHR& surface);
 
     void MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
+
+    VkCommandBuffer BeginSingleTimeCommands();
+
+    void EndSingleTimeCommands(VkCommandBuffer& command_buffer);
 
     void SwapChainCondition();
 
@@ -168,6 +166,8 @@ public:
     void IMGUIRenderLogic();
 
     void RunGUI();
+
+    void GUISetup();
 
     VkRenderPass CreateSubpass(const VkFormat& format);
 
@@ -196,6 +196,11 @@ public:
 
     uint32_t                 min_image_count_ = 3;
     bool                     swap_chain_rebuilding_ = false;
+
+    VkViewport viewport_;
+    VkRect2D scissor_;
+
+    VkExtent2D extent_;
 
     VkRenderPass render_pass_;
 

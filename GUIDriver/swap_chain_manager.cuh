@@ -2,6 +2,8 @@
 
 #include "gui_driver.cuh"
 
+#include "../CUDATest/handler_classes.hpp"
+
 #include <cuda_runtime.h>
 #include "device_launch_parameters.h"
 
@@ -81,42 +83,40 @@ public:
 
     void InitializeSurfaceCapabilities(VkSurfaceKHR& surface) {
         vulkan_status = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities_);
-        //VulkanErrorHandler(vulkan_status);
 
-        uint32_t formatCount;
-        vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, nullptr);
-        //VulkanErrorHandler(vulkan_status);
+        uint32_t format_count;
+        vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &format_count, nullptr);
 
-        if (formatCount != 0) {
-            formats_.resize(formatCount);
-            vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, formats_.data());
-            //VulkanErrorHandler(vulkan_status);
+        if (format_count != 0) {
+            formats_.resize(format_count);
+            vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &format_count, formats_.data());
         }
+
+        s_stream << "\n\nSwapchain Format Count: " << formats_.size() << "\n";
+        ProgramLog::OutputLine(s_stream);
 
         uint32_t present_mode_count;
         vulkan_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count, nullptr);
-        //VulkanErrorHandler(vulkan_status);
 
         if (present_mode_count != 0) {
              present_modes_.resize(present_mode_count);
             vulkan_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count,  present_modes_.data());
-            //VulkanErrorHandler(vulkan_status);
         }
     }
 
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat() {
-        for (const auto& availableFormat : formats_) {
-            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-                return availableFormat;
+        for (const auto& available_format : formats_) {
+            if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB && available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                return available_format;
             }
         }
         return formats_[0];
     }
 
     VkPresentModeKHR ChooseSwapPresentMode() {
-        for (const auto& availablePresentMode :  present_modes_) {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-                return availablePresentMode;
+        for (const auto& available_present_mode :  present_modes_) {
+            if (available_present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                return available_present_mode;
             }
         }
         return VK_PRESENT_MODE_FIFO_KHR;
@@ -126,17 +126,17 @@ public:
         if (capabilities_.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities_.currentExtent;
         }
-        VkExtent2D actualExtent = {
+        VkExtent2D actual_extent = {
             static_cast<uint32_t>(size.x),
             static_cast<uint32_t>(size.y)
         };
 
-        actualExtent.width = ClampNum(actualExtent.width, capabilities_.minImageExtent.width, capabilities_.maxImageExtent.width);
-        actualExtent.height = ClampNum(actualExtent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);
+        actual_extent.width = ClampNum(actual_extent.width, capabilities_.minImageExtent.width, capabilities_.maxImageExtent.width);
+        actual_extent.height = ClampNum(actual_extent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);
 
-        return actualExtent;
+        return actual_extent;
     }
-    
+
     uint32_t ClampNum(const uint32_t& value, const uint32_t& min, const uint32_t& max) {
         return std::max(min, std::min(max, value));
     }

@@ -40,57 +40,89 @@ void VulkanGUIDriver::RunGUI() {
         ProgramLog::OutputLine("Error: Failed to create Vulkan surface.");
         return;
     }
+
     ProgramLog::OutputLine("Successfully created Vulkan surface for window!");
+    surface_ = surface;
 
     int width, height;
-    CreateFrameBuffers(width, height, surface);
+    CreateWindow(width, height, surface);
 
+    bool exit_condition = false;
+
+    GUISetup();
+
+    while (!exit_condition) {
+        GUIPollLogic(exit_condition);
+    }
+}
+
+void VulkanGUIDriver::GUISetup() {
+    //Create Swapchain
     swap_chain_helper_ = SwapChainProperties(device_, physical_device_);
+    auto swapchain_tuple = swap_chain_helper_.CreateSwapChain(surface_, size_);
 
-    auto swapchain_tuple = swap_chain_helper_.CreateSwapChain(surface, size_);
+    //Setting surface format and present mode
+    surface_format_ = swap_chain_helper_.surface_format_;
+    present_mode_ = swap_chain_helper_.present_mode_;
 
     swap_chain_ = std::get<0>(swapchain_tuple);
     swap_chain_helper_.AllocateImages(swap_chain_, std::get<1>(swapchain_tuple));
 
-    surface_format_ = swap_chain_helper_.surface_format_;
+    extent_ = swap_chain_helper_.extent_;
 
-    auto subpass = CreateSubpass(surface_format_.format);
+    //Create viewport and scissor
 
-    vulkan_helper_ = VulkanHelper(device_, subpass);
-    shader_handler_ = ShaderLoader(device_, subpass, pipeline_cache_, allocators_);
+    viewport_.x = 0.0f;
+    viewport_.y = 0.0f;
+    viewport_.width = (float) size_.x;
+    viewport_.height = (float) size_.y;
+    viewport_.minDepth = 0.0f;
+    viewport_.maxDepth = 1.0f;
+
+    scissor_.offset = { 0, 0 };
+    scissor_.extent = extent_;
+
+    //Create Renderpass
+    render_pass_ = CreateSubpass(surface_format_.format);
+
+    //Creating all of the other external helpers
+    vulkan_helper_ = VulkanHelper(device_, render_pass_);
+    shader_handler_ = ShaderLoader(device_, render_pass_, pipeline_cache_, allocators_);
     sync_struct_ = SyncStruct(device_);
 
+    //Creating command pool
     auto pool_info = vulkan_helper_.CommandPoolInfo(queue_family_);
     vulkan_helper_.CreateCommandPool(command_pool_, pool_info);
 
-    vulkan_helper_.CreateFrameBuffers(swap_chain_helper_.swapchain_image_views_);
-    
+    vulkan_helper_.CreateSwapchainFrameBuffers(swap_chain_helper_.swapchain_image_views_);
+
+    //Creating command buffer
     VkCommandBuffer buffer;
     auto buffer_info = VulkanHelper::AllocateCommandBuffer(command_pool_);
     vkAllocateCommandBuffers(device_, &buffer_info, &buffer);
     //NOTE!
     command_buffers_.emplace("GUI", buffer);
 
+    //Creating synchronization structs (fences and semaphores)
     sync_struct_.StartSyncStructs();
     image_semaphore_ = sync_struct_.present_semaphore_;
     render_semaphore_ = sync_struct_.render_semaphore_;
 
     render_fence_ = sync_struct_.fence_;
 
-    shader_handler_.CreateGraphicsPipeline();
+
+    //Create Pipeline
+    shader_handler_.CreateGraphicsPipeline(viewport_, scissor_);
 
     IMGUIRenderLogic();
 
     vulkan_status = vkDeviceWaitIdle(device_);
     VulkanErrorHandler(vulkan_status);
 
+    VkCommandBuffer command_buffer = BeginSingleTimeCommands();
+    ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+    EndSingleTimeCommands(command_buffer);
     ImGui_ImplVulkan_DestroyFontUploadObjects();
-
-    bool exit_condition = false;
-
-    while (!exit_condition) {
-        GUIPollLogic(exit_condition);
-    }
 }
 
 void VulkanGUIDriver::IMGUIRenderLogic() {
@@ -103,36 +135,13 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     ImGui_ImplVulkan_InitInfo init_info = {};
     LoadInitializationInfo(init_info);
 
-    ImGui_ImplVulkan_Init(&init_info, shader_handler_.render_pass_);
+    ImGui_ImplVulkan_Init(&init_info, render_pass_);
 
-    s_stream << "Address for Vulkan Render Pipeline: " << vulkan_helper_.render_pass_ << ".";
+    s_stream << "Address for Vulkan Render Pipeline: " << render_pass_ << ".";
 
-    texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
-
-    vulkan_status = vkResetCommandPool(device_, command_pool_, 0);
-    VulkanErrorHandler(vulkan_status);
+    //texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
 
     ProgramLog::OutputLine("Reset IMGUI command pool successfully.");
-
-    //One time commands
-
-    VkCommandBufferBeginInfo begin_info = {};
-    BeginRendering(begin_info);
-
-    ProgramLog::OutputLine("Started command recording!");
-
-    VkSubmitInfo end_info = {};
-    EndRendering(end_info, command_buffers_["GUI"]);
-
-    vulkan_status = vkEndCommandBuffer(command_buffers_["GUI"]);
-    VulkanErrorHandler(vulkan_status);
-
-    ProgramLog::OutputLine("Ended command recording!");
-
-    vulkan_status = vkQueueSubmit(queue_, 1, &end_info, VK_NULL_HANDLE);
-    VulkanErrorHandler(vulkan_status);
-    
-    ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -164,37 +173,6 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     ImDrawData* draw_data = ImGui::GetDrawData();
 
     MinimizeRenderCondition(draw_data, command_buffers_["GUI"]);
-}
-
-void VulkanGUIDriver::InitializeVulkan() {
-    uint32_t ext_count = 0;
-    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, NULL);
-
-    const char** extensions = new const char* [ext_count];
-    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, extensions);
-
-    VulkanInstantiation(extensions, ext_count);
-    if (ext_count > 0) {
-        delete[] extensions;
-    }
-}
-
-void VulkanGUIDriver::BeginRendering(VkCommandBufferBeginInfo& begin_info) {
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vulkan_status = vkBeginCommandBuffer(command_buffers_["GUI"], &begin_info);
-    VulkanErrorHandler(vulkan_status);
-
-    ImGui_ImplVulkan_CreateFontsTexture(command_buffers_["GUI"]);
-    ProgramLog::OutputLine("Started commands buffers.");
-}
-
-void VulkanGUIDriver::EndRendering(VkSubmitInfo& end_info, VkCommandBuffer& command_buffer) {
-    end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    end_info.commandBufferCount = 1;
-    end_info.pCommandBuffers = &command_buffer;
-    ProgramLog::OutputLine("Ended command buffers.");
 }
 
 void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
@@ -291,15 +269,47 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
 VkRenderPass VulkanGUIDriver::CreateSubpass(const VkFormat& format) {
     VkRenderPass subpass = {};
     auto render_info = RenderPassInitializer::RenderPassInfo(
-        RenderPassInitializer::RenderPassDescriptions(format));
+        RenderPassInitializer::RenderPassDescriptions(format), device_);
 
-    if (vkCreateRenderPass(device_, &render_info, nullptr, &subpass) != VK_SUCCESS) {
-        throw std::runtime_error("Could not create Dear ImGui's render pass");
-    }
+    //if (vkCreateRenderPass(device_, &render_info, nullptr, &subpass) != VK_SUCCESS) {
+        //throw std::runtime_error("Could not create Dear ImGui's render pass");
+    //}
 
     return subpass;
 }
 
 void VulkanGUIDriver::CleanupVulkanWindow() {
     //NOTE!
+}
+
+VkCommandBuffer VulkanGUIDriver::BeginSingleTimeCommands() {
+    VkCommandBufferAllocateInfo alloc_info = VulkanHelper::AllocateCommandBuffer(command_pool_);
+
+    VkCommandBuffer command_buffer;
+    vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
+
+    auto begin_info = VulkanHelper::BeginCommandBufferInfo();
+
+    vkBeginCommandBuffer(command_buffer, &begin_info);
+
+    ProgramLog::OutputLine("Started command recording!");
+
+    return command_buffer;
+}
+
+void VulkanGUIDriver::EndSingleTimeCommands(VkCommandBuffer& command_buffer) {
+    vkEndCommandBuffer(command_buffer);
+
+    ProgramLog::OutputLine("Ended command recording!");
+
+    VkSubmitInfo submit_info {};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &command_buffer;
+
+    vkQueueSubmit(queue_, 1, &submit_info, VK_NULL_HANDLE);
+    ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
+    vkQueueWaitIdle(queue_);
+
+    vkFreeCommandBuffers(device_, command_pool_, 1, &command_buffer);
 }

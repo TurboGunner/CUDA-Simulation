@@ -1,7 +1,6 @@
 #include "gui_driver.cuh"
 
 void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height) {
-    surface_ = surface;
     VkBool32 res;
     vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, queue_family_, surface_, &res);
     if (res != VK_TRUE) {
@@ -11,17 +10,6 @@ void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR& surface, int width, int he
     // Select Surface Format
     const VkFormat requestSurfaceImageFormat[] = { VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM };
     const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-
-    surface_format_ = ImGui_ImplVulkanH_SelectSurfaceFormat(physical_device_, surface_, requestSurfaceImageFormat, (size_t)IM_ARRAYSIZE(requestSurfaceImageFormat), requestSurfaceColorSpace);
-
-    // Select Present Mode
-#ifdef IMGUI_UNLIMITED_FRAME_RATE
-    VkPresentModeKHR 
-        s[] = { VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR };
-#else
-    VkPresentModeKHR present_modes[] = { VK_PRESENT_MODE_FIFO_KHR };
-#endif
-    present_mode_ = ImGui_ImplVulkanH_SelectPresentMode(physical_device_, surface_, &present_modes[0], IM_ARRAYSIZE(present_modes));
 
     IM_ASSERT(min_image_count_ >= 2);
     //Note!
