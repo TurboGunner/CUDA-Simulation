@@ -108,7 +108,7 @@ private:
             vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &format_count, formats_.data());
         }
 
-        s_stream << "\n\nSwapchain Format Count: " << formats_.size() << "\n";
+        s_stream << "\nSwapchain Format Count: " << formats_.size() << "\n";
         ProgramLog::OutputLine(s_stream);
 
         uint32_t present_mode_count;

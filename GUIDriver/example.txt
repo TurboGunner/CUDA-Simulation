@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -8,14 +8,12 @@ No errors detected while selecting Vulkan queue family.
 Vulkan instance successfully created!
 Successfully created Vulkan surface for window!
 Created a window with size 2560 X 1026.
-
 Swapchain Format Count: 3
 
 Created color attachment for renderpass.
 Created depth attachment for renderpass.
 Created attachment references for the renderpass.
 Created a window with size 2560 X 1026.
-
 Swapchain Format Count: 3
 Color Attachment Ref ID: 2
 
@@ -32,227 +30,114 @@ Successfully created render semaphore!
 
 Successfully created render semaphore!
 
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Successfully read shader file Shaders/vert.spv!
+
+Successfully read shader file Shaders/frag.spv!
+
+Initialized input assembly info struct (vertex) for the render pipeline.
+Initialized input assembly info struct (frag) for the render pipeline.
+Initialized vertex input info struct for the render pipeline.
+Initialized input assembly info struct for the render pipeline.
+Initialized viewport state values for the render pipeline.
+Initialized dynamic states for the render pipeline.
+
+Created color blend attachment for the render pipeline.
+Created color blend state for the render pipeline.
+Created depth stencil state for the render pipeline.
+
+Created graphics pipeline info for render pipeline.
+Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x7abf6962 
  vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
 
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x7abf6962 
  vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x7abf6962 
  vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[1].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
 
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x567efb65 
  vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x7abf6962 
  vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x7abf6962 
  vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[1].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkPipelineVertexInputStateCreateInfo-flags-zerobitmask ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0xbea3c245 
- vkCreateGraphicsPipelines: pararameter pCreateInfos[0].pVertexInputState->flags (933821440) is reserved and must be zero. The Vulkan spec states: flags must be 0 (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineVertexInputStateCreateInfo-flags-zerobitmask)
-
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[1].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineVertexInputStateCreateInfo-flags-zerobitmask ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0xbea3c245 
- vkCreateGraphicsPipelines: pararameter pCreateInfos[0].pVertexInputState->flags (933821440) is reserved and must be zero. The Vulkan spec states: flags must be 0 (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineVertexInputStateCreateInfo-flags-zerobitmask)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkGraphicsPipelineCreateInfo-stage-00727 ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkGraphicsPipelineCreateInfo-stage-00727 ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x1b7c7be8 
  Invalid Pipeline CreateInfo[0] State: Vertex Shader required. The Vulkan spec states: If the pipeline is being created with pre-rasterization shader state the stage member of one element of pStages must be VK_SHADER_STAGE_VERTEX_BIT (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkGraphicsPipelineCreateInfo-stage-00727)
-
-Address for Vulkan debug callback: 00007FFD37A517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineDynamicStateCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x6e4f7677 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pDynamicState->sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO. The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineDynamicStateCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[1].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineVertexInputStateCreateInfo-flags-zerobitmask ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0xbea3c245 
- vkCreateGraphicsPipelines: pararameter pCreateInfos[0].pVertexInputState->flags (933821440) is reserved and must be zero. The Vulkan spec states: flags must be 0 (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineVertexInputStateCreateInfo-flags-zerobitmask)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkGraphicsPipelineCreateInfo-stage-00727 ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x1b7c7be8 
- Invalid Pipeline CreateInfo[0] State: Vertex Shader required. The Vulkan spec states: If the pipeline is being created with pre-rasterization shader state the stage member of one element of pStages must be VK_SHADER_STAGE_VERTEX_BIT (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkGraphicsPipelineCreateInfo-stage-00727)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkGraphicsPipelineCreateInfo-renderPass-06043 ] Object 0: handle = 0x209b177bbe0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x81e7cc1c 
- Invalid Pipeline CreateInfo[0] State: pDepthStencilState is NULL when rasterization is enabled and subpass uses a depth/stencil attachment. The Vulkan spec states: If renderPass is not VK_NULL_HANDLE, the pipeline is being created with fragment shader state, and subpass uses a depth/stencil attachment, pDepthStencilState must be a valid pointer to a valid VkPipelineDepthStencilStateCreateInfo structure (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkGraphicsPipelineCreateInfo-renderPass-06043)
 
