@@ -1,9 +1,11 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "vulkan_parameters.hpp"
 
 //Logging
 #include "../CUDATest/handler_classes.hpp"
+
+#include <vulkan/vulkan.h>
 
 #include <array>
 #include <stdexcept>
@@ -25,9 +27,32 @@ public:
 	VkRenderPass Initialize(VkFormat color_format) {
 		RenderPassDescriptions(color_format);
 		CreateRenderPass();
+
+		ProgramLog::OutputLine("Successfully initialized the renderpass!");
+
 		return render_pass_;
 	}
 
+	static VkRenderPassBeginInfo SubpassBeginInfo(VkRenderPass& subpass, VkFramebuffer& frame_buffer, const uint2& size) {
+		VkRenderPassBeginInfo pass_info = {};
+
+		pass_info.renderPass = subpass;
+		pass_info.renderArea.offset.x = 0;
+		pass_info.renderArea.offset.y = 0;
+		pass_info.renderArea.extent.width = size.x;
+		pass_info.renderArea.extent.height = size.y;
+		pass_info.clearValueCount = 1;
+		pass_info.pClearValues = nullptr;
+		pass_info.framebuffer = frame_buffer;
+
+		ProgramLog::OutputLine("Created the subpass begin command info.");
+
+		return pass_info;
+	}
+
+	VkRenderPass render_pass_;
+
+private:
 	void RenderPassDescriptions(VkFormat format) {
 		CreateColorAttachment(format);
 		CreateDepthAttachment();
@@ -37,6 +62,8 @@ public:
 
 		depth_attachment_ref_.attachment = 1;
 		depth_attachment_ref_.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		ProgramLog::OutputLine("Created attachment references for the renderpass.");
 
 		CreateSubpassDescription();
 	}
@@ -50,6 +77,8 @@ public:
 		color_attachment_.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		color_attachment_.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		color_attachment_.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		ProgramLog::OutputLine("Created color attachment for renderpass.");
 	}
 
 	void CreateDepthAttachment() {
@@ -61,6 +90,8 @@ public:
 		depth_attachment_.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		depth_attachment_.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		depth_attachment_.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		ProgramLog::OutputLine("Created depth attachment for renderpass.");
 	}
 
 	void CreateSubpassDescription() {
@@ -76,6 +107,8 @@ public:
 		subpass_info_.pResolveAttachments = nullptr;
 		subpass_info_.pInputAttachments = nullptr;
 		subpass_info_.pPreserveAttachments = nullptr;
+
+		ProgramLog::OutputLine("Created subpass description for renderpass.");
 	}
 
 	void CreateRenderPass() {
@@ -91,6 +124,8 @@ public:
 		render_pass_info_.pSubpasses = &subpass_info_;
 		render_pass_info_.dependencyCount = dependencies.size();
 		render_pass_info_.pDependencies = dependencies.data();
+
+		ProgramLog::OutputLine("Initialized the renderpass creation info.");
 
 		if (vkCreateRenderPass(device_, &render_pass_info_, nullptr, &render_pass_) != VK_SUCCESS) {
 			throw std::runtime_error("Could not create Dear ImGui's render pass");
@@ -111,32 +146,18 @@ public:
 		depth_dependency_.srcAccessMask = 0;
 		depth_dependency_.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 		depth_dependency_.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-	}
 
-	static VkRenderPassBeginInfo SubpassBeginInfo(VkRenderPass& subpass, VkFramebuffer& frame_buffer, const uint2& size) {
-		VkRenderPassBeginInfo pass_info = {};
-
-		pass_info.renderPass = subpass;
-		pass_info.renderArea.offset.x = 0;
-		pass_info.renderArea.offset.y = 0;
-		pass_info.renderArea.extent.width = size.x;
-		pass_info.renderArea.extent.height = size.y;
-		pass_info.clearValueCount = 1;
-		pass_info.pClearValues = nullptr;
-		pass_info.framebuffer = frame_buffer;
-
-		return pass_info;
+		ProgramLog::OutputLine("Created the subpass dependencies for the renderpass.");
 	}
 
 	VkDevice device_;
 
-	VkSubpassDescription subpass_info_;
+	VkSubpassDescription subpass_info_ = {};
 
-	VkRenderPassCreateInfo render_pass_info_;
+	VkRenderPassCreateInfo render_pass_info_ = {};
 
-	VkAttachmentDescription color_attachment_, depth_attachment_;
-	VkRenderPass render_pass_;
+	VkAttachmentDescription color_attachment_ = {}, depth_attachment_ = {};
 
-	VkSubpassDependency dependency_, depth_dependency_;
-	VkAttachmentReference color_attachment_ref_, depth_attachment_ref_;
+	VkSubpassDependency dependency_ = {}, depth_dependency_ = {};
+	VkAttachmentReference color_attachment_ref_ = {}, depth_attachment_ref_ = {};
 };

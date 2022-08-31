@@ -48,6 +48,7 @@ public:
 			Get().file_log << std::endl;
 		}
 		line.clear();
+		s_stream.clear();
 	}
 
 	static void Close() {

@@ -1,17 +1,33 @@
 #pragma once
 
+#include "vulkan_parameters.hpp"
+
 //Logging
 #include "../CUDATest/handler_classes.hpp"
 
 #include <vulkan/vulkan.h>
 
-struct SyncStruct {
+class SyncStruct {
+public:
 	SyncStruct() = default;
 
 	SyncStruct(VkDevice& device_in) {
 		device_ = device_in;
 	}
 
+	void Initialize() {
+		auto fence_info = FenceInfo(VK_FENCE_CREATE_SIGNALED_BIT);
+		vulkan_status = CreateFence(fence_, fence_info);
+
+		auto semaphore_info = SemaphoreInfo(0);
+		vulkan_status = CreateSemaphore(present_semaphore_, semaphore_info);
+		vulkan_status = CreateSemaphore(render_semaphore_, semaphore_info);
+	}
+
+	VkFence fence_;
+	VkSemaphore render_semaphore_, present_semaphore_;
+
+private:
 	VkFenceCreateInfo FenceInfo(VkFenceCreateFlags flags) {
 		VkFenceCreateInfo fence_info = {};
 
@@ -46,19 +62,7 @@ struct SyncStruct {
 		return vulkan_status;
 	}
 
-	void StartSyncStructs() {
-		auto fence_info = FenceInfo(VK_FENCE_CREATE_SIGNALED_BIT);
-		vulkan_status = CreateFence(fence_, fence_info);
-
-		auto semaphore_info = SemaphoreInfo(0);
-		vulkan_status = CreateSemaphore(present_semaphore_, semaphore_info);
-		vulkan_status = CreateSemaphore(render_semaphore_, semaphore_info);
-	}
-
 	VkDevice device_;
-
-	VkFence fence_;
-	VkSemaphore render_semaphore_, present_semaphore_;
 
 	VkResult vulkan_status;
 };

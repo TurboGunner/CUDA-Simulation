@@ -59,14 +59,12 @@ void VulkanGUIDriver::RunGUI() {
 void VulkanGUIDriver::GUISetup() {
     //Create Swapchain
     swap_chain_helper_ = SwapChainProperties(device_, physical_device_);
-    auto swapchain_tuple = swap_chain_helper_.CreateSwapChain(surface_, size_);
+
+    swap_chain_ = swap_chain_helper_.Initialize(surface_, size_);
 
     //Setting surface format and present mode
     surface_format_ = swap_chain_helper_.surface_format_;
     present_mode_ = swap_chain_helper_.present_mode_;
-
-    swap_chain_ = std::get<0>(swapchain_tuple);
-    swap_chain_helper_.AllocateImages(swap_chain_, std::get<1>(swapchain_tuple));
 
     extent_ = swap_chain_helper_.extent_;
 
@@ -88,7 +86,7 @@ void VulkanGUIDriver::GUISetup() {
 
     //Creating all of the other external helpers
     vulkan_helper_ = VulkanHelper(device_, render_pass_);
-    shader_handler_ = ShaderLoader(device_, pipeline_cache_, allocators_);
+    shader_handler_ = ShaderLoader(device_, viewport_, scissor_, pipeline_cache_, allocators_);
     sync_struct_ = SyncStruct(device_);
 
     //Creating command pool
@@ -105,7 +103,7 @@ void VulkanGUIDriver::GUISetup() {
     command_buffers_.emplace("GUI", buffer);
 
     //Creating synchronization structs (fences and semaphores)
-    sync_struct_.StartSyncStructs();
+    sync_struct_.Initialize();
     image_semaphore_ = sync_struct_.present_semaphore_;
     render_semaphore_ = sync_struct_.render_semaphore_;
 
@@ -113,7 +111,7 @@ void VulkanGUIDriver::GUISetup() {
 
 
     //Create Pipeline
-    shader_handler_.Initialize(viewport_, scissor_, render_pass_);
+    shader_handler_.Initialize(render_pass_);
 
     IMGUIRenderLogic();
 
@@ -291,7 +289,7 @@ void VulkanGUIDriver::EndSingleTimeCommands(VkCommandBuffer& command_buffer) {
 
     ProgramLog::OutputLine("Ended command recording!");
 
-    VkSubmitInfo submit_info {};
+    VkSubmitInfo submit_info = {};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submit_info.commandBufferCount = 1;
     submit_info.pCommandBuffers = &command_buffer;

@@ -2,6 +2,7 @@
 
 #include "rasterizer.cuh"
 #include "gui_driver.cuh"
+#include "vulkan_parameters.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
@@ -24,8 +25,11 @@ class ShaderLoader {
 public:
     ShaderLoader() = default;
 
-    ShaderLoader(VkDevice& device_in, VkPipelineCache& cache_in, VkAllocationCallbacks* allocators = nullptr) {
+    ShaderLoader(VkDevice& device_in, VkViewport& viewport_in, VkRect2D& scissor_in, VkPipelineCache& cache_in, VkAllocationCallbacks* allocators = nullptr) {
         device_ = device_in;
+
+        viewport_ = viewport_in;
+        scissor_ = scissor_in;
 
         pipeline_cache_ = cache_in;
 
@@ -42,7 +46,7 @@ public:
         return pipeline_layout_;
     }
 
-    VkPipeline Initialize(VkViewport& viewport, VkRect2D& scissor, VkRenderPass& render_pass) {
+    VkPipeline Initialize(VkRenderPass& render_pass) {
         auto vert_shader_code = ReadFile("Shaders/vert.spv");
         auto frag_shader_code = ReadFile("Shaders/frag.spv");
 
@@ -58,12 +62,12 @@ public:
 
         InputAssemblyInfo();
 
-        CreateViewportInfo(viewport, scissor);
+        CreateViewportInfo();
 
         RasterizationInfo();
         MultiSamplingInfo();
 
-        BlendStates(viewport, scissor);
+        BlendStates();
 
         GraphicsPipelineInfo(render_pass);
 
@@ -71,6 +75,8 @@ public:
 
         vkDestroyShaderModule(device_, frag_shader_module_, nullptr);
         vkDestroyShaderModule(device_, vert_shader_module_, nullptr);
+
+        return render_pipeline_;
     }
 
     VkPipelineLayout pipeline_layout_;
@@ -137,9 +143,9 @@ private:
         return buffer;
     }
 
-     void BlendStates(VkViewport& viewport, VkRect2D& scissor) {
+     void BlendStates() {
 
-        VkPipelineDynamicStateCreateInfo dynamic_state = DynamicStateInfo(viewport, scissor);
+        VkPipelineDynamicStateCreateInfo dynamic_state = DynamicStateInfo();
 
         color_blend_attachment_.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         color_blend_attachment_.blendEnable = VK_FALSE;
@@ -161,7 +167,8 @@ private:
         color_blend_state_.blendConstants[3] = 0.0f; 
     }
 
-    VkPipelineDynamicStateCreateInfo& DynamicStateInfo(VkViewport& viewport, VkRect2D& scissor) {
+    VkPipelineDynamicStateCreateInfo& DynamicStateInfo() {
+        //NOTE!
         array<VkDynamicState, 2> dynamic_states = {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR
@@ -176,11 +183,11 @@ private:
         return dynamic_state;
     }
 
-    void CreateViewportInfo(VkViewport& viewport, VkRect2D& scissor) {
+    void CreateViewportInfo() {
 
         viewport_state_.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        viewport_state_.pScissors = &scissor;
-        viewport_state_.pViewports = &viewport;
+        viewport_state_.pScissors = &scissor_;
+        viewport_state_.pViewports = &viewport_;
         viewport_state_.viewportCount = 1;
         viewport_state_.scissorCount = 1;
     }
@@ -279,6 +286,9 @@ private:
 
     VkPipelineRasterizationStateCreateInfo rasterization_info_;
     VkPipelineMultisampleStateCreateInfo multi_sampling_info_;
+
+    VkViewport viewport_;
+    VkRect2D scissor_;
 
     VkPipelineShaderStageCreateInfo vert_shader_stage_info_, frag_shader_stage_info_;
 

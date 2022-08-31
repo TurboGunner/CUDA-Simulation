@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui_driver.cuh"
+#include "vulkan_parameters.hpp"
 
 #include "../CUDATest/handler_classes.hpp"
 
@@ -21,12 +22,16 @@ class SwapChainProperties {
 public:
     SwapChainProperties() = default;
 
-    SwapChainProperties(VkDevice device_in, VkPhysicalDevice& phys_device_in) {
+    SwapChainProperties(VkDevice& device_in, VkPhysicalDevice& phys_device_in) {
         device_ = device_in;
         physical_device_ = phys_device_in;
     }
 
-    tuple<VkSwapchainKHR, uint32_t> CreateSwapChain(VkSurfaceKHR& surface, uint2 size) {
+    static uint32_t ClampNum(const uint32_t& value, const uint32_t& min, const uint32_t& max) {
+        return std::max(min, std::min(max, value));
+    }
+
+    VkSwapchainKHR Initialize(VkSurfaceKHR& surface, uint2 size) {
         InitializeSurfaceCapabilities(surface);
         surface_format_ = ChooseSwapSurfaceFormat();
 
@@ -41,19 +46,30 @@ public:
 
         VkSwapchainCreateInfoKHR create_info = SwapChainInfo(surface, image_count);
 
-        VkSwapchainKHR swap_chain;
-
-        if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swap_chain) != VK_SUCCESS) {
+        if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
         }
 
-        return tuple<VkSwapchainKHR, uint32_t>(swap_chain, image_count);
+        AllocateImages(image_count);
+
+        return swapchain_;
     }
 
-    void AllocateImages(VkSwapchainKHR& swapchain, uint32_t image_count) {
-        vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain, &image_count, nullptr);
+    VkSwapchainKHR swapchain_;
+
+    VkExtent2D extent_;
+
+    vector<VkImage> swapchain_images_;
+    vector<VkImageView> swapchain_image_views_;
+
+    VkSurfaceFormatKHR surface_format_;
+    VkPresentModeKHR present_mode_;
+
+private:
+    void AllocateImages(uint32_t image_count) {
+        vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain_, &image_count, nullptr);
         swapchain_images_.resize(image_count);
-        vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain, &image_count, swapchain_images_.data());
+        vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain_, &image_count, swapchain_images_.data());
     }
 
     VkSwapchainCreateInfoKHR SwapChainInfo(VkSurfaceKHR& surface, uint32_t image_count) {
@@ -137,10 +153,6 @@ public:
         return actual_extent;
     }
 
-    uint32_t ClampNum(const uint32_t& value, const uint32_t& min, const uint32_t& max) {
-        return std::max(min, std::min(max, value));
-    }
-
     VkDevice device_;
     VkPhysicalDevice physical_device_;
 
@@ -148,14 +160,6 @@ public:
 
     vector<VkSurfaceFormatKHR> formats_;
     vector<VkPresentModeKHR> present_modes_;
-
-    VkSurfaceFormatKHR surface_format_;
-    VkPresentModeKHR present_mode_;
-
-    VkExtent2D extent_;
-
-    vector<VkImage> swapchain_images_;
-    vector<VkImageView> swapchain_image_views_;
 
     VkResult vulkan_status;
 };

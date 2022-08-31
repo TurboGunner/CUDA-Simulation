@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h> //WIP!
+#include <vulkan/vulkan.h>
 
 #include <deque>
 #include <functional>
@@ -10,8 +10,24 @@ using std::deque;
 using std::function;
 using std::string;
 
-struct VulkanParameters {
+class VulkanParameters {
+public:
+	VulkanParameters() = default;
+
 	VkDevice device_;
+	VkPhysicalDevice physical_device_;
+
+	VkSurfaceKHR surface_;
+
+	VkSwapchainKHR swapchain_;
+
+	VkRenderPass render_pass_;
+
+	VkPipeline pipeline_;
+	VkPipelineCache pipeline_cache_;
+
+	VkViewport viewport_;
+	VkRect2D scissor_;
 };
 
 struct AllocationParams {
@@ -39,5 +55,6 @@ struct VulkanMemoryManager {
 
 		allocations_.clear();
 	}
+private:
 	deque<AllocationParams> allocations_;
 };
