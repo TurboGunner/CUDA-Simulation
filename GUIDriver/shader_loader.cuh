@@ -53,10 +53,10 @@ public:
         vert_shader_module_ = CreateShaderModule(vert_shader_code);
         frag_shader_module_ = CreateShaderModule(frag_shader_code);
 
-        InitializeLayout();
-
         vert_shader_stage_info_ = PipelineStageInfo(vert_shader_module_, VK_SHADER_STAGE_VERTEX_BIT);
         frag_shader_stage_info_ = PipelineStageInfo(frag_shader_module_, VK_SHADER_STAGE_FRAGMENT_BIT);
+
+        InitializeLayout();
 
         VertexInputInfo();
 
@@ -112,7 +112,7 @@ private:
     }
 
     VkPipelineLayoutCreateInfo PipelineLayoutInfo() {
-        VkPipelineLayoutCreateInfo pipeline_layout_info{};
+        VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 
         pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipeline_layout_info.setLayoutCount = 0;
@@ -125,7 +125,7 @@ private:
         return pipeline_layout_info;
     }
 
-    vector<char> ReadFile(const string& filename) {
+    vector<uint32_t> ReadFile(const string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -133,7 +133,7 @@ private:
         }
 
         size_t file_size = (size_t) file.tellg();
-        vector<char> buffer(file_size / sizeof(uint32_t));
+        vector<uint32_t> buffer(file_size / sizeof(uint32_t));
 
         file.seekg(0);
         file.read((char*) buffer.data(), file_size);
@@ -239,7 +239,7 @@ private:
         return shader_stage_info;
     }
 
-    VkShaderModule CreateShaderModule(const vector<char>& code) {
+    VkShaderModule CreateShaderModule(const vector<uint32_t>& code) {
         VkShaderModuleCreateInfo create_info = ShaderModuleInfo(code);
 
         VkShaderModule shader_module = {};
@@ -249,7 +249,7 @@ private:
         return shader_module;
     }
 
-    VkShaderModuleCreateInfo ShaderModuleInfo(const vector<char>& code) {
+    VkShaderModuleCreateInfo ShaderModuleInfo(const vector<uint32_t>& code) {
         VkShaderModuleCreateInfo create_info = {};
 
         create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -273,28 +273,28 @@ private:
     VkDevice device_;
     VkPipelineCache pipeline_cache_;
 
-    VkPipelineDynamicStateCreateInfo dynamic_state_;
+    VkPipelineDynamicStateCreateInfo dynamic_state_ = {};
 
-    VkPipelineColorBlendAttachmentState color_blend_attachment_;
-    VkPipelineColorBlendStateCreateInfo color_blend_state_;
+    VkPipelineColorBlendAttachmentState color_blend_attachment_ = {};
+    VkPipelineColorBlendStateCreateInfo color_blend_state_ = {};
 
     VkPipelineVertexInputStateCreateInfo vertex_input_info_;
 
-    VkPipelineInputAssemblyStateCreateInfo input_assembly_;
+    VkPipelineInputAssemblyStateCreateInfo input_assembly_ = {};
 
-    VkPipelineViewportStateCreateInfo viewport_state_;
+    VkPipelineViewportStateCreateInfo viewport_state_ = {};
 
-    VkPipelineRasterizationStateCreateInfo rasterization_info_;
-    VkPipelineMultisampleStateCreateInfo multi_sampling_info_;
+    VkPipelineRasterizationStateCreateInfo rasterization_info_ = {};
+    VkPipelineMultisampleStateCreateInfo multi_sampling_info_ = {};
 
     VkViewport viewport_;
     VkRect2D scissor_;
 
-    VkPipelineShaderStageCreateInfo vert_shader_stage_info_, frag_shader_stage_info_;
+    VkPipelineShaderStageCreateInfo vert_shader_stage_info_ = {}, frag_shader_stage_info_ = {};
 
-    VkGraphicsPipelineCreateInfo pipeline_info_;
+    VkGraphicsPipelineCreateInfo pipeline_info_ = {};
 
-    VkShaderModule vert_shader_module_, frag_shader_module_;
+    VkShaderModule vert_shader_module_ = {}, frag_shader_module_ = {};
 
     VkResult vulkan_status;
 
