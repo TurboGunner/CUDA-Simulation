@@ -23,9 +23,18 @@ void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const u
     const char** extensions_ext = (const char**) malloc(sizeof(const char*) * (ext_count + 1));
     memcpy(extensions_ext, extensions, ext_count * sizeof(const char*));
 
+    VkApplicationInfo app_info = {};
+    app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    app_info.pApplicationName = "Hello Triangle";
+    app_info.applicationVersion = VK_MAKE_VERSION(1, 3, 2);
+    app_info.pEngineName = "No Engine";
+    app_info.engineVersion = VK_MAKE_VERSION(1, 3, 2);
+    app_info.apiVersion = VK_MAKE_VERSION(1, 3, 2);
+
     extensions_ext[ext_count] = "VK_EXT_debug_report";
     instance_info_.enabledExtensionCount = ext_count + 1;
     instance_info_.ppEnabledExtensionNames = extensions_ext;
+    instance_info_.pApplicationInfo = &app_info;
 
     // Create Vulkan Instance
     vulkan_status = vkCreateInstance(&instance_info_, allocators_, &instance_);

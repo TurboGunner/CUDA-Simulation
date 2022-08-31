@@ -169,13 +169,12 @@ public:
 
     void GUISetup();
 
-    VkRenderPass CreateSubpass(const VkFormat& format);
-
     TextureLoader texture_handler_;
     ShaderLoader shader_handler_;
     VulkanHelper vulkan_helper_;
     SwapChainProperties swap_chain_helper_;
     SyncStruct sync_struct_;
+    RenderPassInitializer render_pass_initializer_;
 
     tuple<VkImageView, VkSampler> image_alloc_;
 

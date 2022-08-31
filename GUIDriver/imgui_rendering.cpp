@@ -83,11 +83,12 @@ void VulkanGUIDriver::GUISetup() {
     scissor_.extent = extent_;
 
     //Create Renderpass
-    render_pass_ = CreateSubpass(surface_format_.format);
+    render_pass_initializer_ = RenderPassInitializer(device_);
+    render_pass_ = render_pass_initializer_.Initialize(surface_format_.format);
 
     //Creating all of the other external helpers
     vulkan_helper_ = VulkanHelper(device_, render_pass_);
-    shader_handler_ = ShaderLoader(device_, render_pass_, pipeline_cache_, allocators_);
+    shader_handler_ = ShaderLoader(device_, pipeline_cache_, allocators_);
     sync_struct_ = SyncStruct(device_);
 
     //Creating command pool
@@ -112,7 +113,7 @@ void VulkanGUIDriver::GUISetup() {
 
 
     //Create Pipeline
-    shader_handler_.CreateGraphicsPipeline(viewport_, scissor_);
+    shader_handler_.Initialize(viewport_, scissor_, render_pass_);
 
     IMGUIRenderLogic();
 
@@ -264,18 +265,6 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
     ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer); // Record imgui primitives into command buffer
     //Note!
     EndRenderPass(command_buffer, image_semaphore_, render_semaphore_);
-}
-
-VkRenderPass VulkanGUIDriver::CreateSubpass(const VkFormat& format) {
-    VkRenderPass subpass = {};
-    auto render_info = RenderPassInitializer::RenderPassInfo(
-        RenderPassInitializer::RenderPassDescriptions(format), device_);
-
-    //if (vkCreateRenderPass(device_, &render_info, nullptr, &subpass) != VK_SUCCESS) {
-        //throw std::runtime_error("Could not create Dear ImGui's render pass");
-    //}
-
-    return subpass;
 }
 
 void VulkanGUIDriver::CleanupVulkanWindow() {

@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFCFFB817C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFD394917C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -16,10 +16,98 @@ Created a window with size 2560 X 1026.
 Swapchain Format Count: 3
 Color Attachment Ref ID: 2
 
-Address for Vulkan debug callback: 00007FFCFFB817C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFD394917C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkAttachmentReference-layout-00857 ] Object 0: handle = 0x2431a0cfbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pColorAttachments[0].layout (32758) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+
+Address for Vulkan debug callback: 00007FFD394917C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pColorAttachments[0].layout (32758) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pDepthStencilAttachment->layout (55892) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+
+Address for Vulkan debug callback: 00007FFD394917C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pColorAttachments[0].layout (32758) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pDepthStencilAttachment->layout (55892) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkRenderPassCreateInfo-attachment-00834 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0xfca478c2 
+ vkCreateRenderPass(): pSubpasses[0].pDepthStencilAttachment attachment -2072713088 must be less than the total number of attachments 2. The Vulkan spec states: If the attachment member of any element of pInputAttachments, pColorAttachments, pResolveAttachments or pDepthStencilAttachment, or any element of pPreserveAttachments in any element of pSubpasses is not VK_ATTACHMENT_UNUSED, then it must be less than attachmentCount (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkRenderPassCreateInfo-attachment-00834)
+
+Address for Vulkan debug callback: 00007FFD394917C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pColorAttachments[0].layout (32758) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pDepthStencilAttachment->layout (55892) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkRenderPassCreateInfo-attachment-00834 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0xfca478c2 
+ vkCreateRenderPass(): pSubpasses[0].pDepthStencilAttachment attachment -2072713088 must be less than the total number of attachments 2. The Vulkan spec states: If the attachment member of any element of pInputAttachments, pColorAttachments, pResolveAttachments or pDepthStencilAttachment, or any element of pPreserveAttachments in any element of pSubpasses is not VK_ATTACHMENT_UNUSED, then it must be less than attachmentCount (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkRenderPassCreateInfo-attachment-00834)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkSubpassDescription-None-04437 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x438c2f01 
+ vkCreateRenderPass(): pSubpasses[0].pDepthStencilAttachment layout is Unhandled VkImageLayout but depth/stencil attachments must be VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR orVK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR. The Vulkan spec states: Each attachment must follow the image layout requirements specified for its attachment type (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSubpassDescription-None-04437)
+
+Address for Vulkan debug callback: 00007FFD394917C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pColorAttachments[0].layout (32758) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pDepthStencilAttachment->layout (55892) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkRenderPassCreateInfo-attachment-00834 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0xfca478c2 
+ vkCreateRenderPass(): pSubpasses[0].pDepthStencilAttachment attachment -2072713088 must be less than the total number of attachments 2. The Vulkan spec states: If the attachment member of any element of pInputAttachments, pColorAttachments, pResolveAttachments or pDepthStencilAttachment, or any element of pPreserveAttachments in any element of pSubpasses is not VK_ATTACHMENT_UNUSED, then it must be less than attachmentCount (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkRenderPassCreateInfo-attachment-00834)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkSubpassDescription-None-04437 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x438c2f01 
+ vkCreateRenderPass(): pSubpasses[0].pDepthStencilAttachment layout is Unhandled VkImageLayout but depth/stencil attachments must be VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR orVK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR. The Vulkan spec states: Each attachment must follow the image layout requirements specified for its attachment type (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSubpassDescription-None-04437)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-00857 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x859a7277 
  vkCreateRenderPass(): Layout for pSubpasses[0].pColorAttachments[0] is VK_IMAGE_LAYOUT_UNDEFINED but must not be VK_IMAGE_LAYOUT_[UNDEFINED
 PREINITIALIZED
@@ -29,10 +117,34 @@ DEPTH_READ_ONLY_OPTIMAL
 STENCIL_ATTACHMENT_OPTIMAL
 STENCIL_READ_ONLY_OPTIMAL]. The Vulkan spec states: If attachment is not VK_ATTACHMENT_UNUSED, layout must not be VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PREINITIALIZED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL, or VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-00857)
 
-Address for Vulkan debug callback: 00007FFCFFB817C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFD394917C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkAttachmentReference-layout-00857 ] Object 0: handle = 0x2431a0cfbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pColorAttachments[0].layout (32758) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-parameter ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x75814475 
+ vkCreateRenderPass: value of pCreateInfo->pSubpasses[0].pDepthStencilAttachment->layout (55892) does not fall within the begin..end range of the core VkImageLayout enumeration tokens and is not an extension added token. The Vulkan spec states: layout must be a valid VkImageLayout value (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkAttachmentReference-layout-parameter)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkRenderPassCreateInfo-attachment-00834 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0xfca478c2 
+ vkCreateRenderPass(): pSubpasses[0].pDepthStencilAttachment attachment -2072713088 must be less than the total number of attachments 2. The Vulkan spec states: If the attachment member of any element of pInputAttachments, pColorAttachments, pResolveAttachments or pDepthStencilAttachment, or any element of pPreserveAttachments in any element of pSubpasses is not VK_ATTACHMENT_UNUSED, then it must be less than attachmentCount (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkRenderPassCreateInfo-attachment-00834)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkSubpassDescription-None-04437 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
+ MessageID = 0x438c2f01 
+ vkCreateRenderPass(): pSubpasses[0].pDepthStencilAttachment layout is Unhandled VkImageLayout but depth/stencil attachments must be VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR, VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR orVK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR. The Vulkan spec states: Each attachment must follow the image layout requirements specified for its attachment type (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSubpassDescription-None-04437)
+[vulkan] Debug report from ObjectType: 3
+Message: 
+
+Validation Error: [ VUID-VkAttachmentReference-layout-00857 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x859a7277 
  vkCreateRenderPass(): Layout for pSubpasses[0].pColorAttachments[0] is VK_IMAGE_LAYOUT_UNDEFINED but must not be VK_IMAGE_LAYOUT_[UNDEFINED
 PREINITIALIZED
@@ -44,16 +156,7 @@ STENCIL_READ_ONLY_OPTIMAL]. The Vulkan spec states: If attachment is not VK_ATTA
 [vulkan] Debug report from ObjectType: 3
 Message: 
 
-Validation Error: [ VUID-VkSubpassDescription-None-04437 ] Object 0: handle = 0x2431a0cfbe0, type = VK_OBJECT_TYPE_DEVICE; 
+Validation Error: [ VUID-VkSubpassDescription-None-04437 ] Object 0: handle = 0x24136fe1890, type = VK_OBJECT_TYPE_DEVICE; 
  MessageID = 0x438c2f01 
  vkCreateRenderPass(): pSubpasses[0].pColorAttachments[0] layout is VK_IMAGE_LAYOUT_UNDEFINED but color attachments must be VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR, VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR or VK_IMAGE_LAYOUT_GENERAL. The Vulkan spec states: Each attachment must follow the image layout requirements specified for its attachment type (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSubpassDescription-None-04437)
-
-
-Successfully created render fence!
-
-
-Successfully created render semaphore!
-
-
-Successfully created render semaphore!
 
