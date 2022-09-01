@@ -90,8 +90,7 @@ void VulkanGUIDriver::GUISetup() {
     sync_struct_ = SyncStruct(device_);
 
     //Creating command pool
-    auto pool_info = vulkan_helper_.CommandPoolInfo(queue_family_);
-    vulkan_helper_.CreateCommandPool(command_pool_, pool_info);
+    vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
 
     ProgramLog::OutputLine("Swapchain Image View Size: " + swap_chain_helper_.swapchain_image_views_.size());
 

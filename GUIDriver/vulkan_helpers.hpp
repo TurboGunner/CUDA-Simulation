@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui_driver.cuh"
+#include "image_helpers.hpp"
 
 //Logging
 #include "../CUDATest/handler_classes.hpp"
@@ -31,6 +32,7 @@ struct VulkanHelper {
 		info.commandPool = pool;
 		info.commandBufferCount = count;
 		info.level = level;
+
 		return info;
 	}
 
@@ -64,28 +66,18 @@ struct VulkanHelper {
 		}
 	}
 
-	VkCommandPoolCreateInfo CommandPoolInfo(const uint32_t& queue_family) {
-		VkCommandPoolCreateInfo pool_info {};
+	VkCommandPool CreateCommandPool(VkCommandPool& command_pool, const uint32_t& queue_family) {
+		VkCommandPoolCreateInfo pool_info = {};
 
 		pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		pool_info.queueFamilyIndex = queue_family;
 
-		return pool_info;
-	}
-
-	void CreateCommandPool(VkCommandPool& command_pool, VkCommandPoolCreateInfo& pool_info) {
 		if (vkCreateCommandPool(device_, &pool_info, nullptr, &command_pool) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create command pool!");
 		}
-	}
 
-	void InitializeCommands(VkCommandPool& command_pool, VkCommandBuffer& buffer, const uint32_t& queue_family) {
-		VkCommandPoolCreateInfo pool_info = CommandPoolInfo(queue_family);
-		CreateCommandPool(command_pool, pool_info);
-
-		auto command_alloc_info = AllocateCommandBuffer(command_pool);
-		vkAllocateCommandBuffers(device_, &command_alloc_info, &buffer);
+		return command_pool;
 	}
 
 	VkDevice device_;

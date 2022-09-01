@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cuda_runtime.h>
 #include <vulkan/vulkan.h>
 
 #include <deque>
@@ -18,16 +19,28 @@ public:
 	VkPhysicalDevice physical_device_;
 
 	VkSurfaceKHR surface_;
+	VkSurfaceFormatKHR surface_format_;
 
 	VkSwapchainKHR swapchain_;
 
 	VkRenderPass render_pass_;
 
+	VkCommandPool command_pool_;
+
 	VkPipeline pipeline_;
 	VkPipelineCache pipeline_cache_;
 
+	VkQueue queue_ = VK_NULL_HANDLE;
+
+	VkSemaphore image_semaphore_, render_semaphore_;
+	VkFence render_fence_;
+
 	VkViewport viewport_;
 	VkRect2D scissor_;
+
+	uint32_t image_index_, current_frame_, frame_index_;
+
+	uint2 size_;
 };
 
 struct AllocationParams {

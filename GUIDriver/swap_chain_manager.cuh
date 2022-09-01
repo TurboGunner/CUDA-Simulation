@@ -2,6 +2,8 @@
 
 #include "gui_driver.cuh"
 #include "vulkan_parameters.hpp"
+#include "vulkan_helpers.hpp"
+#include "image_helpers.hpp"
 
 #include "../CUDATest/handler_classes.hpp"
 
@@ -31,7 +33,7 @@ public:
         return std::max(min, std::min(max, value));
     }
 
-    VkSwapchainKHR Initialize(VkSurfaceKHR& surface, uint2 size) {
+    VkSwapchainKHR Initialize(VkSurfaceKHR& surface, uint2& size) {
         InitializeSurfaceCapabilities(surface);
         surface_format_ = ChooseSwapSurfaceFormat();
 
@@ -64,6 +66,9 @@ public:
 
     VkExtent2D extent_;
 
+    VkImage depth_image_;
+    VkImageView depth_image_view;
+
     vector<VkImage> swapchain_images_;
     vector<VkImageView> swapchain_image_views_;
 
@@ -78,7 +83,7 @@ private:
     }
 
     VkSwapchainCreateInfoKHR SwapChainInfo(VkSurfaceKHR& surface, uint32_t image_count) {
-        VkSwapchainCreateInfoKHR create_info {};
+        VkSwapchainCreateInfoKHR create_info = {};
 
         create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         create_info.surface = surface;
@@ -155,39 +160,31 @@ private:
         return actual_extent;
     }
 
-    VkImageView CreateImageView(VkImage& image, const VkFormat& format, const VkImageAspectFlags& flags) {
-        VkImageView image_view = {};
-
-        VkImageViewCreateInfo create_info = {};
-
-        create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        create_info.image = image;
-
-        create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        create_info.format = format;
-
-        create_info.subresourceRange.aspectMask = flags;
-        create_info.subresourceRange.baseMipLevel = 0;
-        create_info.subresourceRange.levelCount = 1;
-        create_info.subresourceRange.baseArrayLayer = 0;
-        create_info.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(device_, &create_info, nullptr, &image_view) != VK_SUCCESS) {
-            ProgramLog::OutputLine("Error: Failed to create image views!");
-        }
-        return image_view;
-    }
-
     void CreateImageViews() {
         swapchain_image_views_.resize(swapchain_images_.size());
 
         for (uint32_t i = 0; i < swapchain_images_.size(); i++) {
-            swapchain_image_views_[i] = CreateImageView(swapchain_images_[i], surface_format_.format, VK_IMAGE_ASPECT_COLOR_BIT);
+            swapchain_image_views_[i] = ImageHelper::CreateImageView(device_, swapchain_images_[i], surface_format_.format, VK_IMAGE_ASPECT_COLOR_BIT);
         }
+    }
+
+    VkImageView DepthImageView(uint2& size) {
+
+        auto format = ImageHelper::FindDepthFormat(physical_device_);
+
+        ImageHelper::InitializeImage(device_, physical_device_, depth_memory_, depth_image_, size, format, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+        auto depth_image_view = ImageHelper::CreateImageView(device_, depth_image_, format, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+        ProgramLog::OutputLine("Created depth image view.");
+
+        return depth_image_view;
     }
 
     VkDevice device_;
     VkPhysicalDevice physical_device_;
+
+    VkDeviceMemory depth_memory_;
 
     VkSurfaceCapabilitiesKHR capabilities_;
 

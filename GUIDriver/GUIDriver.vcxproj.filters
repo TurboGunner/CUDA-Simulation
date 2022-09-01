@@ -83,6 +83,9 @@
     <ClInclude Include="swap_chain_manager.cuh">
       <Filter>includes\init_objects</Filter>
     </ClInclude>
+    <ClInclude Include="image_helpers.hpp">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GUIDriver.rc" />
