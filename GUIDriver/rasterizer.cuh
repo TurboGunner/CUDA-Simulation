@@ -47,6 +47,7 @@ public:
 
 		ProgramLog::OutputLine("Created the subpass begin command info.");
 
+
 		return pass_info;
 	}
 

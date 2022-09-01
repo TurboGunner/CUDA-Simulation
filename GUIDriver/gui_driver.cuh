@@ -4,7 +4,7 @@
 #include "device_launch_parameters.h"
 
 #include "shader_loader.cuh"
-//#include "texture_loader.cuh"
+#include "texture_loader.cuh"
 #include "swap_chain_manager.cuh"
 #include "sync_structs.hpp"
 

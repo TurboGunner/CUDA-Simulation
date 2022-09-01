@@ -58,6 +58,7 @@ public:
         ProgramLog::OutputLine(s_stream);
 
         CreateImageViews();
+        depth_image_view_ = DepthImageView(size);
 
         return swapchain_;
     }
@@ -67,7 +68,7 @@ public:
     VkExtent2D extent_;
 
     VkImage depth_image_;
-    VkImageView depth_image_view;
+    VkImageView depth_image_view_;
 
     vector<VkImage> swapchain_images_;
     vector<VkImageView> swapchain_image_views_;
@@ -149,10 +150,7 @@ private:
         if (capabilities_.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities_.currentExtent;
         }
-        VkExtent2D actual_extent = {
-            static_cast<uint32_t>(size.x),
-            static_cast<uint32_t>(size.y)
-        };
+        VkExtent2D actual_extent = { size.x, size.y };
 
         actual_extent.width = ClampNum(actual_extent.width, capabilities_.minImageExtent.width, capabilities_.maxImageExtent.width);
         actual_extent.height = ClampNum(actual_extent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);

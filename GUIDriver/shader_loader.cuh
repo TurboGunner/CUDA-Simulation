@@ -248,7 +248,6 @@ private:
         pipeline_info_.pDepthStencilState = &depth_stencil_state_;
 
         pipeline_info_.pColorBlendState = &color_blend_state_;
-        //pipeline_info_.pDynamicState = &dynamic_state_;
         pipeline_info_.pDynamicState = nullptr;
         pipeline_info_.pNext = nullptr;
 

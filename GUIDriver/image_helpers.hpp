@@ -6,11 +6,12 @@
 #include <vulkan/vulkan.h>
 
 struct ImageHelper {
-	static uint32_t FindMemoryType(VkPhysicalDevice& physical_device, const uint32_t& type_filter, const VkMemoryPropertyFlags& properties) {
+	static uint32_t FindMemoryType(VkPhysicalDevice& physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties) {
 		VkPhysicalDeviceMemoryProperties mem_properties;
 		vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_properties);
 		for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
 			if (type_filter & (1 << i)) {
+				ProgramLog::OutputLine("Memory Type: " + std::to_string(i));
 				return i;
 			}
 		}
@@ -18,10 +19,12 @@ struct ImageHelper {
 	}
 
 	static VkMemoryAllocateInfo CreateAllocationInfo(VkPhysicalDevice& physical_device, VkMemoryRequirements& mem_requirements, VkMemoryPropertyFlags properties) {
-		VkMemoryAllocateInfo alloc_info{};
+		VkMemoryAllocateInfo alloc_info = {};
 		alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		alloc_info.allocationSize = mem_requirements.size;
 		alloc_info.memoryTypeIndex = FindMemoryType(physical_device, mem_requirements.memoryTypeBits, properties);
+
+		ProgramLog::OutputLine("Created allocation info for video memory. ");
 
 		return alloc_info;
 	}
@@ -32,8 +35,8 @@ struct ImageHelper {
 
 		image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		image_info.imageType = VK_IMAGE_TYPE_2D;
-		image_info.extent.width = static_cast<uint32_t>(size.x);
-		image_info.extent.height = static_cast<uint32_t>(size.y);
+		image_info.extent.width = size.x;
+		image_info.extent.height = size.y;
 		image_info.extent.depth = 1;
 		image_info.mipLevels = 1;
 		image_info.arrayLayers = 1;
@@ -52,7 +55,7 @@ struct ImageHelper {
 		}
 
 		VkMemoryRequirements mem_requirements = {}; //NOTE
-		mem_requirements.size = size.x * size.y * 4;
+		vkGetImageMemoryRequirements(device, image, &mem_requirements);
 
 		VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(physical_device, mem_requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 		if (vkAllocateMemory(device, &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {

@@ -31,8 +31,8 @@ void VulkanGUIDriver::RunGUI() {
 
     InitializeVulkan();
 
-    size_.x = 1024;
-    size_.y = 1024;
+    size_.x = screen_width;
+    size_.y = screen_height;
 
     // Create Window Surface
     VkSurfaceKHR surface;
@@ -85,16 +85,16 @@ void VulkanGUIDriver::GUISetup() {
     render_pass_ = render_pass_initializer_.Initialize(surface_format_.format);
 
     //Creating all of the other external helpers
-    vulkan_helper_ = VulkanHelper(device_, render_pass_);
+    vulkan_helper_ = VulkanHelper(device_, render_pass_, size_);
     shader_handler_ = ShaderLoader(device_, viewport_, scissor_, pipeline_cache_, allocators_);
     sync_struct_ = SyncStruct(device_);
 
     //Creating command pool
     vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
 
-    ProgramLog::OutputLine("Swapchain Image View Size: " + swap_chain_helper_.swapchain_image_views_.size());
+    ProgramLog::OutputLine("Swapchain Image View Size: " + std::to_string(swap_chain_helper_.swapchain_image_views_.size()));
 
-    vulkan_helper_.CreateSwapchainFrameBuffers(swap_chain_helper_.swapchain_image_views_);
+    vulkan_helper_.CreateSwapchainFrameBuffers(swap_chain_helper_.swapchain_image_views_, swap_chain_helper_.depth_image_view_);
 
     //Creating command buffer
     VkCommandBuffer buffer;
@@ -208,7 +208,6 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
     info.pClearValues = clear_values_.data();
 
     vkCmdBeginRenderPass(command_buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
-    ProgramLog::OutputLine("Began render pass!");
 
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
 

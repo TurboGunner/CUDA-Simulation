@@ -18,10 +18,12 @@ using std::vector;
 struct VulkanHelper {
 	VulkanHelper() = default;
 
-	VulkanHelper(VkDevice& device_in, VkRenderPass& pass_in) {
+	VulkanHelper(VkDevice& device_in, VkRenderPass& pass_in, uint2& size_in) {
 		device_ = device_in;
 
 		render_pass_ = pass_in;
+
+		size_ = size_in;
 	}
 
 	static VkCommandBufferAllocateInfo AllocateCommandBuffer(VkCommandPool& pool, uint32_t count = 1, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) {
@@ -45,7 +47,7 @@ struct VulkanHelper {
 		return begin_info;
 	}
 
-	void CreateSwapchainFrameBuffers(vector<VkImageView>& swapchain_image_views) {
+	void CreateSwapchainFrameBuffers(vector<VkImageView>& swapchain_image_views, VkImageView& depth_image_view) {
 		frame_buffers_.resize(swapchain_image_views.size());
 
 		VkFramebufferCreateInfo frame_buffer_info = {};
@@ -53,15 +55,18 @@ struct VulkanHelper {
 		frame_buffer_info.pNext = nullptr;
 
 		frame_buffer_info.renderPass = render_pass_;
-		frame_buffer_info.attachmentCount = 1;
-		frame_buffer_info.width = size_.x;
-		frame_buffer_info.height = size_.y;
 		frame_buffer_info.layers = 1;
-
-		frame_buffers_ = vector<VkFramebuffer>(swapchain_image_views.size());
+		ProgramLog::OutputLine("Framebuffers size: " + std::to_string(size_.x) + " X " + std::to_string(size_.y) + ".");
 
 		for (size_t i = 0; i < swapchain_image_views.size(); i++) {
-			frame_buffer_info.pAttachments = &swapchain_image_views[i];
+			array<VkImageView, 2> attachments = { swapchain_image_views[i], depth_image_view };
+
+			frame_buffer_info.width = size_.x;
+			frame_buffer_info.height = size_.y;
+
+			frame_buffer_info.attachmentCount = attachments.size();
+			frame_buffer_info.pAttachments = attachments.data();
+
 			vulkan_status = vkCreateFramebuffer(device_, &frame_buffer_info, nullptr, &frame_buffers_[i]);
 		}
 	}
