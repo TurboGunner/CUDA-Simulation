@@ -64,38 +64,6 @@ struct VulkanHelper {
 		}
 	}
 
-
-	VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags flags) {
-		VkImageView image_view;
-
-		VkImageViewCreateInfo create_info {};
-
-		create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		create_info.image = image;
-
-		create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		create_info.format = format;
-
-		create_info.subresourceRange.aspectMask = flags;
-		create_info.subresourceRange.baseMipLevel = 0;
-		create_info.subresourceRange.levelCount = 1;
-		create_info.subresourceRange.baseArrayLayer = 0;
-		create_info.subresourceRange.layerCount = 1;
-
-		if (vkCreateImageView(device_, &create_info, nullptr, &image_view) != VK_SUCCESS) {
-			ProgramLog::OutputLine("Error: Failed to create image views!");
-		}
-		return image_view;
-	}
-
-	void CreateImageViews(vector<VkImage> swapchain_images, vector<VkImageView>& swapchain_image_views) {
-		swapchain_image_views.resize(swapchain_image_views.size());
-
-		for (uint32_t i = 0; i < swapchain_image_views.size(); i++) {
-			swapchain_image_views[i] = CreateImageView(swapchain_images[i], swapchain_format_, VK_IMAGE_ASPECT_COLOR_BIT);
-		}
-	}
-
 	VkCommandPoolCreateInfo CommandPoolInfo(const uint32_t& queue_family) {
 		VkCommandPoolCreateInfo pool_info {};
 

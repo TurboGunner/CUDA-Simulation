@@ -28,7 +28,7 @@ public:
 		RenderPassDescriptions(color_format);
 		CreateRenderPass();
 
-		ProgramLog::OutputLine("Successfully initialized the renderpass!");
+		ProgramLog::OutputLine("Successfully initialized the render pass!\n\n");
 
 		return render_pass_;
 	}
@@ -63,7 +63,7 @@ private:
 		depth_attachment_ref_.attachment = 1;
 		depth_attachment_ref_.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-		ProgramLog::OutputLine("Created attachment references for the renderpass.");
+		ProgramLog::OutputLine("Created attachment references for the render pass.");
 
 		CreateSubpassDescription();
 	}
@@ -78,7 +78,7 @@ private:
 		color_attachment_.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		color_attachment_.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-		ProgramLog::OutputLine("Created color attachment for renderpass.");
+		ProgramLog::OutputLine("Created color attachment for the render pass.");
 	}
 
 	void CreateDepthAttachment() {
@@ -91,7 +91,7 @@ private:
 		depth_attachment_.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		depth_attachment_.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-		ProgramLog::OutputLine("Created depth attachment for renderpass.");
+		ProgramLog::OutputLine("Created depth attachment for the render pass.");
 	}
 
 	void CreateSubpassDescription() {
@@ -108,7 +108,7 @@ private:
 		subpass_info_.pInputAttachments = nullptr;
 		subpass_info_.pPreserveAttachments = nullptr;
 
-		ProgramLog::OutputLine("Created subpass description for renderpass.");
+		ProgramLog::OutputLine("Created subpass description for the render pass.");
 	}
 
 	void CreateRenderPass() {

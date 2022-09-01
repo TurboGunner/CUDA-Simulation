@@ -47,10 +47,15 @@ public:
         VkSwapchainCreateInfoKHR create_info = SwapChainInfo(surface, image_count);
 
         if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create swap chain!");
+            ProgramLog::OutputLine("\n\nError: Failed to create swapchain!\n\n");
         }
 
         AllocateImages(image_count);
+
+        s_stream << "\nSwapchain Image Count: " << swapchain_images_.size() << "\n";
+        ProgramLog::OutputLine(s_stream);
+
+        CreateImageViews();
 
         return swapchain_;
     }
@@ -108,14 +113,11 @@ private:
             vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &format_count, formats_.data());
         }
 
-        s_stream << "\nSwapchain Format Count: " << formats_.size() << "\n";
-        ProgramLog::OutputLine(s_stream);
-
         uint32_t present_mode_count;
         vulkan_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count, nullptr);
 
         if (present_mode_count != 0) {
-             present_modes_.resize(present_mode_count);
+            present_modes_.resize(present_mode_count);
             vulkan_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count,  present_modes_.data());
         }
     }
@@ -151,6 +153,37 @@ private:
         actual_extent.height = ClampNum(actual_extent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);
 
         return actual_extent;
+    }
+
+    VkImageView CreateImageView(VkImage& image, const VkFormat& format, const VkImageAspectFlags& flags) {
+        VkImageView image_view = {};
+
+        VkImageViewCreateInfo create_info = {};
+
+        create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        create_info.image = image;
+
+        create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        create_info.format = format;
+
+        create_info.subresourceRange.aspectMask = flags;
+        create_info.subresourceRange.baseMipLevel = 0;
+        create_info.subresourceRange.levelCount = 1;
+        create_info.subresourceRange.baseArrayLayer = 0;
+        create_info.subresourceRange.layerCount = 1;
+
+        if (vkCreateImageView(device_, &create_info, nullptr, &image_view) != VK_SUCCESS) {
+            ProgramLog::OutputLine("Error: Failed to create image views!");
+        }
+        return image_view;
+    }
+
+    void CreateImageViews() {
+        swapchain_image_views_.resize(swapchain_images_.size());
+
+        for (uint32_t i = 0; i < swapchain_images_.size(); i++) {
+            swapchain_image_views_[i] = CreateImageView(swapchain_images_[i], surface_format_.format, VK_IMAGE_ASPECT_COLOR_BIT);
+        }
     }
 
     VkDevice device_;

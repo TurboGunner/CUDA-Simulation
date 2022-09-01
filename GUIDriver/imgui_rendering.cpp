@@ -93,6 +93,8 @@ void VulkanGUIDriver::GUISetup() {
     auto pool_info = vulkan_helper_.CommandPoolInfo(queue_family_);
     vulkan_helper_.CreateCommandPool(command_pool_, pool_info);
 
+    ProgramLog::OutputLine("Swapchain Image View Size: " + swap_chain_helper_.swapchain_image_views_.size());
+
     vulkan_helper_.CreateSwapchainFrameBuffers(swap_chain_helper_.swapchain_image_views_);
 
     //Creating command buffer
@@ -109,6 +111,10 @@ void VulkanGUIDriver::GUISetup() {
 
     render_fence_ = sync_struct_.fence_;
 
+    clear_values_.resize(2);
+
+    clear_values_[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+    clear_values_[1].depthStencil = { 1.0f, 0 };
 
     //Create Pipeline
     shader_handler_.Initialize(render_pass_);
@@ -225,10 +231,9 @@ void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore
 
     info.pWaitDstStageMask = &wait_stage;
 
-    array<VkCommandBuffer, 1> command_buffers =
-    { command_buffers_["GUI"] };
+    array<VkCommandBuffer, 1> command_buffers = { command_buffers_["GUI"] };
 
-    info.commandBufferCount = command_buffers.size();
+    info.commandBufferCount = command_buffers_.size();
     info.pCommandBuffers = command_buffers.data();
 
     info.signalSemaphoreCount = 1;
@@ -241,8 +246,7 @@ void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore
 void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
     VkResult vulkan_status;
 
-    uint32_t image_index;
-    vulkan_status = vkAcquireNextImageKHR(device_, swap_chain_, UINT64_MAX, image_semaphore_, VK_NULL_HANDLE, &frame_index_);
+    vulkan_status = vkAcquireNextImageKHR(device_, swap_chain_, UINT64_MAX, image_semaphore_, VK_NULL_HANDLE, &image_index_);
 
     if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
         swap_chain_rebuilding_ = true;
