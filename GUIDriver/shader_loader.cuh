@@ -70,6 +70,11 @@ public:
         BlendStates();
 
         GraphicsPipelineInfo(render_pass);
+        array<VkPipelineShaderStageCreateInfo, 2> shader_stages = { vert_shader_stage_info_, frag_shader_stage_info_ };
+        pipeline_info_.pStages = shader_stages.data();
+
+        s_stream << "Name for shader stage (Index 0): " << pipeline_info_.pStages[0].pName << ".";
+        ProgramLog::OutputLine(s_stream);
 
         vulkan_status = vkCreateGraphicsPipelines(device_, pipeline_cache_, 1, &pipeline_info_, VK_NULL_HANDLE, &render_pipeline_);
 
@@ -94,19 +99,22 @@ private:
 
         rasterization_info_.lineWidth = 1.0f;
 
-        rasterization_info_.cullMode = VK_CULL_MODE_NONE;
-        rasterization_info_.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterization_info_.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterization_info_.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
         rasterization_info_.depthBiasEnable = VK_FALSE;
+
         rasterization_info_.depthBiasConstantFactor = 0.0f;
         rasterization_info_.depthBiasClamp = 0.0f;
         rasterization_info_.depthBiasSlopeFactor = 0.0f;
     }
 
     void MultiSamplingInfo() {
+        multi_sampling_info_.pNext = nullptr;
         multi_sampling_info_.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multi_sampling_info_.sampleShadingEnable = VK_FALSE;
         multi_sampling_info_.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
         multi_sampling_info_.minSampleShading = 1.0f;
         multi_sampling_info_.pSampleMask = nullptr;
         multi_sampling_info_.alphaToCoverageEnable = VK_FALSE;
@@ -116,6 +124,7 @@ private:
     VkPipelineLayoutCreateInfo PipelineLayoutInfo() {
         VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 
+        pipeline_layout_info.flags = 0;
         pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipeline_layout_info.setLayoutCount = 0;
         pipeline_layout_info.pSetLayouts = nullptr;
@@ -157,7 +166,7 @@ private:
 
      void ColorBlendAttachment() {
          color_blend_attachment_.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-         color_blend_attachment_.blendEnable = VK_FALSE;
+         color_blend_attachment_.blendEnable = VK_TRUE;
 
          color_blend_attachment_.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
          color_blend_attachment_.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -203,10 +212,7 @@ private:
 
     void DynamicStateInfo() {
         //NOTE!
-        array<VkDynamicState, 2> dynamic_states = {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
-        };
+        array<VkDynamicState, 2> dynamic_states = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 
         dynamic_state_.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         dynamic_state_.dynamicStateCount = dynamic_states.size();
@@ -244,13 +250,13 @@ private:
         pipeline_info_.pColorBlendState = &color_blend_state_;
         //pipeline_info_.pDynamicState = &dynamic_state_;
         pipeline_info_.pDynamicState = nullptr;
+        pipeline_info_.pNext = nullptr;
 
         pipeline_info_.layout = pipeline_layout_;
         pipeline_info_.renderPass = render_pass;
         pipeline_info_.subpass = 0;
 
         pipeline_info_.basePipelineHandle = VK_NULL_HANDLE;
-        pipeline_info_.basePipelineIndex = -1;
 
         ProgramLog::OutputLine("Created graphics pipeline info for render pipeline.");
     }
@@ -260,6 +266,8 @@ private:
         vertex_input_info_.vertexBindingDescriptionCount = 0;
         vertex_input_info_.vertexAttributeDescriptionCount = 0;
         vertex_input_info_.pNext = VK_NULL_HANDLE;
+        vertex_input_info_.pVertexBindingDescriptions = nullptr;
+        vertex_input_info_.pVertexAttributeDescriptions = nullptr;
 
         ProgramLog::OutputLine("Initialized vertex input info struct for the render pipeline.");
     }
@@ -268,11 +276,12 @@ private:
         input_assembly_.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         input_assembly_.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly_.primitiveRestartEnable = VK_FALSE;
+        input_assembly_.pNext = nullptr;
 
         ProgramLog::OutputLine("Initialized input assembly info struct for the render pipeline.");
     }
 
-    VkPipelineShaderStageCreateInfo PipelineStageInfo(VkShaderModule& shader_module, VkShaderStageFlagBits flag) {
+    VkPipelineShaderStageCreateInfo PipelineStageInfo(VkShaderModule& shader_module, const VkShaderStageFlagBits& flag) {
         VkPipelineShaderStageCreateInfo shader_stage_info = {};
 
         shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -280,6 +289,8 @@ private:
         shader_stage_info.module = shader_module;
         shader_stage_info.pName = "main";
         shader_stage_info.pNext = nullptr;
+        shader_stage_info.pSpecializationInfo = nullptr;
+        shader_stage_info.flags = 0;
 
         string mode = flag == VK_SHADER_STAGE_VERTEX_BIT ? "vertex" : "frag";
         ProgramLog::OutputLine("Initialized input assembly info struct (" + mode + ") for the render pipeline.");
@@ -327,8 +338,8 @@ private:
     VkPipelineRasterizationStateCreateInfo rasterization_info_ = {};
     VkPipelineMultisampleStateCreateInfo multi_sampling_info_ = {};
 
-    VkViewport viewport_;
-    VkRect2D scissor_;
+    VkViewport viewport_ = {};
+    VkRect2D scissor_ = {};
 
     VkPipelineShaderStageCreateInfo vert_shader_stage_info_ = {}, frag_shader_stage_info_ = {};
 

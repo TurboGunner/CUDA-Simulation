@@ -50,14 +50,14 @@ private:
 
 	VkResult CreateFence(VkFence& fence, VkFenceCreateInfo& fence_info) {
 		vulkan_status = vkCreateFence(device_, &fence_info, nullptr, &fence);
-		ProgramLog::OutputLine("\nSuccessfully created render fence!\n");
+		ProgramLog::OutputLine("Successfully created render fence!\n");
 
 		return vulkan_status;
 	}
 
 	VkResult CreateSemaphore(VkSemaphore& semaphore, VkSemaphoreCreateInfo& semaphore_info) {
 		vulkan_status = vkCreateSemaphore(device_, &semaphore_info, nullptr, &semaphore);
-		ProgramLog::OutputLine("\nSuccessfully created render semaphore!\n");
+		ProgramLog::OutputLine("Successfully created render semaphore!\n");
 
 		return vulkan_status;
 	}

@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFD264917C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -21,12 +21,9 @@ Created subpass description for renderpass.
 Created the subpass dependencies for the renderpass.
 Initialized the renderpass creation info.
 Successfully initialized the renderpass!
-
 Successfully created render fence!
 
-
 Successfully created render semaphore!
-
 
 Successfully created render semaphore!
 
@@ -46,98 +43,14 @@ Created color blend state for the render pipeline.
 Created depth stencil state for the render pipeline.
 
 Created graphics pipeline info for render pipeline.
-Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
+Created a window with size 2560 X 1026.
+Swapchain Format Count: 3
+Color Attachment Ref ID: 2
+Name for shader stage (Index 0): main.
+Successfully created graphics pipeline!
+Reset IMGUI command pool successfully.
+Started command recording!
+Ended command recording!
 
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-
-Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-
-Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-
-Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[1].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-
-Address for Vulkan debug callback: 00007FFD265B17C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[0].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-sType-sType ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x567efb65 
- vkCreateGraphicsPipelines: parameter pCreateInfos[0].pStages[1].sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO The Vulkan spec states: sType must be VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-sType-sType)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[0].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkPipelineShaderStageCreateInfo-pName-parameter ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x7abf6962 
- vkCreateGraphicsPipelines: required parameter pCreateInfos[0].stage[1].pName specified as NULL. The Vulkan spec states: pName must be a null-terminated UTF-8 string (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkPipelineShaderStageCreateInfo-pName-parameter)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkGraphicsPipelineCreateInfo-stage-00727 ] Object 0: handle = 0x24ee44036c0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x1b7c7be8 
- Invalid Pipeline CreateInfo[0] State: Vertex Shader required. The Vulkan spec states: If the pipeline is being created with pre-rasterization shader state the stage member of one element of pStages must be VK_SHADER_STAGE_VERTEX_BIT (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkGraphicsPipelineCreateInfo-stage-00727)
+Successfully submitted item to queue!
 
