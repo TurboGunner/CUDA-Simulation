@@ -94,11 +94,11 @@ There are three main steps for fluid simulations that are defined for Navier-Sto
 
 Stabilize LBM further.
 
-Add a custom GUI and render engine (huge undertaking, will be in the works for a long time)!
-
 Perform more tests and rigorous quality control checks in regards to accuracy.
 
 Get a meshing system.
+
+Likely add MLS-MPM.
 
 ## Relevant Papers Used:
 
