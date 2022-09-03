@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFD554D17C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFCBFE317C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -24,6 +24,7 @@ Created subpass description for the render pass.
 Created the subpass dependencies for the renderpass.
 Initialized the renderpass creation info.
 Successfully initialized the render pass!
+
 
 
 Swapchain Image View Size: 3

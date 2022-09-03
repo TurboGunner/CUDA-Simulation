@@ -33,24 +33,6 @@ public:
 		return render_pass_;
 	}
 
-	static VkRenderPassBeginInfo SubpassBeginInfo(VkRenderPass& subpass, VkFramebuffer& frame_buffer, const uint2& size) {
-		VkRenderPassBeginInfo pass_info = {};
-
-		pass_info.renderPass = subpass;
-		pass_info.renderArea.offset.x = 0;
-		pass_info.renderArea.offset.y = 0;
-		pass_info.renderArea.extent.width = size.x;
-		pass_info.renderArea.extent.height = size.y;
-		pass_info.clearValueCount = 1;
-		pass_info.pClearValues = nullptr;
-		pass_info.framebuffer = frame_buffer;
-
-		ProgramLog::OutputLine("Created the subpass begin command info.");
-
-
-		return pass_info;
-	}
-
 	VkRenderPass render_pass_;
 
 private:

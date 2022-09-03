@@ -24,17 +24,19 @@ class SwapChainProperties {
 public:
     SwapChainProperties() = default;
 
-    SwapChainProperties(VkDevice& device_in, VkPhysicalDevice& phys_device_in) {
+    SwapChainProperties(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkSurfaceKHR& surface_in, uint2& size_in) {
         device_ = device_in;
         physical_device_ = phys_device_in;
+        surface_ = surface_in;
+        size_ = size_in;
     }
 
     static uint32_t ClampNum(const uint32_t& value, const uint32_t& min, const uint32_t& max) {
         return std::max(min, std::min(max, value));
     }
 
-    VkSwapchainKHR Initialize(VkSurfaceKHR& surface, uint2& size) {
-        InitializeSurfaceCapabilities(surface);
+    VkSwapchainKHR Initialize() {
+        InitializeSurfaceCapabilities(surface_);
         surface_format_ = ChooseSwapSurfaceFormat();
 
         uint32_t image_count = capabilities_.minImageCount + 1;
@@ -42,11 +44,11 @@ public:
             image_count = capabilities_.maxImageCount;
         }
 
-        extent_ = ChooseSwapExtent(size);
+        extent_ = ChooseSwapExtent();
 
         present_mode_ = ChooseSwapPresentMode();
 
-        VkSwapchainCreateInfoKHR create_info = SwapChainInfo(surface, image_count);
+        VkSwapchainCreateInfoKHR create_info = SwapChainInfo(surface_, image_count);
 
         if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &swapchain_) != VK_SUCCESS) {
             ProgramLog::OutputLine("\n\nError: Failed to create swapchain!\n\n");
@@ -58,9 +60,33 @@ public:
         ProgramLog::OutputLine(s_stream);
 
         CreateImageViews();
-        depth_image_view_ = DepthImageView(size);
+        depth_image_view_ = DepthImageView();
 
         return swapchain_;
+    }
+
+    void CreateSwapchainFrameBuffers(VkRenderPass& render_pass, vector<VkImageView>& swapchain_image_views, VkImageView& depth_image_view) {
+        frame_buffers_.resize(swapchain_image_views.size());
+
+        VkFramebufferCreateInfo frame_buffer_info = {};
+        frame_buffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        frame_buffer_info.pNext = nullptr;
+
+        frame_buffer_info.renderPass = render_pass;
+        frame_buffer_info.layers = 1;
+        ProgramLog::OutputLine("Framebuffers size: " + std::to_string(size_.x) + " X " + std::to_string(size_.y) + ".");
+
+        for (size_t i = 0; i < swapchain_image_views.size(); i++) {
+            array<VkImageView, 2> attachments = { swapchain_image_views[i], depth_image_view };
+
+            frame_buffer_info.width = size_.x;
+            frame_buffer_info.height = size_.y;
+
+            frame_buffer_info.attachmentCount = attachments.size();
+            frame_buffer_info.pAttachments = attachments.data();
+
+            vulkan_status = vkCreateFramebuffer(device_, &frame_buffer_info, nullptr, &frame_buffers_[i]);
+        }
     }
 
     VkSwapchainKHR swapchain_;
@@ -72,6 +98,8 @@ public:
 
     vector<VkImage> swapchain_images_;
     vector<VkImageView> swapchain_image_views_;
+
+    vector<VkFramebuffer> frame_buffers_;
 
     VkSurfaceFormatKHR surface_format_;
     VkPresentModeKHR present_mode_;
@@ -146,11 +174,11 @@ private:
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    VkExtent2D ChooseSwapExtent(uint2 size) {
+    VkExtent2D ChooseSwapExtent() {
         if (capabilities_.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities_.currentExtent;
         }
-        VkExtent2D actual_extent = { size.x, size.y };
+        VkExtent2D actual_extent = { size_.x, size_.y };
 
         actual_extent.width = ClampNum(actual_extent.width, capabilities_.minImageExtent.width, capabilities_.maxImageExtent.width);
         actual_extent.height = ClampNum(actual_extent.height, capabilities_.minImageExtent.height, capabilities_.maxImageExtent.height);
@@ -166,11 +194,11 @@ private:
         }
     }
 
-    VkImageView DepthImageView(uint2& size) {
+    VkImageView DepthImageView() {
 
         auto format = ImageHelper::FindDepthFormat(physical_device_);
 
-        ImageHelper::InitializeImage(device_, physical_device_, depth_memory_, depth_image_, size, format, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        ImageHelper::InitializeImage(device_, physical_device_, depth_memory_, depth_image_, size_, format, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
         auto depth_image_view = ImageHelper::CreateImageView(device_, depth_image_, format, VK_IMAGE_ASPECT_DEPTH_BIT);
 
@@ -179,8 +207,37 @@ private:
         return depth_image_view;
     }
 
+    void RecreateSwapChain(VkRenderPass& render_pass) {
+        vkDeviceWaitIdle(device_);
+
+        Clean();
+
+        Initialize();
+        CreateImageViews();
+        CreateSwapchainFrameBuffers(render_pass, swapchain_image_views_, depth_image_view_);
+    }
+
+    void Clean() {
+        vkDestroyImageView(device_, depth_image_view_, nullptr);
+        vkDestroyImage(device_, depth_image_, nullptr);
+        vkFreeMemory(device_, depth_memory_, nullptr);
+
+        for (auto frame_buffer : frame_buffers_) {
+            vkDestroyFramebuffer(device_, frame_buffer, nullptr);
+        }
+
+        for (auto view : swapchain_image_views_) {
+            vkDestroyImageView(device_, view, nullptr);
+        }
+        vkDestroySwapchainKHR(device_, swapchain_, nullptr);
+    }
+
     VkDevice device_;
     VkPhysicalDevice physical_device_;
+
+    VkSurfaceKHR surface_;
+
+    uint2 size_;
 
     VkDeviceMemory depth_memory_;
 

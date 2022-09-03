@@ -1,34 +1,15 @@
 #pragma once
 
+#include "gui_driver.cuh"
+
 #include "../CUDATest/handler_classes.hpp"
+
+#include "vulkan_helpers.hpp"
 
 #include <cuda_runtime.h>
 #include <vulkan/vulkan.h>
 
 struct ImageHelper {
-	static uint32_t FindMemoryType(VkPhysicalDevice& physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties) {
-		VkPhysicalDeviceMemoryProperties mem_properties;
-		vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_properties);
-		for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
-			if (type_filter & (1 << i)) {
-				ProgramLog::OutputLine("Memory Type: " + std::to_string(i));
-				return i;
-			}
-		}
-		ProgramLog::OutputLine("Error: Failed to find suitable memory type!");
-	}
-
-	static VkMemoryAllocateInfo CreateAllocationInfo(VkPhysicalDevice& physical_device, VkMemoryRequirements& mem_requirements, VkMemoryPropertyFlags properties) {
-		VkMemoryAllocateInfo alloc_info = {};
-		alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		alloc_info.allocationSize = mem_requirements.size;
-		alloc_info.memoryTypeIndex = FindMemoryType(physical_device, mem_requirements.memoryTypeBits, properties);
-
-		ProgramLog::OutputLine("Created allocation info for video memory. ");
-
-		return alloc_info;
-	}
-
 	static void InitializeImage(VkDevice& device, VkPhysicalDevice& physical_device, VkDeviceMemory& texture_image_memory, VkImage& image, uint2& size,
 		const VkFormat& image_format, const VkImageUsageFlags usage_flags, const VkMemoryPropertyFlags& properties) {
 		VkImageCreateInfo image_info = {};
@@ -57,7 +38,7 @@ struct ImageHelper {
 		VkMemoryRequirements mem_requirements = {}; //NOTE
 		vkGetImageMemoryRequirements(device, image, &mem_requirements);
 
-		VkMemoryAllocateInfo alloc_info = CreateAllocationInfo(physical_device, mem_requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(physical_device, mem_requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 		if (vkAllocateMemory(device, &alloc_info, nullptr, &texture_image_memory) != VK_SUCCESS) {
 			ProgramLog::OutputLine("Error: Failed to allocate image memory!");
 		}
@@ -106,4 +87,73 @@ struct ImageHelper {
 		}
 	}
 
+	static void TransitionImageLayout(VkDevice& device, VkCommandPool& command_pool, VkQueue& queue, VkImage image, const VkFormat& format, const VkImageLayout& old_layout, const VkImageLayout& new_layout) {
+		VkCommandBuffer command_buffer = VulkanHelper::BeginSingleTimeCommands(device, command_pool);
+
+		VkImageMemoryBarrier barrier = CreateImageMemoryBarrier(image, old_layout, new_layout);
+
+		VkPipelineStageFlags source_stage = {};
+		VkPipelineStageFlags destination_stage = {};
+
+		if (new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		{
+			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+			if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT) {
+				barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+			}
+		}
+		else {
+			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		}
+
+		if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+			source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destination_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		}
+		else if (old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			source_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			destination_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+
+		else if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+			source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destination_stage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		}
+
+		else {
+			ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
+		}
+
+		vkCmdPipelineBarrier(command_buffer, source_stage, destination_stage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+		VulkanHelper::EndSingleTimeCommands(command_buffer, device, command_pool, queue);
+	}
+
+private:
+	static VkImageMemoryBarrier CreateImageMemoryBarrier(VkImage image, const VkImageLayout& old_layout, const VkImageLayout& new_layout) {
+		VkImageMemoryBarrier barrier = {};
+
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+		barrier.oldLayout = old_layout;
+		barrier.newLayout = new_layout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image;
+
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+	}
 };

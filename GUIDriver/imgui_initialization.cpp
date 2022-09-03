@@ -61,9 +61,6 @@ void VulkanGUIDriver::SwapChainCondition() {
     SDL_GetWindowSize(window, &width, &height);
     if (width > 0 && height > 0) {
         ImGui_ImplVulkan_SetMinImageCount(min_image_count_);
-        //Note!
-        //ImGui_ImplVulkanH_CreateOrResizeWindow(instance_, physical_device_, device_, &main_window_data_, queue_family_, allocators_, width, height, min_image_count_);
-
         //main_window_data_.FrameIndex = 0;
         swap_chain_rebuilding_ = false;
     }

@@ -58,9 +58,9 @@ void VulkanGUIDriver::RunGUI() {
 
 void VulkanGUIDriver::GUISetup() {
     //Create Swapchain
-    swap_chain_helper_ = SwapChainProperties(device_, physical_device_);
+    swap_chain_helper_ = SwapChainProperties(device_, physical_device_, surface_, size_);
 
-    swap_chain_ = swap_chain_helper_.Initialize(surface_, size_);
+    swap_chain_ = swap_chain_helper_.Initialize();
 
     //Setting surface format and present mode
     surface_format_ = swap_chain_helper_.surface_format_;
@@ -92,9 +92,9 @@ void VulkanGUIDriver::GUISetup() {
     //Creating command pool
     vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
 
-    ProgramLog::OutputLine("Swapchain Image View Size: " + std::to_string(swap_chain_helper_.swapchain_image_views_.size()));
+    ProgramLog::OutputLine("\nSwapchain Image View Size: " + std::to_string(swap_chain_helper_.swapchain_image_views_.size()));
 
-    vulkan_helper_.CreateSwapchainFrameBuffers(swap_chain_helper_.swapchain_image_views_, swap_chain_helper_.depth_image_view_);
+    swap_chain_helper_.CreateSwapchainFrameBuffers(render_pass_, swap_chain_helper_.swapchain_image_views_, swap_chain_helper_.depth_image_view_);
 
     //Creating command buffer
     VkCommandBuffer buffer;
@@ -260,7 +260,7 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
 
     ManageCommandBuffer(command_pool_, command_buffers_["GUI"]);
 
-    StartRenderPass(command_buffer, vulkan_helper_.frame_buffers_[image_index_]);
+    StartRenderPass(command_buffer, swap_chain_helper_.frame_buffers_[image_index_]);
 
     ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer); // Record imgui primitives into command buffer
     //Note!
@@ -272,33 +272,9 @@ void VulkanGUIDriver::CleanupVulkanWindow() {
 }
 
 VkCommandBuffer VulkanGUIDriver::BeginSingleTimeCommands() {
-    VkCommandBufferAllocateInfo alloc_info = VulkanHelper::AllocateCommandBuffer(command_pool_);
-
-    VkCommandBuffer command_buffer;
-    vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
-
-    auto begin_info = VulkanHelper::BeginCommandBufferInfo();
-
-    vkBeginCommandBuffer(command_buffer, &begin_info);
-
-    ProgramLog::OutputLine("Started command recording!");
-
-    return command_buffer;
+    return VulkanHelper::BeginSingleTimeCommands(device_, command_pool_);
 }
 
 void VulkanGUIDriver::EndSingleTimeCommands(VkCommandBuffer& command_buffer) {
-    vkEndCommandBuffer(command_buffer);
-
-    ProgramLog::OutputLine("Ended command recording!");
-
-    VkSubmitInfo submit_info = {};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &command_buffer;
-
-    vkQueueSubmit(queue_, 1, &submit_info, VK_NULL_HANDLE);
-    ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
-    vkQueueWaitIdle(queue_);
-
-    vkFreeCommandBuffers(device_, command_pool_, 1, &command_buffer);
+    VulkanHelper::EndSingleTimeCommands(command_buffer, device_, command_pool_, queue_);
 }

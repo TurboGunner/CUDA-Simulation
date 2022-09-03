@@ -58,7 +58,7 @@
     <ClInclude Include="gui_driver.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="vertex_data.cuh">
+    <ClInclude Include="vertex_data.hpp">
       <Filter>includes\cuda</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />

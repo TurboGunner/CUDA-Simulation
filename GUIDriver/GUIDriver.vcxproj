@@ -113,7 +113,7 @@
     <ClInclude Include="swap_chain_manager.cuh" />
     <ClInclude Include="sync_structs.hpp" />
     <ClInclude Include="texture_loader.cuh" />
-    <ClInclude Include="vertex_data.cuh" />
+    <ClInclude Include="vertex_data.hpp" />
     <ClInclude Include="vulkan_helpers.hpp" />
     <ClInclude Include="vulkan_parameters.hpp" />
   </ItemGroup>
