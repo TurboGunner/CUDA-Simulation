@@ -58,7 +58,7 @@ void VulkanGUIDriver::RunGUI() {
 
 void VulkanGUIDriver::GUISetup() {
     //Create Swapchain
-    swap_chain_helper_ = SwapChainProperties(device_, physical_device_, surface_, size_);
+    swap_chain_helper_ = SwapChainProperties(device_, physical_device_, surface_, queue_, size_);
 
     swap_chain_ = swap_chain_helper_.Initialize();
 
@@ -88,9 +88,12 @@ void VulkanGUIDriver::GUISetup() {
     vulkan_helper_ = VulkanHelper(device_, render_pass_, size_);
     shader_handler_ = ShaderLoader(device_, viewport_, scissor_, pipeline_cache_, allocators_);
     sync_struct_ = SyncStruct(device_);
+    mesh_data_ = VertexData(device_, physical_device_, queue_);
 
     //Creating command pool
     vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
+
+    swap_chain_helper_.InitializeDepthPass(command_pool_);
 
     ProgramLog::OutputLine("\nSwapchain Image View Size: " + std::to_string(swap_chain_helper_.swapchain_image_views_.size()));
 
@@ -101,7 +104,7 @@ void VulkanGUIDriver::GUISetup() {
     auto buffer_info = VulkanHelper::AllocateCommandBuffer(command_pool_);
     vkAllocateCommandBuffers(device_, &buffer_info, &buffer);
     //NOTE!
-    command_buffers_.emplace("GUI", buffer);
+    command_buffers_.push_back(buffer);
 
     //Creating synchronization structs (fences and semaphores)
     sync_struct_.Initialize();
@@ -176,7 +179,7 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
 
-    MinimizeRenderCondition(draw_data, command_buffers_["GUI"]);
+    MinimizeRenderCondition(draw_data, command_buffers_[0]);
 }
 
 void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
@@ -211,7 +214,10 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
 
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
 
-    vkCmdDraw(command_buffer, 3, 1, 0, 0);
+    mesh_data_.Initialize(command_pool_);
+    mesh_data_.BindPipeline(command_buffer, command_pool_);
+
+    vkCmdDrawIndexed(command_buffer, mesh_data_.vertices.Size(), 1, 0, 0, 0);
 }
 
 void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore& image_semaphore, VkSemaphore& render_semaphore) {
@@ -229,10 +235,8 @@ void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore
 
     info.pWaitDstStageMask = &wait_stage;
 
-    array<VkCommandBuffer, 1> command_buffers = { command_buffers_["GUI"] };
-
     info.commandBufferCount = command_buffers_.size();
-    info.pCommandBuffers = command_buffers.data();
+    info.pCommandBuffers = command_buffers_.data();
 
     info.signalSemaphoreCount = 1;
     info.pSignalSemaphores = &render_semaphore;
@@ -258,7 +262,7 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
     vulkan_status = vkResetFences(device_, 1, &render_fence_);
     VulkanErrorHandler(vulkan_status);
 
-    ManageCommandBuffer(command_pool_, command_buffers_["GUI"]);
+    ManageCommandBuffer(command_pool_, command_buffers_[0]);
 
     StartRenderPass(command_buffer, swap_chain_helper_.frame_buffers_[image_index_]);
 

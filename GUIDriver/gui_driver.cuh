@@ -6,7 +6,9 @@
 #include "shader_loader.cuh"
 #include "texture_loader.cuh"
 #include "swap_chain_manager.cuh"
+#include "mesh_manager.hpp"
 #include "sync_structs.hpp"
+#include "vertex_data.hpp"
 
 #include "vulkan_helpers.hpp"
 #include "image_helpers.hpp"
@@ -176,6 +178,7 @@ public:
     SwapChainProperties swap_chain_helper_;
     SyncStruct sync_struct_;
     RenderPassInitializer render_pass_initializer_;
+    VertexData mesh_data_;
 
     tuple<VkImageView, VkSampler> image_alloc_;
 
@@ -205,7 +208,7 @@ public:
     VkRenderPass render_pass_;
 
     VkCommandPool command_pool_;
-    map<string, VkCommandBuffer> command_buffers_;
+    vector<VkCommandBuffer> command_buffers_;
 
     VkSwapchainKHR swap_chain_;
 

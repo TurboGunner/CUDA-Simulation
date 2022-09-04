@@ -26,7 +26,7 @@ public:
         ProgramLog::OutputLine("Initialized texture handler.\n");
     }
 
-    ~TextureLoader() {
+    void Clean() {
         vkDestroyImageView(device_, image_view_, nullptr);
         vkDestroyBuffer(device_, staging_buffer, nullptr);
         vkFreeMemory(device_, staging_buffer_memory, nullptr);

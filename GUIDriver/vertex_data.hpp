@@ -9,12 +9,21 @@
 
 #include <array>
 #include <vector>
+#include <unordered_map>
 
 using std::array;
 using std::vector;
+using std::unordered_map;
 
 struct Vertex {
-    glm::vec2 pos;
+    Vertex() = default;
+
+    Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b) {
+        pos = glm::uvec3(pos_x, pos_y, pos_z);
+        color = glm::uvec3(r, g, b);
+    }
+
+    glm::vec3 pos;
     glm::vec3 color;
 
     static VkVertexInputBindingDescription GetBindingDescription() {
@@ -42,65 +51,109 @@ struct Vertex {
 
         return attribute_descriptions;
     }
+
+    Vertex& operator=(const Vertex& copy) {
+        pos = copy.pos;
+        color = copy.color;
+
+        return *this;
+    }
+
 };
 
-class VertexData {
+struct VectorHash {
+    size_t operator() (const glm::vec3& vector) const {
+        size_t h1 = std::hash<float>()(vector.x);
+        size_t h2 = std::hash<float>()(vector.y);
+        size_t h3 = std::hash<float>()(vector.z);
+
+        return h1 ^ h2 ^ h3;
+    }
+};
+
+class MeshContainer {
 public:
-    VertexData() = default;
+    MeshContainer() = default;
 
-    VertexData(VkDevice device_in, VkPhysicalDevice& phys_device_in) {
-        device_ = device_in;
-        physical_device_ = phys_device_in;
+    MeshContainer(bool collision_mode) {
+        collision = collision_mode;
     }
 
-    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
-        VkBufferCreateInfo buffer_info = CreateVertexBuffer();
-
-        if (vkCreateBuffer(device_, &buffer_info, nullptr, &buffer) != VK_SUCCESS) {
-            ProgramLog::OutputLine("Error: Failed to properly allocate buffer!");
+    void Push(Vertex& coord_in) {
+        if (!collision) {
+            vertices_.push_back(coord_in);
+            return;
         }
-
-        VkMemoryRequirements mem_requirements;
-        vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
-
-        VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(physical_device_, mem_requirements, properties);
-
-        if (vkAllocateMemory(device_, &alloc_info, nullptr, &buffer_memory) != VK_SUCCESS) {
-            ProgramLog::OutputLine("Error: Failed allocate buffery memory!");
+        bool collide = CollisionCheck(coord_in);
+        if (!collide) {
+            vertices_.push_back(coord_in);
         }
-
-        vkBindBufferMemory(device_, buffer, buffer_memory, 0);
     }
 
-    void* MapMemory(const VkBufferCreateInfo& buffer_info, VkDeviceMemory& device_memory, ) {
-        void* data = nullptr;
-
-        vkMapMemory(device_, device_memory, 0, buffer_info.size, 0, &data);
-        memcpy(data, vertices.data(), (size_t) buffer_info.size);
-        vkUnmapMemory(device_, device_memory);
+    void Push(vector<Vertex>& coords_in) {
+        for (auto coord_in : coords_in) {
+            Push(coord_in);
+        }
     }
 
-    void Clean() {
-        vkDestroyBuffer(device_, vertex_buffer_, nullptr);
-        vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
+    void Push(std::initializer_list<Vertex>& coords_in) {
+        for (auto coord_in : coords_in) {
+            Push(coord_in);
+        }
     }
 
-    vector<Vertex> vertices;
+    bool CollisionCheck(Vertex& coord_in) {
+        size_t original_size = vertices_.size();
+        map_.try_emplace(coord_in.pos, vertices_.size());
+        if (vertices_.size() == original_size) {
+            ProgramLog::OutputLine("Warning: Intersecting vertex!");
+            return true;
+        }
+        return false;
+    }
+
+    Vertex& operator[](const int& index) {
+        return Get(index);
+    }
+
+    Vertex& Get(const int& index) {
+        if (index < 0 || index >= vertices_.size()) {
+            ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
+            return vertices_[0];
+        }
+        return vertices_[index];
+    }
+
+    void Set(Vertex& index_coord, const unsigned int& index) {
+        if (index >= vertices_.size()) {
+            ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
+            return;
+        }
+        vertices_[index] = index_coord;
+        CollisionCheck(index_coord);
+    }
+
+    void Remove(const unsigned int& index) {
+        if (index >= vertices_.size()) {
+            ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
+            return;
+        }
+        vertices_.erase(vertices_.begin() + index);
+    }
+
+    const Vertex* Data() {
+        if (vertices_.size() == 0) {
+            ProgramLog::OutputLine("Warning: No vertices stored!");
+        }
+        return vertices_.data();
+    }
+
+    unsigned int Size() {
+        return vertices_.size();
+    }
 
 private:
-    VkBufferCreateInfo CreateVertexBuffer() {
-        VkBufferCreateInfo buffer_info = {};
-
-        buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        buffer_info.size = sizeof(vertices[0]) * vertices.size();
-
-        return buffer_info;
-
-    }
-
-    VkDevice device_;
-    VkPhysicalDevice physical_device_;
-
-    VkBuffer vertex_buffer_;
-    VkDeviceMemory vertex_buffer_memory_;
+    vector<Vertex> vertices_;
+    unordered_map<glm::vec3, unsigned int, VectorHash> map_;
+    bool collision = false;
 };

@@ -21,14 +21,20 @@
     <Filter Include="includes">
       <UniqueIdentifier>{0d97b4cb-a173-432b-82bf-c862c1fbe94a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="includes\cuda">
-      <UniqueIdentifier>{0494c9b4-3e90-4f46-8cdc-b0e229a9eb38}</UniqueIdentifier>
-    </Filter>
     <Filter Include="cuda">
       <UniqueIdentifier>{a17feea3-34f1-4ff8-a2d1-f44dbe014f77}</UniqueIdentifier>
     </Filter>
     <Filter Include="includes\init_objects">
       <UniqueIdentifier>{33b835af-d5bc-4ea6-a25e-adbe16664ff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\helpers">
+      <UniqueIdentifier>{3ac4988f-4f03-4b15-b3ba-b660a77bcdbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\imported">
+      <UniqueIdentifier>{294ee2fa-6f16-429f-bd9e-4abac425cfd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\init_objects\mesh">
+      <UniqueIdentifier>{3701e0c6-9b7e-4506-bea3-332885870cc7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -52,22 +58,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\CUDATest\handler_methods.hpp">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="gui_driver.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="vertex_data.hpp">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="vulkan_helpers.hpp">
-      <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="sync_structs.hpp">
-      <Filter>includes</Filter>
-    </ClInclude>
     <ClInclude Include="vulkan_parameters.hpp">
       <Filter>includes</Filter>
     </ClInclude>
@@ -83,8 +74,26 @@
     <ClInclude Include="swap_chain_manager.cuh">
       <Filter>includes\init_objects</Filter>
     </ClInclude>
-    <ClInclude Include="image_helpers.hpp">
+    <ClInclude Include="gui_driver.cuh">
       <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="sync_structs.hpp">
+      <Filter>includes\init_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="vulkan_helpers.hpp">
+      <Filter>includes\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="image_helpers.hpp">
+      <Filter>includes\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CUDATest\handler_methods.hpp">
+      <Filter>includes\imported</Filter>
+    </ClInclude>
+    <ClInclude Include="vertex_data.hpp">
+      <Filter>includes\init_objects\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh_manager.hpp">
+      <Filter>includes\init_objects\mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

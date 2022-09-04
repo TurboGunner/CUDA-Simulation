@@ -65,7 +65,7 @@ struct VulkanHelper {
 		VkPhysicalDeviceMemoryProperties mem_properties;
 		vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_properties);
 		for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
-			if (type_filter & (1 << i)) {
+			if (type_filter & (1 << i) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
 				ProgramLog::OutputLine("Memory Type: " + std::to_string(i));
 				return i;
 			}
@@ -79,7 +79,7 @@ struct VulkanHelper {
 		alloc_info.allocationSize = mem_requirements.size;
 		alloc_info.memoryTypeIndex = FindMemoryType(physical_device, mem_requirements.memoryTypeBits, properties);
 
-		ProgramLog::OutputLine("Created allocation info for video memory. ");
+		ProgramLog::OutputLine("Created allocation info for video memory.");
 
 		return alloc_info;
 	}

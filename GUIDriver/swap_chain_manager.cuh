@@ -24,10 +24,12 @@ class SwapChainProperties {
 public:
     SwapChainProperties() = default;
 
-    SwapChainProperties(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkSurfaceKHR& surface_in, uint2& size_in) {
+    SwapChainProperties(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkSurfaceKHR& surface_in, VkQueue& queue_in, uint2& size_in) {
         device_ = device_in;
         physical_device_ = phys_device_in;
         surface_ = surface_in;
+        queue_ = queue_in;
+
         size_ = size_in;
     }
 
@@ -60,9 +62,14 @@ public:
         ProgramLog::OutputLine(s_stream);
 
         CreateImageViews();
-        depth_image_view_ = DepthImageView();
 
         return swapchain_;
+    }
+
+    void InitializeDepthPass(VkCommandPool& command_pool) {
+        depth_image_view_ = DepthImageView();
+
+        ImageHelper::TransitionImageLayout(device_, command_pool, queue_, depth_image_, surface_format_.format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
 
     void CreateSwapchainFrameBuffers(VkRenderPass& render_pass, vector<VkImageView>& swapchain_image_views, VkImageView& depth_image_view) {
@@ -207,7 +214,7 @@ private:
         return depth_image_view;
     }
 
-    void RecreateSwapChain(VkRenderPass& render_pass) {
+    void RecreateSwapChain(VkRenderPass& render_pass, VkCommandPool& command_pool) {
         vkDeviceWaitIdle(device_);
 
         Clean();
@@ -236,6 +243,8 @@ private:
     VkPhysicalDevice physical_device_;
 
     VkSurfaceKHR surface_;
+
+    VkQueue queue_;
 
     uint2 size_;
 
