@@ -215,6 +215,7 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
 
     mesh_data_.Initialize(command_pool_);
+    mesh_data_.InitializeIndex(command_pool_);
     mesh_data_.BindPipeline(command_buffer, command_pool_);
 
     vkCmdDrawIndexed(command_buffer, mesh_data_.vertices.Size(), 1, 0, 0, 0);
