@@ -55,36 +55,40 @@ struct VulkanHelper {
 		pool_info.queueFamilyIndex = queue_family;
 
 		if (vkCreateCommandPool(device_, &pool_info, nullptr, &command_pool) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create command pool!");
+			throw std::runtime_error("Error: Failed to create command pool!");
 		}
 
 		return command_pool;
 	}
 
-	static uint32_t FindMemoryType(VkPhysicalDevice& physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties) {
+	static uint32_t FindMemoryType(VkPhysicalDevice& physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties, bool log = true) {
 		VkPhysicalDeviceMemoryProperties mem_properties;
 		vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_properties);
 		for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
 			if (type_filter & (1 << i) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
-				ProgramLog::OutputLine("Memory Type: " + std::to_string(i));
+				if (log) {
+					ProgramLog::OutputLine("Memory Type: " + std::to_string(i));
+				}
 				return i;
 			}
 		}
 		ProgramLog::OutputLine("Error: Failed to find suitable memory type!");
 	}
 
-	static VkMemoryAllocateInfo CreateAllocationInfo(VkPhysicalDevice& physical_device, VkMemoryRequirements& mem_requirements, VkMemoryPropertyFlags properties) {
+	static VkMemoryAllocateInfo CreateAllocationInfo(VkPhysicalDevice& physical_device, VkMemoryRequirements& mem_requirements, VkMemoryPropertyFlags properties, bool log = true) {
 		VkMemoryAllocateInfo alloc_info = {};
 		alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		alloc_info.allocationSize = mem_requirements.size;
-		alloc_info.memoryTypeIndex = FindMemoryType(physical_device, mem_requirements.memoryTypeBits, properties);
+		alloc_info.memoryTypeIndex = FindMemoryType(physical_device, mem_requirements.memoryTypeBits, properties, log);
 
-		ProgramLog::OutputLine("Created allocation info for video memory.");
+		if (log) {
+			ProgramLog::OutputLine("Created allocation info for video memory.");
+		}
 
 		return alloc_info;
 	}
 
-	static VkCommandBuffer BeginSingleTimeCommands(VkDevice& device, VkCommandPool command_pool) {
+	static VkCommandBuffer BeginSingleTimeCommands(VkDevice& device, VkCommandPool command_pool, bool log = true) {
 		VkCommandBufferAllocateInfo alloc_info = AllocateCommandBuffer(command_pool);
 
 		VkCommandBuffer command_buffer;
@@ -94,16 +98,20 @@ struct VulkanHelper {
 
 		vkBeginCommandBuffer(command_buffer, &begin_info);
 
-		ProgramLog::OutputLine("Started command recording!");
+		if (log) {
+			ProgramLog::OutputLine("Started command recording!");
+		}
 
 		return command_buffer;
 	}
 
 
-	static void EndSingleTimeCommands(VkCommandBuffer& command_buffer, VkDevice& device, VkCommandPool command_pool, VkQueue queue) {
+	static void EndSingleTimeCommands(VkCommandBuffer& command_buffer, VkDevice& device, VkCommandPool command_pool, VkQueue queue, bool log = true) {
 		vkEndCommandBuffer(command_buffer);
 
-		ProgramLog::OutputLine("Ended command recording!");
+		if (log) {
+			ProgramLog::OutputLine("Ended command recording!");
+		}
 
 		VkSubmitInfo submit_info = {};
 
@@ -112,7 +120,9 @@ struct VulkanHelper {
 		submit_info.pCommandBuffers = &command_buffer;
 
 		vkQueueSubmit(queue, 1, &submit_info, VK_NULL_HANDLE);
-		ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
+		if (log) {
+			ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
+		}
 		vkQueueWaitIdle(queue);
 
 		vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);

@@ -28,7 +28,8 @@ public:
     }
 
     void BindPipeline(VkCommandBuffer& command_buffer, VkCommandPool& command_pool) {
-        vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffer_, &size_);
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffer_, offsets);
         vkCmdBindIndexBuffer(command_buffer, index_buffer_, 0, VK_INDEX_TYPE_UINT16);
     }
 
@@ -61,7 +62,7 @@ public:
         VkMemoryRequirements mem_requirements;
         vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
 
-        VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(physical_device_, mem_requirements, properties);
+        VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(physical_device_, mem_requirements, properties, false);
 
         if (vkAllocateMemory(device_, &alloc_info, nullptr, &buffer_memory) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Failed to allocate buffer memory!");
@@ -69,7 +70,7 @@ public:
 
         vkBindBufferMemory(device_, buffer, buffer_memory, 0);
 
-        ProgramLog::OutputLine("Created and bound buffer to device memory successfully!");
+        //ProgramLog::OutputLine("Created and bound buffer to device memory successfully!");
     }
 
     void InitializeIndex(VkCommandPool& command_pool) {
@@ -81,7 +82,7 @@ public:
 
         void* data = MapMemory(size_, staging_buffer_memory);
 
-        CreateBuffer(size_, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, index_buffer_, index_buffer_memory_);
+        CreateBuffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size_, index_buffer_, index_buffer_memory_);
 
         CopyBuffer(command_pool, staging_buffer, index_buffer_, size_);
 
@@ -119,13 +120,13 @@ private:
     }
 
     void CopyBuffer(VkCommandPool& command_pool, VkBuffer& src_buffer, VkBuffer& dst_buffer, const VkDeviceSize& size) {
-        VkCommandBuffer command_buffer = VulkanHelper::BeginSingleTimeCommands(device_, command_pool);
+        VkCommandBuffer command_buffer = VulkanHelper::BeginSingleTimeCommands(device_, command_pool, false);
 
-        VkBufferCopy copyRegion = {};
-        copyRegion.size = size;
-        vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copyRegion);
+        VkBufferCopy copy_region = {};
+        copy_region.size = size;
+        vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
 
-        VulkanHelper::EndSingleTimeCommands(command_buffer, device_, command_pool, queue_);
+        VulkanHelper::EndSingleTimeCommands(command_buffer, device_, command_pool, queue_, false);
     }
 
     VkDevice device_;

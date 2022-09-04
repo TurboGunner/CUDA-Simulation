@@ -1,0 +1,69 @@
+Created a window with size 2560 X 1026.
+Address for Vulkan debug callback: 00007FFCBB3817C0. Debug callback successful!
+
+Shout out to Bidoof on the beat!
+
+GPU Device #0 has been selected for Vulkan Rendering successfully!
+No errors detected while selecting Vulkan queue family. 
+Vulkan instance successfully created!
+Successfully created Vulkan surface for window!
+Created a window with size 2560 X 1026.
+Swapchain Image Count: 3
+
+Created color attachment for the render pass.
+Created depth attachment for the render pass.
+Created attachment references for the render pass.
+Created a window with size 2560 X 1026.
+Swapchain Image Count: 3
+Color Attachment Ref ID: 2
+
+Created subpass description for the render pass.
+Created the subpass dependencies for the renderpass.
+Initialized the renderpass creation info.
+Successfully initialized the render pass!
+
+
+Memory Type: 1
+Created allocation info for video memory.
+Created depth image view.
+Started command recording!
+Ended command recording!
+
+Successfully submitted item to queue!
+
+
+Swapchain Image View Size: 3
+Framebuffers size: 2560 X 1026.
+Successfully created render fence!
+
+Successfully created render semaphore!
+
+Successfully created render semaphore!
+
+Successfully read shader file Shaders/vert.spv!
+
+Successfully read shader file Shaders/frag.spv!
+
+Initialized input assembly info struct (vertex) for the render pipeline.
+Initialized input assembly info struct (frag) for the render pipeline.
+Initialized vertex input info struct for the render pipeline.
+Initialized input assembly info struct for the render pipeline.
+Initialized viewport state values for the render pipeline.
+Initialized dynamic states for the render pipeline.
+
+Created color blend attachment for the render pipeline.
+Created color blend state for the render pipeline.
+Created depth stencil state for the render pipeline.
+
+Created graphics pipeline info for render pipeline.
+Created a window with size 2560 X 1026.
+Swapchain Image Count: 3
+Color Attachment Ref ID: 2
+Name for shader stage (Index 0): main.
+Successfully created graphics pipeline!
+Reset IMGUI command pool successfully.
+Started command recording!
+Ended command recording!
+
+Successfully submitted item to queue!
+
