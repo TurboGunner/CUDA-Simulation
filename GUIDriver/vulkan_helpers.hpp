@@ -17,12 +17,12 @@ using std::vector;
 struct VulkanHelper {
 	VulkanHelper() = default;
 
-	VulkanHelper(VkDevice& device_in, VkRenderPass& pass_in, uint2& size_in) {
+	VulkanHelper(VkDevice& device_in, uint2& size_in, const size_t& max_frames_const_in) {
 		device_ = device_in;
 
-		render_pass_ = pass_in; //NOTE: Probably no longer needed
-
 		size_ = size_in;
+
+		MAX_FRAMES_IN_FLIGHT_ = max_frames_const_in;
 	}
 
 	static VkCommandBufferAllocateInfo AllocateCommandBufferInfo(VkCommandPool& pool, uint32_t count = 1, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) {
@@ -38,6 +38,20 @@ struct VulkanHelper {
 		return info;
 	}
 
+	static VkResult InitializeCommandBuffer(VkDevice& device, VkCommandBuffer& command_buffer, VkCommandPool& command_pool) {
+		auto allocation_info = AllocateCommandBufferInfo(command_pool);
+
+		return vkAllocateCommandBuffers(device, &allocation_info, &command_buffer);
+	}
+
+	VkResult InitializeCommandBuffers(vector<VkCommandBuffer>& command_buffers, VkCommandPool& command_pool) {
+		command_buffers.resize(MAX_FRAMES_IN_FLIGHT_);
+
+		auto allocation_info = AllocateCommandBufferInfo(command_pool, MAX_FRAMES_IN_FLIGHT_);
+
+		return vkAllocateCommandBuffers(device_, &allocation_info, command_buffers.data());
+	}
+
 	static VkCommandBufferBeginInfo BeginCommandBufferInfo() {
 		VkCommandBufferBeginInfo begin_info = {};
 
@@ -45,14 +59,6 @@ struct VulkanHelper {
 		begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
 		return begin_info;
-	}
-
-	VkResult InitializeCommandBuffers(vector<VkCommandBuffer>& command_buffers, VkCommandPool& command_pool, const size_t& MAX_FRAMES_IN_FLIGHT) {
-		command_buffers.resize(MAX_FRAMES_IN_FLIGHT);
-
-		auto allocation_info = AllocateCommandBufferInfo(command_pool, MAX_FRAMES_IN_FLIGHT);
-
-		return vkAllocateCommandBuffers(device_, &allocation_info, command_buffers.data());
 	}
 
 	VkCommandPool CreateCommandPool(VkCommandPool& command_pool, const uint32_t& queue_family) {
@@ -69,9 +75,10 @@ struct VulkanHelper {
 		return command_pool;
 	}
 
-	static uint32_t FindMemoryType(VkPhysicalDevice& physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties, bool log = true) {
+	static uint32_t FindMemoryType(VkPhysicalDevice& physical_device, uint32_t type_filter, const VkMemoryPropertyFlags& properties, const bool& log = true) {
 		VkPhysicalDeviceMemoryProperties mem_properties;
 		vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_properties);
+
 		for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++) {
 			if (type_filter & (1 << i) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties) {
 				if (log) {
@@ -83,8 +90,9 @@ struct VulkanHelper {
 		ProgramLog::OutputLine("Error: Failed to find suitable memory type!");
 	}
 
-	static VkMemoryAllocateInfo CreateAllocationInfo(VkPhysicalDevice& physical_device, VkMemoryRequirements& mem_requirements, VkMemoryPropertyFlags properties, bool log = true) {
+	static VkMemoryAllocateInfo CreateAllocationInfo(VkPhysicalDevice& physical_device, VkMemoryRequirements& mem_requirements, const VkMemoryPropertyFlags& properties, bool log = true) {
 		VkMemoryAllocateInfo alloc_info = {};
+
 		alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		alloc_info.allocationSize = mem_requirements.size;
 		alloc_info.memoryTypeIndex = FindMemoryType(physical_device, mem_requirements.memoryTypeBits, properties, log);
@@ -97,10 +105,9 @@ struct VulkanHelper {
 	}
 
 	static VkCommandBuffer BeginSingleTimeCommands(VkDevice& device, VkCommandPool command_pool, bool log = true) {
-		VkCommandBufferAllocateInfo alloc_info = AllocateCommandBufferInfo(command_pool);
 
 		VkCommandBuffer command_buffer;
-		vkAllocateCommandBuffers(device, &alloc_info, &command_buffer);
+		InitializeCommandBuffer(device, command_buffer, command_pool);
 
 		auto begin_info = BeginCommandBufferInfo();
 
@@ -114,8 +121,9 @@ struct VulkanHelper {
 	}
 
 
-	static void EndSingleTimeCommands(VkCommandBuffer& command_buffer, VkDevice& device, VkCommandPool command_pool, VkQueue queue, bool log = true) {
-		vkEndCommandBuffer(command_buffer);
+	static VkResult EndSingleTimeCommands(VkCommandBuffer& command_buffer, VkDevice& device, VkCommandPool command_pool, VkQueue queue, const bool& log = true, const size_t& size = 1) {
+		VkResult vulkan_status = VK_SUCCESS;
+		vulkan_status = vkEndCommandBuffer(command_buffer);
 
 		if (log) {
 			ProgramLog::OutputLine("Ended command recording!");
@@ -124,16 +132,19 @@ struct VulkanHelper {
 		VkSubmitInfo submit_info = {};
 
 		submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submit_info.commandBufferCount = 1;
+		submit_info.commandBufferCount = size;
 		submit_info.pCommandBuffers = &command_buffer;
 
-		vkQueueSubmit(queue, 1, &submit_info, VK_NULL_HANDLE);
+		vulkan_status = vkQueueSubmit(queue, 1, &submit_info, VK_NULL_HANDLE);
+
 		if (log) {
 			ProgramLog::OutputLine("\nSuccessfully submitted item to queue!\n");
 		}
-		vkQueueWaitIdle(queue);
+		vulkan_status = vkQueueWaitIdle(queue);
 
 		vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+
+		return vulkan_status;
 	}
 
 	//NOTE:
@@ -150,12 +161,10 @@ struct VulkanHelper {
 
 	VkDevice device_;
 
-	VkRenderPass render_pass_;
-
 	vector<VkCommandBuffer> imgui_command_buffers_;
 	vector<VkCommandPool> imgui_command_pools_;
 
-	uint2 size_;
+	size_t MAX_FRAMES_IN_FLIGHT_;
 
-	VkResult vulkan_status;
+	uint2 size_;
 };

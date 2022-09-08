@@ -64,10 +64,13 @@ private:
 		return semaphore_info;
 	}
 
-	VkResult CreateFence(VkFence& fence, const VkFenceCreateInfo& fence_info) {
+	VkResult CreateFence(VkFence& fence, const VkFenceCreateInfo& fence_info, const bool& log = false) { //False due to not using individual fence inits anymore
 		VkResult vulkan_status = VK_SUCCESS;
 		vulkan_status = vkCreateFence(device_, &fence_info, nullptr, &fence);
-		ProgramLog::OutputLine("Successfully created render fence!\n");
+
+		if (log) {
+			ProgramLog::OutputLine("Successfully created render fence!\n");
+		}
 
 		return vulkan_status;
 	}
@@ -76,16 +79,24 @@ private:
 	VkResult CreateFences(vector<VkFence>& fences, const VkFenceCreateInfo& fence_info, const size_t& size) {
 		VkResult vulkan_status = VK_SUCCESS;
 		fences.resize(size);
+
 		for (size_t i = 0; i < size && vulkan_status == VK_SUCCESS; i++) {
 			vulkan_status = CreateFence(fences[i], fence_info);
+			ProgramLog::OutputLine("Successfully created render fence #" + std::to_string(i) + "!");
 		}
+
+		ProgramLog::OutputLine("Successfully created all render fences!\n");
+
 		return vulkan_status;
 	}
 
-	VkResult CreateSemaphore(VkSemaphore& semaphore, const VkSemaphoreCreateInfo& semaphore_info) {
+	VkResult CreateSemaphore(VkSemaphore& semaphore, const VkSemaphoreCreateInfo& semaphore_info, const bool& log = false) { //False due to not using individual semaphore inits anymore
 		VkResult vulkan_status = VK_SUCCESS;
 		vulkan_status = vkCreateSemaphore(device_, &semaphore_info, nullptr, &semaphore);
-		ProgramLog::OutputLine("Successfully created render semaphore!\n");
+
+		if (log) {
+			ProgramLog::OutputLine("Successfully created render semaphore!\n");
+		}
 
 		return vulkan_status;
 	}
@@ -93,10 +104,13 @@ private:
 	VkResult CreateSemaphores(vector<VkSemaphore>& semaphores, const VkSemaphoreCreateInfo& semaphore_info, const size_t& size) {
 		VkResult vulkan_status = VK_SUCCESS;
 		semaphores.resize(size);
+
 		for (size_t i = 0; i < size && vulkan_status == VK_SUCCESS; i++) {
 			vulkan_status = CreateSemaphore(semaphores[i], semaphore_info);
+			ProgramLog::OutputLine("Successfully created render semaphore #" + std::to_string(i) + "!");
 		}
-		ProgramLog::OutputLine("Successfully created render semaphore!\n");
+
+		ProgramLog::OutputLine("Successfully created all render semaphores!\n");
 
 		return vulkan_status;
 	}

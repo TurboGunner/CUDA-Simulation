@@ -85,7 +85,7 @@ void VulkanGUIDriver::GUISetup() {
     render_pass_ = render_pass_initializer_.Initialize(surface_format_.format);
 
     //Creating all of the other external helpers
-    vulkan_helper_ = VulkanHelper(device_, render_pass_, size_);
+    vulkan_helper_ = VulkanHelper(device_, size_, MAX_FRAMES_IN_FLIGHT_);
     shader_handler_ = ShaderLoader(device_, viewport_, scissor_, pipeline_cache_, allocators_);
     sync_struct_ = SyncStruct(device_, MAX_FRAMES_IN_FLIGHT_);
     mesh_data_ = VertexData(device_, physical_device_, queue_);
@@ -93,18 +93,19 @@ void VulkanGUIDriver::GUISetup() {
     //Creating command pool
     vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
 
+    //Creating depth pass for rendering
     swap_chain_helper_.InitializeDepthPass(command_pool_);
 
+    //Creating framebuffers
     ProgramLog::OutputLine("\nSwapchain Image View Size: " + std::to_string(swap_chain_helper_.swapchain_image_views_.size()));
 
     swap_chain_helper_.CreateSwapchainFrameBuffers(render_pass_, swap_chain_helper_.swapchain_image_views_, swap_chain_helper_.depth_image_view_);
 
-    //Creating command buffer
-    VkCommandBuffer buffer;
-    auto command_info = VulkanHelper::AllocateCommandBufferInfo(command_pool_);
-    vkAllocateCommandBuffers(device_, &command_info, &buffer);
-    //NOTE!
-    command_buffers_.push_back(buffer);
+    //Creating command buffers
+    if (vulkan_helper_.InitializeCommandBuffers(command_buffers_, command_pool_) != VK_SUCCESS) {
+        ProgramLog::OutputLine("Error: Failed to create command buffers!");
+        return;
+    }
 
     //Creating synchronization structs (fences and semaphores)
     sync_struct_.Initialize();
@@ -183,7 +184,7 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
 
-    MinimizeRenderCondition(draw_data, command_buffers_[0]);
+    MinimizeRenderCondition(draw_data, command_buffers_[current_frame_]);
 }
 
 void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
@@ -197,7 +198,7 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBu
     clear_values_[0].color.float32[2] = clear_color_.z * clear_color_.w;
     clear_values_[0].color.float32[3] = clear_color_.w;
 
-    FrameRender(draw_data, command_buffer);
+    FrameRender(draw_data);
     FramePresent();
 }
 
@@ -238,8 +239,8 @@ void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore
 
     info.pWaitDstStageMask = &wait_stage;
 
-    info.commandBufferCount = command_buffers_.size();
-    info.pCommandBuffers = command_buffers_.data();
+    info.commandBufferCount = 1;
+    info.pCommandBuffers = &command_buffer;
 
     info.signalSemaphoreCount = 1;
     info.pSignalSemaphores = &render_semaphore;
@@ -248,7 +249,7 @@ void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore
     VulkanErrorHandler(vulkan_status);
 }
 
-void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
+void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
     VkResult vulkan_status;
 
     vulkan_status = vkAcquireNextImageKHR(device_, swap_chain_, UINT64_MAX, image_semaphores_[current_frame_], VK_NULL_HANDLE, &image_index_);
@@ -265,13 +266,13 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
     vulkan_status = vkResetFences(device_, 1, &render_fences_[current_frame_]);
     VulkanErrorHandler(vulkan_status);
 
-    ManageCommandBuffer(command_pool_, command_buffer);
+    ManageCommandBuffer(command_pool_, command_buffers_[current_frame_]);
 
-    StartRenderPass(command_buffer, swap_chain_helper_.frame_buffers_[image_index_]);
+    StartRenderPass(command_buffers_[current_frame_], swap_chain_helper_.frame_buffers_[image_index_]);
 
-    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer); // Record imgui primitives into command buffer
+    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffers_[current_frame_]); // Record imgui primitives into command buffer
     //Note!
-    EndRenderPass(command_buffer, image_semaphores_[current_frame_], render_semaphores_[current_frame_]);
+    EndRenderPass(command_buffers_[current_frame_], image_semaphores_[current_frame_], render_semaphores_[current_frame_]);
 }
 
 void VulkanGUIDriver::CleanupVulkanWindow() {

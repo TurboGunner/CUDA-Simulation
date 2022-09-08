@@ -68,7 +68,7 @@ void VulkanGUIDriver::SwapChainCondition() {
 }
 
 void VulkanGUIDriver::ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer) {
-    vulkan_status = vkResetCommandPool(device_, command_pool, 0);
+    //vulkan_status = vkResetCommandPool(device_, command_pool, 0);
     VulkanErrorHandler(vulkan_status);
 
     VkCommandBufferBeginInfo info = {};

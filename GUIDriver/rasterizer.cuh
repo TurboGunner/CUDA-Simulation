@@ -82,7 +82,7 @@ private:
 	}
 
 	void CreateSubpassDescription() {
-		s_stream << "Color Attachment Ref ID: " << color_attachment_ref_.layout << "\n";
+		s_stream << "\n\nColor Attachment Ref ID: " << color_attachment_ref_.layout << "\n";
 		ProgramLog::OutputLine(s_stream);
 
 		subpass_info_.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;

@@ -136,7 +136,7 @@ public:
 
     void CleanupVulkanWindow();
 
-    void FrameRender(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
+    void FrameRender(ImDrawData* draw_data);
 
     void ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer);
 
