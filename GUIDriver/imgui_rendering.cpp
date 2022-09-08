@@ -125,9 +125,7 @@ void VulkanGUIDriver::GUISetup() {
     mesh_data_.Initialize(command_pool_);
     mesh_data_.InitializeIndex(command_pool_);
 
-    mesh_data_.InitializeMeshPipelineLayout();
-
-    mesh_pipeline_layout_ = mesh_data_.mesh_pipeline_layout_;
+    mesh_pipeline_layout_ = shader_handler_.mesh_pipeline_layout_;
 
     IMGUIRenderLogic();
 

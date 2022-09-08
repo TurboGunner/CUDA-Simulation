@@ -104,35 +104,15 @@ public:
         VertexData::MapMemory(size, mesh_buffer_memory_);
     }
 
-    void InitializeMeshPipelineLayout() {
-        VkPipelineLayoutCreateInfo mesh_pipeline_layout_info = ShaderLoader::PipelineLayoutInfo();
-
-        VkPushConstantRange push_constant = {};
-
-        push_constant.offset = 0;
-        push_constant.size = sizeof(MeshPushConstants);
-        push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-        mesh_pipeline_layout_info.pPushConstantRanges = &push_constant;
-        mesh_pipeline_layout_info.pushConstantRangeCount = 1;
-
-        if (vkCreatePipelineLayout(device_, &mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout_) != VK_SUCCESS) {
-            ProgramLog::OutputLine("Error: Could not successfully create the mesh pipeline layout!");
-        }
-    }
-
     void Clean() {
         vkDestroyBuffer(device_, vertex_buffer_, nullptr);
         vkDestroyBuffer(device_, index_buffer_, nullptr);
 
         vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
         vkFreeMemory(device_, index_buffer_memory_, nullptr);
-
-        vkDestroyPipelineLayout(device_, mesh_pipeline_layout_, nullptr);
     }
 
     MeshContainer vertices;
-    VkPipelineLayout mesh_pipeline_layout_;
 private:
     VkBuffer CreateVertexBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
         VkBuffer buffer;

@@ -68,6 +68,7 @@ Created a window with size 2560 X 1026.
 Color Attachment Ref ID: 2
 Name for shader stage (Index 0): main.
 Successfully created graphics pipeline!
+Successfully created mesh pipeline!
 Reset IMGUI command pool successfully.
 Started command recording!
 Ended command recording!

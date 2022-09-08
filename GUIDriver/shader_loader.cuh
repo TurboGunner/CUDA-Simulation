@@ -2,6 +2,7 @@
 
 #include "rasterizer.cuh"
 #include "gui_driver.cuh"
+#include "mesh_manager.hpp"
 #include "vulkan_parameters.hpp"
 
 #include "imgui.h"
@@ -46,6 +47,24 @@ public:
         return pipeline_layout_;
     }
 
+
+    void InitializeMeshPipelineLayout() {
+        VkPipelineLayoutCreateInfo mesh_pipeline_layout_info = PipelineLayoutInfo();
+
+        VkPushConstantRange push_constant = {};
+
+        push_constant.offset = 0;
+        push_constant.size = sizeof(MeshPushConstants);
+        push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        mesh_pipeline_layout_info.pPushConstantRanges = &push_constant;
+        mesh_pipeline_layout_info.pushConstantRangeCount = 1;
+
+        if (vkCreatePipelineLayout(device_, &mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout_) != VK_SUCCESS) {
+            ProgramLog::OutputLine("Error: Could not successfully create the mesh pipeline layout!");
+        }
+    }
+
     static VkPipelineLayoutCreateInfo PipelineLayoutInfo() {
         VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 
@@ -71,6 +90,7 @@ public:
         frag_shader_stage_info_ = PipelineStageInfo(frag_shader_module_, VK_SHADER_STAGE_FRAGMENT_BIT);
 
         InitializeLayout();
+        InitializeMeshPipelineLayout();
 
         VertexInputInfo();
 
@@ -94,6 +114,11 @@ public:
 
         ProgramLog::OutputLine("Successfully created graphics pipeline!");
 
+        pipeline_info_.layout = mesh_pipeline_layout_;
+        vulkan_status = vkCreateGraphicsPipelines(device_, pipeline_cache_, 1, &pipeline_info_, VK_NULL_HANDLE, &mesh_pipeline_);
+
+        ProgramLog::OutputLine("Successfully created mesh pipeline!");
+
         vkDestroyShaderModule(device_, frag_shader_module_, nullptr);
         vkDestroyShaderModule(device_, vert_shader_module_, nullptr);
 
@@ -103,11 +128,12 @@ public:
     void Clean() {
         vkDestroyPipeline(device_, render_pipeline_, nullptr);
         vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
+
+        vkDestroyPipelineLayout(device_, mesh_pipeline_layout_, nullptr);
     }
 
-    VkPipelineLayout pipeline_layout_;
-    VkPipeline render_pipeline_;
-    VkPipeline mesh_pipeline_;
+    VkPipelineLayout pipeline_layout_, mesh_pipeline_layout_;
+    VkPipeline render_pipeline_, mesh_pipeline_;
 
 private:
     void RasterizationInfo() {
