@@ -32,6 +32,10 @@
 //Vulkan
 #include <vulkan/vulkan.h>
 
+//OpenGL/GLM
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+
 //Standard Imports
 #include <array>
 #include <iostream>
@@ -107,7 +111,6 @@ public:
         ImGui_ImplSDL2_Shutdown();
         ImGui::DestroyContext();
 
-        CleanupVulkanWindow();
         CleanupVulkan();
 
         SDL_DestroyWindow(window);
@@ -133,8 +136,6 @@ public:
     void SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height);
 
     void CleanupVulkan();
-
-    void CleanupVulkanWindow();
 
     void FrameRender(ImDrawData* draw_data);
 
@@ -192,12 +193,13 @@ public:
     VkQueue                  queue_ = VK_NULL_HANDLE;
 
     VkPipelineCache          pipeline_cache_ = VK_NULL_HANDLE;
+    VkPipelineLayout         mesh_pipeline_layout_ = VK_NULL_HANDLE;
 
     //Descriptor Pool
     VkDescriptorPoolCreateInfo pool_info_ = {};
     VkDescriptorPool         descriptor_pool_ = VK_NULL_HANDLE;
 
-    uint32_t                 min_image_count_ = 3;
+    uint32_t                 min_image_count_ = 2;
     bool                     swap_chain_rebuilding_ = false;
 
     VkViewport viewport_;

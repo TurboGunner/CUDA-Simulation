@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFD3C9C17C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFD4C4E17C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -61,6 +61,7 @@ Created color blend attachment for the render pipeline.
 Created color blend state for the render pipeline.
 Created depth stencil state for the render pipeline.
 
+Dynamic State Count: 2.
 Created graphics pipeline info for render pipeline.
 Created a window with size 2560 X 1026.
 

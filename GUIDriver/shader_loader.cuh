@@ -105,8 +105,9 @@ public:
         vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
     }
 
-    VkPipelineLayout pipeline_layout_ = {};
-    VkPipeline render_pipeline_ = {};
+    VkPipelineLayout pipeline_layout_;
+    VkPipeline render_pipeline_;
+    VkPipeline mesh_pipeline_;
 
 private:
     void RasterizationInfo() {
@@ -247,10 +248,11 @@ private:
 
         pipeline_info_.pInputAssemblyState = &input_assembly_;
         pipeline_info_.pViewportState = &viewport_state_;
-
         pipeline_info_.pRasterizationState = &rasterization_info_;
         pipeline_info_.pMultisampleState = &multi_sampling_info_;
         pipeline_info_.pDepthStencilState = &depth_stencil_state_;
+
+        ProgramLog::OutputLine("Dynamic State Count: " + std::to_string(dynamic_state_.dynamicStateCount) + ".");
 
         pipeline_info_.pColorBlendState = &color_blend_state_;
         pipeline_info_.pDynamicState = nullptr;

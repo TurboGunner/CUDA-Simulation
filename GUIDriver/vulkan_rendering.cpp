@@ -13,6 +13,16 @@ void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR& surface, int width, int he
 void VulkanGUIDriver::CleanupVulkan() {
     vkDestroyDescriptorPool(device_, descriptor_pool_, allocators_);
 
+    swap_chain_helper_.Clean();
+    sync_struct_.Clean();
+    shader_handler_.Clean();
+    render_pass_initializer_.Clean();
+    mesh_data_.Clean();
+
+    if (surface_ != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(instance_, surface_, nullptr);
+    }
+
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
     auto vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance_, "vkDestroyDebugReportCallbackEXT");
     vkDestroyDebugReportCallbackEXT(instance_, debug_report_callback_, allocators_);

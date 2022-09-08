@@ -118,6 +118,7 @@ public:
         for (auto view : swapchain_image_views_) {
             vkDestroyImageView(device_, view, nullptr);
         }
+
         vkDestroySwapchainKHR(device_, swapchain_, nullptr);
     }
 

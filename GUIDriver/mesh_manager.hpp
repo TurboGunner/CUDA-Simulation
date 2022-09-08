@@ -8,6 +8,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <glm/glm.hpp>
+
 struct MeshPushConstants {
     glm::vec4 data;
     glm::mat4 render_matrix;
@@ -22,11 +24,11 @@ public:
         physical_device_ = phys_device_in;
         queue_ = queue_in;
 
-        //NOTE
         vector<Vertex> vertices_in = {
             Vertex(0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f),
             Vertex(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f),
-            Vertex(-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f)
+            Vertex(-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f),
+            Vertex(-0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f)
         };
 
         vertices.Push(vertices_in);
@@ -130,7 +132,7 @@ public:
     }
 
     MeshContainer vertices;
-
+    VkPipelineLayout mesh_pipeline_layout_;
 private:
     VkBuffer CreateVertexBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
         VkBuffer buffer;
@@ -175,7 +177,4 @@ private:
 
     VkBuffer vertex_buffer_, index_buffer_, mesh_buffer_;
     VkDeviceMemory vertex_buffer_memory_, index_buffer_memory_, mesh_buffer_memory_;
-
-    VkPipelineLayout mesh_pipeline_layout_;
-
 };
