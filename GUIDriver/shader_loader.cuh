@@ -46,6 +46,20 @@ public:
         return pipeline_layout_;
     }
 
+    static VkPipelineLayoutCreateInfo PipelineLayoutInfo() {
+        VkPipelineLayoutCreateInfo pipeline_layout_info = {};
+
+        pipeline_layout_info.flags = 0;
+        pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipeline_layout_info.setLayoutCount = 0;
+        pipeline_layout_info.pSetLayouts = nullptr;
+
+        pipeline_layout_info.pushConstantRangeCount = 0;
+        pipeline_layout_info.pPushConstantRanges = nullptr;
+
+        return pipeline_layout_info;
+    }
+
     VkPipeline Initialize(VkRenderPass& render_pass) {
         auto vert_shader_code = ReadFile("Shaders/vert.spv");
         auto frag_shader_code = ReadFile("Shaders/frag.spv");
@@ -86,6 +100,11 @@ public:
         return render_pipeline_;
     }
 
+    void Clean() {
+        vkDestroyPipeline(device_, render_pipeline_, nullptr);
+        vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
+    }
+
     VkPipelineLayout pipeline_layout_ = {};
     VkPipeline render_pipeline_ = {};
 
@@ -121,20 +140,6 @@ private:
         multi_sampling_info_.alphaToOneEnable = VK_FALSE;
     }
 
-    VkPipelineLayoutCreateInfo PipelineLayoutInfo() {
-        VkPipelineLayoutCreateInfo pipeline_layout_info = {};
-
-        pipeline_layout_info.flags = 0;
-        pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipeline_layout_info.setLayoutCount = 0;
-        pipeline_layout_info.pSetLayouts = nullptr;
-
-        pipeline_layout_info.pushConstantRangeCount = 0;
-        pipeline_layout_info.pPushConstantRanges = nullptr;
-
-        return pipeline_layout_info;
-    }
-
     vector<uint32_t> ReadFile(const string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -168,14 +173,14 @@ private:
          color_blend_attachment_.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
          color_blend_attachment_.blendEnable = VK_TRUE;
 
-         color_blend_attachment_.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-         color_blend_attachment_.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+         color_blend_attachment_.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+         color_blend_attachment_.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 
          color_blend_attachment_.colorBlendOp = VK_BLEND_OP_ADD;
          color_blend_attachment_.alphaBlendOp = VK_BLEND_OP_ADD;
 
          color_blend_attachment_.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-         color_blend_attachment_.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+         color_blend_attachment_.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 
          ProgramLog::OutputLine("Created color blend attachment for the render pipeline.");
      }

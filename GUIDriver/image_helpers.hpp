@@ -11,11 +11,11 @@
 
 struct ImageHelper {
 	static void InitializeImage(VkDevice& device, VkPhysicalDevice& physical_device, VkDeviceMemory& texture_image_memory, VkImage& image, uint2& size,
-		const VkFormat& image_format, const VkImageUsageFlags usage_flags, const VkMemoryPropertyFlags& properties) {
+		const VkFormat& image_format, const VkImageUsageFlags usage_flags, const VkMemoryPropertyFlags& properties, const VkImageType& image_type = VK_IMAGE_TYPE_2D) {
 		VkImageCreateInfo image_info = {};
 
 		image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		image_info.imageType = VK_IMAGE_TYPE_2D;
+		image_info.imageType = image_type;
 		image_info.extent.width = size.x;
 		image_info.extent.height = size.y;
 		image_info.extent.depth = 1;

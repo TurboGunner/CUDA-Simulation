@@ -13,7 +13,7 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
     init_info.DescriptorPool = descriptor_pool_;
 
     init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT_;
-    init_info.ImageCount = static_cast<uint32_t>(swap_chain_helper_.swapchain_images_.size());
+    init_info.ImageCount = swap_chain_helper_.swapchain_images_.size();
 
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -36,7 +36,7 @@ void VulkanGUIDriver::FramePresent() {
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
     info.waitSemaphoreCount = 1;
-    info.pWaitSemaphores = &render_semaphore_;
+    info.pWaitSemaphores = &render_semaphores_[current_frame_];
 
     info.swapchainCount = 1;
 
@@ -44,8 +44,7 @@ void VulkanGUIDriver::FramePresent() {
     info.pImageIndices = &image_index_;
 
     vulkan_status = vkQueuePresentKHR(queue_, &info);
-    if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR)
-    {
+    if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
         swap_chain_rebuilding_ = true;
         return;
     }
@@ -59,11 +58,13 @@ void VulkanGUIDriver::SwapChainCondition() {
     }
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
+
     if (width > 0 && height > 0) {
         ImGui_ImplVulkan_SetMinImageCount(min_image_count_);
-        //main_window_data_.FrameIndex = 0;
         swap_chain_rebuilding_ = false;
     }
+
+    swap_chain_helper_.RecreateSwapChain(render_pass_, command_pool_);
 }
 
 void VulkanGUIDriver::ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer) {

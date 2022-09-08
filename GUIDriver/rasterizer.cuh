@@ -33,6 +33,10 @@ public:
 		return render_pass_;
 	}
 
+	void Clean() {
+		vkDestroyRenderPass(device_, render_pass_, nullptr);
+	}
+
 	VkRenderPass render_pass_;
 
 private:

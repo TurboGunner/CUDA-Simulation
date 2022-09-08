@@ -25,7 +25,7 @@ struct VulkanHelper {
 		size_ = size_in;
 	}
 
-	static VkCommandBufferAllocateInfo AllocateCommandBuffer(VkCommandPool& pool, uint32_t count = 1, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) {
+	static VkCommandBufferAllocateInfo AllocateCommandBufferInfo(VkCommandPool& pool, uint32_t count = 1, VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) {
 		VkCommandBufferAllocateInfo info = {};
 
 		info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -45,6 +45,14 @@ struct VulkanHelper {
 		begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
 		return begin_info;
+	}
+
+	VkResult InitializeCommandBuffers(vector<VkCommandBuffer>& command_buffers, VkCommandPool& command_pool, const size_t& MAX_FRAMES_IN_FLIGHT) {
+		command_buffers.resize(MAX_FRAMES_IN_FLIGHT);
+
+		auto allocation_info = AllocateCommandBufferInfo(command_pool, MAX_FRAMES_IN_FLIGHT);
+
+		return vkAllocateCommandBuffers(device_, &allocation_info, command_buffers.data());
 	}
 
 	VkCommandPool CreateCommandPool(VkCommandPool& command_pool, const uint32_t& queue_family) {
@@ -89,7 +97,7 @@ struct VulkanHelper {
 	}
 
 	static VkCommandBuffer BeginSingleTimeCommands(VkDevice& device, VkCommandPool command_pool, bool log = true) {
-		VkCommandBufferAllocateInfo alloc_info = AllocateCommandBuffer(command_pool);
+		VkCommandBufferAllocateInfo alloc_info = AllocateCommandBufferInfo(command_pool);
 
 		VkCommandBuffer command_buffer;
 		vkAllocateCommandBuffers(device, &alloc_info, &command_buffer);
@@ -128,9 +136,24 @@ struct VulkanHelper {
 		vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 	}
 
+	//NOTE:
+	void InitializeCommandVectors(const vector<VkImageView>& image_views, vector<VkCommandBuffer>& command_buffers, vector<VkCommandPool>& command_pools) {
+		command_buffers.resize(image_views.size());
+		command_pools.resize(image_views.size());
+
+		for (size_t i = 0; i < image_views.size(); i++) {
+			CreateCommandPool(command_pools[i], VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+			auto command_info = AllocateCommandBufferInfo(command_pools[i]);
+			vkAllocateCommandBuffers(device_, &command_info, &command_buffers[i]);
+		}
+	}
+
 	VkDevice device_;
 
 	VkRenderPass render_pass_;
+
+	vector<VkCommandBuffer> imgui_command_buffers_;
+	vector<VkCommandPool> imgui_command_pools_;
 
 	uint2 size_;
 

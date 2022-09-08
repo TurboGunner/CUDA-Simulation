@@ -87,7 +87,7 @@ void VulkanGUIDriver::GUISetup() {
     //Creating all of the other external helpers
     vulkan_helper_ = VulkanHelper(device_, render_pass_, size_);
     shader_handler_ = ShaderLoader(device_, viewport_, scissor_, pipeline_cache_, allocators_);
-    sync_struct_ = SyncStruct(device_);
+    sync_struct_ = SyncStruct(device_, MAX_FRAMES_IN_FLIGHT_);
     mesh_data_ = VertexData(device_, physical_device_, queue_);
 
     //Creating command pool
@@ -101,17 +101,17 @@ void VulkanGUIDriver::GUISetup() {
 
     //Creating command buffer
     VkCommandBuffer buffer;
-    auto buffer_info = VulkanHelper::AllocateCommandBuffer(command_pool_);
-    vkAllocateCommandBuffers(device_, &buffer_info, &buffer);
+    auto command_info = VulkanHelper::AllocateCommandBufferInfo(command_pool_);
+    vkAllocateCommandBuffers(device_, &command_info, &buffer);
     //NOTE!
     command_buffers_.push_back(buffer);
 
     //Creating synchronization structs (fences and semaphores)
     sync_struct_.Initialize();
-    image_semaphore_ = sync_struct_.present_semaphore_;
-    render_semaphore_ = sync_struct_.render_semaphore_;
+    image_semaphores_ = sync_struct_.present_semaphores_;
+    render_semaphores_ = sync_struct_.render_semaphores_;
 
-    render_fence_ = sync_struct_.fence_;
+    render_fences_ = sync_struct_.fences_;
 
     clear_values_.resize(2);
 
@@ -121,11 +121,15 @@ void VulkanGUIDriver::GUISetup() {
     //Create Pipeline
     shader_handler_.Initialize(render_pass_);
 
+    mesh_data_.Initialize(command_pool_);
+    mesh_data_.InitializeIndex(command_pool_);
+
     IMGUIRenderLogic();
 
     vulkan_status = vkDeviceWaitIdle(device_);
     VulkanErrorHandler(vulkan_status);
 
+    //Font Renderer
     VkCommandBuffer command_buffer = BeginSingleTimeCommands();
     ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
     EndSingleTimeCommands(command_buffer);
@@ -144,7 +148,7 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     ImGui_ImplVulkan_Init(&init_info, render_pass_);
 
-    s_stream << "Address for Vulkan Render Pipeline: " << render_pass_ << ".";
+    s_stream << "Address for Vulkan Render Pass: " << render_pass_ << ".";
 
     //texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
 
@@ -169,7 +173,7 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     size.y = 1024;
 
     ImGui_ImplVulkan_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
 
     CreateMenuBar();
@@ -214,8 +218,6 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
 
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
 
-    mesh_data_.Initialize(command_pool_);
-    mesh_data_.InitializeIndex(command_pool_);
     mesh_data_.BindPipeline(command_buffer, command_pool_);
 
     vkCmdDrawIndexed(command_buffer, mesh_data_.vertices.Size(), 1, 0, 0, 0);
@@ -242,14 +244,14 @@ void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore
     info.signalSemaphoreCount = 1;
     info.pSignalSemaphores = &render_semaphore;
 
-    vulkan_status = vkQueueSubmit(queue_, 1, &info, render_fence_);
+    vulkan_status = vkQueueSubmit(queue_, 1, &info, render_fences_[current_frame_]);
     VulkanErrorHandler(vulkan_status);
 }
 
 void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
     VkResult vulkan_status;
 
-    vulkan_status = vkAcquireNextImageKHR(device_, swap_chain_, UINT64_MAX, image_semaphore_, VK_NULL_HANDLE, &image_index_);
+    vulkan_status = vkAcquireNextImageKHR(device_, swap_chain_, UINT64_MAX, image_semaphores_[current_frame_], VK_NULL_HANDLE, &image_index_);
 
     if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
         swap_chain_rebuilding_ = true;
@@ -257,23 +259,23 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data, VkCommandBuffer& comman
     }
 
     VulkanErrorHandler(vulkan_status);
-    vulkan_status = vkWaitForFences(device_, 1, &render_fence_, VK_TRUE, UINT64_MAX); //Has indefinite wait instead of periodic checks
+    vulkan_status = vkWaitForFences(device_, 1, &render_fences_[current_frame_], VK_TRUE, UINT64_MAX); //Has indefinite wait instead of periodic checks
     VulkanErrorHandler(vulkan_status);
 
-    vulkan_status = vkResetFences(device_, 1, &render_fence_);
+    vulkan_status = vkResetFences(device_, 1, &render_fences_[current_frame_]);
     VulkanErrorHandler(vulkan_status);
 
-    ManageCommandBuffer(command_pool_, command_buffers_[0]);
+    ManageCommandBuffer(command_pool_, command_buffer);
 
     StartRenderPass(command_buffer, swap_chain_helper_.frame_buffers_[image_index_]);
 
     ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer); // Record imgui primitives into command buffer
     //Note!
-    EndRenderPass(command_buffer, image_semaphore_, render_semaphore_);
+    EndRenderPass(command_buffer, image_semaphores_[current_frame_], render_semaphores_[current_frame_]);
 }
 
 void VulkanGUIDriver::CleanupVulkanWindow() {
-    //NOTE!
+    swap_chain_helper_.Clean();
 }
 
 VkCommandBuffer VulkanGUIDriver::BeginSingleTimeCommands() {

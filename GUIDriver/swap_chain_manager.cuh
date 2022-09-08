@@ -96,6 +96,31 @@ public:
         }
     }
 
+    void RecreateSwapChain(VkRenderPass& render_pass, VkCommandPool& command_pool) {
+        vkDeviceWaitIdle(device_);
+
+        Clean();
+
+        Initialize();
+        CreateImageViews();
+        CreateSwapchainFrameBuffers(render_pass, swapchain_image_views_, depth_image_view_);
+    }
+
+    void Clean() {
+        vkDestroyImageView(device_, depth_image_view_, nullptr);
+        vkDestroyImage(device_, depth_image_, nullptr);
+        vkFreeMemory(device_, depth_memory_, nullptr);
+
+        for (auto frame_buffer : frame_buffers_) {
+            vkDestroyFramebuffer(device_, frame_buffer, nullptr);
+        }
+
+        for (auto view : swapchain_image_views_) {
+            vkDestroyImageView(device_, view, nullptr);
+        }
+        vkDestroySwapchainKHR(device_, swapchain_, nullptr);
+    }
+
     VkSwapchainKHR swapchain_;
 
     VkExtent2D extent_;
@@ -205,38 +230,13 @@ private:
 
         auto format = ImageHelper::FindDepthFormat(physical_device_);
 
-        ImageHelper::InitializeImage(device_, physical_device_, depth_memory_, depth_image_, size_, format, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        ImageHelper::InitializeImage(device_, physical_device_, depth_memory_, depth_image_, size_, format, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_IMAGE_TYPE_2D);
 
         auto depth_image_view = ImageHelper::CreateImageView(device_, depth_image_, format, VK_IMAGE_ASPECT_DEPTH_BIT);
 
         ProgramLog::OutputLine("Created depth image view.");
 
         return depth_image_view;
-    }
-
-    void RecreateSwapChain(VkRenderPass& render_pass, VkCommandPool& command_pool) {
-        vkDeviceWaitIdle(device_);
-
-        Clean();
-
-        Initialize();
-        CreateImageViews();
-        CreateSwapchainFrameBuffers(render_pass, swapchain_image_views_, depth_image_view_);
-    }
-
-    void Clean() {
-        vkDestroyImageView(device_, depth_image_view_, nullptr);
-        vkDestroyImage(device_, depth_image_, nullptr);
-        vkFreeMemory(device_, depth_memory_, nullptr);
-
-        for (auto frame_buffer : frame_buffers_) {
-            vkDestroyFramebuffer(device_, frame_buffer, nullptr);
-        }
-
-        for (auto view : swapchain_image_views_) {
-            vkDestroyImageView(device_, view, nullptr);
-        }
-        vkDestroySwapchainKHR(device_, swapchain_, nullptr);
     }
 
     VkDevice device_;

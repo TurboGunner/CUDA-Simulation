@@ -15,16 +15,31 @@ using std::array;
 using std::vector;
 using std::unordered_map;
 
+struct VectorHash {
+    size_t operator() (const glm::vec3& vector) const {
+        size_t h1 = std::hash<float>()(vector.x);
+        size_t h2 = std::hash<float>()(vector.y);
+        size_t h3 = std::hash<float>()(vector.z);
+
+        return h1 ^ h2 ^ h3;
+    }
+};
+
 struct Vertex {
     Vertex() = default;
 
     Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b) {
-        pos = glm::uvec3(pos_x, pos_y, pos_z);
+        pos = glm::vec3(pos_x, pos_y, pos_z);
         color = glm::uvec3(r, g, b);
     }
 
     glm::vec3 pos;
+    glm::vec3 normal;
     glm::vec3 color;
+
+    void SetNormal(float x_in, float y_in, float z_in) {
+        normal = glm::vec3(x_in, y_in, z_in);
+    }
 
     static VkVertexInputBindingDescription GetBindingDescription() {
         VkVertexInputBindingDescription binding_description = {};
@@ -36,16 +51,21 @@ struct Vertex {
         return binding_description;
     }
 
-    static array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions() {
-        array<VkVertexInputAttributeDescription, 2> attribute_descriptions {};
+    static array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions() {
+        array<VkVertexInputAttributeDescription, 3> attribute_descriptions {};
 
         attribute_descriptions[0].binding = 0;
         attribute_descriptions[0].location = 0;
         attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
         attribute_descriptions[0].offset = offsetof(Vertex, pos);
 
+        attribute_descriptions[2].binding = 0;
+        attribute_descriptions[2].location = 1;
+        attribute_descriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attribute_descriptions[2].offset = offsetof(Vertex, normal);
+
         attribute_descriptions[1].binding = 0;
-        attribute_descriptions[1].location = 1;
+        attribute_descriptions[1].location = 2;
         attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
         attribute_descriptions[1].offset = offsetof(Vertex, color);
 
@@ -59,17 +79,15 @@ struct Vertex {
         return *this;
     }
 
-};
+    bool operator==(Vertex const& compare) {
+        bool pos_check = pos.x == compare.pos.x && pos.y == compare.pos.y && pos.z == compare.pos.z;
+        bool color_check = color.x == compare.color.x && color.y == compare.color.y && color.z == compare.color.z;
+        bool normal_check = normal.x == compare.normal.x && normal.y == compare.normal.y && normal.z == compare.normal.z;
 
-struct VectorHash {
-    size_t operator() (const glm::vec3& vector) const {
-        size_t h1 = std::hash<float>()(vector.x);
-        size_t h2 = std::hash<float>()(vector.y);
-        size_t h3 = std::hash<float>()(vector.z);
-
-        return h1 ^ h2 ^ h3;
+        return pos_check && color_check && normal_check;
     }
 };
+
 
 class MeshContainer {
 public:
@@ -129,8 +147,12 @@ public:
             ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
             return;
         }
-        vertices_[index] = index_coord;
         CollisionCheck(index_coord);
+        if (collision) {
+            map_.erase(vertices_[index].pos);
+            map_.try_emplace(index_coord.pos, index);
+        }
+        vertices_[index] = index_coord;
     }
 
     void Remove(const unsigned int& index) {
@@ -138,7 +160,18 @@ public:
             ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
             return;
         }
+        if (collision) {
+            map_.erase(vertices_[index].pos);
+        }
         vertices_.erase(vertices_.begin() + index);
+    }
+
+    void Clear() {
+        vertices_.clear();
+        if (collision) {
+            map_.clear();
+        }
+        ProgramLog::OutputLine("Cleared mesh data successfully!");
     }
 
     const Vertex* Data() {

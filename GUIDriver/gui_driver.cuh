@@ -212,7 +212,7 @@ public:
 
     VkSwapchainKHR swap_chain_;
 
-    uint32_t image_index_, current_frame_, frame_index_;
+    uint32_t image_index_ = 0, current_frame_ = 0, frame_index_ = 0;
 
     const uint32_t MAX_FRAMES_IN_FLIGHT_ = 2;
     
@@ -230,8 +230,8 @@ public:
 
     PFN_vkCreateDebugReportCallbackEXT InstanceDebugCallbackEXT;
 
-    VkSemaphore image_semaphore_, render_semaphore_;
-    VkFence render_fence_;
+    vector<VkFence> render_fences_;
+    vector<VkSemaphore> image_semaphores_, render_semaphores_;
 
     vector<VkClearValue> clear_values_;
 

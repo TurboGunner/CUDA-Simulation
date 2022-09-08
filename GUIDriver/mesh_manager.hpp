@@ -2,10 +2,16 @@
 
 #include "vulkan_helpers.hpp"
 #include "vertex_data.hpp"
+#include "shader_loader.cuh"
 
 #include "../CUDATest/handler_classes.hpp"
 
 #include <vulkan/vulkan.h>
+
+struct MeshPushConstants {
+    glm::vec4 data;
+    glm::mat4 render_matrix;
+};
 
 class VertexData {
 public:
@@ -52,14 +58,11 @@ public:
         vkFreeMemory(device_, staging_buffer_memory, nullptr);
     }
 
-    void CreateBuffer(const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkDeviceSize& size, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
-        VkBufferCreateInfo buffer_info = CreateVertexBuffer(size, usage);
-
-        if (vkCreateBuffer(device_, &buffer_info, nullptr, &buffer) != VK_SUCCESS) {
-            ProgramLog::OutputLine("Error: Failed to properly allocate buffer!");
-        }
+    VkResult CreateBuffer(const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkDeviceSize& size, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
+        buffer = CreateVertexBuffer(size, usage);
 
         VkMemoryRequirements mem_requirements;
+
         vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
 
         VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(physical_device_, mem_requirements, properties, false);
@@ -68,12 +71,13 @@ public:
             ProgramLog::OutputLine("Error: Failed to allocate buffer memory!");
         }
 
-        vkBindBufferMemory(device_, buffer, buffer_memory, 0);
+        return vkBindBufferMemory(device_, buffer, buffer_memory, 0);
 
         //ProgramLog::OutputLine("Created and bound buffer to device memory successfully!");
     }
 
     void InitializeIndex(VkCommandPool& command_pool) {
+        VkResult vulkan_status = VK_SUCCESS;
         const vector<uint16_t> indices = { 0, 1, 2 };
 
         VkBuffer staging_buffer;
@@ -90,25 +94,46 @@ public:
         vkFreeMemory(device_, staging_buffer_memory, nullptr);
     }
 
-    void* MapMemory(const VkDeviceSize& size, VkDeviceMemory& device_memory) {
+    void UploadMesh(MeshContainer& mesh, const VkDeviceSize& size) {
         void* data;
 
-        vkMapMemory(device_, device_memory, 0, size, 0, &data);
-        memcpy(data, vertices.Data(), size);
-        vkUnmapMemory(device_, device_memory);
+        auto buffer = CreateVertexBuffer(size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        return data;
+        VertexData::MapMemory(size, mesh_buffer_memory_);
+    }
+
+    void InitializeMeshPipelineLayout() {
+        VkPipelineLayoutCreateInfo mesh_pipeline_layout_info = ShaderLoader::PipelineLayoutInfo();
+
+        VkPushConstantRange push_constant = {};
+
+        push_constant.offset = 0;
+        push_constant.size = sizeof(MeshPushConstants);
+        push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        mesh_pipeline_layout_info.pPushConstantRanges = &push_constant;
+        mesh_pipeline_layout_info.pushConstantRangeCount = 1;
+
+        if (vkCreatePipelineLayout(device_, &mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout_) != VK_SUCCESS) {
+            ProgramLog::OutputLine("Error: Could not successfully create the mesh pipeline layout!");
+        }
     }
 
     void Clean() {
         vkDestroyBuffer(device_, vertex_buffer_, nullptr);
+        vkDestroyBuffer(device_, index_buffer_, nullptr);
+
         vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
+        vkFreeMemory(device_, index_buffer_memory_, nullptr);
+
+        vkDestroyPipelineLayout(device_, mesh_pipeline_layout_, nullptr);
     }
 
     MeshContainer vertices;
 
 private:
-    VkBufferCreateInfo CreateVertexBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
+    VkBuffer CreateVertexBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
+        VkBuffer buffer;
         VkBufferCreateInfo buffer_info = {};
 
         buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -116,7 +141,11 @@ private:
         buffer_info.usage = usage;
         buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        return buffer_info;
+        if (vkCreateBuffer(device_, &buffer_info, nullptr, &buffer) != VK_SUCCESS) {
+            ProgramLog::OutputLine("Error: Failed to properly allocate buffer!");
+        }
+
+        return buffer;
     }
 
     void CopyBuffer(VkCommandPool& command_pool, VkBuffer& src_buffer, VkBuffer& dst_buffer, const VkDeviceSize& size) {
@@ -129,11 +158,24 @@ private:
         VulkanHelper::EndSingleTimeCommands(command_buffer, device_, command_pool, queue_, false);
     }
 
+    void* MapMemory(const VkDeviceSize& size, VkDeviceMemory& device_memory) {
+        void* data;
+
+        vkMapMemory(device_, device_memory, 0, size, 0, &data);
+        memcpy(data, vertices.Data(), size);
+        vkUnmapMemory(device_, device_memory);
+
+        return data;
+    }
+
     VkDevice device_;
     VkPhysicalDevice physical_device_;
     VkQueue queue_;
     VkDeviceSize size_;
 
-    VkBuffer vertex_buffer_, index_buffer_;
-    VkDeviceMemory vertex_buffer_memory_, index_buffer_memory_;
+    VkBuffer vertex_buffer_, index_buffer_, mesh_buffer_;
+    VkDeviceMemory vertex_buffer_memory_, index_buffer_memory_, mesh_buffer_memory_;
+
+    VkPipelineLayout mesh_pipeline_layout_;
+
 };
