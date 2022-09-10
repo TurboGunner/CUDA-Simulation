@@ -114,3 +114,41 @@ Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b, float n
 ```
 
 Where pos denotes position in 3D space, r, g, and b are used for intialization the color value, and the prefix n is referring to the normal of the given vertex in 3D space.
+
+### Mesh Data Storage
+
+Mesh data storage is handled by a class contained within vertex_data.hpp called MeshContainer. The initialization of it is handled by the constructor:
+
+```c++
+MeshContainer(const bool& collision_mode = false);
+```
+
+This contains a boolean called collision_mode, which is a default false value. Enabling this feature allows for the prevention of colliding vertices based on the position of a given vertex.
+
+The private members that manage the storage and state of the vertices are:
+
+```c++
+vector<Vertex> vertices_;
+unordered_map<glm::vec3, unsigned int, VectorHash> map_;
+bool collision = false;
+```
+
+If collision is set to true via the constructor, it will exploit the hash collision properties of the unordered hash map to check if the size of the map has changed upon the entry of a new data point. This is done safely by try_emplace. If not, then it will warn via the logger of a collision.
+
+The warning for intersecting vertices:
+
+```c++
+ProgramLog::OutputLine("Warning: Intersecting vertex!");
+```
+
+All of these members are private, and this in order to encapsulate the vector and map primarily. This allowed for the addition of safe methods, and custom logger warnings to be implemented upon an invalid input- whilst eliminating segfaulting or the requirement of program termination.
+
+The warning for out of bounds:
+
+```c++
+ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
+```
+
+### Mesh Data Management
+
+Mesh management is handled by mesh_manager.hpp, and it contains the class VertexData. It handles the construction of initial vertices, helpers to bind to the render pipeline, and staging buffer management for the mesh. The scheme implemented for the purposes of performance to handle the mesh data were push constants; as opposed to heavily using uniform buffers.
