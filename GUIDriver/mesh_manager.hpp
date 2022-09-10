@@ -15,11 +15,17 @@ struct MeshPushConstants {
     glm::mat4 render_matrix;
 };
 
+struct UniformBufferObject {
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
+
 class VertexData {
 public:
     VertexData() = default;
 
-    VertexData(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in) {
+    VertexData(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in, const size_t& max_frames_const_in) {
         device_ = device_in;
         physical_device_ = phys_device_in;
         queue_ = queue_in;
@@ -33,6 +39,8 @@ public:
 
         vertices.Push(vertices_in);
         size_ = sizeof(vertices[0]) * vertices.Size();
+
+        MAX_FRAMES_IN_FLIGHT_ = max_frames_const_in;
     }
 
     void BindPipeline(VkCommandBuffer& command_buffer, VkCommandPool& command_pool) {
@@ -61,7 +69,7 @@ public:
     }
 
     VkResult CreateBuffer(const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkDeviceSize& size, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
-        buffer = CreateVertexBuffer(size, usage);
+        buffer = AllocateBuffer(size, usage);
 
         VkMemoryRequirements mem_requirements;
 
@@ -99,7 +107,7 @@ public:
     void UploadMesh(MeshContainer& mesh, const VkDeviceSize& size) {
         void* data;
 
-        auto buffer = CreateVertexBuffer(size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        auto buffer = AllocateBuffer(size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
         VertexData::MapMemory(size, mesh_buffer_memory_);
     }
@@ -113,8 +121,9 @@ public:
     }
 
     MeshContainer vertices;
+
 private:
-    VkBuffer CreateVertexBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
+    VkBuffer AllocateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
         VkBuffer buffer;
         VkBufferCreateInfo buffer_info = {};
 
@@ -157,4 +166,6 @@ private:
 
     VkBuffer vertex_buffer_, index_buffer_, mesh_buffer_;
     VkDeviceMemory vertex_buffer_memory_, index_buffer_memory_, mesh_buffer_memory_;
+
+    size_t MAX_FRAMES_IN_FLIGHT_;
 };

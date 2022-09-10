@@ -88,7 +88,7 @@ void VulkanGUIDriver::GUISetup() {
     vulkan_helper_ = VulkanHelper(device_, size_, MAX_FRAMES_IN_FLIGHT_);
     shader_handler_ = ShaderLoader(device_, viewport_, scissor_, pipeline_cache_, allocators_);
     sync_struct_ = SyncStruct(device_, MAX_FRAMES_IN_FLIGHT_);
-    mesh_data_ = VertexData(device_, physical_device_, queue_);
+    mesh_data_ = VertexData(device_, physical_device_, queue_, MAX_FRAMES_IN_FLIGHT_);
 
     //Creating command pool
     vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
@@ -220,6 +220,7 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
     vkCmdBeginRenderPass(command_buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.mesh_pipeline_);
 
     mesh_data_.BindPipeline(command_buffer, command_pool_);
 }
@@ -270,35 +271,18 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     StartRenderPass(command_buffers_[current_frame_], swap_chain_helper_.frame_buffers_[image_index_]);
 
-    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffers_[current_frame_]); // Record imgui primitives into command buffer
+    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffers_[current_frame_]);
 
-    //camera position
-    glm::vec3 cam_pos = { 0.0f, 0.0f, -2.0f };
+    auto constants = mesh_viewport_.ViewportRotation(frame_index_);
 
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), cam_pos);
-
-    glm::mat4 projection = glm::perspective(glm::radians(700.f), 1700.0f / 900.0f, 0.1f, 200.0f);
-    projection[1][1] *= -1;
-
-    glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(frame_index_ * 0.4f), glm::vec3(0, 1, 0));
-
-    //calculate final mesh matrix
-    glm::mat4 mesh_matrix = projection * view * model;
-
-    MeshPushConstants constants;
-    constants.render_matrix = mesh_matrix;
-
-    //Pushes matrix constants to GPU
+    vkCmdSetViewport(command_buffers_[current_frame_], 0, 1, &viewport_);
+    vkCmdSetScissor(command_buffers_[current_frame_], 0, 1, &scissor_);
 
     vkCmdPushConstants(command_buffers_[current_frame_], mesh_pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
 
     frame_index_++;
 
-    vkCmdSetViewport(command_buffers_[current_frame_], 0, 1, &viewport_);
-    vkCmdSetScissor(command_buffers_[current_frame_], 0, 1, &scissor_);
-    //vkCmdSetDepthBias(command_buffers_[current_frame_], 0, 0, 0);
-
-    vkCmdDrawIndexed(command_buffers_[current_frame_], mesh_data_.vertices.Size(), 1, 0, 0, 0);
+    vkCmdDraw(command_buffers_[current_frame_], mesh_data_.vertices.Size(), 1, 0, 0);
 
     //Note!
     EndRenderPass(command_buffers_[current_frame_], image_semaphores_[current_frame_], render_semaphores_[current_frame_]);

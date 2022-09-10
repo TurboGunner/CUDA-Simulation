@@ -45,7 +45,7 @@ struct ImageHelper {
 		vkBindImageMemory(device, image, texture_image_memory, 0);
 	}
 
-	static VkImageView CreateImageView(VkDevice& device, VkImage& image, const VkFormat& format, const VkImageAspectFlags& flags) {
+	static VkImageView CreateImageView(VkDevice& device, VkImage& image, const VkFormat& format, const VkImageAspectFlags& flags, const VkImageViewType& type = VK_IMAGE_VIEW_TYPE_2D) {
 		VkImageView image_view = {};
 
 		VkImageViewCreateInfo create_info = {};
@@ -53,7 +53,7 @@ struct ImageHelper {
 		create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		create_info.image = image;
 
-		create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		create_info.viewType = type;
 		create_info.format = format;
 
 		create_info.subresourceRange.aspectMask = flags;
@@ -95,8 +95,7 @@ struct ImageHelper {
 		VkPipelineStageFlags source_stage = {};
 		VkPipelineStageFlags destination_stage = {};
 
-		if (new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
-		{
+		if (new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
 			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
 			if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT) {

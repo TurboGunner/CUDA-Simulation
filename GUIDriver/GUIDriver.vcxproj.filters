@@ -36,6 +36,9 @@
     <Filter Include="includes\init_objects\mesh">
       <UniqueIdentifier>{3701e0c6-9b7e-4506-bea3-332885870cc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cpp\imported">
+      <UniqueIdentifier>{e37cca23-3f11-4254-af04-9e1e87d00d78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui_rendering.cpp">
@@ -54,7 +57,7 @@
       <Filter>cpp\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\CUDATest\handler_methods.cpp">
-      <Filter>cpp</Filter>
+      <Filter>cpp\imported</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +97,12 @@
     </ClInclude>
     <ClInclude Include="mesh_manager.hpp">
       <Filter>includes\init_objects\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh_viewport.hpp">
+      <Filter>includes\init_objects\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="descriptor_set_handler.hpp">
+      <Filter>includes\helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

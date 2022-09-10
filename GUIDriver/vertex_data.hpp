@@ -41,33 +41,38 @@ struct Vertex {
         normal = glm::vec3(x_in, y_in, z_in);
     }
 
-    static VkVertexInputBindingDescription GetBindingDescription() {
+    static vector<VkVertexInputBindingDescription> GetBindingDescription() {
         VkVertexInputBindingDescription binding_description = {};
 
         binding_description.binding = 0;
         binding_description.stride = sizeof(Vertex);
         binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-        return binding_description;
+        return { binding_description };
     }
 
-    static array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions() {
-        array<VkVertexInputAttributeDescription, 3> attribute_descriptions {};
+    static vector<VkVertexInputAttributeDescription> GetAttributeDescriptions() {
+        vector<VkVertexInputAttributeDescription> attribute_descriptions;
 
-        attribute_descriptions[0].binding = 0;
-        attribute_descriptions[0].location = 0;
-        attribute_descriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attribute_descriptions[0].offset = offsetof(Vertex, pos);
+        VkVertexInputAttributeDescription pos_description = {};
+        pos_description.binding = 0;
+        pos_description.location = 0;
+        pos_description.format = VK_FORMAT_R32G32_SFLOAT;
+        pos_description.offset = offsetof(Vertex, pos);
 
-        attribute_descriptions[2].binding = 0;
-        attribute_descriptions[2].location = 1;
-        attribute_descriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attribute_descriptions[2].offset = offsetof(Vertex, normal);
+        VkVertexInputAttributeDescription normal_description = {};
+        normal_description.binding = 0;
+        normal_description.location = 1;
+        normal_description.format = VK_FORMAT_R32G32B32_SFLOAT;
+        normal_description.offset = offsetof(Vertex, normal);
 
-        attribute_descriptions[1].binding = 0;
-        attribute_descriptions[1].location = 2;
-        attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attribute_descriptions[1].offset = offsetof(Vertex, color);
+        VkVertexInputAttributeDescription color_description = {};
+        color_description.binding = 0;
+        color_description.location = 2;
+        color_description.format = VK_FORMAT_R32G32B32_SFLOAT;
+        color_description.offset = offsetof(Vertex, color);
+
+        attribute_descriptions.insert(attribute_descriptions.end(), { pos_description, normal_description, color_description });
 
         return attribute_descriptions;
     }

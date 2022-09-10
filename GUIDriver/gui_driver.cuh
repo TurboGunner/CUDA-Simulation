@@ -9,6 +9,7 @@
 #include "mesh_manager.hpp"
 #include "sync_structs.hpp"
 #include "vertex_data.hpp"
+#include "mesh_viewport.hpp"
 
 #include "vulkan_helpers.hpp"
 #include "image_helpers.hpp"
@@ -180,6 +181,7 @@ public:
     SyncStruct sync_struct_;
     RenderPassInitializer render_pass_initializer_;
     VertexData mesh_data_;
+    MeshViewport mesh_viewport_;
 
     tuple<VkImageView, VkSampler> image_alloc_;
 
@@ -210,7 +212,7 @@ public:
     VkRenderPass render_pass_;
 
     VkCommandPool command_pool_;
-    vector<VkCommandBuffer> command_buffers_;
+    vector<VkCommandBuffer> command_buffers_, imgui_buffers_;
 
     VkSwapchainKHR swap_chain_;
 
