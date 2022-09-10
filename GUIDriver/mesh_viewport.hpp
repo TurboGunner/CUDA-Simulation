@@ -19,7 +19,7 @@ public:
         projection_ = glm::perspective(glm::radians(700.f), 1700.0f / 900.0f, 0.1f, 200.0f);
         projection_[1][1] *= -1;
 
-        glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(frame_index * 0.4f), glm::vec3(0, 1, 0));
+        glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(frame_index * 0.1f), glm::vec3(0, 1, 0));
 
         //Calculates final mesh matrix
         glm::mat4 mesh_matrix = projection_ * view_ * model;

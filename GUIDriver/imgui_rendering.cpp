@@ -108,7 +108,11 @@ void VulkanGUIDriver::GUISetup() {
     }
 
     //Creating synchronization structs (fences and semaphores)
-    sync_struct_.Initialize();
+    if (sync_struct_.Initialize() != VK_SUCCESS) {
+        ProgramLog::OutputLine("Error: Failed to create synchronization structs!");
+        return;
+    }
+
     image_semaphores_ = sync_struct_.present_semaphores_;
     render_semaphores_ = sync_struct_.render_semaphores_;
 
@@ -154,8 +158,6 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
     s_stream << "Address for Vulkan Render Pass: " << render_pass_ << ".";
 
     //texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
-
-    ProgramLog::OutputLine("Reset IMGUI command pool successfully.");
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -271,18 +273,18 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     StartRenderPass(command_buffers_[current_frame_], swap_chain_helper_.frame_buffers_[image_index_]);
 
-    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffers_[current_frame_]);
-
     auto constants = mesh_viewport_.ViewportRotation(frame_index_);
+
+    vkCmdPushConstants(command_buffers_[current_frame_], mesh_pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
+
+    vkCmdDraw(command_buffers_[current_frame_], mesh_data_.vertices.Size(), 1, 0, 0);
+
+    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffers_[current_frame_]);
 
     vkCmdSetViewport(command_buffers_[current_frame_], 0, 1, &viewport_);
     vkCmdSetScissor(command_buffers_[current_frame_], 0, 1, &scissor_);
 
-    vkCmdPushConstants(command_buffers_[current_frame_], mesh_pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
-
     frame_index_++;
-
-    vkCmdDraw(command_buffers_[current_frame_], mesh_data_.vertices.Size(), 1, 0, 0);
 
     //Note!
     EndRenderPass(command_buffers_[current_frame_], image_semaphores_[current_frame_], render_semaphores_[current_frame_]);

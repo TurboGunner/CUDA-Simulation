@@ -31,10 +31,11 @@ public:
         queue_ = queue_in;
 
         vector<Vertex> vertices_in = {
-            Vertex(0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f),
-            Vertex(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f),
-            Vertex(-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f),
-            Vertex(-0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f)
+            Vertex(0.5f, -0.5f, 0.0f, 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f),
+            Vertex(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f),
+            Vertex(-0.5f, -0.5f, 1.0f, 1.0f, 0.5f, 1.0f, 0.5f, 0.5f, 0.5f),
+            Vertex(-0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+            Vertex(0.0f, -1.0f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)
         };
 
         vertices.Push(vertices_in);
@@ -88,7 +89,7 @@ public:
 
     void InitializeIndex(VkCommandPool& command_pool) {
         VkResult vulkan_status = VK_SUCCESS;
-        const vector<uint16_t> indices = { 0, 1, 2 };
+        const vector<uint16_t> indices = { 0, 1, 2, 3, 0 };
 
         VkBuffer staging_buffer;
         VkDeviceMemory staging_buffer_memory;

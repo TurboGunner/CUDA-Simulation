@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFD1AAE17C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFCD38717C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -69,7 +69,6 @@ Color Attachment Ref ID: 2
 Name for shader stage (Index 0): main.
 Successfully created graphics pipeline!
 Successfully created mesh pipeline!
-Reset IMGUI command pool successfully.
 Started command recording!
 Ended command recording!
 
