@@ -95,7 +95,7 @@ class MeshContainer {
 public:
     MeshContainer() = default;
 
-    MeshContainer(bool collision_mode) {
+    MeshContainer(const bool& collision_mode = false) {
         collision = collision_mode;
     }
 

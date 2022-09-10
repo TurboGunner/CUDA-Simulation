@@ -90,7 +90,7 @@ public:
         return pipeline_layout_info;
     }
 
-    array<VkPipeline, 2> Initialize(VkRenderPass& render_pass) {
+    VkPipeline Initialize(VkRenderPass& render_pass) {
         auto vert_shader_code = ReadFile("Shaders/vert.spv");
         auto frag_shader_code = ReadFile("Shaders/frag.spv");
 
@@ -132,28 +132,25 @@ public:
 
         pipeline_info_.pVertexInputState = &vertex_input_info;
 
-        pipeline_info_.layout = mesh_pipeline_layout_;
-
         s_stream << "Name for shader stage (Index 0): " << pipeline_info_.pStages[0].pName << ".";
         ProgramLog::OutputLine(s_stream);
+
+        pipeline_info_.layout = mesh_pipeline_layout_;
 
         vulkan_status = vkCreateGraphicsPipelines(device_, pipeline_cache_, 1, &pipeline_info_, VK_NULL_HANDLE, &render_pipeline_);
 
         ProgramLog::OutputLine("Successfully created graphics pipeline!");
-
-        vulkan_status = vkCreateGraphicsPipelines(device_, pipeline_cache_, 1, &pipeline_info_, VK_NULL_HANDLE, &mesh_pipeline_);
 
         ProgramLog::OutputLine("Successfully created mesh pipeline!");
 
         vkDestroyShaderModule(device_, frag_shader_module_, nullptr);
         vkDestroyShaderModule(device_, vert_shader_module_, nullptr);
 
-        return { render_pipeline_, mesh_pipeline_ };
+        return render_pipeline_;
     }
 
     void Clean() {
         vkDestroyPipeline(device_, render_pipeline_, nullptr);
-        vkDestroyPipeline(device_, mesh_pipeline_, nullptr);
 
         vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
         vkDestroyPipelineLayout(device_, mesh_pipeline_layout_, nullptr);
@@ -162,7 +159,7 @@ public:
     }
 
     VkPipelineLayout pipeline_layout_, mesh_pipeline_layout_;
-    VkPipeline render_pipeline_, mesh_pipeline_;
+    VkPipeline render_pipeline_;
 
 private:
     void RasterizationInfo() {

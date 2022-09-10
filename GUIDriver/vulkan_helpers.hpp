@@ -105,7 +105,6 @@ struct VulkanHelper {
 	}
 
 	static VkCommandBuffer BeginSingleTimeCommands(VkDevice& device, VkCommandPool command_pool, bool log = true) {
-
 		VkCommandBuffer command_buffer;
 		InitializeCommandBuffer(device, command_buffer, command_pool);
 
@@ -147,22 +146,7 @@ struct VulkanHelper {
 		return vulkan_status;
 	}
 
-	//NOTE:
-	void InitializeCommandVectors(const vector<VkImageView>& image_views, vector<VkCommandBuffer>& command_buffers, vector<VkCommandPool>& command_pools) {
-		command_buffers.resize(image_views.size());
-		command_pools.resize(image_views.size());
-
-		for (size_t i = 0; i < image_views.size(); i++) {
-			CreateCommandPool(command_pools[i], VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-			auto command_info = AllocateCommandBufferInfo(command_pools[i]);
-			vkAllocateCommandBuffers(device_, &command_info, &command_buffers[i]);
-		}
-	}
-
 	VkDevice device_;
-
-	vector<VkCommandBuffer> imgui_command_buffers_;
-	vector<VkCommandPool> imgui_command_pools_;
 
 	size_t MAX_FRAMES_IN_FLIGHT_;
 
