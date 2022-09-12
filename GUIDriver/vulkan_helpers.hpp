@@ -105,6 +105,7 @@ struct VulkanHelper {
 	}
 
 	static VkCommandBuffer BeginSingleTimeCommands(VkDevice& device, VkCommandPool command_pool, bool log = true) {
+
 		VkCommandBuffer command_buffer;
 		InitializeCommandBuffer(device, command_buffer, command_pool);
 

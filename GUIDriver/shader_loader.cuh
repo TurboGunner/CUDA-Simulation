@@ -68,8 +68,8 @@ public:
 
         array<VkDescriptorSetLayout, 2> set_layouts = { descriptor_set_handler_.global_set_layout_, descriptor_set_handler_.object_set_layout_ };
 
-        mesh_pipeline_layout_info.setLayoutCount = 2;
-        mesh_pipeline_layout_info.pSetLayouts = set_layouts.data();
+        //mesh_pipeline_layout_info.setLayoutCount = 2;
+        //mesh_pipeline_layout_info.pSetLayouts = set_layouts.data();
 
         if (vkCreatePipelineLayout(device_, &mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout_) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Could not successfully create the mesh pipeline layout!");
@@ -253,13 +253,13 @@ private:
          ProgramLog::OutputLine("Created color blend state for the render pipeline.");
      }
 
-     void DepthStencilState() {
+     void DepthStencilState(const bool& depth_test = true, const bool& depth_write = true, const VkCompareOp& compare_op = VK_COMPARE_OP_LESS_OR_EQUAL) {
          depth_stencil_state_.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
          depth_stencil_state_.pNext = nullptr;
 
-         depth_stencil_state_.depthTestEnable = VK_TRUE;
-         depth_stencil_state_.depthWriteEnable = VK_TRUE;
-         depth_stencil_state_.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+         depth_stencil_state_.depthTestEnable = depth_test ? VK_TRUE : VK_FALSE;
+         depth_stencil_state_.depthWriteEnable = depth_write ? VK_TRUE : VK_FALSE;
+         depth_stencil_state_.depthCompareOp = depth_test ? compare_op : VK_COMPARE_OP_ALWAYS;
          depth_stencil_state_.depthBoundsTestEnable = VK_FALSE;
          depth_stencil_state_.minDepthBounds = 0.0f;
          depth_stencil_state_.maxDepthBounds = 1.0f;

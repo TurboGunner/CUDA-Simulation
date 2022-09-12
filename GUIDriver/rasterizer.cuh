@@ -24,8 +24,8 @@ public:
 		device_ = device_in;
 	}
 
-	VkRenderPass Initialize(const VkFormat& color_format) {
-		RenderPassDescriptions(color_format, true);
+	VkRenderPass Initialize(const VkFormat& color_format, const VkFormat& depth_format) {
+		RenderPassDescriptions(color_format, depth_format, true);
 
 		CreateRenderPass(render_pass_);
 
@@ -41,10 +41,10 @@ public:
 	VkRenderPass render_pass_;
 
 private:
-	void RenderPassDescriptions(const VkFormat& format, const bool& depth) {
+	void RenderPassDescriptions(const VkFormat& format, const VkFormat& depth_format, const bool& depth) {
 		if (!init_status_) {
 			CreateColorAttachment(format);
-			CreateDepthAttachment();
+			CreateDepthAttachment(depth_format);
 
 			color_attachment_ref_.attachment = 0;
 			color_attachment_ref_.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -73,8 +73,8 @@ private:
 		ProgramLog::OutputLine("Created color attachment for the render pass.");
 	}
 
-	void CreateDepthAttachment() {
-		depth_attachment_.format = VK_FORMAT_D32_SFLOAT;
+	void CreateDepthAttachment(const VkFormat& depth_format) {
+		depth_attachment_.format = depth_format;
 		depth_attachment_.samples = VK_SAMPLE_COUNT_1_BIT;
 		depth_attachment_.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		depth_attachment_.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

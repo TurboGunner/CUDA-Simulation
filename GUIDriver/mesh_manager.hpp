@@ -15,12 +15,6 @@ struct MeshPushConstants {
     glm::mat4 render_matrix;
 };
 
-struct UniformBufferObject {
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
-};
-
 class VertexData {
 public:
     VertexData() = default;
@@ -32,10 +26,11 @@ public:
 
         vector<Vertex> vertices_in = {
             Vertex(0.5f, -0.5f, 0.0f, 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f),
-            Vertex(0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f),
-            Vertex(-0.5f, -0.5f, 1.0f, 1.0f, 0.5f, 1.0f, 0.5f, 0.5f, 0.5f),
-            Vertex(-0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-            Vertex(0.0f, -1.0f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)
+            Vertex(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f),
+            Vertex(-1.5f, 1.0f, 1.0f, 1.0f, 0.5f, 1.0f, 0.5f, 0.5f, 0.5f),
+            Vertex(-1.5f, -1.5f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+            Vertex(1.0f, -1.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f),
+            Vertex(1.0f, 1.0f, 1.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f)
         };
 
         vertices.Push(vertices_in);
@@ -57,7 +52,7 @@ public:
         //Staging Buffer
         CreateBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size_, staging_buffer, staging_buffer_memory);
 
-        void* data = MapMemory(size_, staging_buffer_memory);
+        void* data = MapMemory(vertices.Data(), size_, staging_buffer_memory);
 
         //Vertex Buffer
         CreateBuffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size_, vertex_buffer_, vertex_buffer_memory_);
@@ -83,19 +78,17 @@ public:
         }
 
         return vkBindBufferMemory(device_, buffer, buffer_memory, 0);
-
-        //ProgramLog::OutputLine("Created and bound buffer to device memory successfully!");
     }
 
     void InitializeIndex(VkCommandPool& command_pool) {
         VkResult vulkan_status = VK_SUCCESS;
-        const vector<uint16_t> indices = { 0, 1, 2, 3, 0 };
+        const vector<uint16_t> indices = { 0, 1, 2, 0, 3, 2 }; //Make this a data member for the vert
 
         VkBuffer staging_buffer;
         VkDeviceMemory staging_buffer_memory;
         CreateBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size_, staging_buffer, staging_buffer_memory);
 
-        void* data = MapMemory(size_, staging_buffer_memory);
+        void* data = MapMemory(indices.data(), size_, staging_buffer_memory);
 
         CreateBuffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size_, index_buffer_, index_buffer_memory_);
 
@@ -110,7 +103,7 @@ public:
 
         auto buffer = AllocateBuffer(size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        VertexData::MapMemory(size, mesh_buffer_memory_);
+        VertexData::MapMemory(vertices.Data(), size, mesh_buffer_memory_);
     }
 
     void Clean() {
@@ -150,11 +143,11 @@ private:
         VulkanHelper::EndSingleTimeCommands(command_buffer, device_, command_pool, queue_, false);
     }
 
-    void* MapMemory(const VkDeviceSize& size, VkDeviceMemory& device_memory) {
+    void* MapMemory(const void* arr, const VkDeviceSize& size, VkDeviceMemory& device_memory) {
         void* data;
 
         vkMapMemory(device_, device_memory, 0, size, 0, &data);
-        memcpy(data, vertices.Data(), size);
+        memcpy(data, arr, size);
         vkUnmapMemory(device_, device_memory);
 
         return data;

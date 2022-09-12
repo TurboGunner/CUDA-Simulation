@@ -93,8 +93,6 @@ struct Vertex {
 
 class MeshContainer {
 public:
-    MeshContainer() = default;
-
     MeshContainer(const bool& collision_mode = false) {
         collision = collision_mode;
     }

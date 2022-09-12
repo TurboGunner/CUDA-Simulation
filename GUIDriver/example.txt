@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFCFF5E17C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFCD42A17C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -69,6 +69,14 @@ Color Attachment Ref ID: 2
 Name for shader stage (Index 0): main.
 Successfully created graphics pipeline!
 Successfully created mesh pipeline!
+Created a window with size 2560 X 1026.
+
+Color Attachment Ref ID: 2
+Name for shader stage (Index 0): main.
+
+Address for Vulkan Render Pass: EC4BEC000000000B.
+
+
 Started command recording!
 Ended command recording!
 

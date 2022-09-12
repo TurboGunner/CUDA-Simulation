@@ -82,7 +82,7 @@ void VulkanGUIDriver::GUISetup() {
 
     //Create Renderpass
     render_pass_initializer_ = RenderPassInitializer(device_);
-    render_pass_ = render_pass_initializer_.Initialize(surface_format_.format);
+    render_pass_ = render_pass_initializer_.Initialize(surface_format_.format, ImageHelper::FindDepthFormat(physical_device_));
 
     //Creating all of the other external helpers
     vulkan_helper_ = VulkanHelper(device_, size_, MAX_FRAMES_IN_FLIGHT_);
@@ -120,7 +120,7 @@ void VulkanGUIDriver::GUISetup() {
 
     clear_values_.resize(2);
 
-    clear_values_[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+    clear_values_[0].color = { {0.0f, 0.0f, 0.0f, 1.0f } };
     clear_values_[1].depthStencil = { 1.0f, 0 };
 
     //Create Pipeline
@@ -155,7 +155,8 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     ImGui_ImplVulkan_Init(&init_info, render_pass_);
 
-    s_stream << "Address for Vulkan Render Pass: " << render_pass_ << ".";
+    s_stream << "\n\nAddress for Vulkan Render Pass: " << render_pass_ << ".\n";
+    ProgramLog::OutputLine(s_stream);
 
     //texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
 }
@@ -276,7 +277,7 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     vkCmdPushConstants(command_buffers_[current_frame_], mesh_pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
 
-    vkCmdDraw(command_buffers_[current_frame_], mesh_data_.vertices.Size(), 1, 0, 0);
+    vkCmdDrawIndexed(command_buffers_[current_frame_], mesh_data_.vertices.Size(), 1, 0, 0, 0);
 
     ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffers_[current_frame_]);
 

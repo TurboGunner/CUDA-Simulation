@@ -11,7 +11,7 @@
 
 struct ImageHelper {
 	static void InitializeImage(VkDevice& device, VkPhysicalDevice& physical_device, VkDeviceMemory& texture_image_memory, VkImage& image, uint2& size,
-		const VkFormat& image_format, const VkImageUsageFlags usage_flags, const VkMemoryPropertyFlags& properties, const VkImageType& image_type = VK_IMAGE_TYPE_2D) {
+		const VkFormat& image_format, const VkImageUsageFlags& usage_flags, const VkMemoryPropertyFlags& properties, const VkImageType& image_type = VK_IMAGE_TYPE_2D) {
 		VkImageCreateInfo image_info = {};
 
 		image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
