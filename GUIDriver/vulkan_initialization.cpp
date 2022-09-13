@@ -61,9 +61,8 @@ void VulkanGUIDriver::SelectGPU() {
 
     int use_gpu = 0;
     for (size_t i = 0; i < gpu_count; i++) {
-        VkPhysicalDeviceProperties properties;
-        vkGetPhysicalDeviceProperties(gpus[i], &properties);
-        if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+        vkGetPhysicalDeviceProperties(gpus[i], &device_properties_);
+        if (device_properties_.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
             use_gpu = i;
             break;
         }

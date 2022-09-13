@@ -93,6 +93,8 @@ void VulkanGUIDriver::GUISetup() {
     //Creating command pool
     vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
 
+    shader_handler_.InitializeDescriptorHandler(physical_device_, descriptor_pool_, command_pool_, queue_, MAX_FRAMES_IN_FLIGHT_);
+
     //Creating depth pass for rendering
     swap_chain_helper_.InitializeDepthPass(command_pool_);
 
@@ -174,10 +176,6 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     }
     SwapChainCondition();
 
-    uint2 size;
-    size.x = 1024;
-    size.y = 1024;
-
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
@@ -225,6 +223,10 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.render_pipeline_);
 
     mesh_data_.BindPipeline(command_buffer, command_pool_);
+
+    auto& descriptor_helper = shader_handler_.descriptor_set_handler_;
+    uint32_t uniform_offset = BufferHelpers::PadUniformBufferSize(device_properties_, frame_index_);
+    vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shader_handler_.mesh_pipeline_layout_, 0, 1, &descriptor_helper.global_descriptors_[current_frame_], 1, &uniform_offset);
 }
 
 void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore& image_semaphore, VkSemaphore& render_semaphore) {
@@ -273,7 +275,7 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     StartRenderPass(command_buffers_[current_frame_], swap_chain_helper_.frame_buffers_[image_index_]);
 
-    auto constants = mesh_viewport_.ViewportRotation(frame_index_);
+    auto constants = mesh_viewport_.ViewportRotation(frame_index_, current_frame_, shader_handler_.descriptor_set_handler_);
 
     vkCmdPushConstants(command_buffers_[current_frame_], mesh_pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
 

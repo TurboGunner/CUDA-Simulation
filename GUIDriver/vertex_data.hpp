@@ -10,6 +10,7 @@
 #include <array>
 #include <vector>
 #include <unordered_map>
+#include <cmath>
 
 using std::array;
 using std::vector;
@@ -37,6 +38,27 @@ struct Vertex {
     glm::vec3 pos;
     glm::vec3 normal;
     glm::vec3 color;
+
+    void RGBAdjust(float r, float g, float b, float size = 255.0f) {
+        if (size <= 0.0f) {
+            ProgramLog::OutputLine("Invalid input size of " + std::to_string(size) + "! Must be greater than 0.");
+            return;
+        }
+
+        if ((r > size || g > size || b > size) && (r < 0 || g < 0 || b < 0)) {
+            s_stream << "Invalid input size of color (" << r << ", " << g << ", " << b << ")! Must be greater than 0 and less than size.";
+            ProgramLog::OutputLine(s_stream);
+            return;
+        }
+
+        size = int(size);
+
+        r /= size;
+        g /= size;
+        b /= size;
+
+        color = glm::vec3(r, g, b);
+    }
 
     static vector<VkVertexInputBindingDescription> GetBindingDescription() {
         VkVertexInputBindingDescription binding_description = {};

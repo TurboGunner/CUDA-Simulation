@@ -37,8 +37,10 @@ public:
         pipeline_cache_ = cache_in;
 
         allocators_ = allocators;
+    }
 
-        descriptor_set_handler_ = DescriptorSetHandler(device_);
+    void InitializeDescriptorHandler(VkPhysicalDevice& phys_device_in, VkDescriptorPool& descriptor_pool_in, VkCommandPool& command_pool_in, VkQueue& queue_in, const size_t& max_frames_const_in) {
+        descriptor_set_handler_ = DescriptorSetHandler(device_, phys_device_in, queue_in, command_pool_in, descriptor_pool_in, max_frames_const_in);
     }
 
     VkPipelineLayout InitializeLayout() {
@@ -68,8 +70,10 @@ public:
 
         array<VkDescriptorSetLayout, 2> set_layouts = { descriptor_set_handler_.global_set_layout_, descriptor_set_handler_.object_set_layout_ };
 
-        //mesh_pipeline_layout_info.setLayoutCount = 2;
-        //mesh_pipeline_layout_info.pSetLayouts = set_layouts.data();
+        descriptor_set_handler_.AllocateDescriptorSets();
+
+        mesh_pipeline_layout_info.setLayoutCount = 1;
+        mesh_pipeline_layout_info.pSetLayouts = &set_layouts.data()[0];
 
         if (vkCreatePipelineLayout(device_, &mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout_) != VK_SUCCESS) {
             ProgramLog::OutputLine("Error: Could not successfully create the mesh pipeline layout!");
@@ -157,6 +161,9 @@ public:
 
         descriptor_set_handler_.Clean();
     }
+
+    //Helper Struct
+    DescriptorSetHandler descriptor_set_handler_;
 
     VkPipelineLayout pipeline_layout_, mesh_pipeline_layout_;
     VkPipeline render_pipeline_;
@@ -379,9 +386,6 @@ private:
 
         return create_info;
     }
-
-    //Helper Struct
-    DescriptorSetHandler descriptor_set_handler_;
 
     VkDevice device_;
     VkPipelineCache pipeline_cache_;

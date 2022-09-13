@@ -33,6 +33,10 @@ void VulkanGUIDriver::CreateMainFrame() {
     ImVec2 window_size(width_ratio, height_ratio);
     ImGui::SetWindowSize(window_size);
 
+    if (ImGui::IsKeyDown(ImGuiKey_W)) {
+        mesh_viewport_.ShiftCamPos(0.0f, 1.0f);
+    }
+
     ImVec2 window_pos(0.0f, (screen_height - height_ratio) - ((screen_height / 10.0f) * 0.75f));
 
     ImGui::SetWindowPos(window_pos);

@@ -104,6 +104,9 @@
     <ClInclude Include="descriptor_set_handler.hpp">
       <Filter>includes\helpers</Filter>
     </ClInclude>
+    <ClInclude Include="buffer_helpers.hpp">
+      <Filter>includes\helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GUIDriver.rc" />

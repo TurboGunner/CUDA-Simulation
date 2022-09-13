@@ -105,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
+    <ClInclude Include="buffer_helpers.hpp" />
     <ClInclude Include="descriptor_set_handler.hpp" />
     <ClInclude Include="gui_driver.cuh" />
     <ClInclude Include="image_helpers.hpp" />

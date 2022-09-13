@@ -10,6 +10,7 @@
 #include "sync_structs.hpp"
 #include "vertex_data.hpp"
 #include "mesh_viewport.hpp"
+#include "descriptor_set_handler.hpp"
 
 #include "vulkan_helpers.hpp"
 #include "image_helpers.hpp"
@@ -182,6 +183,8 @@ public:
     RenderPassInitializer render_pass_initializer_;
     VertexData mesh_data_;
     MeshViewport mesh_viewport_;
+
+    VkPhysicalDeviceProperties device_properties_;
 
     tuple<VkImageView, VkSampler> image_alloc_;
 
