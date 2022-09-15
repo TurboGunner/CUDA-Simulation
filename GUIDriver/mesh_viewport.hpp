@@ -5,32 +5,120 @@
 
 #include <vulkan/vulkan.h>
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_vulkan.h>
+
 #include <glm/glm.hpp>
+
 #include <glm/gtx/transform.hpp>
 
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+#include <imgui.h>
+
+#include <string>
 #include <vector>
 
 using std::vector;
+using std::string;
 
 class MeshViewport {
 public:
-    MeshViewport() = default;
+    MeshViewport() {
+        cam_pos_ = default_pos_;
 
-    MeshViewport(VkDevice& device_in, VkDescriptorPool& descriptor_pool_in) {
-        device_ = device_in;
-        descriptor_pool_ = descriptor_pool_in;
+        view_ = glm::mat4{ 1.0f };
+
+        forward_direction_ = glm::vec3(0.0f, 1.0f, 0.0f);
     }
 
-    void ShiftCamPos(float x = 0.0f, float y = 0.0f, float z = 0.0f) {
+    MeshViewport(VkDevice& device_in) {
+        device_ = device_in;
+
+        cam_pos_ = default_pos_;
+
+        view_ = glm::mat4 { 1.0f };
+
+        forward_direction_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    }
+
+    void ShiftCamPos(float x = 0.0f, float y = 0.0f, float z = 0.0f, const bool& log = false) {
         cam_pos_ += glm::vec3(x, y, z);
+        if (log) {
+            s_stream << "Shifted camera position by: (" << x << ", " << y << ", " << z << ")!";
+            ProgramLog::OutputLine(s_stream);
+            s_stream << "Current camera position: (" << cam_pos_.x << ", " << cam_pos_.y << ", " << cam_pos_.z << ").";
+            ProgramLog::OutputLine(s_stream);
+        }
+    }
+
+    void ResetCamera() {
+        cam_pos_ = default_pos_;
+    }
+
+    void ManipulateCamera() {
+        glm::vec3 up_direction(0.0f, 1.0f, 0.0f);
+
+        float delta_time = ImGui::GetIO().DeltaTime;
+
+        glm::vec2 delta_movement(0.0f, 0.0f);
+
+        bool rotate = ImGui::IsMouseDown(ImGuiMouseButton_Right);
+
+        if (rotate) {
+            //ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+            SDL_SetRelativeMouseMode(SDL_TRUE);
+
+            auto mouse_pos_temp = ImGui::GetMousePos();
+            glm::vec2 mouse_position(mouse_pos_temp.x, mouse_pos_temp.y);
+
+            delta_movement = (mouse_position - last_mouse_pos);
+
+            ProgramLog::OutputLine("Delta Movement: " + std::to_string(forward_direction_.x));
+
+            last_mouse_pos = mouse_position;
+        }
+        else {
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        }
+
+        forward_direction_ = rotate ? forward_direction_ : glm::vec3(0.0f, 1.0f, 0.0f);
+        right_direction_ = rotate ? glm::cross(forward_direction_, up_direction) : glm::vec3(1.0f, 0.0f, 0.0f);
+
+
+        if (ImGui::IsKeyDown(ImGuiKey_W)) {
+            cam_pos_ += forward_direction_ * 5.0f * delta_time;
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_S)) {
+            cam_pos_ -= forward_direction_ * 5.0f * delta_time;
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_A)) {
+            cam_pos_ -= right_direction_ * 5.0f * delta_time;
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_D)) {
+            cam_pos_ += right_direction_ * 5.0f * delta_time;
+        }
+
+        if (ImGui::IsKeyPressed(ImGuiKey_F, false)) {
+            ResetCamera();
+        }
+
+        if (delta_movement.x != 0.0f || delta_movement.y != 0.0f) {
+            float pitch_delta = delta_movement.y * 0.3f;
+            float yaw_delta = delta_movement.x * 0.3f;
+
+            quaternion_ = glm::normalize(glm::cross(glm::angleAxis(-pitch_delta, right_direction_), glm::angleAxis(-yaw_delta, glm::vec3(0.0f, 1.0f, 0.0f))));
+            forward_direction_ = glm::rotate(quaternion_, forward_direction_);
+        }
+
     }
 
     MeshPushConstants ViewportRotation(const size_t& frame_index, const size_t& current_frame, DescriptorSetHandler& handler) {
-        cam_pos_ = { 0.0f, 0.0f, -2.0f };
-
-        view_ = glm::translate(glm::mat4(1.0f), cam_pos_);
+        view_ = glm::lookAt(cam_pos_, forward_direction_, glm::vec3(0.0f, 1.0f, 0.0f));
 
         projection_ = glm::perspective(glm::radians(70.0f), 1700.0f / 900.0f, 0.1f, 250.0f);
+
         projection_[1][1] *= -1;
 
         handler.camera_data_[current_frame].proj = projection_;
@@ -42,7 +130,7 @@ public:
         glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(frame_index * 0.1f), glm::vec3(0, 1, 0));
 
         //Calculates the final mesh matrix
-        glm::mat4 mesh_matrix = projection_ * view_ * model;
+        glm::mat4 mesh_matrix = projection_ * view_;
 
         MeshPushConstants constants;
         constants.render_matrix = mesh_matrix;
@@ -52,9 +140,15 @@ public:
 
 private:
     VkDevice device_;
-    VkDescriptorPool descriptor_pool_;
 
     glm::vec3 cam_pos_;
     glm::mat4 view_;
     glm::mat4 projection_;
+
+    glm::vec3 forward_direction_, right_direction_;
+    
+    glm::quat quaternion_;
+
+    glm::vec3 default_pos_ = glm::vec3(0.0f, 0.0f, -2.0f);
+    glm::vec2 last_mouse_pos;
 };

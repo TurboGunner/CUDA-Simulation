@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUIDriver", "GUIDriver\GUID
 		{48BA3375-7348-417C-B935-77A6345A2E93} = {48BA3375-7348-417C-B935-77A6345A2E93}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Meshing", "Meshing\Meshing.vcxproj", "{E7727259-F4EA-4266-95CE-3E6B8CD6809E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -38,6 +40,10 @@ Global
 		{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}.Debug|x64.Build.0 = Debug|x64
 		{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}.Release|x64.ActiveCfg = Release|x64
 		{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}.Release|x64.Build.0 = Release|x64
+		{E7727259-F4EA-4266-95CE-3E6B8CD6809E}.Debug|x64.ActiveCfg = Debug|x64
+		{E7727259-F4EA-4266-95CE-3E6B8CD6809E}.Debug|x64.Build.0 = Debug|x64
+		{E7727259-F4EA-4266-95CE-3E6B8CD6809E}.Release|x64.ActiveCfg = Release|x64
+		{E7727259-F4EA-4266-95CE-3E6B8CD6809E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

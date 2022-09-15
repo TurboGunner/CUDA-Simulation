@@ -86,6 +86,7 @@ void VulkanGUIDriver::InitializeVulkan() {
     const char** extensions = new const char* [ext_count];
     SDL_Vulkan_GetInstanceExtensions(window, &ext_count, extensions);
 
+
     VulkanInstantiation(extensions, ext_count);
     if (ext_count > 0) {
         delete[] extensions;

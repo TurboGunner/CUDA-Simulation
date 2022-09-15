@@ -194,7 +194,7 @@ public:
     VkDevice                 device_ = VK_NULL_HANDLE;
 
     //Queuing
-    uint32_t queue_family_ = (uint32_t)-1;
+    uint32_t queue_family_ = (uint32_t) - 1;
     VkQueue                  queue_ = VK_NULL_HANDLE;
 
     VkPipelineCache          pipeline_cache_ = VK_NULL_HANDLE;

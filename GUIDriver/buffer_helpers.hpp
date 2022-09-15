@@ -43,7 +43,7 @@ struct BufferHelpers {
     }
 
     static VkResult CreateBuffer(VkDevice& device, VkPhysicalDevice& physical_device, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkDeviceSize& size, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
-        buffer = BufferHelpers::AllocateBuffer(device, size, usage);
+        buffer = AllocateBuffer(device, size, usage);
 
         VkMemoryRequirements mem_requirements;
 
@@ -88,4 +88,23 @@ struct BufferHelpers {
         return alignedSize;
     }
 
+    static VkResult CreateBufferCross(VkDevice& device, VkPhysicalDevice& physical_device, VkQueue& queue, VkCommandPool& command_pool, const void* ptr, VkBuffer& buffer, VkDeviceMemory& buffer_memory, const VkBufferUsageFlags& usage_flags, const size_t& size) {
+        VkResult vulkan_status = VK_SUCCESS;
+
+        VkBuffer staging_buffer;
+        VkDeviceMemory staging_buffer_memory;
+
+        vulkan_status = CreateBuffer(device, physical_device, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size, staging_buffer, staging_buffer_memory);
+
+        void* data = MapMemory(device, ptr, size, staging_buffer_memory);
+
+        vulkan_status = CreateBuffer(device, physical_device, VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage_flags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size, buffer, buffer_memory);
+
+        vulkan_status = CopyBuffer(device, queue, command_pool, staging_buffer, buffer, size);
+
+        vkDestroyBuffer(device, staging_buffer, nullptr);
+        vkFreeMemory(device, staging_buffer_memory, nullptr);
+
+        return vulkan_status;
+    }
 };

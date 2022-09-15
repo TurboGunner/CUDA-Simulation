@@ -90,7 +90,7 @@
       <Filter>cpp\utility_structures</Filter>
     </ClCompile>
     <ClCompile Include="handler_methods.cpp">
-      <Filter>cpp</Filter>
+      <Filter>cuda</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

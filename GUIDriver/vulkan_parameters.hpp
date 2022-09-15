@@ -6,10 +6,12 @@
 #include <deque>
 #include <functional>
 #include <string>
+#include <vector>
 
 using std::deque;
 using std::function;
 using std::string;
+using std::vector;
 
 class VulkanParameters {
 public:
@@ -24,6 +26,8 @@ public:
 	VkSwapchainKHR swapchain_;
 
 	VkRenderPass render_pass_;
+
+	vector<VkCommandBuffer> command_buffers_;
 
 	VkCommandPool command_pool_;
 
@@ -41,33 +45,4 @@ public:
 	uint32_t image_index_, current_frame_, frame_index_;
 
 	uint2 size_;
-};
-
-struct AllocationParams {
-	AllocationParams() = default;
-
-	AllocationParams(function<void()> func_in, string name_in = "") {
-		name_ = name_in;
-		delete_func_ = func_in;
-	}
-
-	function<void()> delete_func_;
-	string name_;
-};
-
-struct VulkanMemoryManager {
-
-	void PushFunction(function<void()>& function, string name = "") {
-		allocations_.push_back(AllocationParams(function, name));
-	}
-
-	void Flush() {
-		for (auto it = allocations_.rbegin(); it != allocations_.rend(); it++) {
-			(*it).delete_func_();
-		}
-
-		allocations_.clear();
-	}
-private:
-	deque<AllocationParams> allocations_;
 };

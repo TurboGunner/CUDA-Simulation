@@ -67,10 +67,11 @@ void VulkanGUIDriver::SelectGPU() {
             break;
         }
     }
+
     physical_device_ = gpus[use_gpu];
     s_stream << "GPU Device #" << use_gpu << " has been selected for Vulkan Rendering successfully!";
     ProgramLog::OutputLine(s_stream);
-    free(gpus);
+    free(gpus);;
 }
 
 void VulkanGUIDriver::PoolDescriptionInitialization() {

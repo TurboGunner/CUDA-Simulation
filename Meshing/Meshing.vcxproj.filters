@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="includes">
+      <UniqueIdentifier>{7df18325-d5d6-4aed-bb88-bbac1def402e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\import">
+      <UniqueIdentifier>{15756fdb-d51b-4249-ac80-e886af57c6c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp">
+      <UniqueIdentifier>{9cb573dd-1c3f-463c-ad65-80153015d008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cuda">
+      <UniqueIdentifier>{5ca8df87-1203-4b49-a678-ad00d84ad060}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\CUDATest\handler_methods.hpp">
+      <Filter>includes\import</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.cuh">
+      <Filter>includes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\CUDATest\handler_methods.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu">
+      <Filter>cuda</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>
