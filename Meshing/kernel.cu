@@ -5,6 +5,7 @@
 #include "matrix.cuh"
 
 #include "../CUDATest/handler_methods.hpp"
+#include "../CUDATest/handler_classes.hpp"
 
 #include <stdio.h>
 
@@ -20,57 +21,50 @@ int main() {
     cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main",
         cuda_status, "Do you have a CUDA-capable GPU installed?");
 
-    Matrix* matrix = Matrix::Create(3, 3, true);
+    Matrix* matrix = Matrix::Create(3, 4, false);
+    std::cout << sizeof(Matrix) << std::endl;
+
+    RandomFloat random(0.0f, 10.0f, 3);
 
     for (size_t i = 0; i < matrix->rows; i++) {
         for (size_t j = 0; j < matrix->columns; j++) {
-            matrix->Set(2.0f + ((i + 5) + (j * (j + 1))), i, j);
+            matrix->Set(random.Generate(), i, j);
         }
     }
 
-    matrix->Set(10.0f, 0, 0);
+    matrix->PrintMatrix();
 
-    for (size_t i = 0; i < matrix->rows; i++) {
-        std::cout << std::endl;
-        for (size_t j = 0; j < matrix->columns; j++) {
-            std::cout << matrix->Get(i, j) << " ";
-        }
-    }
+    cuda_status = matrix->DeviceTransfer(matrix->device_alloc, matrix);
 
-    Matrix transpose = matrix->Transpose();
+    Matrix* transpose = Matrix::Create(4, 3, false);
+
+    cuda_status = transpose->DeviceTransfer(transpose->device_alloc, transpose);
+
+    Matrix::TransposeGPU(matrix, transpose);
 
     std::cout << std::endl << std::endl;
 
-    for (size_t i = 0; i < transpose.rows; i++) {
-        std::cout << std::endl;
-        for (size_t j = 0; j < transpose.columns; j++) {
-            std::cout << transpose.Get(i, j) << " ";
-        }
-    }
+    transpose->PrintMatrix();
 
     std::cout << std::endl << std::endl;
+
 
     Matrix adjoint(matrix->rows, matrix->columns, true);
     Matrix::Adjoint(*matrix, adjoint);
 
-    for (size_t i = 0; i < adjoint.rows; i++) {
-        std::cout << std::endl;
-        for (size_t j = 0; j < adjoint.columns; j++) {
-            std::cout << adjoint.Get(i, j) << " ";
-        }
-    }
+    adjoint.PrintMatrix();
 
     std::cout << std::endl << std::endl;
 
     Matrix inverse(matrix->rows, matrix->columns, true);
     Matrix::Inverse(*matrix, inverse);
 
-    for (size_t i = 0; i < inverse.rows; i++) {
-        std::cout << std::endl;
-        for (size_t j = 0; j < inverse.columns; j++) {
-            std::cout << inverse.Get(i, j) << " ";
-        }
-    }
+    inverse.PrintMatrix();
+
+    std::cout << std::endl << std::endl;
+
+    Matrix* multiply = Matrix::MultiplyGPU(matrix, transpose);
+    multiply->PrintMatrix();
 
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

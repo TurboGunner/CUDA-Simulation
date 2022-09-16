@@ -34,5 +34,8 @@
     <CudaCompile Include="matrix.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
+    <CudaCompile Include="matrix_kernel.cu">
+      <Filter>cuda</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

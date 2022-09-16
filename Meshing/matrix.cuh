@@ -3,10 +3,12 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+#include "../CUDATest/handler_methods.hpp"
+
 #include <stdio.h>
 
+#include <iostream>
 #include <stdexcept>
-#include "../CUDATest/handler_methods.hpp"
 
 class Matrix {
 public:
@@ -20,6 +22,8 @@ public:
 
 	__host__ __device__ Matrix Transpose();
 
+	__host__ static cudaError_t TransposeGPU(Matrix* matrix, Matrix* output);
+
 	__host__ __device__ float& Get(const int& index);
 
 	__host__ __device__ float& Get(const size_t& row, const size_t& column);
@@ -31,11 +35,20 @@ public:
 
     __host__ __device__  void GetCofactor(Matrix& output_matrix, int p, int q, int n);
 
-    __host__ __device__ static int Determinant(Matrix& matrix, size_t length);
+    __host__ __device__ static float Determinant(Matrix& matrix, size_t length);
 
     __host__ __device__ static void Adjoint(Matrix& matrix, Matrix& adjoint);
 
-    __host__ __device__ static bool Inverse(Matrix& matrix, Matrix& inverse);
+	__host__ __device__ static bool Inverse(Matrix& matrix, Matrix& inverse);
+
+	__host__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
+
+	__host__ cudaError_t DeviceTransfer(Matrix* ptr, Matrix* src);
+
+	__host__ cudaError_t HostTransfer();
+
+	__host__ __device__ void PrintMatrix();
+
 
     Matrix* device_alloc;
 
@@ -45,4 +58,11 @@ private:
 	float* data, *data_device;
 
     bool is_square = true;
+
+	bool device_allocated_status = false;
+	//Maybe add memory allocation state enum for better safety
 };
+
+__global__ void TransposeKernel(Matrix* matrix, Matrix* output);
+
+__global__ void MultiplyKernel(Matrix* matrix_A, Matrix* matrix_B, Matrix* output);
