@@ -18,17 +18,26 @@ public:
 
 	__host__ __device__ static Matrix* Create(const size_t& rows, const size_t& columns, const bool& local = false);
 
+	__host__ __device__ void Destroy();
+
 	__host__ __device__ size_t IX(size_t row, size_t column) const;
 
 	__host__ __device__ Matrix Transpose();
 
-	__host__ static cudaError_t TransposeGPU(Matrix* matrix, Matrix* output);
+	__host__ static Matrix* TransposeGPU(Matrix* matrix);
+	__host__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
 
 	__host__ __device__ float& Get(const int& index);
 
 	__host__ __device__ float& Get(const size_t& row, const size_t& column);
 
 	__host__ __device__ float& operator[](const int& index);
+
+	__host__ __device__ static Matrix* DiagonalMatrix(const float* points, const size_t& row, const size_t& column);
+
+	__host__ __device__ float* Row(const size_t& index);
+
+	__host__ __device__ float* Column(const size_t& index);
 
 	__host__ __device__ void Set(const float& value, const int& index);
 	__host__ __device__ void Set(const float& value, const size_t& row, const size_t& column);
@@ -41,7 +50,9 @@ public:
 
 	__host__ __device__ static bool Inverse(Matrix& matrix, Matrix& inverse);
 
-	__host__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
+	__host__ __device__ Matrix AbsoluteValue();
+
+	__host__ __device__ Matrix Reciprocal();
 
 	__host__ cudaError_t DeviceTransfer(Matrix* ptr, Matrix* src);
 
@@ -59,8 +70,7 @@ private:
 
     bool is_square = true;
 
-	bool device_allocated_status = false;
-	//Maybe add memory allocation state enum for better safety
+	bool device_allocated_status = false, local = false;
 };
 
 __global__ void TransposeKernel(Matrix* matrix, Matrix* output);

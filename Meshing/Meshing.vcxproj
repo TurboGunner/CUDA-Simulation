@@ -87,6 +87,7 @@
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="matrix.cu" />
     <CudaCompile Include="matrix_kernel.cu" />
+    <CudaCompile Include="matrix_math.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CUDATest\handler_methods.cpp" />
