@@ -4,13 +4,21 @@
 #include <iostream>
 #include <math.h>
 
-void CudaExceptionHandler(cudaError_t& cuda_status, string error_message) {
+void CudaExceptionHandler(const cudaError_t& cuda_status, string error_message) {
     if (cuda_status != cudaSuccess) {
+        std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
         throw std::invalid_argument(error_message);
     }
 }
 
-void ErrorLog(cudaError_t cuda_status, string operation_name, string method_name, string optional_args) {
+__host__ __device__ void CudaExceptionHandlerCross(cudaError_t cuda_status, const char* error_message) {
+    if (cuda_status != cudaSuccess) {
+        printf("%s\n", error_message);
+        printf("Error Stacktrace: %s\n\n", cudaGetErrorString(cuda_status));
+    }
+}
+
+void ErrorLog(const cudaError_t& cuda_status, const string& operation_name, const string& method_name, const string& optional_args) {
     if (cuda_status != cudaSuccess) {
         std::cout << operation_name << " returned error code " << cuda_status << " after launching " << method_name << "\n" << std::endl;
         std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
@@ -20,7 +28,7 @@ void ErrorLog(cudaError_t cuda_status, string operation_name, string method_name
     }
 }
 
-void ErrorLog(VkResult vk_status, string operation_name, string method_name, string optional_args) {
+void ErrorLog(const VkResult& vk_status, const string& operation_name, const string& method_name, const string& optional_args) {
     if (vk_status != VK_SUCCESS) {
         std::cout << operation_name << " returned error code " << vk_status << " after launching " << method_name << "\n" << std::endl;
         std::cout << "Error Stacktrace: " << vk_status << "\n" << std::endl;

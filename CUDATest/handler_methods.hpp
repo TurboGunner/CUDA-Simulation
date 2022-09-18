@@ -15,11 +15,13 @@ using std::vector;
 using std::function;
 
 /// <summary> Throws an invalid argument with the supplied error message when CUDA status is invalid. </summary>
-void CudaExceptionHandler(cudaError_t& cuda_status, string error_message);
+void CudaExceptionHandler(const cudaError_t& cuda_status, string error_message);
 
-void ErrorLog(cudaError_t cuda_status, string operation_name, string method_name, string optional_args = "");
+__host__ __device__ void CudaExceptionHandlerCross(cudaError_t cuda_status, const char* error_message);
 
-void ErrorLog(VkResult vk_status, string operation_name, string method_name, string optional_args = "");
+void ErrorLog(const cudaError_t& cuda_status, const string& operation_name, const string& method_name, const string& optional_args = "");
+
+void ErrorLog(const VkResult& vk_status, const string& operation_name, const string& method_name, const string& optional_args = "");
 
 /// <summary> Allocates memory to a referenced std::vector of referenced wrapped generic pointers.
 /// <para> Note: element_alloc does not have to be supplied if size_alloc contains the combined size of the elements. </para> </summary>

@@ -11,18 +11,14 @@
 
 #include <iostream>
 #include <functional>
+#include <vector>
 
 using std::function;
+using std::vector;
 
 Matrix* GMatrixTerm(Matrix* matrix, Matrix* matrix_T, Matrix* weights) {
-    std::cout << std::endl << std::endl;
-
-    Matrix* multiply_t = Matrix::MultiplyGPU(matrix_T, weights);
-    multiply_t->PrintMatrix();
-    std::cout << std::endl << std::endl;
-    Matrix* multiply = Matrix::MultiplyGPU(multiply_t, weights);
-    multiply->PrintMatrix();
-    std::cout << std::endl << std::endl;
+    Matrix* transpose_weights = Matrix::MultiplyGPU(matrix_T, weights);
+    Matrix* multiply = Matrix::MultiplyGPU(transpose_weights, weights);
 
    return Matrix::MultiplyGPU(multiply, matrix);
 }
@@ -35,29 +31,12 @@ Matrix* Weights(Matrix* matrix) {
         free(ptr);
     }
 
-    std::cout << std::endl << std::endl;
-
     Matrix* diagonal = Matrix::DiagonalMatrix(arr.data(), 4, 4);
     *diagonal = diagonal->Reciprocal();
 
-    std::cout << std::endl << std::endl;
-    diagonal->PrintMatrix();
-    std::cout << std::endl << std::endl;
     diagonal->DeviceTransfer(diagonal->device_alloc, diagonal);
 
     return diagonal;
-}
-
-cudaError_t PopulateMatrix(Matrix* matrix) {
-    RandomFloat random(0, 1.0f, 3);
-
-    for (size_t i = 0; i < matrix->rows; i++) {
-        for (size_t j = 0; j < matrix->columns; j++) {
-            matrix->Set(random.Generate(), j, i);
-        }
-    }
-
-    return matrix->DeviceTransfer(matrix->device_alloc, matrix);
 }
 
 int main() {
@@ -69,62 +48,48 @@ int main() {
 
     Matrix* matrix = Matrix::Create(4, 3, false);
 
-    PopulateMatrix(matrix);
+    Matrix::PopulateRandomHost(matrix, 0.0f, 1.0f);
 
-    matrix->PrintMatrix();
-
-    std::cout << std::endl << std::endl;
+    matrix->PrintMatrix("Matrix: ");
 
     Matrix* transpose = Matrix::TransposeGPU(matrix);
-    transpose->PrintMatrix();
-
-    std::cout << std::endl << std::endl;
+    transpose->PrintMatrix("Transpose: ");
 
     Matrix* weights = Weights(matrix);
 
-    weights->PrintMatrix();
-
-    std::cout << std::endl << "G: " << std::endl;
+    weights->PrintMatrix("Weights: ");
 
     Matrix* G_term = GMatrixTerm(matrix, transpose, weights);
 
-    G_term->PrintMatrix();
-
-    std::cout << std::endl << std::endl;
+    G_term->PrintMatrix("G Term: ");
 
     Matrix* inverse = Matrix::Create(G_term->rows, G_term->columns);
     Matrix::Inverse(*G_term, *inverse);
 
     inverse->DeviceTransfer(inverse->device_alloc, inverse);
 
-    inverse->PrintMatrix();
-
-    std::cout << std::endl << std::endl;
+    inverse->PrintMatrix("Inverse of G Term: ");
 
     Matrix* multiply_t = Matrix::MultiplyGPU(inverse, transpose);
-    multiply_t->PrintMatrix();
-    std::cout << std::endl << std::endl;
-    Matrix* multiply_t2 = Matrix::MultiplyGPU(multiply_t, weights);
-    Matrix* multiply_t3 = Matrix::MultiplyGPU(multiply_t2, weights);
-    multiply_t3->PrintMatrix();
+
+    Matrix* weight_multiply = Matrix::MultiplyGPU(multiply_t, weights);
+
+    Matrix* gradient = Matrix::MultiplyGPU(weight_multiply, weights);
+    gradient->PrintMatrix("Gradient: ");
 
     RandomFloat random(100.0f, 500.0f, 1);
-
-    std::cout << std::endl << std::endl;
 
     Matrix* delta = Matrix::Create(4, 1);
     for (size_t j = 0; j < delta->rows; j++) {
         delta->Set(random.Generate(), j);
     }
 
-    delta->PrintMatrix();
+    delta->PrintMatrix("Temperature Delta: ");
 
     delta->DeviceTransfer(delta->device_alloc, delta);
-    Matrix* multiply_t4 = Matrix::MultiplyGPU(multiply_t3, delta);
+    Matrix* multiply_t4 = Matrix::MultiplyGPU(gradient, delta);
 
-    std::cout << std::endl << std::endl;
-
-    multiply_t4->PrintMatrix();
+    multiply_t4->PrintMatrix("Gradient Solution: ");
 
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

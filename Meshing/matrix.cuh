@@ -3,12 +3,16 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+#include "../CUDATest/handler_classes.hpp"
 #include "../CUDATest/handler_methods.hpp"
 
 #include <stdio.h>
 
 #include <iostream>
 #include <stdexcept>
+#include <vector>
+
+using std::vector;
 
 class Matrix {
 public:
@@ -18,7 +22,9 @@ public:
 
 	__host__ __device__ static Matrix* Create(const size_t& rows, const size_t& columns, const bool& local = false);
 
-	__host__ __device__ void Destroy();
+	__host__ __device__ cudaError_t Destroy();
+
+	__host__ static void DeleteAllocations(vector<Matrix*> matrices);
 
 	__host__ __device__ size_t IX(size_t row, size_t column) const;
 
@@ -58,7 +64,9 @@ public:
 
 	__host__ cudaError_t HostTransfer();
 
-	__host__ __device__ void PrintMatrix();
+	__host__ __device__ void PrintMatrix(const char* label = nullptr);
+
+	__host__ static cudaError_t PopulateRandomHost(Matrix* matrix, const float& min, const float& max);
 
 
     Matrix* device_alloc;
