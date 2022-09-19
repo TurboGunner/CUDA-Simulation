@@ -6,7 +6,6 @@ __global__ void TransposeKernel(Matrix* matrix, Matrix* output) {
 
     if (x_bounds <= output->rows && y_bounds <= output->columns) {
         output->Get(output->IX(threadIdx.y, threadIdx.x)) = matrix->Get(matrix->IX(threadIdx.x, threadIdx.y));
-        //printf("aaa %f\n", output->Get(output->IX(x_bounds, y_bounds)));
     }
 }
 

@@ -13,10 +13,7 @@ __host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_
     local = local_in;
 
 #ifdef __CUDA_ARCH__
-    cuda_status = cudaMalloc(&data_device, size_alloc);
-    if (cuda_status != cudaSuccess) {
-        printf("%s\n", "Could not allocate the memory for the matrix (host).");
-    }
+    data_device = (float*) malloc(size_alloc);
 #else
     cuda_status = cudaMallocHost(&data, size_alloc);
     CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix (host).");

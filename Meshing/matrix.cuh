@@ -34,7 +34,6 @@ public:
 	__host__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
 
 	__host__ __device__ float& Get(const int& index);
-
 	__host__ __device__ float& Get(const size_t& row, const size_t& column);
 
 	__host__ __device__ float& operator[](const int& index);
@@ -55,6 +54,12 @@ public:
     __host__ __device__ static void Adjoint(Matrix& matrix, Matrix& adjoint);
 
 	__host__ __device__ static bool Inverse(Matrix& matrix, Matrix& inverse);
+
+	__host__ static Matrix* GMatrixTerm(Matrix* matrix, Matrix* matrix_T, Matrix* weights);
+
+	__host__ static Matrix* Weights(Matrix* matrix);
+
+	__host__ static vector<Matrix*> WeightedLeastSquares(Matrix* matrix);
 
 	__host__ __device__ Matrix AbsoluteValue();
 

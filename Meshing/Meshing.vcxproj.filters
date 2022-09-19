@@ -13,32 +13,65 @@
     <Filter Include="cuda">
       <UniqueIdentifier>{5ca8df87-1203-4b49-a678-ad00d84ad060}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cuda\matrix">
+      <UniqueIdentifier>{0b1b43ae-62c4-485b-bdd2-3a2bb6ddf3ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cuda\mpm">
+      <UniqueIdentifier>{01f4ea10-b4ca-422d-b9d2-3e053aafc19d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\import">
+      <UniqueIdentifier>{7f59ccfb-8dd3-432d-ac8a-712058f4f79b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\cuda">
+      <UniqueIdentifier>{2d414739-64c1-446c-bdb2-ea9ae9b05eca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp">
       <Filter>includes\import</Filter>
     </ClInclude>
     <ClInclude Include="matrix.cuh">
-      <Filter>includes</Filter>
+      <Filter>includes\cuda</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\CUDATest\handler_methods.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
+    <ClInclude Include="vector_cross.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="mpm.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="mpm_kernel.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CUDATest\index_pair_cuda.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
+    <CudaCompile Include="matrix_math.cu">
+      <Filter>cuda\matrix</Filter>
+    </CudaCompile>
     <CudaCompile Include="matrix.cu">
-      <Filter>cuda</Filter>
+      <Filter>cuda\matrix</Filter>
     </CudaCompile>
     <CudaCompile Include="matrix_kernel.cu">
+      <Filter>cuda\matrix</Filter>
+    </CudaCompile>
+    <CudaCompile Include="mpm.cu">
+      <Filter>cuda\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="weighted_least_squares.cu">
+      <Filter>cuda\matrix</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\CUDATest\index_pair_cuda.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
-    <CudaCompile Include="matrix_math.cu">
-      <Filter>cuda</Filter>
-    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\CUDATest\handler_methods.cpp">
+      <Filter>cpp\import</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

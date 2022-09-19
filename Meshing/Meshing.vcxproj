@@ -84,17 +84,24 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="..\CUDATest\index_pair_cuda.cu" />
     <CudaCompile Include="kernel.cu" />
     <CudaCompile Include="matrix.cu" />
     <CudaCompile Include="matrix_kernel.cu" />
     <CudaCompile Include="matrix_math.cu" />
+    <CudaCompile Include="mpm.cu" />
+    <CudaCompile Include="weighted_least_squares.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CUDATest\handler_methods.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
+    <ClInclude Include="..\CUDATest\index_pair_cuda.cuh" />
     <ClInclude Include="matrix.cuh" />
+    <ClInclude Include="mpm.cuh" />
+    <ClInclude Include="mpm_kernel.cuh" />
+    <ClInclude Include="vector_cross.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
