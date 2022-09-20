@@ -148,3 +148,20 @@ __host__ __device__ Matrix Vector3D::ToMatrix() {
 	}
 	return matrix;
 }
+
+__host__ __device__ void Vector3D::Reset() {
+	dim[0] = 0;
+	dim[1] = 0;
+	dim[2] = 0;
+}
+
+__host__ __device__ Vector3D Vector3D::Clamp(float min, float max) {
+	Vector3D output(dim[0], dim[1], dim[2]);
+
+	for (size_t i = 0; i < 2; i++) {
+		dim[i] = dim[i] < min ? min : dim[i];
+		dim[i] = dim[i] > max ? max : dim[i];
+	}
+
+	return output;
+}

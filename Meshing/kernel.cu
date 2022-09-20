@@ -4,7 +4,6 @@
 
 #include "matrix.cuh"
 #include "mpm.cuh"
-#include "mpm_kernel.cuh"
 
 #include "../CUDATest/handler_methods.hpp"
 #include "../CUDATest/handler_classes.hpp"
@@ -29,12 +28,11 @@ int main() {
 
     Matrix::WeightedLeastSquares(matrix);
 
-    size_t dim = 64;
+    size_t dim = 32;
 
-    Grid* grid = new Grid(Vector3D(dim, dim, dim), 16);
+    Grid* grid = new Grid(Vector3D(dim, dim, dim), 8);
 
     Grid::SimulateGPU(grid);
-    
 
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

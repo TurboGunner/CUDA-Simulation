@@ -42,9 +42,6 @@
     <ClInclude Include="mpm.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="mpm_kernel.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
     <ClInclude Include="..\CUDATest\index_pair_cuda.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
@@ -73,6 +70,18 @@
     </CudaCompile>
     <CudaCompile Include="vector_cross.cu">
       <Filter>cuda\data_structures</Filter>
+    </CudaCompile>
+    <CudaCompile Include="simulation_helpers.cu">
+      <Filter>cuda\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="gradient_solve.cu">
+      <Filter>cuda\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cell_momentum.cu">
+      <Filter>cuda\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="advect_particles.cu">
+      <Filter>cuda\mpm</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>

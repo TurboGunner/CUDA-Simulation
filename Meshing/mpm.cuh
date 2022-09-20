@@ -9,6 +9,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+#include <iostream>
 
 struct Particle {
 	Vector3D position;
@@ -50,6 +53,8 @@ public:
 
 	__host__ __device__ Cell* GetCell(const size_t& index);
 
+	__host__ __device__ Cell* GetCell(IndexPair incident);
+
 	__host__ __device__ Particle* GetParticle(const size_t& index);
 
 	__host__ __device__ Particle* GetParticle(IndexPair incident);
@@ -80,8 +85,22 @@ private:
 	float resolution_;
 };
 
+//Globals
+
 __global__ void InitializeGrid(Grid* grid);
 
 __global__ void SimulateGrid(Grid* grid);
 
 __global__ void UpdateCell(Grid* grid);
+
+__global__ void UpdateGrid(Grid* grid);
+
+__global__ void AdvectParticles(Grid* grid);
+
+__global__ void ClearGrid(Grid* grid);
+
+//Device Methods
+
+__device__ Vector3D* GetWeights(Vector3D cell_difference);
+
+__device__ IndexPair* GetTraversals(IndexPair incident);

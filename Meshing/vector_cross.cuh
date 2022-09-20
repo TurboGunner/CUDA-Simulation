@@ -55,5 +55,9 @@ public:
 
 	__host__ __device__ Matrix ToMatrix();
 
+	__host__ __device__ void Reset();
+
+	__host__ __device__ Vector3D Clamp(float min, float max);
+
 	float dim[3];
 };

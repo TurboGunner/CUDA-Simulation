@@ -82,11 +82,23 @@ __host__ __device__ void Grid::AddParticle(Particle* particle, const size_t& ind
 #ifdef __CUDA_ARCH__
 	particles_device_[index] = particle;
 #else
-	particles_device_[index] = particle;
+	particles_[index] = particle;
 #endif
 }
 
 __host__ __device__ Cell* Grid::GetCell(const size_t& index) {
+	if (index >= total_size_) {
+		printf("%s %zu\n", "Warning! Out of bounds access. Input Index: ", index);
+	}
+#ifdef __CUDA_ARCH__
+	return cells_device_[index];
+#else
+	return cells_[index];
+#endif
+}
+
+__host__ __device__ Cell* Grid::GetCell(IndexPair incident) {
+	size_t index = incident.IX(side_size_);
 	if (index >= total_size_) {
 		printf("%s %zu\n", "Warning! Out of bounds access. Input Index: ", index);
 	}
@@ -109,7 +121,7 @@ __host__ __device__ Particle* Grid::GetParticle(const size_t& index) {
 }
 
 __host__ __device__ Particle* Grid::GetParticle(IndexPair incident) {
-	size_t index = incident.IX(side_size_);
+	size_t index = incident.IX(side_size_ * resolution_); //NOTE
 	if (index >= GetParticleCount()) {
 		printf("%s %zu\n", "Warning! Out of bounds access. Input Index: ", index);
 	}
