@@ -83,3 +83,5 @@ private:
 __global__ void InitializeGrid(Grid* grid);
 
 __global__ void SimulateGrid(Grid* grid);
+
+__global__ void UpdateCell(Grid* grid);

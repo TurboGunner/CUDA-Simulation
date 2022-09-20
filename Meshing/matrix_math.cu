@@ -44,7 +44,6 @@ __host__ __device__ float Matrix::Determinant(Matrix& matrix, size_t length) {
 
     for (int f = 0; f < length; f++) {
         matrix.GetCofactor(temp, 0, f, length);
-        //temp.PrintMatrix();
         float pre_calculation = matrix.Get(matrix.IX(0, f)) * Determinant(temp, length - 1);
         determinant += sign * pre_calculation;
 

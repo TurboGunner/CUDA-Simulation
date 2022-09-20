@@ -27,32 +27,41 @@ __global__ void InitializeGrid(Grid* grid) {
 	}
 }
 
+__device__ inline Vector3D* GetWeights(Vector3D cell_difference) {
+	Vector3D weights[3] {}; //Array of weights
+
+	weights[0] = (cell_difference.Negative() + 0.5f).Squared() * 0.5f;
+	weights[1] = cell_difference.Squared().Negative() + 0.75f;
+	weights[2] = (cell_difference + 0.5f).Squared() * 0.5f;
+
+	return weights;
+}
+
 __global__ void SimulateGrid(Grid* grid) {
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
 	unsigned int z_bounds = blockIdx.z * blockDim.z + threadIdx.z;
 
-	IndexPair incident(x_bounds, y_bounds, z_bounds);
+	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current position
 
+	//Current particle variables
 	Particle* particle = grid->GetParticle(incident);
 	Vector3D position = particle->position;
 	Vector3D cell_idx = position.Truncate();
 
 	Vector3D cell_difference = (position - cell_idx) - 0.5f;
 
-	Vector3D weights[3] {};
+	Vector3D* weights = GetWeights(cell_difference);
 
-	weights[0] = (cell_difference.Negative() + 0.5f).Squared() * 0.5f;
-	weights[1] = cell_difference.Squared().Negative() + 0.75f;
-	weights[2] = (cell_difference + 0.5f).Squared() * 0.5f;
-
-	const size_t traversal_length = 19;
+	const size_t traversal_length = 27;
 
 	IndexPair incidents[traversal_length] = { incident,
 		incident.Left(), incident.Right(), incident.Front(), incident.Back(), incident.Up(), incident.Down(),
 		incident.CornerLDownFront(), incident.CornerLDownBack(), incident.CornerRDownFront(), incident.CornerRDownBack(),
 		incident.CornerLUpFront(), incident.CornerLUpBack(), incident.CornerRUpFront(), incident.CornerRUpBack(),
-		incident.CornerLMidBack(), incident.CornerRMidBack(), incident.CornerLMidFront(), incident.CornerRMidFront()
+		incident.CornerLMidBack(), incident.CornerRMidBack(), incident.CornerLMidFront(), incident.CornerRMidFront(),
+		incident.MidUpFront(), incident.MidUpBack(), incident.MidUpLeft(), incident.MidUpRight(),
+		incident.MidDownFront() ,incident.MidDownBack(), incident.MidDownLeft(), incident.MidDownRight()
 	};
 
 	float density = 0.0f;
@@ -89,7 +98,7 @@ __global__ void SimulateGrid(Grid* grid) {
 	Matrix::MultiplyScalarOnPointer(eq_16_term_0, -volume * 4 * grid->dt);
 
 	for (size_t i = 0; i < traversal_length; ++i) {
-		int x_weight_idx = (i / 6) % 2,
+		int x_weight_idx = (i / 9) % 2,
 			y_weight_idx = (i / 3) % 2,
 			z_weight_idx = i % 2;
 
@@ -107,13 +116,80 @@ __global__ void SimulateGrid(Grid* grid) {
 		Matrix* cell_dist_matrix = Matrix::Create(1, 3);
 		*cell_dist_matrix = cell_dist.ToMatrix();
 
-		Matrix* momentum = Matrix::Create(1, 3);
+		Matrix* momentum = Matrix::Create(eq_16_term_0->rows, cell_dist_matrix->columns);
 
-		MultiplyKernel(eq_16_term_0, cell_dist_matrix, momentum);
+		dim3 blocks, threads;
+
+		threads = dim3(1, 1);
+		blocks = dim3(ceil((1.0 * momentum->columns)), ceil((1.0f * cell_dist_matrix->rows)), 1); //NOTE
+
+		MultiplyKernel<<<blocks, threads>>>(eq_16_term_0, cell_dist_matrix, momentum); 
 
 		Vector3D momentum_vector(momentum->Get(0), momentum->Get(1), momentum->Get(2));
 
 		cell->velocity = cell->velocity + momentum_vector;
+	}
+}
+
+__global__ void UpdateCell(Grid* grid) {
+	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
+	unsigned int z_bounds = blockIdx.z * blockDim.z + threadIdx.z;
+
+	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current position
+
+	//Current particle variables
+	Particle* particle = grid->GetParticle(incident);
+	Vector3D position = particle->position;
+	Vector3D cell_idx = position.Truncate();
+
+	Vector3D cell_difference = (position - cell_idx) - 0.5f;
+
+	Vector3D* weights = GetWeights(cell_difference);
+
+	const size_t traversal_length = 27;
+
+	IndexPair incidents[traversal_length] = { incident,
+		incident.Left(), incident.Right(), incident.Front(), incident.Back(), incident.Up(), incident.Down(),
+		incident.CornerLDownFront(), incident.CornerLDownBack(), incident.CornerRDownFront(), incident.CornerRDownBack(),
+		incident.CornerLUpFront(), incident.CornerLUpBack(), incident.CornerRUpFront(), incident.CornerRUpBack(),
+		incident.CornerLMidBack(), incident.CornerRMidBack(), incident.CornerLMidFront(), incident.CornerRMidFront(),
+		incident.MidUpFront(), incident.MidUpBack(), incident.MidUpLeft(), incident.MidUpRight(),
+		incident.MidDownFront() ,incident.MidDownBack(), incident.MidDownLeft(), incident.MidDownRight()
+	};
+
+	for (size_t i = 0; i < traversal_length; i++) {
+		int x_weight_idx = (i / 9) % 2,
+			y_weight_idx = (i / 3) % 2,
+			z_weight_idx = i % 2;
+
+		float weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
+		Vector3D cell_position(cell_idx.x() + x_weight_idx - 1,
+			cell_idx.y() + y_weight_idx - 1,
+			cell_idx.z() + z_weight_idx - 1);
+
+		Vector3D cell_dist = (cell_position - position) + 0.5f;
+
+		Matrix* cell_dist_matrix = Matrix::Create(1, 3);
+		*cell_dist_matrix = cell_dist.ToMatrix();
+
+		dim3 blocks, threads;
+
+		threads = dim3(1, 1);
+		blocks = dim3(ceil((1.0 * particle->momentum.columns)), ceil((1.0f * cell_dist_matrix->rows)), 1); //NOTE: May be backwards
+
+		Matrix* momentum = Matrix::Create(particle->momentum.rows, cell_dist_matrix->columns);
+
+		MultiplyKernel<<<blocks, threads>>> (particle->momentum, cell_dist_matrix, momentum);
+
+		Vector3D Q(momentum->Get(0), momentum->Get(1), momentum->Get(2));
+
+		float mass_contribution = weight * particle->mass;
+
+		Cell* cell = grid->GetCell(incident.IX(grid->side_size_));
+
+		cell->mass += mass_contribution;
+		cell->velocity = cell->velocity + (particle->velocity + Q) * mass_contribution;
 	}
 }
 

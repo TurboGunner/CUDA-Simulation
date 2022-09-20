@@ -9,11 +9,13 @@ __global__ void TransposeKernel(Matrix* matrix, Matrix* output) {
     }
 }
 
-__host__ Matrix* Matrix::TransposeGPU(Matrix* matrix) {
+__host__ __device__ Matrix* Matrix::TransposeGPU(Matrix* matrix) {
     cudaError_t cuda_status = cudaSuccess;
 
     Matrix* output = Matrix::Create(matrix->columns, matrix->rows);
+#ifndef __CUDA__ARCH__
     cuda_status = output->DeviceTransfer(output->device_alloc, output);
+#endif
 
     dim3 blocks, threads;
 
@@ -21,8 +23,10 @@ __host__ Matrix* Matrix::TransposeGPU(Matrix* matrix) {
     threads = dim3(matrix->columns, matrix->rows);
 
     TransposeKernel<<<blocks, threads>>> (matrix->device_alloc, output->device_alloc);
+#ifndef __CUDA__ARCH__
     cuda_status = PostExecutionChecks(cuda_status, "TransposeKernel", true);
     output->HostTransfer();
+#endif
 
     return output;
 }
@@ -42,11 +46,13 @@ __global__ void MultiplyKernel(Matrix* matrix_A, Matrix* matrix_B, Matrix* outpu
     }
 }
 
-__host__  Matrix* Matrix::MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B) {
+__host__ __device__ Matrix* Matrix::MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B) {
     cudaError_t cuda_status = cudaSuccess;
 
     Matrix* output = Matrix::Create(matrix_A->rows, matrix_B->columns);
+#ifndef __CUDA__ARCH__
     cuda_status = output->DeviceTransfer(output->device_alloc, output);
+#endif
 
     const int TILE_DIM = 1;
 
@@ -57,8 +63,10 @@ __host__  Matrix* Matrix::MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B) {
 
     MultiplyKernel<<<blocks, threads>>> (matrix_A->device_alloc, matrix_B->device_alloc, output->device_alloc);
 
+#ifndef __CUDA__ARCH__
     cuda_status = PostExecutionChecks(cuda_status, "MultiplyKernel", true);
     output->HostTransfer();
+#endif
 
     return output;
 }

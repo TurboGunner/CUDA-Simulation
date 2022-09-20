@@ -87,6 +87,23 @@ struct IndexPair {
 	/// <summary> Shifts the IndexPair incident to the right and backward on the grid. </summary>
 	__host__ __device__ IndexPair CornerRMidBack();
 
+	__host__ __device__ IndexPair MidUpFront();
+
+	__host__ __device__ IndexPair MidUpBack();
+
+	__host__ __device__ IndexPair MidUpLeft();
+
+	__host__ __device__ IndexPair MidUpRight();
+
+	__host__ __device__ IndexPair MidDownFront();
+
+	__host__ __device__ IndexPair MidDownBack();
+
+	__host__ __device__ IndexPair MidDownLeft();
+
+	__host__ __device__ IndexPair MidDownRight();
+
+
 	unsigned int x = 0, y = 0, z = 0; //Spots
 
 	float weight;

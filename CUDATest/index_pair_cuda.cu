@@ -52,21 +52,21 @@ __host__ __device__ IndexPair IndexPair::Right() {
 //Y Direction
 
 __host__ __device__ IndexPair IndexPair::Front() {
-	return IndexPair(x, y, z + 1, 0.05556f);
+	return IndexPair(x, y + 1, z, 0.05556f);
 }
 
 __host__ __device__ IndexPair IndexPair::Back() {
-	return IndexPair(x, y, z - 1, 0.05556f);
+	return IndexPair(x, y - 1, z, 0.05556f);
 }
 
 //Z Direction
 
 __host__ __device__ IndexPair IndexPair::Up() {
-	return IndexPair(x, y + 1, z, 0.05556f);
+	return IndexPair(x, y, z + 1, 0.05556f);
 }
 
 __host__ __device__ IndexPair IndexPair::Down() {
-	return IndexPair(x, y - 1, z, 0.05556f);
+	return IndexPair(x, y, z - 1, 0.05556f);
 }
 
 //Outer Neighbor Weights
@@ -88,7 +88,7 @@ __host__ __device__ IndexPair IndexPair::CornerRUpFront() {
 }
 
 __host__ __device__ IndexPair IndexPair::CornerRDownFront() {
-	return IndexPair(x - 1, y + 1, z + 1, 0.027778f);
+	return IndexPair(x + 1, y + 1, z - 1, 0.027778f);
 }
 
 //Back Left Corners
@@ -129,4 +129,44 @@ __host__ __device__ IndexPair IndexPair::CornerLMidBack() {
 
 __host__ __device__ IndexPair IndexPair::CornerRMidBack() {
 	return IndexPair(x + 1, y - 1, z, 0.027778f);
+}
+
+//Mid Front Indexes
+
+__host__ __device__ IndexPair IndexPair::MidUpFront() {
+	return IndexPair(x, y - 1, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::MidDownFront() {
+	return IndexPair(x, y - 1, z - 1);
+}
+
+//Mid Back Indexes
+
+__host__ __device__ IndexPair IndexPair::MidUpBack() {
+	return IndexPair(x, y - 1, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::MidDownBack() {
+	return IndexPair(x, y - 1, z - 1);
+}
+
+//Mid Left Indexes
+
+__host__ __device__ IndexPair IndexPair::MidUpLeft() {
+	return IndexPair(x - 1, y, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::MidDownLeft() {
+	return IndexPair(x - 1, y, z - 1);
+}
+
+//Mid Right Indexes
+
+__host__ __device__ IndexPair IndexPair::MidUpRight() {
+	return IndexPair(x + 1, y, z + 1);
+}
+
+__host__ __device__ IndexPair IndexPair::MidDownRight() {
+	return IndexPair(x + 1, y, z - 1);
 }

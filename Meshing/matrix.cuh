@@ -30,8 +30,8 @@ public:
 
 	__host__ __device__ Matrix Transpose();
 
-	__host__ static Matrix* TransposeGPU(Matrix* matrix);
-	__host__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
+	__host__ __device__ static Matrix* TransposeGPU(Matrix* matrix);
+	__host__ __device__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
 
 	__host__ __device__ Matrix operator*(const float& scalar);
 
