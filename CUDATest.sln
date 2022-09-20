@@ -4,21 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FluidSim", "CUDATest\CUDATest.vcxproj", "{F4E9BE34-26A5-4B4E-AAEA-E046456E6B07}"
-	ProjectSection(ProjectDependencies) = postProject
-		{48BA3375-7348-417C-B935-77A6345A2E93} = {48BA3375-7348-417C-B935-77A6345A2E93}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C5D2EC18-05E3-4A95-B6EE-997EE369598F}"
 	ProjectSection(SolutionItems) = preProject
 		CUDATest\vdbtest.blend = CUDATest\vdbtest.blend
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Renderer", "Renderer\Renderer.vcxproj", "{48BA3375-7348-417C-B935-77A6345A2E93}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUIDriver", "GUIDriver\GUIDriver.vcxproj", "{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}"
-	ProjectSection(ProjectDependencies) = postProject
-		{48BA3375-7348-417C-B935-77A6345A2E93} = {48BA3375-7348-417C-B935-77A6345A2E93}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Meshing", "Meshing\Meshing.vcxproj", "{E7727259-F4EA-4266-95CE-3E6B8CD6809E}"
 EndProject
@@ -32,10 +24,6 @@ Global
 		{F4E9BE34-26A5-4B4E-AAEA-E046456E6B07}.Debug|x64.Build.0 = Debug|x64
 		{F4E9BE34-26A5-4B4E-AAEA-E046456E6B07}.Release|x64.ActiveCfg = Release|x64
 		{F4E9BE34-26A5-4B4E-AAEA-E046456E6B07}.Release|x64.Build.0 = Release|x64
-		{48BA3375-7348-417C-B935-77A6345A2E93}.Debug|x64.ActiveCfg = Debug|x64
-		{48BA3375-7348-417C-B935-77A6345A2E93}.Debug|x64.Build.0 = Debug|x64
-		{48BA3375-7348-417C-B935-77A6345A2E93}.Release|x64.ActiveCfg = Release|x64
-		{48BA3375-7348-417C-B935-77A6345A2E93}.Release|x64.Build.0 = Release|x64
 		{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}.Debug|x64.ActiveCfg = Debug|x64
 		{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}.Debug|x64.Build.0 = Debug|x64
 		{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}.Release|x64.ActiveCfg = Release|x64
