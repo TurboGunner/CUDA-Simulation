@@ -27,50 +27,32 @@ __host__ Matrix* Matrix::Weights(Matrix* matrix) {
 
 __host__ vector<Matrix*> Matrix::WeightedLeastSquares(Matrix* matrix) {
     vector<Matrix*> matrices;
-
     matrices.push_back(matrix);
 
     Matrix::PopulateRandomHost(matrix, 0.0f, 1.0f);
 
-    matrix->PrintMatrix("Matrix: ");
-
     Matrix* transpose = Matrix::TransposeGPU(matrix);
-    transpose->PrintMatrix("Transpose: ");
-
     matrices.push_back(transpose);
 
     Matrix* weights = Matrix::Weights(matrix);
-
-    weights->PrintMatrix("Weights: ");
-
     matrices.push_back(weights);
 
     Matrix* G_term = Matrix::GMatrixTerm(matrix, transpose, weights);
-
-    G_term->PrintMatrix("G Term: ");
-
     matrices.push_back(G_term);
 
     Matrix* inverse = Matrix::Create(G_term->rows, G_term->columns);
     Matrix::Inverse(*G_term, *inverse);
 
     inverse->DeviceTransfer(inverse->device_alloc, inverse);
-
-    inverse->PrintMatrix("Inverse of G Term: ");
-
     matrices.push_back(inverse);
 
     Matrix* multiply_t = Matrix::MultiplyGPU(inverse, transpose);
-
     matrices.push_back(multiply_t);
 
     Matrix* weight_multiply = Matrix::MultiplyGPU(multiply_t, weights);
-
     matrices.push_back(weight_multiply);
 
     Matrix* gradient = Matrix::MultiplyGPU(weight_multiply, weights);
-    gradient->PrintMatrix("Gradient: ");
-
     matrices.push_back(gradient);
 
     RandomFloat random(100.0f, 500.0f, 1);
@@ -79,14 +61,10 @@ __host__ vector<Matrix*> Matrix::WeightedLeastSquares(Matrix* matrix) {
     for (size_t j = 0; j < delta->rows; j++) {
         delta->Set(random.Generate(), j);
     }
-
+    delta->DeviceTransfer(delta->device_alloc, delta);
     matrices.push_back(delta);
 
-    delta->PrintMatrix("Temperature Delta: ");
-
-    delta->DeviceTransfer(delta->device_alloc, delta);
     Matrix* multiply_t4 = Matrix::MultiplyGPU(gradient, delta);
-
     matrices.push_back(multiply_t4);
 
     multiply_t4->PrintMatrix("Gradient Solution: ");

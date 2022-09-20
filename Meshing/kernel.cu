@@ -29,9 +29,9 @@ int main() {
 
     Matrix::WeightedLeastSquares(matrix);
 
-    size_t dim = 32;
+    size_t dim = 64;
 
-    Grid* grid = new Grid(Vector3D(dim, dim, dim), 4);
+    Grid* grid = new Grid(Vector3D(dim, dim, dim), 16);
 
     Grid::SimulateGPU(grid);
     

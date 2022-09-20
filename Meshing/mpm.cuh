@@ -3,6 +3,8 @@
 #include "matrix.cuh"
 #include "vector_cross.cuh"
 
+#include "../CUDATest/index_pair_cuda.cuh"
+
 #include "../CUDATest/handler_methods.hpp"
 
 #include <stdio.h>
@@ -11,6 +13,7 @@
 struct Particle {
 	Vector3D position;
 	Vector3D velocity;
+	float mass = 0.0f;
 	Matrix momentum = Matrix(3, 3, true);
 };
 
@@ -37,12 +40,33 @@ public:
 
 	__host__ __device__ size_t GetTotalSize() const;
 
+	__host__ __device__ size_t GetParticleCount() const;
+
+	__host__ __device__ float GetResolution() const;
+
+	__host__ __device__ void AddCell(Cell* cell, const size_t& index);
+
+	__host__ __device__ void AddParticle(Particle* particle, const size_t& index);
+
+	__host__ __device__ Cell* GetCell(const size_t& index);
+
+	__host__ __device__ Particle* GetParticle(const size_t& index);
+
+	__host__ __device__ Particle* GetParticle(IndexPair incident);
+
+	const float gravity = -0.3f;
+
+	const float rest_density = 4.0f;
+	const float dynamic_viscosity = 0.1f;
+
+	const float eos_stiffness = 10.0f;
+	const float eos_power = 4;
+
+	const float dt = 0.2f;
+
 	Grid* device_alloc_;
 
 	size_t side_size_;
-
-	__host__ __device__ void AddCell(Cell* cell, const size_t& index);
-	__host__ __device__ void AddParticle(Particle* particle, const size_t& index);
 
 private:
 	Particle** particles_, **particles_device_;
@@ -56,4 +80,6 @@ private:
 	float resolution_;
 };
 
-__global__ void InitializeGrid(Grid* grid, float resolution);
+__global__ void InitializeGrid(Grid* grid);
+
+__global__ void SimulateGrid(Grid* grid);

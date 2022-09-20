@@ -33,6 +33,8 @@ public:
 	__host__ static Matrix* TransposeGPU(Matrix* matrix);
 	__host__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
 
+	__host__ __device__ Matrix operator*(const float& scalar);
+
 	__host__ __device__ float& Get(const int& index);
 	__host__ __device__ float& Get(const size_t& row, const size_t& column);
 
@@ -73,6 +75,9 @@ public:
 
 	__host__ static cudaError_t PopulateRandomHost(Matrix* matrix, const float& min, const float& max);
 
+	__host__ __device__ static void AddOnPointer(Matrix* matrix, Matrix add);
+
+	__host__ __device__ static void MultiplyScalarOnPointer(Matrix* matrix, const float& multi);
 
     Matrix* device_alloc;
 

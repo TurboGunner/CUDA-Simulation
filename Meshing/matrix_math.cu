@@ -126,3 +126,30 @@ __host__ __device__ Matrix Matrix::Reciprocal() {
 
     return output;
 }
+
+__host__ __device__ Matrix Matrix::operator*(const float& scalar) {
+    Matrix matrix(rows, columns);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+            matrix.Get(i, j) = Get(i, j) * scalar;
+        }
+    }
+    return matrix;
+}
+
+__host__ __device__ void Matrix::AddOnPointer(Matrix* matrix, Matrix add) {
+    for (int i = 0; i < matrix->rows; i++) {
+        for (int j = 0; j < matrix->columns; j++) {
+            matrix->Get(i, j) += add.Get(i, j);
+        }
+    }
+}
+
+__host__ __device__ void Matrix::MultiplyScalarOnPointer(Matrix* matrix, const float& multi) {
+    for (int i = 0; i < matrix->rows; i++) {
+        for (int j = 0; j < matrix->columns; j++) {
+            matrix->Get(i, j) *= multi;
+        }
+    }
+}
