@@ -42,7 +42,7 @@ __global__ void MultiplyKernel(Matrix* matrix_A, Matrix* matrix_B, Matrix* outpu
         for (int k = 0; k < matrix_A->columns; ++k) {
             Pvalue += matrix_A->Get(y_bounds * matrix_A->columns + k) * matrix_B->Get(k * matrix_B->columns + x_bounds);
         }
-        output->Get(idx) = Pvalue;
+        output->Set(idx, Pvalue);
     }
 }
 

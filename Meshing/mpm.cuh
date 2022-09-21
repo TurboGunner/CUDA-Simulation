@@ -37,7 +37,7 @@ public:
 
 	__host__ cudaError_t DeviceTransfer(Grid*& src);
 
-	__host__ void HostTransfer(cudaError_t& cuda_status);
+	__host__ cudaError_t HostTransfer();
 
 	__host__ static cudaError_t SimulateGPU(Grid* grid);
 
@@ -98,6 +98,8 @@ __global__ void UpdateGrid(Grid* grid);
 __global__ void AdvectParticles(Grid* grid);
 
 __global__ void ClearGrid(Grid* grid);
+
+__host__ cudaError_t InitializeGridHost(Grid* grid);
 
 //Device Methods
 

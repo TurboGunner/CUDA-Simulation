@@ -30,12 +30,9 @@ __host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& col
     cudaError_t cuda_status = cudaSuccess;
 
 #ifdef __CUDA_ARCH__
-    cuda_status = cudaMalloc(&matrix->device_alloc, sizeof(Matrix));
-    if (cuda_status != cudaSuccess) {
-        printf("%s", "Error: Did not properly allocate matrix pointer (device, on device).");
-    }
-    *matrix = Matrix(rows, columns, local);
-    *(matrix->device_alloc) = Matrix(rows, columns, local);
+    matrix = new Matrix(rows, columns, true);
+
+    matrix->device_alloc = matrix;
 #else
     cuda_status = cudaMallocHost(&matrix, sizeof(Matrix));
     CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix pointer (host).");
@@ -53,8 +50,8 @@ __host__ __device__ size_t Matrix::IX(size_t row, size_t column) const {
 }
 
 __host__ __device__ float& Matrix::Get(const int& index) {
-    if (index >= rows * columns || index < 0) {
-        printf("%s%d\n", "Warning: Out of bounds! Index: ", index);
+    if (index >= rows * columns || index < 0 || rows * columns == 0) {
+        printf("%s%d\n", "Warning: Out of bounds (MatrixGet)! Index: ", index);
 #ifdef __CUDA_ARCH__
         return data_device[0];
 #else
@@ -78,7 +75,7 @@ __host__ __device__ float& Matrix::operator[](const int& index) {
 
 __host__ __device__ void Matrix::Set(const float& value, const int& index) {
     if (index >= rows * columns || index < 0) {
-        printf("%s\n", "Warning: Out of bounds!");
+        printf("%s%d\n", "Warning: Out of bounds (MatrixSet)! Index: ", index);
         return;
     }
 #ifdef __CUDA_ARCH__
@@ -156,6 +153,7 @@ __host__ __device__ float* Matrix::Column(const size_t& index) {
 
 __host__ __device__ cudaError_t Matrix::Destroy() {
     cudaError_t cuda_status = cudaSuccess;
+#ifndef __CUDA_ARCH__
     if (!local) {
         cuda_status = cudaFree(data_device);
         if (cuda_status != cudaSuccess) {
@@ -166,9 +164,9 @@ __host__ __device__ cudaError_t Matrix::Destroy() {
         cuda_status = cudaFree(device_alloc);
         printf("%s\n", "Could not free memory for the device allocation.");
     }
-#ifndef __CUDA_ARCH__
-    free(data);
 #endif
+    free(data);
+    //printf("%s\n", "Destruction of matrix successful.");
     return cuda_status;
 }
 

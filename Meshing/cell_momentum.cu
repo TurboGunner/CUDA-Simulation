@@ -9,7 +9,7 @@ __global__ void UpdateCell(Grid* grid) {
 	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current position
 
 	//Current particle variables
-	Particle* particle = grid->GetParticle(incident);
+	Particle* particle = grid->GetParticle(1);
 	Vector3D position = particle->position;
 	Vector3D cell_idx = position.Truncate();
 
@@ -20,6 +20,9 @@ __global__ void UpdateCell(Grid* grid) {
 	const size_t traversal_length = 27;
 
 	IndexPair* incidents = GetTraversals(incident);
+
+	Matrix* cell_dist_matrix = Matrix::Create(1, 3);
+	Matrix* momentum_ptr = Matrix::Create(3, 3);
 
 	for (size_t i = 0; i < traversal_length; i++) {
 		int x_weight_idx = (i / 9) % 2,
@@ -32,9 +35,9 @@ __global__ void UpdateCell(Grid* grid) {
 			cell_idx.z() + z_weight_idx - 1);
 
 		Vector3D cell_dist = (cell_position - position) + 0.5f;
-
-		Matrix* cell_dist_matrix = Matrix::Create(1, 3);
-		*cell_dist_matrix = cell_dist.ToMatrix();
+		for (int j = 0; j < cell_dist_matrix->columns; j++) {
+			cell_dist_matrix->Set(j, cell_dist.dim[j]);
+		}
 
 		dim3 blocks, threads;
 
@@ -43,8 +46,10 @@ __global__ void UpdateCell(Grid* grid) {
 
 		Matrix* momentum = Matrix::Create(particle->momentum.rows, cell_dist_matrix->columns);
 
-		MultiplyKernel << <blocks, threads >> > (&particle->momentum, cell_dist_matrix, momentum);
+		*momentum_ptr = particle->momentum;
 
+		MultiplyKernel << <blocks, threads >> > (momentum_ptr, cell_dist_matrix, momentum);
+		
 		Vector3D Q(momentum->Get(0), momentum->Get(1), momentum->Get(2));
 
 		float mass_contribution = weight * particle->mass;
@@ -53,5 +58,10 @@ __global__ void UpdateCell(Grid* grid) {
 
 		cell->mass += mass_contribution;
 		cell->velocity = cell->velocity + (particle->velocity + Q) * mass_contribution;
+		
+
+		//cell_dist_matrix->Destroy();
+		//momentum->Destroy();
+		//momentum_ptr->Destroy();
 	}
 }

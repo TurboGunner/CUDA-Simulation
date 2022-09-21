@@ -24,17 +24,17 @@ int main() {
     cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main",
         cuda_status, "Do you have a CUDA-capable GPU installed?");
 
-    Matrix* matrix = Matrix::Create(4, 3, false);
+    //Matrix* matrix = Matrix::Create(4, 3, false);
 
-    Matrix::WeightedLeastSquares(matrix);
+    //Matrix::WeightedLeastSquares(matrix);
 
-    size_t dim = 32;
+    size_t dim = 16;
 
-    Grid* grid = new Grid(Vector3D(dim, dim, dim), 8);
+    Grid* grid = new Grid(Vector3D(dim, dim, dim), 4);
 
     Grid::SimulateGPU(grid);
 
-    cuda_status = cudaDeviceReset();
+    //cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");
 
     return 0;

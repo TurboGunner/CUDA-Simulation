@@ -149,6 +149,12 @@ __host__ __device__ Matrix Vector3D::ToMatrix() {
 	return matrix;
 }
 
+__host__ __device__ void Vector3D::ToMatrix(Matrix* matrix) {
+	for (int i = 0; i < matrix->rows * matrix->columns; i++) {
+		matrix->Get(i) = dim[i];
+	}
+}
+
 __host__ __device__ void Vector3D::Reset() {
 	dim[0] = 0;
 	dim[1] = 0;
