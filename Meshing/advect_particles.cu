@@ -45,10 +45,10 @@ __global__ void AdvectParticles(Grid* grid) {
 			weighted_y = weighted_velocity * dist.y(),
 			weighted_z = weighted_velocity * dist.z();
 
-		for (size_t i = 0; i < term->rows; i++) {
-			term->Get(0, i) = weighted_x.dim[i];
-			term->Get(1, i) = weighted_y.dim[i];
-			term->Get(2, i) = weighted_z.dim[i];
+		for (size_t j = 0; i < term->rows; j++) {
+			term->Get(0, j) = weighted_x.dim[j];
+			term->Get(1, j) = weighted_y.dim[j];
+			term->Get(2, j) = weighted_z.dim[j];
 		}
 
 		Matrix::AddOnPointer(B, *term);

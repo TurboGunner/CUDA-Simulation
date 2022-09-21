@@ -130,15 +130,20 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 	InitializeGrid<<<blocks, threads>>> (grid->device_alloc_);
 	cuda_status = PostExecutionChecks(cuda_status, "GridInitialization", true);
 
+	cudaDeviceSynchronize();
+
 	std::cout << "Allocated successfully " << grid->GetTotalSize() << " cells! (device)" << std::endl;
 	std::cout << "Allocated successfully " << grid->GetParticleCount() << " particles! (device)" << std::endl;
 
 	UpdateCell<<<blocks, threads>>> (grid->device_alloc_);
 	cuda_status = PostExecutionChecks(cuda_status, "CellMomentum", true);
 
+
+	cudaDeviceSynchronize();
+
 	std::cout << "Ran through cell momentum!" << std::endl;
 
-	SimulateGrid<<<blocks2, threads2>>> (grid->device_alloc_);
+	//SimulateGrid<<<blocks2, threads2>>> (grid->device_alloc_);
 	cuda_status = PostExecutionChecks(cuda_status, "VelocityGradientSolve", true);
 
 	std::cout << "Ran through the velocity gradient solve!" << std::endl;

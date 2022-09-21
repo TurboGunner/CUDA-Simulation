@@ -138,8 +138,7 @@ __host__ __device__ Particle* Grid::GetParticle(const size_t& index) {
 #endif
 }
 
-__host__ __device__ Particle* Grid::GetParticle(IndexPair& incident, const bool& grid_space) {
-	size_t index_space = grid_space ? side_size_ * GetResolution() : side_size_;
-	size_t index = incident.IX(index_space); //NOTE
+__host__ __device__ Particle* Grid::GetParticle(IndexPair& incident, const size_t& grid_offset) {
+	size_t index = incident.IX(side_size_) * grid_offset; //NOTE
 	return GetParticle(index);
 }
