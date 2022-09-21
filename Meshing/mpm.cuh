@@ -57,7 +57,7 @@ public:
 
 	__host__ __device__ Particle* GetParticle(const size_t& index);
 
-	__host__ __device__ Particle* GetParticle(IndexPair& incident);
+	__host__ __device__ Particle* GetParticle(IndexPair& incident, const bool& grid_space = true);
 
 	const float gravity = -0.3f;
 

@@ -41,9 +41,6 @@ __host__ void Grid::operator delete(void* ptr) {
 __host__ cudaError_t Grid::DeviceTransfer(Grid*& src) {
 	cudaError_t cuda_status = cudaSuccess;
 
-	//cuda_status = CopyFunction("DeviceTransferParticles", particles_device_, particles_, cudaMemcpyHostToDevice, cuda_status, sizeof(Particle*), total_size_ * resolution_);
-	//cuda_status = CopyFunction("DeviceTransferCells", cells_device_, cells_, cudaMemcpyHostToDevice, cuda_status, sizeof(Cell*), total_size_);
-
 	if (!device_allocated_status) {
 		cuda_status = cudaMalloc(&device_alloc_, sizeof(Grid));
 		device_allocated_status = true;
@@ -141,7 +138,8 @@ __host__ __device__ Particle* Grid::GetParticle(const size_t& index) {
 #endif
 }
 
-__host__ __device__ Particle* Grid::GetParticle(IndexPair& incident) {
-	size_t index = incident.IX(side_size_ * GetResolution()); //NOTE
+__host__ __device__ Particle* Grid::GetParticle(IndexPair& incident, const bool& grid_space) {
+	size_t index_space = grid_space ? side_size_ * GetResolution() : side_size_;
+	size_t index = incident.IX(index_space); //NOTE
 	return GetParticle(index);
 }
