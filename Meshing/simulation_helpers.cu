@@ -9,6 +9,8 @@ __global__ void InitializeGrid(Grid* grid) {
 	IndexPair incident(x_bounds, y_bounds, z_bounds);
 
 	Cell* cell = new Cell();
+	cell->velocity = Vector3D(0.0f, 0.0f, 0.0f);
+	cell->mass = 0.0f;
 	grid->AddCell(cell, incident.IX(grid->side_size_));
 
 	for (size_t i = 0; i < grid->GetResolution(); i++) { //IDX, Particle
@@ -16,6 +18,7 @@ __global__ void InitializeGrid(Grid* grid) {
 		particle->position = Vector3D(0.0f, 0.0f, 0.0f);
 		particle->velocity = Vector3D(0.0f, 0.0f, 0.0f);
 		particle->momentum = Matrix(3, 3, false);
+		particle->mass = 0.0f;
 
 		grid->AddParticle(particle, incident.IX(grid->side_size_) + i);
 	}
@@ -24,6 +27,8 @@ __global__ void InitializeGrid(Grid* grid) {
 __host__ cudaError_t InitializeGridHost(Grid* grid) {
 	for (size_t i = 0; i < grid->GetTotalSize(); i++) {
 		Cell* cell = new Cell();
+		cell->velocity = Vector3D(0.0f, 0.0f, 0.0f);
+		cell->mass = 0.0f;
 		grid->AddCell(cell, i);
 	}
 
@@ -128,7 +133,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 	std::cout << "Allocated successfully " << grid->GetTotalSize() << " cells! (device)" << std::endl;
 	std::cout << "Allocated successfully " << grid->GetParticleCount() << " particles! (device)" << std::endl;
 
-	UpdateCell<<<blocks, threads>>> (grid->device_alloc_);
+	//UpdateCell<<<blocks, threads>>> (grid->device_alloc_);
 	cuda_status = PostExecutionChecks(cuda_status, "CellMomentum", true);
 
 	std::cout << "Ran through cell momentum!" << std::endl;

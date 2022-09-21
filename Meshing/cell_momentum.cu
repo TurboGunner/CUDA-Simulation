@@ -9,7 +9,7 @@ __global__ void UpdateCell(Grid* grid) {
 	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current position
 
 	//Current particle variables
-	Particle* particle = grid->GetParticle(1);
+	Particle* particle = grid->GetParticle(incident);
 	Vector3D position = particle->position;
 	Vector3D cell_idx = position.Truncate();
 
