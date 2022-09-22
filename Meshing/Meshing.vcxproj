@@ -94,6 +94,7 @@
     <CudaCompile Include="matrix_math.cu" />
     <CudaCompile Include="mpm.cu" />
     <CudaCompile Include="simulation_helpers.cu" />
+    <CudaCompile Include="simulation_initialization.cu" />
     <CudaCompile Include="vector_cross.cu" />
     <CudaCompile Include="weighted_least_squares.cu" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 #include "mpm.cuh"
 
-__global__ void AdvectParticles(Grid* grid) {
+__global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_term) {
 	//Particle Boundaries
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
@@ -19,10 +19,6 @@ __global__ void AdvectParticles(Grid* grid) {
 
 	const size_t traversal_length = 27;
 
-	IndexPair* incidents = GetTraversals(incident);
-
-	Matrix* B = Matrix::Create(3, 3);
-
 	for (size_t i = 0; i < traversal_length; i++) {
 		int x_weight_idx = (i / 6) % 2,
 			y_weight_idx = (i / 3) % 2,
@@ -39,25 +35,23 @@ __global__ void AdvectParticles(Grid* grid) {
 		Vector3D dist = (cell_position - particle->position) + 0.5f;
 		Vector3D weighted_velocity = grid->GetCell(cell_index)->velocity * weight;
 
-		Matrix* term = Matrix::Create(3, 3);
-
 		Vector3D weighted_x = weighted_velocity * dist.x(),
 			weighted_y = weighted_velocity * dist.y(),
 			weighted_z = weighted_velocity * dist.z();
 
-		for (size_t j = 0; i < term->rows; j++) {
-			term->Get(0, j) = weighted_x.dim[j];
-			term->Get(1, j) = weighted_y.dim[j];
-			term->Get(2, j) = weighted_z.dim[j];
+		for (size_t j = 0; j < 2; j++) {
+			weighted_term->Get(0, j) = weighted_x.dim[j];
+			weighted_term->Get(1, j) = weighted_y.dim[j];
+			weighted_term->Get(2, j) = weighted_z.dim[j];
 		}
 
-		Matrix::AddOnPointer(B, *term);
+		Matrix::AddOnPointer(B_term, *weighted_term);
 
 		particle->velocity = particle->velocity + weighted_velocity;
 
-		Matrix::MultiplyScalarOnPointer(B, 9);
+		Matrix::MultiplyScalarOnPointer(B_term, 9);
 
-		particle->momentum = *B;
+		particle->momentum = *B_term;
 
 		particle->position = particle->position + particle->velocity * grid->dt;
 

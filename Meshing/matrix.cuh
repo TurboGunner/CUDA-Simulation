@@ -42,6 +42,8 @@ public:
 
 	__host__ __device__ static Matrix* DiagonalMatrix(const float* points, const size_t& row, const size_t& column);
 
+	__host__ __device__ static void PopulateDiagonalMatrix(Matrix* matrix, const float* points, const size_t& row, const size_t& column);
+
 	__host__ __device__ float* Row(const size_t& index);
 
 	__host__ __device__ float* Column(const size_t& index);
@@ -67,7 +69,7 @@ public:
 
 	__host__ __device__ Matrix Reciprocal();
 
-	__host__ cudaError_t DeviceTransfer(Matrix* ptr, Matrix* src);
+	__host__ cudaError_t DeviceTransfer(Matrix* src);
 
 	__host__ cudaError_t HostTransfer();
 

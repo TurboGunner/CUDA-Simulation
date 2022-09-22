@@ -30,9 +30,9 @@ int main() {
 
     size_t dim = 16;
 
-    Grid* grid = new Grid(Vector3D(dim, dim, dim), 4);
+    Grid* grid = new Grid(Vector3D(dim, dim, dim), 2);
 
-    Grid::SimulateGPU(grid);
+    cuda_status = Grid::SimulateGPU(grid);
 
     //cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

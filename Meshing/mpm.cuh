@@ -57,7 +57,7 @@ public:
 
 	__host__ __device__ Particle* GetParticle(const size_t& index);
 
-	__host__ __device__ Particle* GetParticle(IndexPair& incident, const size_t& grid_offset = 1);
+	__host__ __device__ Particle* GetParticle(IndexPair& incident, const size_t& grid_offset = 0);
 
 	const float gravity = -0.3f;
 
@@ -73,9 +73,10 @@ public:
 
 	size_t side_size_;
 
+	Particle** particles_, ** particles_device_;
+	Cell** cells_, ** cells_device_;
+
 private:
-	Particle** particles_, **particles_device_;
-	Cell** cells_, **cells_device_;
 
 	Vector3D sim_size_;
 	size_t total_size_;
@@ -89,13 +90,13 @@ private:
 
 __global__ void InitializeGrid(Grid* grid);
 
-__global__ void SimulateGrid(Grid* grid);
+__global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dist_matrix, Matrix* momentum);
 
-__global__ void UpdateCell(Grid* grid);
+__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted_stress, Matrix* cell_dist_matrix, Matrix* momentum); //Stress matrix must be diagonal!
 
 __global__ void UpdateGrid(Grid* grid);
 
-__global__ void AdvectParticles(Grid* grid);
+__global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_term);
 
 __global__ void ClearGrid(Grid* grid);
 
@@ -104,5 +105,3 @@ __host__ cudaError_t InitializeGridHost(Grid* grid);
 //Device Methods
 
 __device__ Vector3D* GetWeights(Vector3D cell_difference);
-
-__device__ IndexPair* GetTraversals(IndexPair incident);

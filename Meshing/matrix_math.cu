@@ -101,6 +101,12 @@ __host__ __device__ Matrix* Matrix::DiagonalMatrix(const float* points, const si
     return output;
 }
 
+__host__ __device__ void Matrix::PopulateDiagonalMatrix(Matrix* matrix, const float* points, const size_t& row, const size_t& column) {
+    for (int i = 0; i < matrix->rows; i++) {
+        matrix->Get(i, i) = points[i];
+    }
+}
+
 __host__ __device__ Matrix Matrix::AbsoluteValue() {
     Matrix output(rows, columns);
 

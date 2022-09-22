@@ -32,7 +32,7 @@ __host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& col
 #ifdef __CUDA_ARCH__
     matrix = new Matrix(rows, columns, true);
 
-    matrix->device_alloc = matrix;
+    matrix->device_alloc = new Matrix(rows, columns, true);
 #else
     cuda_status = cudaMallocHost(&matrix, sizeof(Matrix));
     CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix pointer (host).");
@@ -40,6 +40,7 @@ __host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& col
     if (!local) {
         cuda_status = cudaMalloc(&(matrix->device_alloc), sizeof(Matrix));
         CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix pointer (device, on host).");
+        matrix->DeviceTransfer(matrix);
     }
 #endif
     return matrix;
@@ -97,21 +98,17 @@ __host__ cudaError_t Matrix::HostTransfer() {
     return cuda_status;
 }
 
-__host__ cudaError_t Matrix::DeviceTransfer(Matrix* ptr, Matrix* src) {
+__host__ cudaError_t Matrix::DeviceTransfer(Matrix* src) {
     cudaError_t cuda_status = cudaSuccess;
 
     if (!device_allocated_status) {
-        cuda_status = cudaMalloc(&ptr, sizeof(Matrix));
+        cuda_status = cudaMalloc(&device_alloc, sizeof(Matrix));
         device_allocated_status = true;
-        cuda_status = CopyFunction("DeviceTransferObject", ptr, src, cudaMemcpyHostToDevice, cuda_status, sizeof(Matrix), 1);
-        device_alloc = ptr;
+        cuda_status = CopyFunction("DeviceTransferObject", device_alloc, src, cudaMemcpyHostToDevice, cuda_status, sizeof(Matrix), 1);
         if (local) {
             std::cout << "Warning! Host locality is set to true, but device synchronization was called." <<
                 "\n\nThis will likely result in a segfault, as the corresponding GPU table data was not initialized." << std::endl;
         }
-    }
-    else {
-        ptr = device_alloc;
     }
 
     cuda_status = CopyFunction("DeviceTransferTable", data_device, data, cudaMemcpyHostToDevice, cuda_status, sizeof(float), rows * columns);
@@ -185,5 +182,5 @@ cudaError_t Matrix::PopulateRandomHost(Matrix* matrix, const float& min, const f
         }
     }
 
-    return matrix->DeviceTransfer(matrix->device_alloc, matrix);
+    return matrix->DeviceTransfer(matrix);
 }

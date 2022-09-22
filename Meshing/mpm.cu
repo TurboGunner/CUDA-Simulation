@@ -51,9 +51,9 @@ __host__ cudaError_t Grid::DeviceTransfer(Grid*& src) {
 
 __host__ cudaError_t Grid::HostTransfer() {
 	cudaError_t cuda_status = cudaSuccess;
-	cuda_status = CopyFunction("HostTransferParticles", particles_, particles_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(Particle*), total_size_ * resolution_);
-	cuda_status = CopyFunction("HostTransferCells", cells_, cells_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(Cell*), total_size_);
-	cudaDeviceSynchronize();
+	cuda_status = CopyFunction("HostTransferParticles", particles_, particles_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(particles_), 1);
+	cuda_status = CopyFunction("HostTransferCells", cells_, cells_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(cells_), 1);
+	cuda_status = cudaDeviceSynchronize();
 
 	return cuda_status;
 }
@@ -117,14 +117,7 @@ __host__ __device__ Cell* Grid::GetCell(const size_t& index) {
 
 __host__ __device__ Cell* Grid::GetCell(IndexPair incident) {
 	size_t index = incident.IX(side_size_);
-	if (index >= total_size_) {
-		printf("%s%zu\n", "Warning! Out of bounds access (IndexPair, Cell). Input Index: ", index);
-	}
-#ifdef __CUDA_ARCH__
-	return cells_device_[index];
-#else
-	return cells_[index];
-#endif
+	return GetCell(index);
 }
 
 __host__ __device__ Particle* Grid::GetParticle(const size_t& index) {
@@ -139,6 +132,6 @@ __host__ __device__ Particle* Grid::GetParticle(const size_t& index) {
 }
 
 __host__ __device__ Particle* Grid::GetParticle(IndexPair& incident, const size_t& grid_offset) {
-	size_t index = incident.IX(side_size_) * grid_offset; //NOTE
+	size_t index = incident.IX(side_size_) * (grid_offset); //NOTE
 	return GetParticle(index);
 }

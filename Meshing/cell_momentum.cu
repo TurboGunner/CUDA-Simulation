@@ -1,6 +1,6 @@
 #include "mpm.cuh"
 
-__global__ void UpdateCell(Grid* grid) {
+__global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dist_matrix, Matrix* momentum) {
 	//Cell Boundaries
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
@@ -20,11 +20,6 @@ __global__ void UpdateCell(Grid* grid) {
 
 		const size_t traversal_length = 27;
 
-		IndexPair* incidents = GetTraversals(incident);
-
-		Matrix* cell_dist_matrix = Matrix::Create(3, 1);
-		Matrix* momentum_ptr = Matrix::Create(3, 3);
-
 		for (size_t i = 0; i < traversal_length; i++) {
 			int x_weight_idx = (i / 9) % 2,
 				y_weight_idx = (i / 3) % 2,
@@ -37,7 +32,7 @@ __global__ void UpdateCell(Grid* grid) {
 
 			Vector3D cell_dist = (cell_position - position) + 0.5f;
 			for (int j = 0; j < cell_dist_matrix->columns; j++) {
-				cell_dist_matrix->Set(j, cell_dist.dim[j]);
+				cell_dist_matrix->Get(j) = cell_dist.dim[j];
 			}
 
 			dim3 blocks, threads;
@@ -45,24 +40,22 @@ __global__ void UpdateCell(Grid* grid) {
 			threads = dim3(1, 1);
 			blocks = dim3(ceil((1.0 * cell_dist_matrix->columns)), ceil((1.0f * particle->momentum.rows)), 1); //NOTE: May be backwards
 
-			Matrix* momentum = Matrix::Create(particle->momentum.rows, cell_dist_matrix->columns);
+			*momentum_matrix = particle->momentum;
 
-			*momentum_ptr = particle->momentum;
+			MultiplyKernel<<<blocks, threads >>> (momentum_matrix, cell_dist_matrix, momentum);
 
-			MultiplyKernel << <blocks, threads >> > (momentum_ptr, cell_dist_matrix, momentum);
-
-			Vector3D Q(momentum->Get(0), momentum->Get(1), momentum->Get(2));
+			Vector3D Q = Vector3D(momentum->Get(0), momentum->Get(1), momentum->Get(2));
 
 			float mass_contribution = weight * particle->mass;
 
-			Cell* cell = grid->GetCell(incident.IX(grid->side_size_));
+			Cell* cell = grid->GetCell(incident);
 
 			cell->mass += mass_contribution;
 			cell->velocity = cell->velocity + (particle->velocity + Q) * mass_contribution;
 
 			//cell_dist_matrix->Destroy();
 			//momentum->Destroy();
-			//momentum_ptr->Destroy();
+			//momentum_matrix->Destroy();
 		}
 	}
 }

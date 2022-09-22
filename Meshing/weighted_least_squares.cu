@@ -20,7 +20,7 @@ __host__ Matrix* Matrix::Weights(Matrix* matrix) {
     Matrix* diagonal = Matrix::DiagonalMatrix(arr.data(), max_side_length, max_side_length);
     *diagonal = diagonal->Reciprocal();
 
-    diagonal->DeviceTransfer(diagonal->device_alloc, diagonal);
+    diagonal->DeviceTransfer(diagonal);
 
     return diagonal;
 }
@@ -43,7 +43,7 @@ __host__ vector<Matrix*> Matrix::WeightedLeastSquares(Matrix* matrix) {
     Matrix* inverse = Matrix::Create(G_term->rows, G_term->columns);
     Matrix::Inverse(*G_term, *inverse);
 
-    inverse->DeviceTransfer(inverse->device_alloc, inverse);
+    inverse->DeviceTransfer(inverse);
     matrices.push_back(inverse);
 
     Matrix* multiply_t = Matrix::MultiplyGPU(inverse, transpose);
@@ -61,7 +61,7 @@ __host__ vector<Matrix*> Matrix::WeightedLeastSquares(Matrix* matrix) {
     for (size_t j = 0; j < delta->rows; j++) {
         delta->Set(random.Generate(), j);
     }
-    delta->DeviceTransfer(delta->device_alloc, delta);
+    delta->DeviceTransfer(delta);
     matrices.push_back(delta);
 
     Matrix* multiply_t4 = Matrix::MultiplyGPU(gradient, delta);
