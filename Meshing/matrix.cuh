@@ -6,6 +6,13 @@
 #include "../CUDATest/handler_classes.hpp"
 #include "../CUDATest/handler_methods.hpp"
 
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+
+#include <thrust/copy.h>
+#include <thrust/fill.h>
+#include <thrust/sequence.h>
+
 #include <stdio.h>
 
 #include <iostream>
@@ -18,13 +25,17 @@ class Matrix {
 public:
 	__host__ __device__ Matrix() = default;
 
-	__host__ __device__ Matrix(const size_t& rows_in, const size_t& columns_in, const bool& local = false);
+	__host__ __device__ Matrix(const size_t& rows_in, const size_t& columns_in, const bool& local = false, const bool& host_in = true);
 
 	__host__ __device__ static Matrix* Create(const size_t& rows, const size_t& columns, const bool& local = false);
 
 	__host__ __device__ cudaError_t Destroy();
 
 	__host__ static void DeleteAllocations(vector<Matrix*> matrices);
+
+	__host__ __device__ static Matrix* MatrixMassAllocation(const size_t& size, const size_t& rows, const size_t& columns);
+
+	__host__ __device__ static void CopyMatrixOnPointer(Matrix* matrix, Matrix& copy);
 
 	__host__ __device__ size_t IX(size_t row, size_t column) const;
 

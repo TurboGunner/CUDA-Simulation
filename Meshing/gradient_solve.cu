@@ -9,8 +9,7 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted
 	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current position
 
 	//Current particle variables
-	Particle* particle = grid->GetParticle(incident);
-	Vector3D position = particle->position;
+	Vector3D position = grid->GetPosition(incident);
 	Vector3D cell_idx = position.Truncate();
 
 	Vector3D cell_difference = (position - cell_idx) - 0.5f;
@@ -32,22 +31,21 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted
 
 		IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
 
-		density += grid->GetCell(cell_incident)->mass * weight;
+		density += grid->GetCellMass(cell_incident) * weight;
 	}
 
-	float volume = particle->mass / density;
+	float volume = grid->GetParticleMass(incident) / density;
 
 	float pressure = fmax(-0.1f, grid->eos_stiffness * (pow(density / grid->rest_density, grid->eos_power) - 1));
 
-	float points[3] = { -pressure, -pressure, -pressure };
-
-	Matrix& strain_matrix = particle->momentum;
+	Matrix& strain_matrix = grid->GetMomentum(incident);
 
 	float trace = strain_matrix.Get(2, 0) + strain_matrix.Get(1, 1) + strain_matrix.Get(0, 2);
 
 	for (size_t i = 0; i < strain_matrix.rows; i++) {
 		size_t reverse_idx = strain_matrix.rows - i - 1;
 		strain_matrix.Get(i, reverse_idx) = trace;
+		stress_matrix->Set(-pressure, i, reverse_idx);
 	}
 
 	Matrix viscosity_term = strain_matrix * grid->dynamic_viscosity;
@@ -55,6 +53,4 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted
 	Matrix::AddOnPointer(stress_matrix, viscosity_term);
 
 	Matrix::MultiplyScalarOnPointer(weighted_stress, -volume * 9 * grid->dt);
-
-	
 }

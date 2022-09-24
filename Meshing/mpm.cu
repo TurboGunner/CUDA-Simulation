@@ -19,11 +19,17 @@ __host__ Grid::Grid(const Vector3D& sim_size_in, const float& resolution_in) { /
 
 	cudaError_t cuda_status = cudaSuccess;
 
-	cudaMalloc(&particles_device_, sizeof(Particle*) * total_size_ * resolution_);
-	cudaMallocHost(&particles_, sizeof(Particle*) * total_size_ * resolution_);
+	cudaMalloc(&particle_position_device_, GetParticleCount() * sizeof(Vector3D));
+	cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
 
-	cudaMalloc(&cells_device_, sizeof(Cell*) * total_size_);
-	cudaMallocHost(&cells_, sizeof(Cell*) * total_size_);
+	cudaMalloc(&particle_velocity_device_, GetParticleCount() * sizeof(Vector3D));
+	cudaMalloc(&particle_mass_device_, GetParticleCount() * sizeof(float));
+
+	cudaMalloc(&cell_velocity_device_, total_size_ * sizeof(Vector3D)); //NOTE
+	//cudaMallocHost(&cells_, sizeof(Cell));
+	cudaMalloc(&cell_mass_device_, total_size_ * sizeof(float));
+
+	momentum_matrices_ = Matrix::MatrixMassAllocation(GetParticleCount(), 3, 3);
 
 	is_initialized_ = true;
 }
@@ -49,10 +55,10 @@ __host__ cudaError_t Grid::DeviceTransfer(Grid*& src) {
 	return cuda_status;
 }
 
-__host__ cudaError_t Grid::HostTransfer() {
+__host__ cudaError_t Grid::HostTransfer() { //NOTE
 	cudaError_t cuda_status = cudaSuccess;
-	cuda_status = CopyFunction("HostTransferParticles", particles_, particles_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(particles_), 1);
-	cuda_status = CopyFunction("HostTransferCells", cells_, cells_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(cells_), 1);
+	cuda_status = CopyFunction("HostTransferParticles", particle_position_, particle_position_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(Vector3D), GetParticleCount());
+	//cuda_status = CopyFunction("HostTransferCells", cells_, cells_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(cells_), 1);
 	cuda_status = cudaDeviceSynchronize();
 
 	return cuda_status;
@@ -82,56 +88,91 @@ __host__ __device__ float Grid::GetResolution() const {
 #endif
 }
 
-__host__ __device__ void Grid::AddCell(Cell* cell, const size_t& index) {
-	if (index >= GetTotalSize()) {
-		printf("%s %d\n", "Warning! Out of bounds access (AddCell). Input Index: ", index);
-	}
+__host__ __device__ Vector3D& Grid::GetVelocity(const size_t& index) {
 #ifdef __CUDA_ARCH__
-	cells_device_[index] = cell;
+	return particle_velocity_device_[index];
 #else
-	cells_[index] = cell;
+	return particle_velocity_[index];
 #endif
 }
 
-__host__ __device__ void Grid::AddParticle(Particle* particle, const size_t& index) {
-	if (index >= GetParticleCount()) {
-		printf("%s %d\n", "Warning! Out of bounds access (AddParticle). Input Index: ", index);
-	}
-#ifdef __CUDA_ARCH__
-	particles_device_[index] = particle;
-#else
-	particles_[index] = particle;
-#endif
-}
-
-__host__ __device__ Cell* Grid::GetCell(const size_t& index) {
-	if (index >= total_size_) {
-		printf("%s%zu\n", "Warning! Out of bounds access (size_t, Cell). Input Index: ", index);
-	}
-#ifdef __CUDA_ARCH__
-	return cells_device_[index];
-#else
-	return cells_[index];
-#endif
-}
-
-__host__ __device__ Cell* Grid::GetCell(IndexPair incident) {
+__host__ __device__ Vector3D& Grid::GetVelocity(IndexPair incident) {
 	size_t index = incident.IX(side_size_);
-	return GetCell(index);
+	return GetVelocity(index);
 }
 
-__host__ __device__ Particle* Grid::GetParticle(const size_t& index) {
-	if (index >= GetParticleCount()) {
-		printf("%s %d\n", "Warning! Out of bounds access (size_t, Particle). Input Index: ", index);
-	}
+__host__ __device__ Vector3D& Grid::GetPosition(const size_t& index) {
+	if (index > GetParticleCount()) {
+		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
+}
 #ifdef __CUDA_ARCH__
-	return particles_device_[index];
+	return particle_position_device_[index];
 #else
-	return particles_[index];
+	return particle_position_[index];
 #endif
 }
 
-__host__ __device__ Particle* Grid::GetParticle(IndexPair& incident, const size_t& grid_offset) {
-	size_t index = incident.IX(side_size_) * (grid_offset); //NOTE
-	return GetParticle(index);
+__host__ __device__ Vector3D& Grid::GetPosition(IndexPair incident) {
+	size_t index = incident.IX(side_size_);
+	return GetPosition(index);
+}
+
+__host__ __device__ Matrix& Grid::GetMomentum(const size_t& index) { //NOTE: DEVICE ONLY!
+	if (index >= GetParticleCount()) {
+		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
+	}
+	return momentum_matrices_[index];
+}
+
+__host__ __device__ Matrix& Grid::GetMomentum(IndexPair incident) {
+	size_t index = incident.IX(side_size_);
+	return GetMomentum(index);
+}
+
+__host__ __device__ float& Grid::GetParticleMass(const size_t& index) {
+	if (index >= GetParticleCount()) {
+		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
+	}
+#ifdef __CUDA_ARCH__
+	return particle_mass_device_[index];
+#else
+	return particle_mass_[index];
+#endif
+}
+
+__host__ __device__ float& Grid::GetParticleMass(IndexPair incident) {
+	size_t index = incident.IX(side_size_);
+	return GetParticleMass(index);
+}
+
+__host__ __device__ float& Grid::GetCellMass(const size_t& index) {
+	if (index >= total_size_) {
+		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
+	}
+#ifdef __CUDA_ARCH__
+	return cell_mass_device_[index];
+#else
+	return cell_mass_[index];
+#endif
+}
+
+__host__ __device__ float& Grid::GetCellMass(IndexPair incident) {
+	size_t index = incident.IX(side_size_);
+	return GetCellMass(index);
+}
+
+__host__ __device__ Vector3D& Grid::GetCellVelocity(const size_t& index) {
+	if (index >= total_size_) {
+		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
+	}
+#ifdef __CUDA_ARCH__
+	return cell_velocity_device_[index];
+#else
+	return cell_velocity_[index];
+#endif
+}
+
+__host__ __device__ Vector3D& Grid::GetCellVelocity(IndexPair incident) {
+	size_t index = incident.IX(side_size_);
+	return GetCellVelocity(index);
 }

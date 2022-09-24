@@ -7,23 +7,18 @@
 
 #include "../CUDATest/handler_methods.hpp"
 
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+
+#include <thrust/copy.h>
+#include <thrust/fill.h>
+#include <thrust/sequence.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include <iostream>
-
-struct Particle {
-	Vector3D position;
-	Vector3D velocity;
-	float mass = 0.0f;
-	Matrix momentum = Matrix(3, 3, true);
-};
-
-struct Cell {
-	Vector3D velocity;
-	float mass = 0.0f;
-};
 
 class Grid {
 public:
@@ -47,17 +42,29 @@ public:
 
 	__host__ __device__ float GetResolution() const;
 
-	__host__ __device__ void AddCell(Cell* cell, const size_t& index);
+	__host__ __device__ Vector3D& GetVelocity(const size_t& index);
+								 
+	__host__ __device__ Vector3D& GetVelocity(IndexPair incident);
 
-	__host__ __device__ void AddParticle(Particle* particle, const size_t& index);
+	__host__ __device__ Vector3D& GetPosition(const size_t& index);
 
-	__host__ __device__ Cell* GetCell(const size_t& index);
+	__host__ __device__ Vector3D& GetPosition(IndexPair incident);
 
-	__host__ __device__ Cell* GetCell(IndexPair incident);
+	__host__ __device__ Matrix& GetMomentum(const size_t& index);
 
-	__host__ __device__ Particle* GetParticle(const size_t& index);
+	__host__ __device__ Matrix& GetMomentum(IndexPair incident);
 
-	__host__ __device__ Particle* GetParticle(IndexPair& incident, const size_t& grid_offset = 0);
+	__host__ __device__ float& GetParticleMass(const size_t& index);
+
+	__host__ __device__ float& GetParticleMass(IndexPair incident);
+
+	__host__ __device__ float& GetCellMass(const size_t& index);
+
+	__host__ __device__ float& GetCellMass(IndexPair incident);
+
+	__host__ __device__ Vector3D& GetCellVelocity(const size_t& index);
+
+	__host__ __device__ Vector3D& GetCellVelocity(IndexPair incident);
 
 	const float gravity = -0.3f;
 
@@ -73,8 +80,14 @@ public:
 
 	size_t side_size_;
 
-	Particle** particles_, ** particles_device_;
-	Cell** cells_, ** cells_device_;
+	Vector3D* particle_position_, *particle_position_device_;
+	Vector3D* particle_velocity_, *particle_velocity_device_;
+	float* particle_mass_, *particle_mass_device_;
+
+	Vector3D* cell_velocity_, *cell_velocity_device_;
+	float* cell_mass_, *cell_mass_device_;
+
+	Matrix* momentum_matrices_;
 
 private:
 
@@ -88,8 +101,6 @@ private:
 
 //Globals
 
-__global__ void InitializeGrid(Grid* grid);
-
 __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dist_matrix, Matrix* momentum);
 
 __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted_stress, Matrix* cell_dist_matrix, Matrix* momentum); //Stress matrix must be diagonal!
@@ -97,6 +108,7 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted
 __global__ void UpdateGrid(Grid* grid);
 
 __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_term);
+__device__ void MPMBoundaryConditions(Grid* grid, IndexPair incident, const Vector3D& position_normalized, const float& wall_min, const float& wall_max);
 
 __global__ void ClearGrid(Grid* grid);
 

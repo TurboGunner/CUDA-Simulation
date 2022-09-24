@@ -1,6 +1,6 @@
 #include "matrix.cuh"
 
-__host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_in, const bool& local_in) {
+__host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_in, const bool& local_in, const bool& host_in) {
     rows = rows_in;
     columns = columns_in;
 
@@ -15,8 +15,10 @@ __host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_
 #ifdef __CUDA_ARCH__
     data_device = (float*) malloc(size_alloc);
 #else
-    cuda_status = cudaMallocHost(&data, size_alloc);
-    CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix (host).");
+    if (host_in) {
+        cuda_status = cudaMallocHost(&data, size_alloc);
+        CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix (host).");
+    }
     if (!local) {
         cuda_status = cudaMalloc(&data_device, size_alloc);
         CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix (device, on host).");
@@ -30,9 +32,9 @@ __host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& col
     cudaError_t cuda_status = cudaSuccess;
 
 #ifdef __CUDA_ARCH__
-    matrix = new Matrix(rows, columns, true);
+    matrix = new Matrix(rows, columns, true, false);
 
-    matrix->device_alloc = new Matrix(rows, columns, true);
+    matrix->device_alloc = matrix;
 #else
     cuda_status = cudaMallocHost(&matrix, sizeof(Matrix));
     CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix pointer (host).");
@@ -183,4 +185,24 @@ cudaError_t Matrix::PopulateRandomHost(Matrix* matrix, const float& min, const f
     }
 
     return matrix->DeviceTransfer(matrix);
+}
+
+__host__ __device__ Matrix* Matrix::MatrixMassAllocation(const size_t& size, const size_t& rows, const size_t& columns) {
+    cudaError_t cuda_status = cudaSuccess;
+
+    Matrix* output = nullptr;
+    cuda_status = cudaMalloc(&output, sizeof(Matrix) * size * rows * columns);
+    thrust::device_ptr<Matrix> thrust_alloc(output);
+
+    thrust::fill(thrust_alloc, thrust_alloc + size, Matrix(rows, columns, false, false));
+
+    return thrust_alloc.get();
+}
+
+__host__ __device__ void Matrix::CopyMatrixOnPointer(Matrix* matrix, Matrix& copy) {
+    for (size_t i = 0; i < matrix->rows; i++) {
+        for (size_t j = 0; j < matrix->columns; j++) {
+            matrix->Get(j, i) = copy.Get(j, i);
+        }
+    }
 }

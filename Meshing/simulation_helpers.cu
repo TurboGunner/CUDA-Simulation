@@ -8,23 +8,21 @@ __global__ void UpdateGrid(Grid* grid) {
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current Index
 
-	Cell* cell = grid->GetCell(incident); //Current Cell
-
-	cell->velocity = cell->velocity / cell->mass; //Converting momentum to velocity
+	grid->GetCellVelocity(incident) /= grid->GetCellMass(incident); //Converting momentum to velocity
 
 	//Applying gravity to velocity
 	Vector3D gravity_vector(0.0f, 0.0f, grid->gravity);
-	cell->velocity = cell->velocity + (gravity_vector * grid->dt);
+	grid->GetCellVelocity(incident) += (gravity_vector * grid->dt);
 
 	//Boundary Conditions
 	if (x_bounds < 2 || x_bounds > grid->side_size_ - 3) {
-		cell->velocity.dim[0] = 0;
+		grid->GetCellVelocity(incident).dim[0] = 0;
 	}
 	if (y_bounds < 2 || y_bounds > grid->side_size_ - 3) {
-		cell->velocity.dim[1] = 0;
+		grid->GetCellVelocity(incident).dim[1] = 0;
 	}
 	if (z_bounds < 2 || z_bounds > grid->side_size_ - 3) {
-		cell->velocity.dim[2] = 0;
+		grid->GetCellVelocity(incident).dim[2] = 0;
 	}
 }
 
@@ -46,19 +44,17 @@ __global__ void ClearGrid(Grid* grid) {
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current position
 
-	Cell* cell = grid->GetCell(incident);
-
-	cell->mass = 0;
-	cell->velocity.Reset();
+	grid->GetCellMass(incident) = 0;
+	grid->GetCellVelocity(incident).Reset();
 }
 
 __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 	//Matrix Allocations
 	cudaError_t cuda_status = cudaSuccess;
 
-	Matrix* momentum_matrix = Matrix::Create(3, 3, false);
 	Matrix* cell_dist_matrix = Matrix::Create(3, 1, false);
 	Matrix* momentum = Matrix::Create(3, 1, false);
+	Matrix* momentum_matrix = Matrix::Create(3, 3, false);
 
 	Matrix* stress_matrix = Matrix::Create(3, 3, false);
 	Matrix* weighted_stress = Matrix::Create(3, 3, false);
@@ -77,24 +73,14 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 
 	threads = dim3(threads_per_dim, threads_per_dim, threads_per_dim);
 	blocks = dim3(block_count, block_count, block_count);
-
 	dim3 blocks2, threads2;
 
 	std::cout << "Resolution: " << grid->GetResolution() << std::endl;
 
-	threads2 = dim3(threads_per_dim * grid->GetResolution(), threads_per_dim * grid->GetResolution(), threads_per_dim * grid->GetResolution()); //NOTE
+	threads2 = dim3(threads_per_dim * grid->GetResolution(), threads_per_dim, threads_per_dim); //NOTE
 	blocks2 = dim3(block_count, block_count, block_count);
 
-	InitializeGrid<<<blocks, threads>>> (grid->device_alloc_);
-	cuda_status = PostExecutionChecks(cuda_status, "GridInitialization", true);
-
-	cuda_status = cudaDeviceSynchronize();
-	cuda_status = PostExecutionChecks(cuda_status, "GridInitialization", true);
-
-	std::cout << "Allocated successfully " << grid->GetTotalSize() << " cells! (device)" << std::endl;
-	std::cout << "Allocated successfully " << grid->GetParticleCount() << " particles! (device)" << std::endl;
-
-	UpdateCell<<<blocks, threads>>> (grid->device_alloc_, momentum_matrix->device_alloc, cell_dist_matrix->device_alloc, momentum->device_alloc);
+	UpdateCell<<<blocks2, threads2>>> (grid->device_alloc_, momentum_matrix->device_alloc, cell_dist_matrix->device_alloc, momentum->device_alloc);
 	cuda_status = PostExecutionChecks(cuda_status, "CellMomentum", true);
 
 	cuda_status = cudaDeviceSynchronize();
@@ -102,7 +88,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 
 	std::cout << "Ran through cell momentum!" << std::endl;
 
-	SimulateGrid<<<blocks, threads>>> (grid->device_alloc_, stress_matrix, weighted_stress, cell_dist_matrix, momentum); //NOTE
+	SimulateGrid<<<blocks2, threads2>>> (grid->device_alloc_, stress_matrix, weighted_stress, cell_dist_matrix, momentum); //NOTE
 	cuda_status = PostExecutionChecks(cuda_status, "VelocityGradientSolve", true);
 
 	cuda_status = cudaDeviceSynchronize();
@@ -118,7 +104,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 
 	std::cout << "Updated the grid!" << std::endl;
 
-	AdvectParticles<<<blocks, threads>>> (grid->device_alloc_, B_term, weighted_term);
+	AdvectParticles<<<blocks2, threads2>>> (grid->device_alloc_, B_term, weighted_term);
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectParticles", true);
 
 	cuda_status = cudaDeviceSynchronize();

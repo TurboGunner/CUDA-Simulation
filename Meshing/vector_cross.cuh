@@ -37,6 +37,12 @@ public:
 
 	__host__ __device__ Vector3D operator/(const Vector3D& vector);
 
+	__host__ __device__ Vector3D& operator+=(const Vector3D& vector);
+
+	__host__ __device__ Vector3D& operator/=(const Vector3D& vector);
+
+	__host__ __device__ Vector3D& operator/=(const float& t);
+
 	__host__ __device__ Vector3D Squared();
 
 	__host__ __device__ Vector3D Negative();

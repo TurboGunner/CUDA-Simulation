@@ -104,6 +104,31 @@ __host__ __device__ Vector3D Vector3D::operator/(const Vector3D& vector) {
 	return output;
 }
 
+__host__ __device__ Vector3D& Vector3D::operator+=(const Vector3D& vector) {
+	dim[0] += vector.dim[0];
+	dim[1] += vector.dim[1];
+	dim[2] += vector.dim[2];
+
+	return *this;
+}
+
+__host__ __device__ Vector3D& Vector3D::operator/=(const Vector3D& vector) {
+	dim[0] /= vector.dim[0];
+	dim[1] /= vector.dim[1];
+	dim[2] /= vector.dim[2];
+
+	return *this;
+}
+
+__host__ __device__ Vector3D& Vector3D::operator/=(const float& t) {
+	dim[0] /= t;
+	dim[1] /= t;
+	dim[2] /= t;
+
+	return *this;
+}
+
+
 __host__ __device__ Vector3D Vector3D::Squared() {
 	return Vector3D(dim[0] * dim[0], dim[1] * dim[1], dim[2] * dim[2]);
 }
