@@ -27,8 +27,7 @@ struct BufferHelpers {
         return vulkan_status;
     }
 
-    static VkBuffer AllocateBuffer(VkDevice& device, const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
-        VkBuffer buffer;
+    static VkBufferCreateInfo CreateBufferInfo(const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkSharingMode& sharing_mode = VK_SHARING_MODE_EXCLUSIVE) {
         VkBufferCreateInfo buffer_info = {};
 
         buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -36,8 +35,15 @@ struct BufferHelpers {
         buffer_info.usage = usage;
         buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
+        return buffer_info;
+    }
+
+    static VkBuffer AllocateBuffer(VkDevice& device, const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
+        VkBuffer buffer;
+        VkBufferCreateInfo buffer_info = CreateBufferInfo(size, usage);
+
         if (vkCreateBuffer(device, &buffer_info, nullptr, &buffer) != VK_SUCCESS) {
-            ProgramLog::OutputLine("Error: Failed to properly allocate buffer!");
+            ProgramLog::OutputLine("Error: Failed to properly create buffer!");
         }
         return buffer;
     }

@@ -28,9 +28,9 @@ int main() {
 
     //Matrix::WeightedLeastSquares(matrix);
 
-    size_t dim = 16;
+    size_t dim = 32;
 
-    Grid* grid = new Grid(Vector3D(dim, dim, dim), 2);
+    Grid* grid = new Grid(Vector3D(dim, dim, dim), 4);
 
     cuda_status = Grid::SimulateGPU(grid);
 

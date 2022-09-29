@@ -130,7 +130,7 @@ public:
     }
 
     void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
-        VkBufferCreateInfo buffer_info {};
+        VkBufferCreateInfo buffer_info = {};
 
         buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         buffer_info.size = size;

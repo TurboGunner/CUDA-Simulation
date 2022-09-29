@@ -83,7 +83,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 	UpdateCell<<<blocks2, threads2>>> (grid->device_alloc_, momentum_matrix->device_alloc, cell_dist_matrix->device_alloc, momentum->device_alloc);
 	cuda_status = PostExecutionChecks(cuda_status, "CellMomentum", true);
 
-	cuda_status = cudaDeviceSynchronize();
+	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "CellMomentum failed!");
 
 	std::cout << "Ran through cell momentum!" << std::endl;
@@ -91,7 +91,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 	SimulateGrid<<<blocks2, threads2>>> (grid->device_alloc_, stress_matrix, weighted_stress, cell_dist_matrix, momentum); //NOTE
 	cuda_status = PostExecutionChecks(cuda_status, "VelocityGradientSolve", true);
 
-	cuda_status = cudaDeviceSynchronize();
+	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "SimulateGrid failed!");
 
 	std::cout << "Ran through the velocity gradient solve!" << std::endl;
@@ -99,7 +99,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 	UpdateGrid<<<blocks, threads>>> (grid->device_alloc_);
 	cuda_status = PostExecutionChecks(cuda_status, "UpdateGrid", true);
 
-	cuda_status = cudaDeviceSynchronize();
+	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "UpdateGrid failed!");
 
 	std::cout << "Updated the grid!" << std::endl;
@@ -107,7 +107,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid) {
 	AdvectParticles<<<blocks2, threads2>>> (grid->device_alloc_, B_term, weighted_term);
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectParticles", true);
 
-	cuda_status = cudaDeviceSynchronize();
+	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "AdvectParticles failed!");
 
 	std::cout << "Advected the particles!" << std::endl;

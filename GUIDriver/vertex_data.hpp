@@ -27,9 +27,9 @@ struct VectorHash {
 };
 
 struct Vertex {
-    Vertex() = default;
+    __host__ __device__ Vertex() = default;
 
-    Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b, float n_x = 0.0f, float n_y = 0.0f, float n_z = 0.0f) {
+    __host__ __device__ Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b, float n_x = 0.0f, float n_y = 0.0f, float n_z = 0.0f) {
         pos = glm::vec3(pos_x, pos_y, pos_z);
         color = glm::vec3(r, g, b);
         glm::vec3(n_x, n_y, n_z);

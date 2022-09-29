@@ -92,6 +92,9 @@
     </CudaLink>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="cuda_interop_helper.cu" />
+    <CudaCompile Include="cuda_interop_memory.cu" />
+    <CudaCompile Include="cuda_interop_semaphore.cu" />
     <CudaCompile Include="gui_display.cu" />
     <CudaCompile Include="gui.cu" />
   </ItemGroup>
@@ -106,6 +109,7 @@
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
     <ClInclude Include="buffer_helpers.hpp" />
+    <ClInclude Include="cuda_interop_helper.cuh" />
     <ClInclude Include="descriptor_set_handler.hpp" />
     <ClInclude Include="gui_driver.cuh" />
     <ClInclude Include="image_helpers.hpp" />
@@ -120,6 +124,7 @@
     <ClInclude Include="vertex_data.hpp" />
     <ClInclude Include="vulkan_helpers.hpp" />
     <ClInclude Include="vulkan_parameters.hpp" />
+    <ClInclude Include="windows_security_attributes.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GUIDriver.rc" />

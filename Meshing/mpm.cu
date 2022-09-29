@@ -57,7 +57,7 @@ __host__ cudaError_t Grid::DeviceTransfer(Grid*& src) {
 
 __host__ cudaError_t Grid::HostTransfer() { //NOTE
 	cudaError_t cuda_status = cudaSuccess;
-	cuda_status = CopyFunction("HostTransferParticles", particle_position_, particle_position_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(Vector3D), GetParticleCount());
+	cuda_status = CopyFunction("HostTransferParticlesPosition", particle_position_, particle_position_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(Vector3D), GetParticleCount());
 	//cuda_status = CopyFunction("HostTransferCells", cells_, cells_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(cells_), 1);
 	cuda_status = cudaDeviceSynchronize();
 

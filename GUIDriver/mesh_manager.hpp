@@ -47,7 +47,7 @@ public:
     }
 
     void Initialize(VkCommandPool& command_pool) {
-         VkBuffer staging_buffer;
+        VkBuffer staging_buffer;
         VkDeviceMemory staging_buffer_memory;
 
         //Staging Buffer
@@ -87,12 +87,20 @@ public:
         return vulkan_status;
     }
 
-    void UploadMesh(MeshContainer& mesh, const VkDeviceSize& size) {
-        void* data;
+    tuple<VkBuffer, VkDeviceMemory> UploadMesh(void* device_mesh_ptr, const VkDeviceSize& size) {
+        VkResult vulkan_status = VK_SUCCESS;
 
-        auto buffer = BufferHelpers::AllocateBuffer(device_, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        VkBuffer buffer_device;
+        VkDeviceMemory device_memory;
 
-        BufferHelpers::MapMemory(device_, vertices.Data(), size, mesh_buffer_memory_);
+        VkExternalMemoryBufferCreateInfo external_buffer_info = {};
+
+        external_buffer_info.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
+        external_buffer_info.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT;
+
+        void* data = BufferHelpers::MapMemory(device_, device_mesh_ptr, size_, device_memory);
+
+        return { buffer_device, device_memory };
     }
 
     void Clean() {

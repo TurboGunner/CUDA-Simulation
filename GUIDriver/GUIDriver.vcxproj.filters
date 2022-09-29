@@ -7,6 +7,15 @@
     <CudaCompile Include="gui.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
+    <CudaCompile Include="cuda_interop_helper.cu">
+      <Filter>cuda\interop</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cuda_interop_semaphore.cu">
+      <Filter>cuda\interop</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cuda_interop_memory.cu">
+      <Filter>cuda\interop</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cpp">
@@ -38,6 +47,12 @@
     </Filter>
     <Filter Include="cpp\imported">
       <UniqueIdentifier>{e37cca23-3f11-4254-af04-9e1e87d00d78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cuda\interop">
+      <UniqueIdentifier>{af3ff736-46f3-4536-82bd-16084e0b7fd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\interop">
+      <UniqueIdentifier>{9da562e0-e7c0-4d92-b90a-354e07e7fbcd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +121,12 @@
     </ClInclude>
     <ClInclude Include="buffer_helpers.hpp">
       <Filter>includes\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_interop_helper.cuh">
+      <Filter>includes\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="windows_security_attributes.h">
+      <Filter>includes\interop</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
