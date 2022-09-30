@@ -165,3 +165,31 @@ void* CudaInterop::GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternal
 	}
 	return (void*)(uintptr_t) fd;
 }
+
+cudaError_t CudaInterop::ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize& size, const VkExternalMemoryHandleTypeFlagBits& handle_type) {
+	VkResult vulkan_status = VK_SUCCESS;
+
+	cudaExternalMemoryHandleDesc external_memory_handle_desc = {};
+
+	if (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) {
+		external_memory_handle_desc.type = cudaExternalMemoryHandleTypeOpaqueWin32;
+	}
+	else if (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT) {
+		external_memory_handle_desc.type = cudaExternalMemoryHandleTypeOpaqueWin32Kmt;
+	}
+	else if (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT) {
+		external_memory_handle_desc.type = cudaExternalMemoryHandleTypeOpaqueFd;
+	}
+	else {
+		ProgramLog::OutputLine("Error: Unknown handle type requested!");
+	}
+
+	external_memory_handle_desc.size = size;
+
+	if (os_ != LINUX) {
+		external_memory_handle_desc.handle.win32.handle = (HANDLE) GetMemoryHandle(buffer_memory, handle_type);
+	}
+	else {
+		external_memory_handle_desc.handle.fd = (int) (uintptr_t) GetMemoryHandle(buffer_memory, handle_type);
+	}
+}

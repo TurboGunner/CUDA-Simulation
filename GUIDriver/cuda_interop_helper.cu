@@ -118,6 +118,8 @@ cudaError_t CudaInterop::SimulationSetup() {
     MemoryAccessDescriptor();
 
     cuMemSetAccess(d_ptr, total_alloc_size_, &access_descriptor_, 1); //Adds read-write access to the whole VA range.
+
+    return cuda_status;
 }
 
 CUresult CudaInterop::Clean() {

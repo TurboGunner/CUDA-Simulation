@@ -94,6 +94,8 @@ public:
 
 	cudaError_t ImportCudaExternalSemaphore(cudaExternalSemaphore_t& cuda_semaphore, VkSemaphore& vk_semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
+	cudaError_t ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize& size, const VkExternalMemoryHandleTypeFlagBits& handle_type);
+
 	void GetDefaultSecurityDescriptor(CUmemAllocationProp* prop);
 
 	size_t RoundWarpGranularity(const size_t& size, const int& granularity);

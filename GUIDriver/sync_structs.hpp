@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+
 #include "vulkan_parameters.hpp"
 
 //Logging
@@ -40,8 +43,28 @@ public:
 		}
 	}
 
+	void GetWaitSemaphores(const size_t& current_frame) {
+		if (current_frame != 0) {
+			wait_semaphores_.push_back(vk_wait_semaphore_);
+			wait_stages_.push_back(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+		}
+	}
+
+	void GetSignalFrameSemaphores() {
+		signal_semaphores_.push_back(vk_signal_semaphore_);
+	}
+
 	vector<VkFence> fences_;
-	vector<VkSemaphore> render_semaphores_, present_semaphores_;
+	vector<VkSemaphore> render_semaphores_, present_semaphores_; //Wait, Signal
+
+	vector<VkSemaphore> wait_semaphores_, signal_semaphores_;
+
+	VkSemaphore vk_wait_semaphore_, vk_signal_semaphore_;
+
+	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
+
+	vector<VkPipelineStageFlags> wait_stages_;
+
 
 private:
 	VkFenceCreateInfo FenceInfo(const VkFenceCreateFlags& flags = 0) {
