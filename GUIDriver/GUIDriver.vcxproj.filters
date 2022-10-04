@@ -16,6 +16,24 @@
     <CudaCompile Include="cuda_interop_memory.cu">
       <Filter>cuda\interop</Filter>
     </CudaCompile>
+    <CudaCompile Include="rasterizer.cu">
+      <Filter>cpp\init_objects</Filter>
+    </CudaCompile>
+    <CudaCompile Include="shader_loader_modules.cu">
+      <Filter>cpp\init_objects\shader_loader</Filter>
+    </CudaCompile>
+    <CudaCompile Include="shader_loader.cu">
+      <Filter>cpp\init_objects\shader_loader</Filter>
+    </CudaCompile>
+    <CudaCompile Include="shader_loader_init.cu">
+      <Filter>cpp\init_objects\shader_loader</Filter>
+    </CudaCompile>
+    <CudaCompile Include="swap_chain_manager_init.cu">
+      <Filter>cpp\init_objects\swap_chain</Filter>
+    </CudaCompile>
+    <CudaCompile Include="swap_chain_manager.cu">
+      <Filter>cpp\init_objects\swap_chain</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cpp">
@@ -54,6 +72,27 @@
     <Filter Include="includes\interop">
       <UniqueIdentifier>{9da562e0-e7c0-4d92-b90a-354e07e7fbcd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cpp\helpers">
+      <UniqueIdentifier>{5ea5c81a-020f-4e3c-9a94-0708f0421432}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\init_objects">
+      <UniqueIdentifier>{5bda9b2f-74e3-4676-a9ea-5d12dd771607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\init_objects\shader_loader">
+      <UniqueIdentifier>{46312846-a43e-4ece-9efd-bedce54f1774}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\init_objects\swap_chain">
+      <UniqueIdentifier>{f45f47b0-7caf-4382-ad1e-8a3f31d2ba0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\init_objects\mesh">
+      <UniqueIdentifier>{ae4beb36-d2c3-41ef-ba90-c64a29feffd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\init_objects\mesh\vertex_data">
+      <UniqueIdentifier>{17e12fde-e2d0-4a91-a5ea-bc8aac868ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp\vulkan\interop">
+      <UniqueIdentifier>{165aa380-c791-40ad-bda6-09603dbd86c5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui_rendering.cpp">
@@ -74,14 +113,41 @@
     <ClCompile Include="..\CUDATest\handler_methods.cpp">
       <Filter>cpp\imported</Filter>
     </ClCompile>
+    <ClCompile Include="buffer_helpers.cpp">
+      <Filter>cpp\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="descriptor_set_handler.cpp">
+      <Filter>cpp\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="image_helpers.cpp">
+      <Filter>cpp\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkan_helpers.cpp">
+      <Filter>cpp\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="sync_structs.cpp">
+      <Filter>cpp\init_objects</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_manager.cpp">
+      <Filter>cpp\init_objects\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_viewport.cpp">
+      <Filter>cpp\init_objects\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex_data.cpp">
+      <Filter>cpp\init_objects\mesh\vertex_data</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh_container.cpp">
+      <Filter>cpp\init_objects\mesh\vertex_data</Filter>
+    </ClCompile>
+    <ClCompile Include="windows_security_attributes.cpp">
+      <Filter>cpp\vulkan\interop</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="vulkan_parameters.hpp">
       <Filter>includes</Filter>
-    </ClInclude>
-    <ClInclude Include="texture_loader.cuh">
-      <Filter>includes\init_objects</Filter>
     </ClInclude>
     <ClInclude Include="shader_loader.cuh">
       <Filter>includes\init_objects</Filter>
@@ -125,7 +191,7 @@
     <ClInclude Include="cuda_interop_helper.cuh">
       <Filter>includes\interop</Filter>
     </ClInclude>
-    <ClInclude Include="windows_security_attributes.h">
+    <ClInclude Include="windows_security_attributes.hpp">
       <Filter>includes\interop</Filter>
     </ClInclude>
   </ItemGroup>

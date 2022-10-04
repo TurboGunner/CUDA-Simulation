@@ -1,5 +1,12 @@
 #include "cuda_interop_helper.cuh"
 
+#ifdef _WIN64
+#include <VersionHelpers.h>
+#include <winternl.h>
+#include <sddl.h>
+#endif
+
+
 CudaInterop::CudaInterop(VkDevice& device_in, VkPhysicalDevice& phys_device_in) {
     device_ = device_in;
     phys_device_ = phys_device_in;
@@ -57,7 +64,7 @@ void CudaInterop::CalculateTotalMemorySize(const size_t& granularity) {
     }
 }
 
-void CudaInterop::AddMemoryHandle(const size_t& size) {
+void CudaInterop::AddMemoryHandle(const size_t& size) {  //NOTE: ALLOCATE STRUCT WITH SIZE
     CUmemGenericAllocationHandle cuda_position_handle;
     ShareableHandle position_shareable_handle;
     //WIP
@@ -126,15 +133,55 @@ CUresult CudaInterop::Clean() {
     CUresult cuda_result;
     for (const auto& mem_handle : cross_memory_handles_) { //Ensures that all allocations are mapped before attempting unmap memory
         if (!mem_handle.vulkan_ptr) {
-            return;
+            return cuda_result;
         }
     }
 
     IPCCloseShareableHandle(cross_memory_handles_[0].shareable_handle_);
 
     cuda_result = cuMemAddressFree((CUdeviceptr) cross_memory_handles_[0].vulkan_ptr, total_alloc_size_);
+
+    return cuda_result;
 }
 
 int CudaInterop::IPCCloseShareableHandle(ShareableHandle sh_handle) {
     return CloseHandle(sh_handle);
+}
+
+cudaError_t CudaInterop::InitializeCudaInterop(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
+    cudaError_t cuda_status = cudaSuccess;
+    VkResult vulkan_status = VK_SUCCESS;
+
+    cuda_status = cudaStreamCreateWithFlags(&cuda_stream_, cudaStreamNonBlocking);
+    cuda_status = SimulationSetup();
+
+    VkDeviceSize alloc_size = cross_memory_handles_[0].size_; //NOTE: MULTIPLY BY VECTOR3D ONCE HOOKED
+    auto mem_handle_type = GetPlatformMemoryHandle();
+    void* mem_handle = (void*) (uintptr_t) &cross_memory_handles_[0].shareable_handle_;
+
+    vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer, buffer_memory);
+
+    auto mem_semaphore_type = GetPlatformSemaphoreHandle();
+
+    vulkan_status = CreateExternalSemaphore(signal_semaphore, mem_semaphore_type);
+    vulkan_status = CreateExternalSemaphore(wait_semaphore, mem_semaphore_type);
+
+    cuda_status = ImportCudaExternalSemaphore(cuda_wait_semaphore_, signal_semaphore, mem_semaphore_type);
+    cuda_status = ImportCudaExternalSemaphore(cuda_signal_semaphore_, wait_semaphore, mem_semaphore_type);
+
+    return cuda_status;
+}
+
+void CudaInterop::InteropDeviceExtensions() {
+    interop_device_extensions_.push_back(VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME);
+    interop_device_extensions_.push_back(VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME);
+
+    if (os_ != LINUX) {
+        interop_device_extensions_.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
+        interop_device_extensions_.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
+    }
+    else {
+        interop_device_extensions_.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
+        interop_device_extensions_.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
+    }
 }

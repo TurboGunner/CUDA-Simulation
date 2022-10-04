@@ -1,11 +1,14 @@
 #pragma once
 
 #include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include "device_launch_parameters.h"
 
+//#include "texture_loader.cuh"
 #include "shader_loader.cuh"
-#include "texture_loader.cuh"
 #include "swap_chain_manager.cuh"
+#include "cuda_interop_helper.cuh"
+
 #include "mesh_manager.hpp"
 #include "sync_structs.hpp"
 #include "vertex_data.hpp"
@@ -151,7 +154,7 @@ public:
 
     void LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info);
 
-    void CreateWindow(int& width, int& height, VkSurfaceKHR& surface);
+    void CreateGUIWindow(int& width, int& height, VkSurfaceKHR& surface);
 
     void MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
 
@@ -175,7 +178,7 @@ public:
 
     void GUISetup();
 
-    TextureLoader texture_handler_;
+    //TextureLoader texture_handler_;
     ShaderLoader shader_handler_;
     VulkanHelper vulkan_helper_;
     SwapChainProperties swap_chain_helper_;
@@ -183,6 +186,7 @@ public:
     RenderPassInitializer render_pass_initializer_;
     VertexData mesh_data_;
     MeshViewport mesh_viewport_;
+    CudaInterop interop_handler_;
 
     VkPhysicalDeviceProperties device_properties_;
 

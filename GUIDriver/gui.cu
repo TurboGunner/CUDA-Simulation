@@ -12,7 +12,7 @@
 
 using std::function;
 
-int WinMain(int argc, char* argv[]) {
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow) {
     cudaError_t cuda_status = cudaSuccess;
 
     function<cudaError_t()> set_device_func = []() { return cudaSetDevice(0); };

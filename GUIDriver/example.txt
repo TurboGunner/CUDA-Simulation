@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFCF26217C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFAE7AE17C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -13,7 +13,7 @@ Swapchain Image Count: 3
 Created color attachment for the render pass.
 Created depth attachment for the render pass.
 Created attachment references for the render pass.
-Created a window with size 2560 X 1026.
+
 
 Color Attachment Ref ID: 2
 
@@ -63,16 +63,10 @@ Created depth stencil state for the render pipeline.
 
 Dynamic State Count: 2.
 Created graphics pipeline info for render pipeline.
-Created a window with size 2560 X 1026.
-
-Color Attachment Ref ID: 2
 Name for shader stage (Index 0): main.
 Successfully created graphics pipeline!
 Successfully created mesh pipeline!
 Created a window with size 2560 X 1026.
-
-Color Attachment Ref ID: 2
-Name for shader stage (Index 0): main.
 
 Address for Vulkan Render Pass: EC4BEC000000000B.
 
@@ -80,4 +74,11 @@ Started command recording!
 Ended command recording!
 
 Successfully submitted item to queue!
+
+Address for Vulkan debug callback: 00007FFAE7AE17C0. Debug callback successful![vulkan] Debug report from ObjectType: 1
+Message: 
+
+Validation Error: [ VUID-VkSubmitInfo-pSignalSemaphores-parameter ] Object 0: handle = 0x1d6f7e730d0, type = VK_OBJECT_TYPE_INSTANCE; 
+ MessageID = 0xb108ab13 
+ Invalid VkSemaphore Object 0xcccccccccccccccc. The Vulkan spec states: If signalSemaphoreCount is not 0, pSignalSemaphores must be a valid pointer to an array of signalSemaphoreCount valid VkSemaphore handles (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSubmitInfo-pSignalSemaphores-parameter)
 

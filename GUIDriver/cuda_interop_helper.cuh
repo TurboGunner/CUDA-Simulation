@@ -10,20 +10,12 @@
 //Logging
 #include "../CUDATest/handler_classes.hpp"
 
-#include "windows_security_attributes.h"
+#include "windows_security_attributes.hpp"
 
 #include <vulkan/vulkan.h>
 
 #ifdef _WIN64
-#include <aclapi.h>
-#include <dxgi1_2.h>
-#include <ntdef.h>
-#include <sddl.h>
-#include <VersionHelpers.h>
 #include <vulkan/vulkan_win32.h>
-#include <windows.h>
-#include <winternl.h>
-
 typedef HANDLE ShareableHandle;
 #else
 typedef int ShareableHandle;
@@ -38,18 +30,6 @@ using std::vector;
 
 enum OperatingSystem { WINDOWS_MODERN, WINDOWS_OLD, LINUX };
 
-unordered_map<OperatingSystem, VkExternalSemaphoreHandleTypeFlagBits> semaphore_handle_map = {
-	{ WINDOWS_MODERN, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT },
-	{ WINDOWS_OLD, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
-	{ LINUX, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT }
-};
-
-unordered_map<OperatingSystem, VkExternalMemoryHandleTypeFlagBits> memory_handle_map = {
-	{ WINDOWS_MODERN, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT },
-	{ WINDOWS_OLD, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
-	{ LINUX, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT }
-};
-
 struct CrossMemoryHandle {
 	CUmemGenericAllocationHandle cuda_handle_;
 	ShareableHandle shareable_handle_;
@@ -61,6 +41,8 @@ struct CrossMemoryHandle {
 
 class CudaInterop {
 public:
+	CudaInterop() = default;
+
 	CudaInterop(VkDevice& device_in, VkPhysicalDevice& phys_device_in);
 
 	VkExternalSemaphoreHandleTypeFlagBits GetPlatformSemaphoreHandle();
@@ -114,7 +96,11 @@ public:
 
 	CUresult Clean();
 
+	void InteropDeviceExtensions();
+
 	int IPCCloseShareableHandle(ShareableHandle sh_handle);
+
+	cudaError_t InitializeCudaInterop(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
@@ -129,8 +115,23 @@ public:
 	size_t total_alloc_size_ = 0;
 
 	cudaStream_t cuda_stream_;
+	vector<const char*> interop_device_extensions_;
+
+	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
 
 	int cuda_device_ = -1;
 
 	OperatingSystem os_;
+
+	unordered_map<OperatingSystem, VkExternalSemaphoreHandleTypeFlagBits> semaphore_handle_map = {
+	{ WINDOWS_MODERN, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT },
+	{ WINDOWS_OLD, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
+	{ LINUX, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT }
+	};
+
+	unordered_map<OperatingSystem, VkExternalMemoryHandleTypeFlagBits> memory_handle_map = {
+		{ WINDOWS_MODERN, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT },
+		{ WINDOWS_OLD, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
+		{ LINUX, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT }
+	};
 };

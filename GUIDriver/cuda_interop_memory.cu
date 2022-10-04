@@ -1,5 +1,9 @@
 #include "cuda_interop_helper.cuh"
 
+#ifdef _WIN64
+#include <dxgi1_2.h>
+#endif
+
 VkExternalMemoryHandleTypeFlagBits CudaInterop::GetPlatformMemoryHandle() {
 	return memory_handle_map[os_];
 }
@@ -167,6 +171,7 @@ void* CudaInterop::GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternal
 }
 
 cudaError_t CudaInterop::ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize& size, const VkExternalMemoryHandleTypeFlagBits& handle_type) {
+	cudaError_t cuda_status = cudaSuccess;
 	VkResult vulkan_status = VK_SUCCESS;
 
 	cudaExternalMemoryHandleDesc external_memory_handle_desc = {};
@@ -192,4 +197,16 @@ cudaError_t CudaInterop::ImportCudaExternalMemory(void** cuda_ptr, cudaExternalM
 	else {
 		external_memory_handle_desc.handle.fd = (int) (uintptr_t) GetMemoryHandle(buffer_memory, handle_type);
 	}
+
+	cuda_status = cudaImportExternalMemory(&cuda_memory, &external_memory_handle_desc);
+
+	cudaExternalMemoryBufferDesc external_mem_buffer_desc = {};
+
+	external_mem_buffer_desc.offset = 0;
+	external_mem_buffer_desc.size = size;
+	external_mem_buffer_desc.flags = 0;
+
+	cuda_status = cudaExternalMemoryGetMappedBuffer(cuda_ptr, cuda_memory, &external_mem_buffer_desc);
+
+	return cuda_status;
 }

@@ -1,5 +1,9 @@
 #include "cuda_interop_helper.cuh"
 
+#ifdef _WIN64
+#include <dxgi1_2.h>
+#endif
+
 VkExternalSemaphoreHandleTypeFlagBits CudaInterop::GetPlatformSemaphoreHandle() {
 	return semaphore_handle_map[os_];
 }

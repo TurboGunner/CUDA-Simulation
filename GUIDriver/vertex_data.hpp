@@ -29,183 +29,49 @@ struct VectorHash {
 struct Vertex {
     __host__ __device__ Vertex() = default;
 
-    __host__ __device__ Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b, float n_x = 0.0f, float n_y = 0.0f, float n_z = 0.0f) {
-        pos = glm::vec3(pos_x, pos_y, pos_z);
-        color = glm::vec3(r, g, b);
-        glm::vec3(n_x, n_y, n_z);
-    }
+    __host__ __device__ Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b, float n_x = 0.0f, float n_y = 0.0f, float n_z = 0.0f);
+
+    void RGBAdjust(float r, float g, float b, float size = 255.0f);
+
+    static vector<VkVertexInputBindingDescription> GetBindingDescription();
+
+    static vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
+
+    Vertex& operator=(const Vertex& copy);
+
+    bool operator==(Vertex const& compare);
 
     glm::vec3 pos;
     glm::vec3 normal;
     glm::vec3 color;
-
-    void RGBAdjust(float r, float g, float b, float size = 255.0f) {
-        if (size <= 0.0f) {
-            ProgramLog::OutputLine("Invalid input size of " + std::to_string(size) + "! Must be greater than 0.");
-            return;
-        }
-
-        if ((r > size || g > size || b > size) && (r < 0 || g < 0 || b < 0)) {
-            s_stream << "Invalid input size of color (" << r << ", " << g << ", " << b << ")! Must be greater than 0 and less than size.";
-            ProgramLog::OutputLine(s_stream);
-            return;
-        }
-
-        size = int(size);
-
-        r /= size;
-        g /= size;
-        b /= size;
-
-        color = glm::vec3(r, g, b);
-    }
-
-    static vector<VkVertexInputBindingDescription> GetBindingDescription() {
-        VkVertexInputBindingDescription binding_description = {};
-
-        binding_description.binding = 0;
-        binding_description.stride = sizeof(Vertex);
-        binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-        return { binding_description };
-    }
-
-    static vector<VkVertexInputAttributeDescription> GetAttributeDescriptions() {
-        vector<VkVertexInputAttributeDescription> attribute_descriptions;
-
-        VkVertexInputAttributeDescription pos_description = {};
-        pos_description.binding = 0;
-        pos_description.location = 0;
-        pos_description.format = VK_FORMAT_R32G32_SFLOAT;
-        pos_description.offset = offsetof(Vertex, pos);
-
-        VkVertexInputAttributeDescription normal_description = {};
-        normal_description.binding = 0;
-        normal_description.location = 1;
-        normal_description.format = VK_FORMAT_R32G32B32_SFLOAT;
-        normal_description.offset = offsetof(Vertex, normal);
-
-        VkVertexInputAttributeDescription color_description = {};
-        color_description.binding = 0;
-        color_description.location = 2;
-        color_description.format = VK_FORMAT_R32G32B32_SFLOAT;
-        color_description.offset = offsetof(Vertex, color);
-
-        attribute_descriptions.insert(attribute_descriptions.end(), { pos_description, normal_description, color_description });
-
-        return attribute_descriptions;
-    }
-
-    Vertex& operator=(const Vertex& copy) {
-        pos = copy.pos;
-        color = copy.color;
-
-        return *this;
-    }
-
-    bool operator==(Vertex const& compare) {
-        bool pos_check = pos.x == compare.pos.x && pos.y == compare.pos.y && pos.z == compare.pos.z;
-        bool color_check = color.x == compare.color.x && color.y == compare.color.y && color.z == compare.color.z;
-        bool normal_check = normal.x == compare.normal.x && normal.y == compare.normal.y && normal.z == compare.normal.z;
-
-        return pos_check && color_check && normal_check;
-    }
 };
 
 
 class MeshContainer {
 public:
-    MeshContainer(const bool& collision_mode = false) {
-        collision = collision_mode;
-    }
+    MeshContainer(const bool& collision_mode = false);
 
-    void Push(Vertex& coord_in) {
-        if (!collision) {
-            vertices_.push_back(coord_in);
-            return;
-        }
-        bool collide = CollisionCheck(coord_in);
-        if (!collide) {
-            vertices_.push_back(coord_in);
-        }
-    }
+    void Push(Vertex& coord_in);
 
-    void Push(vector<Vertex>& coords_in) {
-        for (auto coord_in : coords_in) {
-            Push(coord_in);
-        }
-    }
+    void Push(vector<Vertex>& coords_in);
 
-    void Push(std::initializer_list<Vertex>& coords_in) {
-        for (auto coord_in : coords_in) {
-            Push(coord_in);
-        }
-    }
+    void Push(std::initializer_list<Vertex>& coords_in);
 
-    bool CollisionCheck(Vertex& coord_in) {
-        size_t original_size = vertices_.size();
-        map_.try_emplace(coord_in.pos, vertices_.size());
-        if (vertices_.size() == original_size) {
-            ProgramLog::OutputLine("Warning: Intersecting vertex!");
-            return true;
-        }
-        return false;
-    }
+    bool CollisionCheck(Vertex& coord_in);
 
-    Vertex& operator[](const int& index) {
-        return Get(index);
-    }
+    Vertex& operator[](const int& index);
 
-    Vertex& Get(const int& index) {
-        if (index < 0 || index >= vertices_.size()) {
-            ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
-            return vertices_[0];
-        }
-        return vertices_[index];
-    }
+    Vertex& Get(const int& index);
 
-    void Set(Vertex& index_coord, const unsigned int& index) {
-        if (index >= vertices_.size()) {
-            ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
-            return;
-        }
-        CollisionCheck(index_coord);
-        if (collision) {
-            map_.erase(vertices_[index].pos);
-            map_.try_emplace(index_coord.pos, index);
-        }
-        vertices_[index] = index_coord;
-    }
+    void Set(Vertex& index_coord, const unsigned int& index);
 
-    void Remove(const unsigned int& index) {
-        if (index >= vertices_.size()) {
-            ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
-            return;
-        }
-        if (collision) {
-            map_.erase(vertices_[index].pos);
-        }
-        vertices_.erase(vertices_.begin() + index);
-    }
+    void Remove(const unsigned int& index);
 
-    void Clear() {
-        vertices_.clear();
-        if (collision) {
-            map_.clear();
-        }
-        ProgramLog::OutputLine("Cleared mesh data successfully!");
-    }
+    void Clear();
 
-    const Vertex* Data() {
-        if (vertices_.size() == 0) {
-            ProgramLog::OutputLine("Warning: No vertices stored!");
-        }
-        return vertices_.data();
-    }
+    const Vertex* Data();
 
-    unsigned int Size() {
-        return vertices_.size();
-    }
+    unsigned int Size();
 
 private:
     vector<Vertex> vertices_;

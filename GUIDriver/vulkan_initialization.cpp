@@ -107,8 +107,13 @@ void VulkanGUIDriver::LoadPoolDescriptionProperties(VkDescriptorPoolCreateInfo& 
 }
 
 void VulkanGUIDriver::LogicalDeviceInitialization() {
-    int device_extension_count = 1;
-    const char* device_extensions[] = { "VK_KHR_swapchain" };
+    vector<const char*> device_extensions;
+    vector<const char*>& interop_device_extensions = interop_handler_.interop_device_extensions_;
+
+    device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+
+    device_extensions.insert(device_extensions.begin(), interop_device_extensions.begin(), interop_device_extensions.end());
+
     const float queue_priority[] = { 1.0f };
 
     VkDeviceQueueCreateInfo queue_info[1] = {};
@@ -122,8 +127,8 @@ void VulkanGUIDriver::LogicalDeviceInitialization() {
     instance_info_.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     instance_info_.queueCreateInfoCount = sizeof(queue_info) / sizeof(queue_info[0]);
     instance_info_.pQueueCreateInfos = queue_info;
-    instance_info_.enabledExtensionCount = device_extension_count;
-    instance_info_.ppEnabledExtensionNames = device_extensions;
+    instance_info_.enabledExtensionCount = device_extensions.size();
+    instance_info_.ppEnabledExtensionNames = device_extensions.data();
 
     vulkan_status = vkCreateDevice(physical_device_, &instance_info_, allocators_, &device_);
 

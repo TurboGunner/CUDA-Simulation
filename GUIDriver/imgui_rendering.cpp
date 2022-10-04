@@ -45,7 +45,7 @@ void VulkanGUIDriver::RunGUI() {
     surface_ = surface;
 
     int width, height;
-    CreateWindow(width, height, surface);
+    CreateGUIWindow(width, height, surface);
 
     bool exit_condition = false;
 
@@ -90,6 +90,7 @@ void VulkanGUIDriver::GUISetup() {
     sync_struct_ = SyncStruct(device_, MAX_FRAMES_IN_FLIGHT_);
     mesh_data_ = VertexData(device_, physical_device_, queue_, MAX_FRAMES_IN_FLIGHT_);
     mesh_viewport_ = MeshViewport(device_);
+    interop_handler_ = CudaInterop(device_, physical_device_);
 
     //Creating command pool
     vulkan_helper_.CreateCommandPool(command_pool_, queue_family_);
@@ -236,23 +237,25 @@ void VulkanGUIDriver::EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore
     vulkan_status = vkEndCommandBuffer(command_buffer);
     VulkanErrorHandler(vulkan_status);
 
+    //WIP!
     VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo info = {};
 
     info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    info.waitSemaphoreCount = 1;
-    info.pWaitSemaphores = &image_semaphore;
+    info.waitSemaphoreCount = sync_struct_.wait_semaphores_.size();
+    info.pWaitSemaphores = sync_struct_.wait_semaphores_.data();
 
-    info.pWaitDstStageMask = &wait_stage;
+    info.pWaitDstStageMask = sync_struct_.wait_stages_.data();
 
     info.commandBufferCount = 1;
     info.pCommandBuffers = &command_buffer;
 
-    info.signalSemaphoreCount = 1;
-    info.pSignalSemaphores = &render_semaphore;
+    info.signalSemaphoreCount = sync_struct_.signal_semaphores_.size();
+    info.pSignalSemaphores = sync_struct_.signal_semaphores_.data();
 
     vulkan_status = vkQueueSubmit(queue_, 1, &info, render_fences_[current_frame_]);
     VulkanErrorHandler(vulkan_status);
+    //WIP
 }
 
 void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
@@ -271,6 +274,18 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     vulkan_status = vkResetFences(device_, 1, &render_fences_[current_frame_]);
     VulkanErrorHandler(vulkan_status);
+
+    //WIP, maybe move order after Fence reset if it doesn't work
+
+    //Wait Semaphores (CUDA <-> Vulkan Sync)
+    sync_struct_.wait_semaphores_.push_back(image_semaphores_[current_frame_]);
+    sync_struct_.wait_stages_.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+    sync_struct_.GetWaitSemaphores(frame_index_);
+
+    sync_struct_.GetSignalFrameSemaphores();
+    sync_struct_.signal_semaphores_.push_back(render_semaphores_[frame_index_]);
+
+    //WIP
 
     ManageCommandBuffer(command_pool_, command_buffers_[current_frame_]);
 

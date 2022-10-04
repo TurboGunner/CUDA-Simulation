@@ -1,6 +1,6 @@
 #include "gui_driver.cuh"
 
-#include "../Renderer/raypath.cuh"
+//#include "../Renderer/raypath.cuh"
 
 #include "texture_loader.cuh"
 

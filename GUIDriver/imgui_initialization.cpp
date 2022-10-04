@@ -21,7 +21,7 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
     init_info.CheckVkResultFn = VulkanErrorHandler;
 }
 
-void VulkanGUIDriver::CreateWindow(int& width, int& height, VkSurfaceKHR& surface) {
+void VulkanGUIDriver::CreateGUIWindow(int& width, int& height, VkSurfaceKHR& surface) {
     SDL_GetWindowSize(window, &width, &height);
     SetupVulkanWindow(surface, width, height);
 }
@@ -81,7 +81,7 @@ void VulkanGUIDriver::ManageCommandBuffer(VkCommandPool& command_pool, VkCommand
 
 void VulkanGUIDriver::InitializeVulkan() {
     uint32_t ext_count = 0;
-    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, NULL);
+    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, nullptr);
 
     const char** extensions = new const char* [ext_count];
     SDL_Vulkan_GetInstanceExtensions(window, &ext_count, extensions);
