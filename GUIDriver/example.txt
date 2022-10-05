@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFB075D17C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFB02AD17C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -75,23 +75,23 @@ Ended command recording!
 
 Successfully submitted item to queue!
 
-Address for Vulkan debug callback: 00007FFB075D17C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
+Address for Vulkan debug callback: 00007FFB02AD17C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x215257d6970, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x1bc88c4e0c0, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 
-Address for Vulkan debug callback: 00007FFB075D17C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
+Address for Vulkan debug callback: 00007FFB02AD17C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x215257d6970, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x1bc88c4e0c0, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 [vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x215257d6970, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x1bc88c4e0c0, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 

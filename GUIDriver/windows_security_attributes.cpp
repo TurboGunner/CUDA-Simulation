@@ -50,7 +50,7 @@ WindowsSecurityAttributes::~WindowsSecurityAttributes() {
     if (*security_id_double_ptr) {
         FreeSid(*security_id_double_ptr);
     }
-    if (*ppACL) {
+    if (ppACL && *ppACL) {
         LocalFree(*ppACL);
     }
     free(win_psecurity_descriptor_);

@@ -44,12 +44,14 @@ VkResult CudaInterop::CreateExternalBuffer(const VkDeviceSize& size, const VkBuf
 }
 
 VkExportMemoryWin32HandleInfoKHR CudaInterop::ExportMemoryHandleWin32() {
+	WindowsSecurityAttributes win_security_attributes;
+
 	VkExportMemoryWin32HandleInfoKHR vulkan_export_memory_win32_info = {};
 
 	vulkan_export_memory_win32_info.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
 	vulkan_export_memory_win32_info.pNext = nullptr;
 
-	vulkan_export_memory_win32_info.pAttributes = &win_security_attributes_;
+	vulkan_export_memory_win32_info.pAttributes = &win_security_attributes;
 	vulkan_export_memory_win32_info.dwAccess = DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE;
 	vulkan_export_memory_win32_info.name = (LPCWSTR) nullptr;
 

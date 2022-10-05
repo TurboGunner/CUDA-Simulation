@@ -28,12 +28,14 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 }
 
 VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32() {
+	WindowsSecurityAttributes win_security_attributes;
+
 	VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = {};
 
 	export_semaphore_win32_handle.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
 	export_semaphore_win32_handle.pNext = nullptr;
 
-	export_semaphore_win32_handle.pAttributes = &win_security_attributes_;
+	export_semaphore_win32_handle.pAttributes = &win_security_attributes;
 	export_semaphore_win32_handle.dwAccess = DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE;
 
 	export_semaphore_win32_handle.name = (LPCWSTR) nullptr;

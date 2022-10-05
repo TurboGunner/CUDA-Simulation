@@ -65,9 +65,9 @@ void VulkanGUIDriver::GUISetup() {
     vulkan_status = vulkan_parameters_.InitVulkanStage2();
 
     //Font Renderer
-    VkCommandBuffer command_buffer = BeginSingleTimeCommands();
+    VkCommandBuffer command_buffer = vulkan_parameters_.BeginSingleTimeCommands();
     ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-    EndSingleTimeCommands(command_buffer);
+    vulkan_parameters_.EndSingleTimeCommands(command_buffer);
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
@@ -136,6 +136,7 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
     VkRenderPassBeginInfo info = {};
 
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+
     info.renderPass = vulkan_parameters_.render_pass_;
     info.framebuffer = frame_buffer;
 
@@ -151,9 +152,8 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
 
     vulkan_parameters_.mesh_data_.BindPipeline(command_buffer, vulkan_parameters_.command_pool_);
 
-    auto& descriptor_helper = vulkan_parameters_.shader_handler_.descriptor_set_handler_;
     //uint32_t uniform_offset = BufferHelpers::PadUniformBufferSize(device_properties_, frame_index_);
-    vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_parameters_.mesh_pipeline_layout_, 0, 1, &descriptor_helper.global_descriptors_[vulkan_parameters_.current_frame_], 0, nullptr);
+    vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_parameters_.mesh_pipeline_layout_, 0, 1, &vulkan_parameters_.CurrentDescriptorSet(), 0, nullptr);
 }
 
 void VulkanGUIDriver::EndRenderPass() {
@@ -168,16 +168,16 @@ void VulkanGUIDriver::EndRenderPass() {
     VkSubmitInfo info = {};
 
     info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    info.waitSemaphoreCount = vulkan_parameters_.sync_struct_.wait_semaphores_.size();
-    info.pWaitSemaphores = vulkan_parameters_.sync_struct_.wait_semaphores_.data();
+    info.waitSemaphoreCount = vulkan_parameters_.WaitSemaphores().size();
+    info.pWaitSemaphores = vulkan_parameters_.WaitSemaphores().data();
 
-    info.pWaitDstStageMask = vulkan_parameters_.sync_struct_.wait_stages_.data();
+    info.pWaitDstStageMask = vulkan_parameters_.WaitStages().data();
 
     info.commandBufferCount = 1;
     info.pCommandBuffers = &in_flight_command_buffer;
 
-    info.signalSemaphoreCount = vulkan_parameters_.sync_struct_.signal_semaphores_.size();
-    info.pSignalSemaphores = vulkan_parameters_.sync_struct_.signal_semaphores_.data();
+    info.signalSemaphoreCount = vulkan_parameters_.SignalSemaphores().size();
+    info.pSignalSemaphores = vulkan_parameters_.SignalSemaphores().data();
 
     vulkan_status = vkQueueSubmit(queue_, 1, &info, vulkan_parameters_.InFlightFence());
     VulkanErrorHandler(vulkan_status);
@@ -228,7 +228,7 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     StartRenderPass(in_flight_command_buffer, current_swapchain_buffer);
 
-    auto constants = vulkan_parameters_.mesh_viewport_.ViewportRotation(vulkan_parameters_.frame_index_, vulkan_parameters_.current_frame_, vulkan_parameters_.shader_handler_.descriptor_set_handler_);
+    auto constants = vulkan_parameters_.ViewportRotation();
 
     vkCmdPushConstants(in_flight_command_buffer, vulkan_parameters_.mesh_pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
 
@@ -243,12 +243,4 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     //Note!
     EndRenderPass();
-}
-
-VkCommandBuffer VulkanGUIDriver::BeginSingleTimeCommands() {
-    return VulkanHelper::BeginSingleTimeCommands(device_, vulkan_parameters_.command_pool_);
-}
-
-void VulkanGUIDriver::EndSingleTimeCommands(VkCommandBuffer& command_buffer) {
-    VulkanHelper::EndSingleTimeCommands(command_buffer, device_, vulkan_parameters_.command_pool_, queue_);
 }

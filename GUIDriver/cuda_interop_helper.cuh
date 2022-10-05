@@ -31,12 +31,18 @@ using std::vector;
 enum OperatingSystem { WINDOWS_MODERN, WINDOWS_OLD, LINUX };
 
 struct CrossMemoryHandle {
-	CUmemGenericAllocationHandle cuda_handle_;
-	ShareableHandle shareable_handle_;
+	CUmemGenericAllocationHandle cuda_handle;
+	ShareableHandle shareable_handle;
 
-	size_t size_;
-	size_t granularity_size_;
 	void* vulkan_ptr = nullptr;
+
+	VkDeviceSize TotalAllocationSize() const {
+		return size * type_size;
+	}
+
+	size_t size;
+	size_t granularity_size;
+	size_t type_size;
 };
 
 class CudaInterop {
@@ -84,7 +90,7 @@ public:
 
 	void CalculateTotalMemorySize(const size_t& granularity);
 
-	void AddMemoryHandle(const size_t& size);
+	void AddMemoryHandle(const size_t& size, const size_t& type_size);
 
 	cudaError_t CreateStream(const unsigned int& flags = cudaStreamNonBlocking);
 
@@ -102,14 +108,14 @@ public:
 
 	cudaError_t InitializeCudaInterop(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
+	bool IsVkPhysicalDeviceUUID(void* uuid);
+
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
 
 	CUmemAllocationHandleType ipc_handle_type_flag_;
 	CUmemAllocationProp current_alloc_prop_ = {};
 	CUmemAccessDesc access_descriptor_ = {};
-
-	WindowsSecurityAttributes win_security_attributes_;
 
 	vector<CrossMemoryHandle> cross_memory_handles_;
 	size_t total_alloc_size_ = 0;
@@ -119,7 +125,8 @@ public:
 
 	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
 
-	int cuda_device_ = -1;
+	int cuda_device_ = -1, device_count_ = 0;
+	uint8_t vk_device_uuid_[VK_UUID_SIZE];
 
 	OperatingSystem os_;
 

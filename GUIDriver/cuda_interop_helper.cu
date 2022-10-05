@@ -6,7 +6,6 @@
 #include <sddl.h>
 #endif
 
-
 CudaInterop::CudaInterop(VkDevice& device_in, VkPhysicalDevice& phys_device_in) {
     device_ = device_in;
     phys_device_ = phys_device_in;
@@ -23,7 +22,13 @@ CudaInterop::CudaInterop(VkDevice& device_in, VkPhysicalDevice& phys_device_in) 
         ipc_handle_type_flag_ = CU_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR;
     }
 
-    cudaError_t cuda_status = cudaGetDevice(&cuda_device_);
+    cudaError_t cuda_status = cudaGetDeviceCount(&device_count_);
+
+    if (device_count_ > 1) {
+        ProgramLog::OutputLine("Warning: There are multiple CUDA devices!");
+    }
+
+    cuda_status = cudaGetDevice(&cuda_device_);
 }
 
 void CudaInterop::GetDefaultSecurityDescriptor(CUmemAllocationProp* prop) {
@@ -58,17 +63,19 @@ void CudaInterop::CalculateTotalMemorySize(const size_t& granularity) {
     total_alloc_size_ = 0;
 
     for (auto& mem_handle : cross_memory_handles_) {
-        size_t current_granularity_size = RoundWarpGranularity(mem_handle.size_, granularity);
+        size_t current_granularity_size = RoundWarpGranularity(mem_handle.size, granularity);
         total_alloc_size_ += current_granularity_size;
-        mem_handle.granularity_size_ = current_granularity_size;
+        mem_handle.granularity_size = current_granularity_size;
     }
 }
 
-void CudaInterop::AddMemoryHandle(const size_t& size) {  //NOTE: ALLOCATE STRUCT WITH SIZE
+void CudaInterop::AddMemoryHandle(const size_t& size, const size_t& type_size) {  //NOTE: ALLOCATE STRUCT WITH SIZE
     CUmemGenericAllocationHandle cuda_position_handle;
     ShareableHandle position_shareable_handle;
+
     //WIP
-    CrossMemoryHandle position_handle = { cuda_position_handle, position_shareable_handle, size };
+
+    CrossMemoryHandle position_handle = { cuda_position_handle, position_shareable_handle, nullptr, size, 0, type_size };
     cross_memory_handles_.push_back(position_handle);
 }
 
@@ -111,16 +118,16 @@ cudaError_t CudaInterop::SimulationSetup() {
 
     cuda_result = cuMemAddressReserve(&d_ptr, total_alloc_size_, granularity, 0U, 0);
 
-    cuda_result = cuMemCreate(&cross_memory_handles_[0].cuda_handle_, cross_memory_handles_[0].granularity_size_, &current_alloc_prop_, 0);
+    cuda_result = cuMemCreate(&cross_memory_handles_[0].cuda_handle, cross_memory_handles_[0].granularity_size, &current_alloc_prop_, 0);
 
-    cuda_result = cuMemExportToShareableHandle((void*)&cross_memory_handles_[0].shareable_handle_, cross_memory_handles_[0].cuda_handle_, ipc_handle_type_flag_, 0);
+    cuda_result = cuMemExportToShareableHandle((void*)&cross_memory_handles_[0].shareable_handle, cross_memory_handles_[0].cuda_handle, ipc_handle_type_flag_, 0);
 
     CUdeviceptr va_position = d_ptr; //NOTE: When having other pointers, this will adding the offsets in order to properly account for fitting into the contiguous VA range.
     cross_memory_handles_[0].vulkan_ptr = (void*)va_position;
 
-    cuda_result = cuMemMap(va_position, cross_memory_handles_[0].size_, 0, cross_memory_handles_[0].cuda_handle_, 0);
+    cuda_result = cuMemMap(va_position, cross_memory_handles_[0].size, 0, cross_memory_handles_[0].cuda_handle, 0);
 
-    cuda_result = cuMemRelease(cross_memory_handles_[0].cuda_handle_);
+    cuda_result = cuMemRelease(cross_memory_handles_[0].cuda_handle);
 
     MemoryAccessDescriptor();
 
@@ -137,7 +144,7 @@ CUresult CudaInterop::Clean() {
         }
     }
 
-    IPCCloseShareableHandle(cross_memory_handles_[0].shareable_handle_);
+    IPCCloseShareableHandle(cross_memory_handles_[0].shareable_handle);
 
     cuda_result = cuMemAddressFree((CUdeviceptr) cross_memory_handles_[0].vulkan_ptr, total_alloc_size_);
 
@@ -152,12 +159,12 @@ cudaError_t CudaInterop::InitializeCudaInterop(VkBuffer& buffer, VkDeviceMemory&
     cudaError_t cuda_status = cudaSuccess;
     VkResult vulkan_status = VK_SUCCESS;
 
-    cuda_status = cudaStreamCreateWithFlags(&cuda_stream_, cudaStreamNonBlocking);
+    cuda_status = CreateStream();
     cuda_status = SimulationSetup();
 
-    VkDeviceSize alloc_size = cross_memory_handles_[0].size_; //NOTE: MULTIPLY BY VECTOR3D ONCE HOOKED
+    VkDeviceSize alloc_size = cross_memory_handles_[0].TotalAllocationSize();
     auto mem_handle_type = GetPlatformMemoryHandle();
-    void* mem_handle = (void*) (uintptr_t) &cross_memory_handles_[0].shareable_handle_;
+    void* mem_handle = (void*) (uintptr_t) &cross_memory_handles_[0].shareable_handle;
 
     vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer, buffer_memory);
 
@@ -184,4 +191,8 @@ void CudaInterop::InteropDeviceExtensions() {
         interop_device_extensions_.push_back(VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME);
         interop_device_extensions_.push_back(VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME);
     }
+}
+
+bool CudaInterop::IsVkPhysicalDeviceUUID(void* uuid) {
+    return !memcmp((void*) vk_device_uuid_, uuid, (size_t) VK_UUID_SIZE);
 }

@@ -125,3 +125,59 @@ void VulkanParameters::CleanInitStructs() {
 	render_pass_initializer_.Clean();
 	mesh_data_.Clean();
 }
+
+VkSemaphore& VulkanParameters::InFlightImageSemaphore() {
+	return image_semaphores_[current_frame_];
+}
+
+VkSemaphore& VulkanParameters::InFlightRenderSemaphore() {
+	return render_semaphores_[current_frame_];
+}
+
+VkFence& VulkanParameters::InFlightFence() {
+	return render_fences_[current_frame_];
+}
+
+VkCommandBuffer& VulkanParameters::InFlightCommandBuffer() {
+	return command_buffers_[current_frame_];
+}
+
+InFlightObjects VulkanParameters::InFlightAll() {
+	return { InFlightImageSemaphore(), InFlightRenderSemaphore(), InFlightFence(), InFlightCommandBuffer() };
+}
+
+VkFramebuffer& VulkanParameters::CurrentSwapchainFrameBuffer() {
+	return swap_chain_helper_.frame_buffers_[image_index_];
+}
+
+DescriptorSetHandler& VulkanParameters::DescriptorSetHandler() {
+	return shader_handler_.descriptor_set_handler_;
+}
+
+VkDescriptorSet& VulkanParameters::CurrentDescriptorSet() {
+	return DescriptorSetHandler().global_descriptors_[current_frame_];
+}
+
+VkCommandBuffer VulkanParameters::BeginSingleTimeCommands() {
+	return VulkanHelper::BeginSingleTimeCommands(device_, command_pool_);
+}
+
+void VulkanParameters::EndSingleTimeCommands(VkCommandBuffer& command_buffer) {
+	VulkanHelper::EndSingleTimeCommands(command_buffer, device_, command_pool_, queue_);
+}
+
+vector<VkSemaphore>& VulkanParameters::WaitSemaphores() {
+	return sync_struct_.wait_semaphores_;
+}
+
+vector<VkSemaphore>& VulkanParameters::SignalSemaphores() {
+	return sync_struct_.signal_semaphores_;
+}
+
+vector<VkPipelineStageFlags>& VulkanParameters::WaitStages() {
+	return sync_struct_.wait_stages_;
+}
+
+MeshPushConstants VulkanParameters::ViewportRotation() {
+	return mesh_viewport_.ViewportRotation(frame_index_, current_frame_, DescriptorSetHandler());
+}

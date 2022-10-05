@@ -40,31 +40,35 @@ public:
 
 	VkResult InitVulkanStage2();
 
-	VkSemaphore InFlightImageSemaphore() {
-		return image_semaphores_[current_frame_];
-	}
+	VkSemaphore& InFlightImageSemaphore();
 
-	VkSemaphore InFlightRenderSemaphore() {
-		return render_semaphores_[current_frame_];
-	}
+	VkSemaphore& InFlightRenderSemaphore();
 
-	VkFence InFlightFence() {
-		return render_fences_[current_frame_];
-	}
+	VkFence& InFlightFence();
 
-	VkCommandBuffer InFlightCommandBuffer() {
-		return command_buffers_[current_frame_];
-	}
+	VkCommandBuffer& InFlightCommandBuffer();
 
-	InFlightObjects InFlightAll() {
-		return { InFlightImageSemaphore(), InFlightRenderSemaphore(), InFlightFence(), InFlightCommandBuffer() };
-	}
+	InFlightObjects InFlightAll();
 
-	VkFramebuffer CurrentSwapchainFrameBuffer() {
-		return swap_chain_helper_.frame_buffers_[image_index_];
-	}
+	VkFramebuffer& CurrentSwapchainFrameBuffer();
+
+	DescriptorSetHandler& DescriptorSetHandler();
+
+	VkDescriptorSet& CurrentDescriptorSet();
+
+	VkCommandBuffer BeginSingleTimeCommands();
+
+	void EndSingleTimeCommands(VkCommandBuffer& command_buffer);
 
 	void CleanInitStructs();
+
+	vector<VkSemaphore>& WaitSemaphores();
+
+	vector<VkSemaphore>& SignalSemaphores();
+
+	vector<VkPipelineStageFlags>& WaitStages();
+
+	MeshPushConstants ViewportRotation();
 
 	VkDevice device_;
 	VkPhysicalDevice physical_device_;

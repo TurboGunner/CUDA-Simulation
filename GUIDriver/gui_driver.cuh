@@ -160,10 +160,6 @@ public:
 
     void MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
 
-    VkCommandBuffer BeginSingleTimeCommands();
-
-    void EndSingleTimeCommands(VkCommandBuffer& command_buffer);
-
     void SwapChainCondition();
 
     void CreateMenuBar();
