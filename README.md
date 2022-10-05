@@ -96,9 +96,9 @@ Stabilize LBM further.
 
 Perform more tests and rigorous quality control checks in regards to accuracy.
 
-Get a meshing system.
+Hook up CUDA to Vulkan interop successfully with MLS-MPM.
 
-Likely add MLS-MPM.
+Have UI control simulation parameters.
 
 ## Relevant Papers Used:
 
