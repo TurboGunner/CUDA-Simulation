@@ -108,7 +108,7 @@ void VulkanGUIDriver::LoadPoolDescriptionProperties(VkDescriptorPoolCreateInfo& 
 
 void VulkanGUIDriver::LogicalDeviceInitialization() {
     vector<const char*> device_extensions;
-    vector<const char*>& interop_device_extensions = interop_handler_.interop_device_extensions_;
+    vector<const char*>& interop_device_extensions = vulkan_parameters_.interop_handler_.interop_device_extensions_;
 
     device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 

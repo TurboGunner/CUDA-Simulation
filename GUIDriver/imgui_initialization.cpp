@@ -8,12 +8,12 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
     init_info.QueueFamily = queue_family_;
     init_info.Queue = queue_;
 
-    init_info.PipelineCache = pipeline_cache_;
+    init_info.PipelineCache = vulkan_parameters_.pipeline_cache_;
 
     init_info.DescriptorPool = descriptor_pool_;
 
     init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT_;
-    init_info.ImageCount = swap_chain_helper_.swapchain_images_.size();
+    init_info.ImageCount = vulkan_parameters_.swap_chain_helper_.swapchain_images_.size();
 
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -27,33 +27,35 @@ void VulkanGUIDriver::CreateGUIWindow(int& width, int& height, VkSurfaceKHR& sur
 }
 
 void VulkanGUIDriver::FramePresent() {
-    if (swap_chain_rebuilding_) {
+    if (vulkan_parameters_.swap_chain_rebuilding_) {
         return;
     }
+
+    VkSemaphore in_flight_render_semaphore = vulkan_parameters_.InFlightRenderSemaphore();
 
     VkPresentInfoKHR info = {};
 
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
     info.waitSemaphoreCount = 1;
-    info.pWaitSemaphores = &render_semaphores_[current_frame_];
+    info.pWaitSemaphores = &in_flight_render_semaphore;
 
     info.swapchainCount = 1;
 
-    info.pSwapchains = &swap_chain_;
-    info.pImageIndices = &image_index_;
+    info.pSwapchains = &vulkan_parameters_.swap_chain_;
+    info.pImageIndices = &vulkan_parameters_.image_index_;
 
-    vulkan_status = vkQueuePresentKHR(queue_, &info);
+    vulkan_status = vkQueuePresentKHR(vulkan_parameters_.queue_, &info);
     if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
-        swap_chain_rebuilding_ = true;
+        vulkan_parameters_.swap_chain_rebuilding_ = true;
         return;
     }
     VulkanErrorHandler(vulkan_status);
-    current_frame_ = (current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT_;
+    vulkan_parameters_.current_frame_ = (vulkan_parameters_.current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT_;
 }
 
 void VulkanGUIDriver::SwapChainCondition() {
-    if (!swap_chain_rebuilding_) {
+    if (!vulkan_parameters_.swap_chain_rebuilding_) {
         return;
     }
     int width, height;
@@ -61,10 +63,10 @@ void VulkanGUIDriver::SwapChainCondition() {
 
     if (width > 0 && height > 0) {
         ImGui_ImplVulkan_SetMinImageCount(min_image_count_);
-        swap_chain_rebuilding_ = false;
+        vulkan_parameters_.swap_chain_rebuilding_ = false;
     }
 
-    swap_chain_helper_.RecreateSwapChain(render_pass_, command_pool_);
+    vulkan_parameters_.swap_chain_helper_.RecreateSwapChain(vulkan_parameters_.render_pass_, vulkan_parameters_.command_pool_);
 }
 
 void VulkanGUIDriver::ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer) {

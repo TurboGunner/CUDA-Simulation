@@ -26,23 +26,27 @@ void VertexData::BindPipeline(VkCommandBuffer& command_buffer, VkCommandPool& co
     vkCmdBindIndexBuffer(command_buffer, index_buffer_, 0, VK_INDEX_TYPE_UINT16);
 }
 
-void VertexData::Initialize(VkCommandPool& command_pool) {
+VkResult VertexData::Initialize(VkCommandPool& command_pool) {
+    VkResult vulkan_status = VK_SUCCESS;
+
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
 
     //Staging Buffer
-    BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size_, staging_buffer, staging_buffer_memory);
+    vulkan_status = BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size_, staging_buffer, staging_buffer_memory);
 
     void* data = BufferHelpers::MapMemory(device_, vertices.Data(), size_, staging_buffer_memory);
 
     //Vertex Buffer
-    BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size_, vertex_buffer_, vertex_buffer_memory_);
+    vulkan_status = BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size_, vertex_buffer_, vertex_buffer_memory_);
 
-    BufferHelpers::CopyBuffer(device_, queue_, command_pool, staging_buffer, vertex_buffer_, size_);
+    vulkan_status = BufferHelpers::CopyBuffer(device_, queue_, command_pool, staging_buffer, vertex_buffer_, size_);
 
     //Destroying Staging Buffer
     vkDestroyBuffer(device_, staging_buffer, nullptr);
     vkFreeMemory(device_, staging_buffer_memory, nullptr);
+
+    return vulkan_status;
 }
 
 VkResult VertexData::InitializeIndex(VkCommandPool& command_pool) {

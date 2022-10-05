@@ -2,14 +2,13 @@
 
 #define NOMINMAX
 
-#include "vulkan_parameters.hpp"
+#include <cuda_runtime.h>
+#include "device_launch_parameters.h"
+
 #include "vulkan_helpers.hpp"
 #include "image_helpers.hpp"
 
 #include "../CUDATest/handler_classes.hpp"
-
-#include <cuda_runtime.h>
-#include "device_launch_parameters.h"
 
 #include <vulkan/vulkan.h>
 

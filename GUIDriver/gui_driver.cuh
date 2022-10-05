@@ -18,6 +18,8 @@
 #include "vulkan_helpers.hpp"
 #include "image_helpers.hpp"
 
+#include "vulkan_parameters.hpp"
+
 //Logging
 #include "../CUDATest/handler_classes.hpp"
 
@@ -138,7 +140,7 @@ public:
 
     void SelectGPU();
 
-    void SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height);
+    VkResult SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height);
 
     void CleanupVulkan();
 
@@ -148,7 +150,7 @@ public:
 
     void StartRenderPass(VkCommandBuffer& command_buffer, VkFramebuffer& frame_buffer);
 
-    void EndRenderPass(VkCommandBuffer& command_buffer, VkSemaphore& image_semaphore, VkSemaphore& render_semaphore);
+    void EndRenderPass();
 
     void FramePresent();
 
@@ -178,19 +180,9 @@ public:
 
     void GUISetup();
 
-    //TextureLoader texture_handler_;
-    ShaderLoader shader_handler_;
-    VulkanHelper vulkan_helper_;
-    SwapChainProperties swap_chain_helper_;
-    SyncStruct sync_struct_;
-    RenderPassInitializer render_pass_initializer_;
-    VertexData mesh_data_;
-    MeshViewport mesh_viewport_;
-    CudaInterop interop_handler_;
+    VulkanParameters vulkan_parameters_;
 
     VkPhysicalDeviceProperties device_properties_;
-
-    tuple<VkImageView, VkSampler> image_alloc_;
 
     VkInstance               instance_ = VK_NULL_HANDLE;
     VkInstanceCreateInfo     instance_info_ = {};
@@ -199,31 +191,13 @@ public:
 
     //Queuing
     uint32_t queue_family_ = (uint32_t) - 1;
-    VkQueue                  queue_ = VK_NULL_HANDLE;
-
-    VkPipelineCache          pipeline_cache_ = VK_NULL_HANDLE;
-    VkPipelineLayout         mesh_pipeline_layout_ = VK_NULL_HANDLE;
+    VkQueue queue_ = VK_NULL_HANDLE;
 
     //Descriptor Pool
     VkDescriptorPoolCreateInfo pool_info_ = {};
-    VkDescriptorPool         descriptor_pool_ = VK_NULL_HANDLE;
+    VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;
 
-    uint32_t                 min_image_count_ = 2;
-    bool                     swap_chain_rebuilding_ = false;
-
-    VkViewport viewport_;
-    VkRect2D scissor_;
-
-    VkExtent2D extent_;
-
-    VkRenderPass render_pass_;
-
-    VkCommandPool command_pool_;
-    vector<VkCommandBuffer> command_buffers_, imgui_buffers_;
-
-    VkSwapchainKHR swap_chain_;
-
-    uint32_t image_index_ = 0, current_frame_ = 0, frame_index_ = 0;
+    uint32_t min_image_count_ = 2;
 
     const uint32_t MAX_FRAMES_IN_FLIGHT_ = 2;
     
@@ -240,11 +214,6 @@ public:
     VkDebugReportCallbackCreateInfoEXT debug_info_callback_ = {};
 
     PFN_vkCreateDebugReportCallbackEXT InstanceDebugCallbackEXT;
-
-    vector<VkFence> render_fences_;
-    vector<VkSemaphore> image_semaphores_, render_semaphores_;
-
-    vector<VkClearValue> clear_values_;
 
     //Windows
     SDL_Window* window;

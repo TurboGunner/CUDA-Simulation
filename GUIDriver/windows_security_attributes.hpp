@@ -6,7 +6,7 @@ class WindowsSecurityAttributes {
 public:
     WindowsSecurityAttributes();
 
-    EXPLICIT_ACCESS ExplicitAccessInfo(PSID* security_id_double_ptr);
+    EXPLICIT_ACCESS ExplicitAccessInfo(PSID*& security_id_double_ptr);
 
     ~WindowsSecurityAttributes();
 

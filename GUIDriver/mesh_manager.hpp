@@ -2,7 +2,6 @@
 
 #include "vulkan_helpers.hpp"
 #include "vertex_data.hpp"
-#include "shader_loader.cuh"
 #include "buffer_helpers.hpp"
 
 #include "../CUDATest/handler_classes.hpp"
@@ -10,6 +9,10 @@
 #include <vulkan/vulkan.h>
 
 #include <glm/glm.hpp>
+
+#include <tuple>
+
+using std::tuple;
 
 struct MeshPushConstants {
     glm::vec4 data;
@@ -24,7 +27,7 @@ public:
 
     void BindPipeline(VkCommandBuffer& command_buffer, VkCommandPool& command_pool);
 
-    void Initialize(VkCommandPool& command_pool);
+    VkResult Initialize(VkCommandPool& command_pool);
 
     VkResult InitializeIndex(VkCommandPool& command_pool);
 

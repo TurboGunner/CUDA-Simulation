@@ -1,7 +1,5 @@
 #pragma once
 
-#include "vulkan_parameters.hpp"
-
 //Logging
 #include "../CUDATest/handler_classes.hpp"
 

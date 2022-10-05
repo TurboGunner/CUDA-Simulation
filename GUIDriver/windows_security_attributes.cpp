@@ -24,7 +24,7 @@ WindowsSecurityAttributes::WindowsSecurityAttributes() {
     win_security_attributes_.bInheritHandle = TRUE;
 }
 
-EXPLICIT_ACCESS WindowsSecurityAttributes::ExplicitAccessInfo(PSID* security_id_double_ptr) {
+EXPLICIT_ACCESS WindowsSecurityAttributes::ExplicitAccessInfo(PSID*& security_id_double_ptr) {
     EXPLICIT_ACCESS explicit_access;
 
     ZeroMemory(&explicit_access, sizeof(EXPLICIT_ACCESS));
@@ -44,9 +44,8 @@ SECURITY_ATTRIBUTES* WindowsSecurityAttributes::operator&() {
 }
 
 WindowsSecurityAttributes::~WindowsSecurityAttributes() {
-    PSID* security_id_double_ptr =
-        (PSID*)((PBYTE)win_psecurity_descriptor_ + SECURITY_DESCRIPTOR_MIN_LENGTH);
-    PACL* ppACL = (PACL*)((PBYTE)security_id_double_ptr + sizeof(PSID*));
+    PSID* security_id_double_ptr = (PSID*)((PBYTE) win_psecurity_descriptor_ + SECURITY_DESCRIPTOR_MIN_LENGTH);
+    PACL* ppACL = (PACL*)((PBYTE) security_id_double_ptr + sizeof(PSID*));
 
     if (*security_id_double_ptr) {
         FreeSid(*security_id_double_ptr);

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "rasterizer.cuh"
 #include "vertex_data.hpp"
 #include "mesh_manager.hpp"
-#include "vulkan_parameters.hpp"
 #include "descriptor_set_handler.hpp"
+
+//#include "vulkan_parameters.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"

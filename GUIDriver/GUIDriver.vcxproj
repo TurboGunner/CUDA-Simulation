@@ -121,6 +121,7 @@
     <ClCompile Include="vulkan_debugging.cpp" />
     <ClCompile Include="vulkan_helpers.cpp" />
     <ClCompile Include="vulkan_initialization.cpp" />
+    <ClCompile Include="vulkan_parameters.cpp" />
     <ClCompile Include="vulkan_rendering.cpp" />
     <ClCompile Include="windows_security_attributes.cpp" />
   </ItemGroup>

@@ -2,7 +2,7 @@
 
 //#include "../Renderer/raypath.cuh"
 
-#include "texture_loader.cuh"
+//#include "texture_loader.cuh"
 
 #include <tuple>
 
@@ -35,7 +35,7 @@ void VulkanGUIDriver::CreateMainFrame() {
     ImVec2 window_size(width_ratio, height_ratio);
 
     ImGui::SetWindowSize(window_size);
-    mesh_viewport_.ManipulateCamera();
+    vulkan_parameters_.mesh_viewport_.ManipulateCamera();
 
     ImVec2 window_pos(0.0f, (screen_height - height_ratio) - ((screen_height / 10.0f) * 0.75f));
 

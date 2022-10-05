@@ -1,23 +1,20 @@
 #include "gui_driver.cuh"
 
-void VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height) {
+VkResult VulkanGUIDriver::SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height) {
     VkBool32 res;
-    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, queue_family_, surface_, &res);
+    VkResult vulkan_status = vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, queue_family_, surface_, &res);
     if (res != VK_TRUE) {
         ProgramLog::OutputLine("Error: no WSI support on physical device 0!");
     }
 
     IM_ASSERT(min_image_count_ >= 2);
+    return vulkan_status;
 }
 
 void VulkanGUIDriver::CleanupVulkan() {
     vkDestroyDescriptorPool(device_, descriptor_pool_, allocators_);
 
-    swap_chain_helper_.Clean();
-    sync_struct_.Clean();
-    shader_handler_.Clean();
-    render_pass_initializer_.Clean();
-    mesh_data_.Clean();
+    vulkan_parameters_.CleanInitStructs();
 
     if (surface_ != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(instance_, surface_, nullptr);

@@ -143,6 +143,9 @@
     <ClCompile Include="windows_security_attributes.cpp">
       <Filter>cpp\vulkan\interop</Filter>
     </ClCompile>
+    <ClCompile Include="vulkan_parameters.cpp">
+      <Filter>cpp\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
