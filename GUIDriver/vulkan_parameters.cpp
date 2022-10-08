@@ -27,6 +27,8 @@ VkResult VulkanParameters::InitVulkan() {
 
 	SwapchainInitStage2();
 
+	interop_handler_.BulkInitializationTest(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_);
+
 	InFlightObjectsInit();
 
 	VkResult vulkan_status = PipelineInit();
@@ -180,4 +182,8 @@ vector<VkPipelineStageFlags>& VulkanParameters::WaitStages() {
 
 MeshPushConstants VulkanParameters::ViewportRotation() {
 	return mesh_viewport_.ViewportRotation(frame_index_, current_frame_, DescriptorSetHandler());
+}
+
+cudaError_t VulkanParameters::InteropDrawFrame() {
+	return interop_handler_.InteropDrawFrame(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_);
 }

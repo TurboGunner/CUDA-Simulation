@@ -71,7 +71,7 @@ public:
 
 	VkResult CreateExternalSemaphore(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
-	VkExportSemaphoreWin32HandleInfoKHR ExportSemaphoreHandleWin32();
+	VkExportSemaphoreWin32HandleInfoKHR& ExportSemaphoreHandleWin32();
 
 	void ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
@@ -132,6 +132,8 @@ public:
 	__host__ cudaError_t TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
 	__host__ cudaError_t BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
+
+	__host__ cudaError_t InteropDrawFrame(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;

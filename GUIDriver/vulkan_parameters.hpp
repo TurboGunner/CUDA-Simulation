@@ -70,6 +70,8 @@ public:
 
 	MeshPushConstants ViewportRotation();
 
+	cudaError_t InteropDrawFrame();
+
 	VkDevice device_;
 	VkPhysicalDevice physical_device_;
 

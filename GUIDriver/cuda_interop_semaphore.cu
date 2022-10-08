@@ -27,7 +27,7 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 	return vulkan_status;
 }
 
-VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32() {
+VkExportSemaphoreWin32HandleInfoKHR& CudaInterop::ExportSemaphoreHandleWin32() {
 	WindowsSecurityAttributes win_security_attributes;
 
 	VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = {};
@@ -49,6 +49,7 @@ void CudaInterop::ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR
 	if (os_ != LINUX) {
 		export_semaphore_win32_handle = ExportSemaphoreHandleWin32();
 		export_semaphore_create_info.pNext = (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) ? &export_semaphore_win32_handle : nullptr;
+		//export_semaphore_create_info.pNext = nullptr;
 	}
 	else {
 		export_semaphore_create_info.pNext = nullptr;

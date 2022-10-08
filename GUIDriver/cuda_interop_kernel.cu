@@ -6,7 +6,7 @@ __global__ void TestKernel(float* data) {
 }
 
 __host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
-	cudaError_t cuda_status = BulkInitializationTest(wait_semaphore, signal_semaphore);
+	cudaError_t cuda_status = cudaSuccess;
 
 	void*& device_ptr = cross_memory_handles_[0].cuda_device_ptr,
 		*& host_ptr = cross_memory_handles_[0].cuda_host_ptr;
@@ -38,6 +38,24 @@ __host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semap
 	}
 
 	cuda_status = InitializeCudaInterop(wait_semaphore, signal_semaphore);
+
+	return cuda_status;
+}
+
+__host__ cudaError_t CudaInterop::InteropDrawFrame(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
+	cudaExternalSemaphoreWaitParams wait_params = {};
+	wait_params.flags = 0;
+	wait_params.params.fence.value = 0;
+
+	cudaExternalSemaphoreSignalParams signal_params = {};
+	signal_params.flags = 0;
+	signal_params.params.fence.value = 0;
+
+	cudaError_t cuda_status = cudaWaitExternalSemaphoresAsync(&cuda_wait_semaphore_, &wait_params, 1, cuda_stream_);
+
+	cuda_status = TestMethod(wait_semaphore, signal_semaphore);
+
+	cudaSignalExternalSemaphoresAsync(&cuda_signal_semaphore_, &signal_params, 1, cuda_stream_);
 
 	return cuda_status;
 }

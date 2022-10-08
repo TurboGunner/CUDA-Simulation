@@ -129,6 +129,7 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBu
     vulkan_parameters_.clear_values_[0].color.float32[3] = clear_color_.w;
 
     FrameRender(draw_data);
+    cudaError_t cuda_status = vulkan_parameters_.InteropDrawFrame();
     FramePresent();
 }
 
@@ -215,9 +216,9 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
     //Wait Semaphores (CUDA <-> Vulkan Sync)
     vulkan_parameters_.sync_struct_.wait_semaphores_.push_back(in_flight_image_semaphore);
     vulkan_parameters_.sync_struct_.wait_stages_.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-    //sync_struct_.GetWaitSemaphores(frame_index_);
+    vulkan_parameters_.sync_struct_.GetWaitSemaphores(vulkan_parameters_.frame_index_);
 
-    //sync_struct_.GetSignalFrameSemaphores();
+    vulkan_parameters_.sync_struct_.GetSignalFrameSemaphores();
     vulkan_parameters_.sync_struct_.signal_semaphores_.push_back(in_flight_render_semaphore);
 
     //WIP

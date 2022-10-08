@@ -70,8 +70,8 @@ void CudaInterop::CalculateTotalMemorySize(const size_t& granularity) {
 }
 
 void CudaInterop::AddMemoryHandle(const size_t& size, const size_t& type_size) {  //NOTE: ALLOCATE STRUCT WITH SIZE
-    CUmemGenericAllocationHandle cuda_position_handle;
-    ShareableHandle position_shareable_handle;
+    CUmemGenericAllocationHandle cuda_position_handle = {};
+    ShareableHandle position_shareable_handle = {};
 
     //WIP
 
