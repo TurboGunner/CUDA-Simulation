@@ -94,7 +94,9 @@
     </CudaLink>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="cross_memory_handle.cu" />
     <CudaCompile Include="cuda_interop_helper.cu" />
+    <CudaCompile Include="cuda_interop_kernel.cu" />
     <CudaCompile Include="cuda_interop_memory.cu" />
     <CudaCompile Include="cuda_interop_semaphore.cu" />
     <CudaCompile Include="gui_display.cu" />
@@ -127,6 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
+    <ClInclude Include="..\Meshing\mpm.cuh" />
     <ClInclude Include="buffer_helpers.hpp" />
     <ClInclude Include="cuda_interop_helper.cuh" />
     <ClInclude Include="descriptor_set_handler.hpp" />

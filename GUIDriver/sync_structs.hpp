@@ -24,6 +24,8 @@ public:
 
 	void Clean();
 
+	void CleanSynchronization();
+
 	void GetWaitSemaphores(const size_t& current_frame);
 
 	void GetSignalFrameSemaphores();

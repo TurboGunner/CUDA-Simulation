@@ -7,6 +7,8 @@
 #include "buffer_helpers.hpp"
 #include "vulkan_helpers.hpp"
 
+#include "../CUDATest/handler_methods.hpp"
+
 //Logging
 #include "../CUDATest/handler_classes.hpp"
 
@@ -30,20 +32,33 @@ using std::vector;
 
 enum OperatingSystem { WINDOWS_MODERN, WINDOWS_OLD, LINUX };
 
-struct CrossMemoryHandle {
+class CrossMemoryHandle {
+public:
+	CrossMemoryHandle() = default;
+
+	CrossMemoryHandle(CUmemGenericAllocationHandle cuda_handle_in, ShareableHandle shareable_handle_in, const size_t& size_in, const size_t& type_size_in);
+
+	VkDeviceSize TotalAllocationSize() const;
+
+	cudaError_t AllocateCudaMemory();
+
+	cudaError_t DeallocateCudaMemory();
+
+	VkBuffer buffer;
+	VkDeviceMemory buffer_memory;
+
 	CUmemGenericAllocationHandle cuda_handle;
 	ShareableHandle shareable_handle;
 
 	void* vulkan_ptr = nullptr;
+	void* cuda_host_ptr = nullptr, *cuda_device_ptr = nullptr;
 
-	VkDeviceSize TotalAllocationSize() const {
-		return size * type_size;
-	}
-
-	size_t size;
-	size_t granularity_size;
-	size_t type_size;
+	size_t size = 0;
+	size_t granularity_size = 0;
+	size_t type_size = 0;
 };
+
+__global__ void TestKernel(float* data);
 
 class CudaInterop {
 public:
@@ -94,21 +109,29 @@ public:
 
 	cudaError_t CreateStream(const unsigned int& flags = cudaStreamNonBlocking);
 
+	void PopulateCommandBuffer(VkCommandBuffer& command_buffer);
+
 	void MemoryAllocationProp();
 
 	void MemoryAccessDescriptor();
 
-	cudaError_t SimulationSetup();
+	CUresult SimulationSetupAllocations();
 
 	CUresult Clean();
+
+	cudaError_t CleanSynchronization();
 
 	void InteropDeviceExtensions();
 
 	int IPCCloseShareableHandle(ShareableHandle sh_handle);
 
-	cudaError_t InitializeCudaInterop(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
+	cudaError_t InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
 	bool IsVkPhysicalDeviceUUID(void* uuid);
+
+	__host__ cudaError_t TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
+
+	__host__ cudaError_t BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
@@ -131,9 +154,9 @@ public:
 	OperatingSystem os_;
 
 	unordered_map<OperatingSystem, VkExternalSemaphoreHandleTypeFlagBits> semaphore_handle_map = {
-	{ WINDOWS_MODERN, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT },
-	{ WINDOWS_OLD, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
-	{ LINUX, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT }
+		{ WINDOWS_MODERN, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT },
+		{ WINDOWS_OLD, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
+		{ LINUX, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT }
 	};
 
 	unordered_map<OperatingSystem, VkExternalMemoryHandleTypeFlagBits> memory_handle_map = {

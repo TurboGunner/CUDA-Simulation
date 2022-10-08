@@ -34,6 +34,12 @@
     <CudaCompile Include="swap_chain_manager.cu">
       <Filter>cpp\init_objects\swap_chain</Filter>
     </CudaCompile>
+    <CudaCompile Include="cuda_interop_kernel.cu">
+      <Filter>cuda\interop</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cross_memory_handle.cu">
+      <Filter>cuda\interop</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cpp">
@@ -195,6 +201,9 @@
       <Filter>includes\interop</Filter>
     </ClInclude>
     <ClInclude Include="windows_security_attributes.hpp">
+      <Filter>includes\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Meshing\mpm.cuh">
       <Filter>includes\interop</Filter>
     </ClInclude>
   </ItemGroup>

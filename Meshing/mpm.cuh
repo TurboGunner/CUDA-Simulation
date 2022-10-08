@@ -26,6 +26,8 @@ public:
 
 	__host__ Grid(const Vector3D& sim_size_in, const float& resolution_in = 4.0f);
 
+	__host__ static cudaError_t CreateGrid();
+
 	__host__ void* operator new(size_t size);
 
 	__host__ void operator delete(void* ptr);

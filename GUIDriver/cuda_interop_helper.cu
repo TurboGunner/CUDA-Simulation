@@ -75,7 +75,7 @@ void CudaInterop::AddMemoryHandle(const size_t& size, const size_t& type_size) {
 
     //WIP
 
-    CrossMemoryHandle position_handle = { cuda_position_handle, position_shareable_handle, nullptr, size, 0, type_size };
+    CrossMemoryHandle position_handle(cuda_position_handle, position_shareable_handle, size, type_size);
     cross_memory_handles_.push_back(position_handle);
 }
 
@@ -101,11 +101,10 @@ void CudaInterop::MemoryAccessDescriptor() {
     access_descriptor_.flags = CU_MEM_ACCESS_FLAGS_PROT_READWRITE;
 }
 
-cudaError_t CudaInterop::SimulationSetup() {
+CUresult CudaInterop::SimulationSetupAllocations() {
     CUdeviceptr d_ptr = 0U;
     size_t granularity = 0;
 
-    cudaError_t cuda_status = cudaSuccess;
     CUresult cuda_result;
 
     MemoryAllocationProp();
@@ -131,14 +130,14 @@ cudaError_t CudaInterop::SimulationSetup() {
 
     MemoryAccessDescriptor();
 
-    cuMemSetAccess(d_ptr, total_alloc_size_, &access_descriptor_, 1); //Adds read-write access to the whole VA range.
+    cuda_result = cuMemSetAccess(d_ptr, total_alloc_size_, &access_descriptor_, 1); //Adds read-write access to the whole VA range.
 
-    return cuda_status;
+    return cuda_result;
 }
 
 CUresult CudaInterop::Clean() {
     CUresult cuda_result;
-    for (const auto& mem_handle : cross_memory_handles_) { //Ensures that all allocations are mapped before attempting unmap memory
+    for (const auto& mem_handle : cross_memory_handles_) { //Ensures that all allocations are mapped before attempting to unmap memory
         if (!mem_handle.vulkan_ptr) {
             return cuda_result;
         }
@@ -151,20 +150,39 @@ CUresult CudaInterop::Clean() {
     return cuda_result;
 }
 
+cudaError_t CudaInterop::CleanSynchronization() {
+    cudaError_t cuda_status = cudaSuccess;
+
+    if (cuda_stream_) {
+        cuda_status = cudaStreamSynchronize(cuda_stream_);
+        cuda_status = cudaStreamDestroy(cuda_stream_);
+    }
+
+    cuda_status = cudaDestroyExternalSemaphore(cuda_wait_semaphore_);
+    cuda_status = cudaDestroyExternalSemaphore(cuda_signal_semaphore_);
+
+    for (const auto& mem_handle : cross_memory_handles_) {
+        vkDestroyBuffer(device_, mem_handle.buffer, nullptr);
+        vkFreeMemory(device_, mem_handle.buffer_memory, nullptr);
+    }
+
+    return cuda_status;
+}
+
 int CudaInterop::IPCCloseShareableHandle(ShareableHandle sh_handle) {
     return CloseHandle(sh_handle);
 }
 
-cudaError_t CudaInterop::InitializeCudaInterop(VkBuffer& buffer, VkDeviceMemory& buffer_memory, VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
+cudaError_t CudaInterop::InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
     cudaError_t cuda_status = cudaSuccess;
     VkResult vulkan_status = VK_SUCCESS;
-
-    cuda_status = CreateStream();
-    cuda_status = SimulationSetup();
 
     VkDeviceSize alloc_size = cross_memory_handles_[0].TotalAllocationSize();
     auto mem_handle_type = GetPlatformMemoryHandle();
     void* mem_handle = (void*) (uintptr_t) &cross_memory_handles_[0].shareable_handle;
+
+    VkBuffer& buffer = cross_memory_handles_[0].buffer;
+    VkDeviceMemory& buffer_memory = cross_memory_handles_[0].buffer_memory;
 
     vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer, buffer_memory);
 
@@ -195,4 +213,16 @@ void CudaInterop::InteropDeviceExtensions() {
 
 bool CudaInterop::IsVkPhysicalDeviceUUID(void* uuid) {
     return !memcmp((void*) vk_device_uuid_, uuid, (size_t) VK_UUID_SIZE);
+}
+
+void CudaInterop::PopulateCommandBuffer(VkCommandBuffer& command_buffer) {
+    VkDeviceSize offsets[] = { 0, 0 };
+    vector<VkBuffer> buffers;
+
+    for (auto& cross_memory_handle : cross_memory_handles_) {
+        buffers.push_back(cross_memory_handle.buffer);
+    }
+
+    vkCmdBindVertexBuffers(command_buffer, 0, buffers.size(), buffers.data(), offsets);
+    vkCmdDraw(command_buffer, cross_memory_handles_[0].size, 1, 0, 0);
 }

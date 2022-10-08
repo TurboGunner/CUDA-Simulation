@@ -25,6 +25,12 @@ void SyncStruct::Clean() {
 	}
 }
 
+void SyncStruct::CleanSynchronization() {
+	 //NOTE: WIP
+	vkDestroySemaphore(device_, vk_wait_semaphore_, nullptr);
+	vkDestroySemaphore(device_, vk_signal_semaphore_, nullptr);
+}
+
 void SyncStruct::GetWaitSemaphores(const size_t& current_frame) {
 	if (current_frame != 0) {
 		wait_semaphores_.push_back(vk_wait_semaphore_);

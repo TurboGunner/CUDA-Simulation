@@ -39,10 +39,10 @@
     <ClInclude Include="vector_cross.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="mpm.cuh">
+    <ClInclude Include="..\CUDATest\index_pair_cuda.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="..\CUDATest\index_pair_cuda.cuh">
+    <ClInclude Include="mpm.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
   </ItemGroup>

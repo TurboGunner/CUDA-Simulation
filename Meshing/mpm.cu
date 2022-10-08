@@ -19,19 +19,29 @@ __host__ Grid::Grid(const Vector3D& sim_size_in, const float& resolution_in) { /
 
 	cudaError_t cuda_status = cudaSuccess;
 
-	cudaMalloc(&particle_position_device_, GetParticleCount() * sizeof(Vector3D));
-	cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
+	cuda_status = cudaMalloc(&particle_position_device_, GetParticleCount() * sizeof(Vector3D));
+	cuda_status = cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
 
-	cudaMalloc(&particle_velocity_device_, GetParticleCount() * sizeof(Vector3D));
-	cudaMalloc(&particle_mass_device_, GetParticleCount() * sizeof(float));
+	cuda_status = cudaMalloc(&particle_velocity_device_, GetParticleCount() * sizeof(Vector3D));
+	cuda_status = cudaMalloc(&particle_mass_device_, GetParticleCount() * sizeof(float));
 
-	cudaMalloc(&cell_velocity_device_, total_size_ * sizeof(Vector3D)); //NOTE
+	cuda_status = cudaMalloc(&cell_velocity_device_, total_size_ * sizeof(Vector3D)); //NOTE
 	//cudaMallocHost(&cells_, sizeof(Cell));
-	cudaMalloc(&cell_mass_device_, total_size_ * sizeof(float));
+	cuda_status = cudaMalloc(&cell_mass_device_, total_size_ * sizeof(float));
 
 	momentum_matrices_ = Matrix::MatrixMassAllocation(GetParticleCount(), 3, 3);
 
 	is_initialized_ = true;
+}
+
+__host__ cudaError_t Grid::CreateGrid() {
+	size_t dim = 32;
+
+	Grid* grid = new Grid(Vector3D(dim, dim, dim), 4);
+
+	cudaError_t cuda_status = SimulateGPU(grid);
+
+	return cuda_status;
 }
 
 __host__ void* Grid::operator new(size_t size) {
