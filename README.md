@@ -2,13 +2,15 @@
 
 ## Introduction
 
-A work in process program for the simulation of fluids via NVIDIA's CUDA.
+A work in process program for the simulation of fluids via NVIDIA's CUDA and display via Vulkan.
 
-Written in a mixture of CUDA C/C++ and standard C++ using the MSBuild compiler.
+Written in a mixture of CUDA C/C++ and standard C++ using the MSBuild compiler. Shaders are written in GLSL compiled to Vulkan's SPIR-V. Some functions are handled (i.e. camera rotation) are implemented via OpenGL's GLM.
 
 Data structures are handled via custom implementations, and file exports are handled via the OpenVDB library created by Dreamworks Animation.
 
-Uses a mixture of OOP, some functional patterns, and helper methods in order to reduce CUDA boilerplate with memory alloc/dealloc calls on GPU/system memory, as well as copying to and from GPU and system memory.
+Uses a mixture of OOP, some functional patterns, and helper methods in order to reduce CUDA/Vulkan boilerplate with memory alloc/dealloc calls on GPU/system memory, as well as copying to and from GPU and system memory. The Vulkan implementation uses a hierarchy of helper structures that can contain methods for either defining general operations or defining the initialization of rendering logic. It uses LunarG's validation layers for error checking.
+
+Vulkan interop is going to be the main mechanism for communication between the renderer and the simulation. SDL is used for handling user inputs, and IMGUI is used for wrapping the GUI interface.
 
 ## CUDA Helper Structure
 
@@ -96,9 +98,9 @@ Stabilize LBM further.
 
 Perform more tests and rigorous quality control checks in regards to accuracy.
 
-Get a meshing system.
+Hook up CUDA to Vulkan interop successfully with MLS-MPM.
 
-Likely add MLS-MPM.
+Have UI control simulation parameters.
 
 ## Relevant Papers Used:
 
