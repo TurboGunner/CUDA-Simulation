@@ -14,10 +14,7 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 	VkSemaphoreCreateInfo semaphore_info = {};
 	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-	VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = {};
-	export_semaphore_create_info.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
-
-	ExportSemaphoreCreationSettings(export_semaphore_create_info, handle_type);
+	VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = ExportSemaphoreCreationSettings(handle_type);
 
 	semaphore_info.pNext = &export_semaphore_create_info;
 
@@ -27,7 +24,7 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 	return vulkan_status;
 }
 
-VkExportSemaphoreWin32HandleInfoKHR& CudaInterop::ExportSemaphoreHandleWin32() {
+VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32() {
 	WindowsSecurityAttributes win_security_attributes;
 
 	VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = {};
@@ -43,11 +40,23 @@ VkExportSemaphoreWin32HandleInfoKHR& CudaInterop::ExportSemaphoreHandleWin32() {
 	return export_semaphore_win32_handle;
 }
 
-void CudaInterop::ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {
+VkExportSemaphoreCreateInfoKHR& CudaInterop::ExportSemaphoreCreationSettings(const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {
+	VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = {};
 	VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = {};
+	export_semaphore_create_info.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
 
 	if (os_ != LINUX) {
-		export_semaphore_win32_handle = ExportSemaphoreHandleWin32();
+		WindowsSecurityAttributes win_security_attributes;
+		VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = {};
+
+		export_semaphore_win32_handle.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
+		export_semaphore_win32_handle.pNext = nullptr;
+
+		export_semaphore_win32_handle.pAttributes = &win_security_attributes;
+		export_semaphore_win32_handle.dwAccess = DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE;
+
+		export_semaphore_win32_handle.name = (LPCWSTR) nullptr;
+
 		export_semaphore_create_info.pNext = (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) ? &export_semaphore_win32_handle : nullptr;
 		//export_semaphore_create_info.pNext = nullptr;
 	}
@@ -55,6 +64,8 @@ void CudaInterop::ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR
 		export_semaphore_create_info.pNext = nullptr;
 	}
 	export_semaphore_create_info.handleTypes = handle_type;
+
+	return export_semaphore_create_info;
 }
 
 void* CudaInterop::GetSemaphoreHandle(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {

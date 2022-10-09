@@ -25,6 +25,7 @@ typedef int ShareableHandle;
 
 #include <algorithm>
 #include <unordered_map>
+#include <string>
 #include <vector>
 
 using std::unordered_map;
@@ -71,9 +72,9 @@ public:
 
 	VkResult CreateExternalSemaphore(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
-	VkExportSemaphoreWin32HandleInfoKHR& ExportSemaphoreHandleWin32();
+	VkExportSemaphoreWin32HandleInfoKHR ExportSemaphoreHandleWin32();
 
-	void ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
+	VkExportSemaphoreCreateInfoKHR& ExportSemaphoreCreationSettings(const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
 	VkResult CreateExternalBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkExternalMemoryHandleTypeFlagsKHR& external_mem_handle_type, VkBuffer& buffer, VkDeviceMemory& buffer_memory);
 

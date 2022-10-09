@@ -186,13 +186,15 @@ cudaError_t CudaInterop::InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSe
 
     vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer, buffer_memory);
 
+    ProgramLog::OutputLine("Buffer Memory Size: " + std::to_string(alloc_size));
+
     auto mem_semaphore_type = GetPlatformSemaphoreHandle();
 
-    vulkan_status = CreateExternalSemaphore(signal_semaphore, mem_semaphore_type);
     vulkan_status = CreateExternalSemaphore(wait_semaphore, mem_semaphore_type);
+    vulkan_status = CreateExternalSemaphore(signal_semaphore, mem_semaphore_type);
 
-    cuda_status = ImportCudaExternalSemaphore(cuda_wait_semaphore_, signal_semaphore, mem_semaphore_type);
-    cuda_status = ImportCudaExternalSemaphore(cuda_signal_semaphore_, wait_semaphore, mem_semaphore_type);
+    cuda_status = ImportCudaExternalSemaphore(cuda_wait_semaphore_, wait_semaphore, mem_semaphore_type);
+    cuda_status = ImportCudaExternalSemaphore(cuda_signal_semaphore_, signal_semaphore, mem_semaphore_type);
 
     return cuda_status;
 }
