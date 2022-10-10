@@ -50,12 +50,10 @@ void CudaInterop::GetDefaultSecurityDescriptor(CUmemAllocationProp* prop) {
 
         obj_attributes_configured = true;
     }
-
     prop->win32HandleMetaData = &obj_attributes;
-    return;
 }
 
-size_t CudaInterop::RoundWarpGranularity(const size_t& size, const int& granularity) {
+size_t CudaInterop::RoundWarpGranularity(const size_t& size, const size_t& granularity) {
     return ((size + granularity - 1) / granularity) * granularity;
 }
 
@@ -63,19 +61,16 @@ void CudaInterop::CalculateTotalMemorySize(const size_t& granularity) {
     total_alloc_size_ = 0;
 
     for (auto& mem_handle : cross_memory_handles_) {
-        size_t current_granularity_size = RoundWarpGranularity(mem_handle.size, granularity);
+        size_t current_granularity_size = RoundWarpGranularity(mem_handle.TotalAllocationSize(), granularity);
         total_alloc_size_ += current_granularity_size;
         mem_handle.granularity_size = current_granularity_size;
     }
 }
 
 void CudaInterop::AddMemoryHandle(const size_t& size, const size_t& type_size) {  //NOTE: ALLOCATE STRUCT WITH SIZE
-    CUmemGenericAllocationHandle cuda_position_handle = {};
-    ShareableHandle position_shareable_handle = {};
-
     //WIP
 
-    CrossMemoryHandle position_handle(cuda_position_handle, position_shareable_handle, size, type_size);
+    CrossMemoryHandle position_handle(size, type_size);
     cross_memory_handles_.push_back(position_handle);
 }
 
@@ -84,7 +79,6 @@ cudaError_t CudaInterop::CreateStream(const unsigned int& flags) {
 }
 
 void CudaInterop::MemoryAllocationProp() {
-    current_alloc_prop_ = {};
     current_alloc_prop_.type = CU_MEM_ALLOCATION_TYPE_PINNED;
 
     current_alloc_prop_.location.type = CU_MEM_LOCATION_TYPE_DEVICE;
@@ -92,6 +86,10 @@ void CudaInterop::MemoryAllocationProp() {
 
     current_alloc_prop_.win32HandleMetaData = nullptr;
     current_alloc_prop_.requestedHandleTypes = ipc_handle_type_flag_;
+
+    if (os_ != LINUX) {
+        GetDefaultSecurityDescriptor(&current_alloc_prop_);
+    }
 }
 
 void CudaInterop::MemoryAccessDescriptor() {
@@ -109,28 +107,35 @@ CUresult CudaInterop::SimulationSetupAllocations() {
 
     MemoryAllocationProp();
 
-    GetDefaultSecurityDescriptor(&current_alloc_prop_);
-
-    cuda_result = cuMemGetAllocationGranularity(&granularity, &current_alloc_prop_, CU_MEM_ALLOC_GRANULARITY_RECOMMENDED);
+    cuda_result = cuMemGetAllocationGranularity(&granularity, &current_alloc_prop_, CU_MEM_ALLOC_GRANULARITY_MINIMUM);
+    DriverLog(cuda_result, "Allocation Granularity");
 
     CalculateTotalMemorySize(granularity);
 
     cuda_result = cuMemAddressReserve(&d_ptr, total_alloc_size_, granularity, 0U, 0);
+    DriverLog(cuda_result, "MemAddressReserve");
+
+    ProgramLog::OutputLine("Granularity: " + std::to_string(granularity) + "\n");
 
     cuda_result = cuMemCreate(&cross_memory_handles_[0].cuda_handle, cross_memory_handles_[0].granularity_size, &current_alloc_prop_, 0);
+    DriverLog(cuda_result, "MemCreate");
 
     cuda_result = cuMemExportToShareableHandle((void*)&cross_memory_handles_[0].shareable_handle, cross_memory_handles_[0].cuda_handle, ipc_handle_type_flag_, 0);
+    DriverLog(cuda_result, "ExportToShareableHandle");
 
     CUdeviceptr va_position = d_ptr; //NOTE: When having other pointers, this will adding the offsets in order to properly account for fitting into the contiguous VA range.
     cross_memory_handles_[0].vulkan_ptr = (void*)va_position;
 
-    cuda_result = cuMemMap(va_position, cross_memory_handles_[0].size, 0, cross_memory_handles_[0].cuda_handle, 0);
+    cuda_result = cuMemMap(va_position, cross_memory_handles_[0].granularity_size, 0, cross_memory_handles_[0].cuda_handle, 0);
+    DriverLog(cuda_result, "MapMemory");
 
     cuda_result = cuMemRelease(cross_memory_handles_[0].cuda_handle);
+    DriverLog(cuda_result, "ReleaseMemory");
 
     MemoryAccessDescriptor();
 
     cuda_result = cuMemSetAccess(d_ptr, total_alloc_size_, &access_descriptor_, 1); //Adds read-write access to the whole VA range.
+    DriverLog(cuda_result, "SetMemoryAccess");
 
     return cuda_result;
 }
@@ -139,6 +144,7 @@ CUresult CudaInterop::Clean() {
     CUresult cuda_result;
     for (const auto& mem_handle : cross_memory_handles_) { //Ensures that all allocations are mapped before attempting to unmap memory
         if (!mem_handle.vulkan_ptr) {
+            DriverLog(cuda_result, "Clean");
             return cuda_result;
         }
     }
@@ -146,6 +152,7 @@ CUresult CudaInterop::Clean() {
     IPCCloseShareableHandle(cross_memory_handles_[0].shareable_handle);
 
     cuda_result = cuMemAddressFree((CUdeviceptr) cross_memory_handles_[0].vulkan_ptr, total_alloc_size_);
+    DriverLog(cuda_result, "VulkanPtrCUDAFree");
 
     return cuda_result;
 }
@@ -159,7 +166,9 @@ cudaError_t CudaInterop::CleanSynchronization() {
     }
 
     cuda_status = cudaDestroyExternalSemaphore(cuda_wait_semaphore_);
+    CudaExceptionHandler(cuda_status, "DestroyExternalSemaphoreWait");
     cuda_status = cudaDestroyExternalSemaphore(cuda_signal_semaphore_);
+    CudaExceptionHandler(cuda_status, "DestroyExternalSemaphoreSignal");
 
     for (const auto& mem_handle : cross_memory_handles_) {
         vkDestroyBuffer(device_, mem_handle.buffer, nullptr);
@@ -194,9 +203,20 @@ cudaError_t CudaInterop::InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSe
     vulkan_status = CreateExternalSemaphore(signal_semaphore, mem_semaphore_type);
 
     cuda_status = ImportCudaExternalSemaphore(cuda_wait_semaphore_, wait_semaphore, mem_semaphore_type);
+    CudaExceptionHandler(cuda_status, "ImportCUDAExternalSemaphoreWait");
     cuda_status = ImportCudaExternalSemaphore(cuda_signal_semaphore_, signal_semaphore, mem_semaphore_type);
+    CudaExceptionHandler(cuda_status, "ImportCUDAExternalSemaphoreSignal");
 
     return cuda_status;
+}
+
+void CudaInterop::InteropExtensions() {
+    interop_extensions_.push_back(VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
+
+    interop_extensions_.push_back(VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME);
+    interop_extensions_.push_back(VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME);
+
+    interop_extensions_.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 }
 
 void CudaInterop::InteropDeviceExtensions() {

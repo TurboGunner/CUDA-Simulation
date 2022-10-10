@@ -59,3 +59,13 @@ __host__ cudaError_t CudaInterop::InteropDrawFrame(VkSemaphore& wait_semaphore, 
 
 	return cuda_status;
 }
+
+__host__ void CudaInterop::DriverLog(CUresult& cuda_result, const string& label) {
+	const char* name_output, *str_output;
+
+	cuda_result = cuGetErrorName(cuda_result, &name_output);
+	cuda_result = cuGetErrorString(cuda_result, &str_output);
+
+	s_stream << "CUDA Driver API Error Status for " << label << ": " << name_output << " | CUDA Driver Error String: " << str_output << std::endl;
+	ProgramLog::OutputLine(s_stream);
+}

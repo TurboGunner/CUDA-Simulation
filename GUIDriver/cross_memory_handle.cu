@@ -1,9 +1,6 @@
 #include "cuda_interop_helper.cuh"
 
-CrossMemoryHandle::CrossMemoryHandle(CUmemGenericAllocationHandle cuda_handle_in, ShareableHandle shareable_handle_in, const size_t& size_in, const size_t& type_size_in) {
-	cuda_handle = cuda_handle_in;
-	shareable_handle = shareable_handle_in;
-
+CrossMemoryHandle::CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in) {
 	size = size_in;
 	type_size = type_size_in;
 }

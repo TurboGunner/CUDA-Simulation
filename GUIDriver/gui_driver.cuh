@@ -46,19 +46,19 @@
 //Standard Imports
 #include <array>
 #include <iostream>
-#include <string>
 #include <fstream>
-#include <sstream>
-#include <memory>
-#include <vector>
-#include <tuple>
 #include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <vector>
 
 using std::array;
-using std::string;
-using std::vector;
-using std::tuple;
 using std::map;
+using std::string;
+using std::tuple;
+using std::vector;
 
 #ifdef _DEBUG
 #define IMGUI_VULKAN_DEBUG_REPORT
@@ -124,11 +124,11 @@ public:
         SDL_Quit();
     }
 
-    void LoadInstanceProperties(const char** extensions, const uint32_t& ext_count);
+    void LoadInstanceProperties();
 
-    void VulkanInstantiation(const char** extensions, uint32_t ext_count);
+    void VulkanInstantiation();
 
-    void DebugOptionInitialization(const char** extensions, const uint32_t& ext_count);
+    void DebugOptionInitialization();
 
     void PoolDescriptionInitialization();
     void LoadPoolDescriptionProperties(VkDescriptorPoolCreateInfo& pool_info_, VkDescriptorPoolSize pool_sizes[]);
@@ -201,6 +201,8 @@ public:
     VkSurfaceFormatKHR surface_format_;
 
     VkPresentModeKHR present_mode_;
+
+    vector<const char*> phys_device_extensions_;
 
     uint2 size_;
 

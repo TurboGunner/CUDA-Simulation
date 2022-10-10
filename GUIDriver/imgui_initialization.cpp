@@ -85,12 +85,24 @@ void VulkanGUIDriver::InitializeVulkan() {
     uint32_t ext_count = 0;
     SDL_Vulkan_GetInstanceExtensions(window, &ext_count, nullptr);
 
-    const char** extensions = new const char* [ext_count];
-    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, extensions);
+    vulkan_parameters_.interop_handler_.InteropExtensions();
+    auto& interop_extensions = vulkan_parameters_.interop_handler_.interop_extensions_;
 
+    ext_count += interop_extensions.size();
 
-    VulkanInstantiation(extensions, ext_count);
-    if (ext_count > 0) {
-        delete[] extensions;
+    phys_device_extensions_.insert(phys_device_extensions_.begin(), interop_extensions.begin(), interop_extensions.end());
+
+    const char** sdl_extensions = new const char* [ext_count];
+
+    SDL_Vulkan_GetInstanceExtensions(window, &ext_count, sdl_extensions);
+
+    for (int i = 0; i < ext_count; i++) {
+        phys_device_extensions_.push_back(sdl_extensions[i]);
     }
+
+    if (ext_count > 0) {
+        delete[] sdl_extensions;
+    }
+
+    VulkanInstantiation();
 }

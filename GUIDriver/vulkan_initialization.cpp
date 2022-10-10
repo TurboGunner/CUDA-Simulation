@@ -2,17 +2,17 @@
 
 #include <fstream>
 
-void VulkanGUIDriver::LoadInstanceProperties(const char** extensions, const uint32_t& ext_count) {
+void VulkanGUIDriver::LoadInstanceProperties() {
     instance_info_.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instance_info_.enabledExtensionCount = ext_count;
-    instance_info_.ppEnabledExtensionNames = extensions;
+    instance_info_.enabledExtensionCount = phys_device_extensions_.size();
+    instance_info_.ppEnabledExtensionNames = phys_device_extensions_.data();
 }
 
-void VulkanGUIDriver::VulkanInstantiation(const char** extensions, uint32_t ext_count) {
-    LoadInstanceProperties(extensions, ext_count);
+void VulkanGUIDriver::VulkanInstantiation() {
+    LoadInstanceProperties();
 
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
-    DebugOptionInitialization(extensions, ext_count);
+    DebugOptionInitialization();
 #else
     vulkan_status = vkCreateInstance(&instance_info_, allocators_, &instance_);
     VulkanErrorHandler(vulkan_status);

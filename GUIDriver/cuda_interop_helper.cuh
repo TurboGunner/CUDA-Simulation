@@ -28,6 +28,7 @@ typedef int ShareableHandle;
 #include <string>
 #include <vector>
 
+using std::string;
 using std::unordered_map;
 using std::vector;
 
@@ -37,7 +38,7 @@ class CrossMemoryHandle {
 public:
 	CrossMemoryHandle() = default;
 
-	CrossMemoryHandle(CUmemGenericAllocationHandle cuda_handle_in, ShareableHandle shareable_handle_in, const size_t& size_in, const size_t& type_size_in);
+	CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in);
 
 	VkDeviceSize TotalAllocationSize() const;
 
@@ -102,7 +103,7 @@ public:
 
 	void GetDefaultSecurityDescriptor(CUmemAllocationProp* prop);
 
-	size_t RoundWarpGranularity(const size_t& size, const int& granularity);
+	size_t RoundWarpGranularity(const size_t& size, const size_t& granularity);
 
 	void CalculateTotalMemorySize(const size_t& granularity);
 
@@ -122,6 +123,8 @@ public:
 
 	cudaError_t CleanSynchronization();
 
+	void InteropExtensions();
+
 	void InteropDeviceExtensions();
 
 	int IPCCloseShareableHandle(ShareableHandle sh_handle);
@@ -136,6 +139,8 @@ public:
 
 	__host__ cudaError_t InteropDrawFrame(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
+	__host__ void DriverLog(CUresult& cuda_result, const string& label = "");
+
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
 
@@ -147,7 +152,7 @@ public:
 	size_t total_alloc_size_ = 0;
 
 	cudaStream_t cuda_stream_;
-	vector<const char*> interop_device_extensions_;
+	vector<const char*> interop_extensions_, interop_device_extensions_;
 
 	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
 

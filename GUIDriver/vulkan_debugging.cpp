@@ -5,7 +5,7 @@ void VulkanGUIDriver::DebugErrorCallback() {
     debug_info_callback_.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
 
     debug_info_callback_.pfnCallback = DebugReport;
-    debug_info_callback_.pUserData = NULL;
+    debug_info_callback_.pUserData = nullptr;
 
     vulkan_status = InstanceDebugCallbackEXT(instance_, &debug_info_callback_, allocators_, &debug_report_callback_);
     VulkanErrorHandler(vulkan_status);
@@ -13,15 +13,13 @@ void VulkanGUIDriver::DebugErrorCallback() {
     ProgramLog::OutputLine("\nShout out to Bidoof on the beat!\n");
 }
 
-void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const uint32_t& ext_count) {
+void VulkanGUIDriver::DebugOptionInitialization() {
     // Enabling validation layers
     const char* layers[] = { "VK_LAYER_KHRONOS_validation" };
     instance_info_.enabledLayerCount = 1;
     instance_info_.ppEnabledLayerNames = layers;
 
     // Enable debug report extension (we need additional storage, so we duplicate the user array to add our new extension to it)
-    const char** extensions_ext = (const char**) malloc(sizeof(const char*) * (ext_count + 1));
-    memcpy(extensions_ext, extensions, ext_count * sizeof(const char*));
 
     VkApplicationInfo app_info = {};
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -31,16 +29,15 @@ void VulkanGUIDriver::DebugOptionInitialization(const char** extensions, const u
     app_info.engineVersion = VK_MAKE_VERSION(1, 3, 2);
     app_info.apiVersion = VK_MAKE_VERSION(1, 3, 2);
 
-    extensions_ext[ext_count] = "VK_EXT_debug_report";
-    instance_info_.enabledExtensionCount = ext_count + 1;
-    instance_info_.ppEnabledExtensionNames = extensions_ext;
+    phys_device_extensions_.push_back("VK_EXT_debug_report");
+    instance_info_.enabledExtensionCount = phys_device_extensions_.size();
+    instance_info_.ppEnabledExtensionNames = phys_device_extensions_.data();
     instance_info_.pApplicationInfo = &app_info;
 
     // Create Vulkan Instance
     vulkan_status = vkCreateInstance(&instance_info_, allocators_, &instance_);
 
     VulkanErrorHandler(vulkan_status);
-    free(extensions_ext);
 
     // Get the function pointer (required for any extensions)
     InstanceDebugCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)

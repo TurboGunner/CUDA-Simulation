@@ -49,6 +49,7 @@ public:
 		}
 		line.clear();
 		s_stream.clear();
+		s_stream.str(string());
 	}
 
 	static void Close() {
