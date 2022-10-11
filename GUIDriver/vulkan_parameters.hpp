@@ -17,6 +17,8 @@
 #include "vulkan_helpers.hpp"
 #include "image_helpers.hpp"
 
+#include "../Meshing/mpm.cuh"
+
 #include <string>
 #include <vector>
 
@@ -119,6 +121,8 @@ public:
 	MeshViewport mesh_viewport_;
 	SyncStruct sync_struct_;
 	CudaInterop interop_handler_;
+
+	Grid* grid_;
 
 private:
 	void SwapchainInit();

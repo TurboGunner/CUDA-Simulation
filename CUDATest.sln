@@ -11,6 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUIDriver", "GUIDriver\GUIDriver.vcxproj", "{61BDE0D4-2F03-4886-8E5C-193A7DBD642C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E7727259-F4EA-4266-95CE-3E6B8CD6809E} = {E7727259-F4EA-4266-95CE-3E6B8CD6809E}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Meshing", "Meshing\Meshing.vcxproj", "{E7727259-F4EA-4266-95CE-3E6B8CD6809E}"
 EndProject

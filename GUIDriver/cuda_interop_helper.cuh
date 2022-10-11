@@ -14,6 +14,8 @@
 
 #include "windows_security_attributes.hpp"
 
+#include "../Meshing/mpm.cuh"
+
 #include <vulkan/vulkan.h>
 
 #ifdef _WIN64
@@ -38,7 +40,7 @@ class CrossMemoryHandle {
 public:
 	CrossMemoryHandle() = default;
 
-	CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in);
+	CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in, const bool& host_inclusive_in = true);
 
 	VkDeviceSize TotalAllocationSize() const;
 
@@ -58,6 +60,8 @@ public:
 	size_t size = 0;
 	size_t granularity_size = 0;
 	size_t type_size = 0;
+private:
+	bool host_inclusive = true;
 };
 
 __global__ void TestKernel(float* data);
@@ -135,12 +139,18 @@ public:
 
 	__host__ cudaError_t TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
-	__host__ cudaError_t BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
+	__host__ cudaError_t BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore, const size_t& size);
 
 	__host__ cudaError_t InteropDrawFrame(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
 	__host__ void DriverLog(CUresult& cuda_result, const string& label = "");
 
+	vector<const char*> interop_extensions_, interop_device_extensions_;
+
+	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
+	Grid* grid_;
+
+private:
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
 
@@ -152,9 +162,6 @@ public:
 	size_t total_alloc_size_ = 0;
 
 	cudaStream_t cuda_stream_;
-	vector<const char*> interop_extensions_, interop_device_extensions_;
-
-	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
 
 	int cuda_device_ = -1, device_count_ = 0;
 	uint8_t vk_device_uuid_[VK_UUID_SIZE];

@@ -27,8 +27,6 @@ VkResult VulkanParameters::InitVulkan() {
 
 	SwapchainInitStage2();
 
-	interop_handler_.BulkInitializationTest(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_);
-
 	InFlightObjectsInit();
 
 	VkResult vulkan_status = PipelineInit();
@@ -57,6 +55,11 @@ void VulkanParameters::SwapchainInitStage2() {
 	ProgramLog::OutputLine("\nSwapchain Image View Size: " + std::to_string(swap_chain_helper_.swapchain_image_views_.size()));
 
 	swap_chain_helper_.CreateSwapchainFrameBuffers(render_pass_, swap_chain_helper_.swapchain_image_views_, swap_chain_helper_.depth_image_view_);
+
+	grid_ = new Grid(Vector3D(16.0f, 16.0f, 16.0f));
+
+	interop_handler_.grid_ = grid_;
+	interop_handler_.BulkInitializationTest(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_, grid_->GetParticleCount());
 }
 
 void VulkanParameters::ViewportInit() {

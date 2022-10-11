@@ -43,6 +43,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -50,12 +53,13 @@
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>cuda.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(CudaToolkitLibDir);%(AdditionalLibraryDirectories);$(SolutionDir)Dependencies</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CudaToolkitLibDir);%(AdditionalLibraryDirectories);$(SolutionDir)Dependencies;$(SolutionDir)x64\Debug</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
@@ -75,6 +79,7 @@
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -82,7 +87,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>cuda.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(CudaToolkitLibDir);%(AdditionalLibraryDirectories);$(SolutionDir)Dependencies</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CudaToolkitLibDir);%(AdditionalLibraryDirectories);$(SolutionDir)Dependencies;$(SolutionDir)x64\Debug</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
@@ -94,6 +99,16 @@
     </CudaLink>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="..\CUDATest\index_pair_cuda.cu" />
+    <CudaCompile Include="..\Meshing\advect_particles.cu" />
+    <CudaCompile Include="..\Meshing\cell_momentum.cu" />
+    <CudaCompile Include="..\Meshing\gradient_solve.cu" />
+    <CudaCompile Include="..\Meshing\matrix.cu" />
+    <CudaCompile Include="..\Meshing\matrix_kernel.cu" />
+    <CudaCompile Include="..\Meshing\matrix_math.cu" />
+    <CudaCompile Include="..\Meshing\mpm.cu" />
+    <CudaCompile Include="..\Meshing\simulation_helpers.cu" />
+    <CudaCompile Include="..\Meshing\vector_cross.cu" />
     <CudaCompile Include="cross_memory_handle.cu" />
     <CudaCompile Include="cuda_interop_helper.cu" />
     <CudaCompile Include="cuda_interop_kernel.cu" />
@@ -129,7 +144,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
+    <ClInclude Include="..\CUDATest\index_pair_cuda.cuh" />
+    <ClInclude Include="..\Meshing\matrix.cuh" />
     <ClInclude Include="..\Meshing\mpm.cuh" />
+    <ClInclude Include="..\Meshing\vector_cross.cuh" />
     <ClInclude Include="buffer_helpers.hpp" />
     <ClInclude Include="cuda_interop_helper.cuh" />
     <ClInclude Include="descriptor_set_handler.hpp" />

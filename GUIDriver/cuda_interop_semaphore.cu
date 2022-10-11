@@ -136,6 +136,7 @@ cudaError_t CudaInterop::ImportCudaExternalSemaphore(cudaExternalSemaphore_t& cu
 	external_semaphore_handle_desc.flags = 0;
 
 	cuda_status = cudaImportExternalSemaphore(&cuda_semaphore, &external_semaphore_handle_desc);
+	CudaExceptionHandler(cuda_status, "CUDAImportExternalSemaphore");
 
 	return cuda_status;
 }

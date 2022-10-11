@@ -39,7 +39,25 @@ __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dis
 		blocks = dim3(ceil((1.0 * cell_dist_matrix->columns)), ceil((1.0f * grid->GetMomentum(incident).rows)), 1); //NOTE: May be backwards
 		Matrix::CopyMatrixOnPointer(momentum_matrix, grid->GetMomentum(incident));
 
-		MultiplyKernel<<<blocks, threads>>> (momentum_matrix, cell_dist_matrix, momentum);
+		//cudaStream_t cuda_stream_dyn; //Dynamic parallelism stream
+
+		//cudaStreamCreateWithFlags(&cuda_stream_dyn, cudaStreamNonBlocking);
+
+		//MultiplyKernel<<<blocks, threads, 1, cuda_stream_dyn>>> (momentum_matrix, cell_dist_matrix, momentum);
+
+		//cudaStreamDestroy(cuda_stream_dyn);
+		for (int l = 0; l < grid->GetMomentum(incident).columns; l++) {
+			for (int j = 0; j < grid->GetMomentum(incident).rows; j++) {
+				unsigned int idx = j * momentum->columns + l;
+				if (y_bounds < momentum->rows && x_bounds < momentum->columns) {
+					float Pvalue = 0;
+					for (int k = 0; k < momentum_matrix->columns; ++k) {
+						Pvalue += momentum_matrix->Get(j * momentum_matrix->columns + k) * cell_dist_matrix->Get(k * cell_dist_matrix->columns + l);
+					}
+					momentum->Get(idx) = Pvalue;
+				}
+			}
+		}
 
 		IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
 

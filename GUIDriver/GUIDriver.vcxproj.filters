@@ -40,6 +40,36 @@
     <CudaCompile Include="cross_memory_handle.cu">
       <Filter>cuda\interop</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\Meshing\matrix.cu">
+      <Filter>cuda\imported</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\vector_cross.cu">
+      <Filter>cuda\imported</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\CUDATest\index_pair_cuda.cu">
+      <Filter>cuda\imported</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\mpm.cu">
+      <Filter>cuda\imported\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\advect_particles.cu">
+      <Filter>cuda\imported\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\cell_momentum.cu">
+      <Filter>cuda\imported\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\gradient_solve.cu">
+      <Filter>cuda\imported\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\simulation_helpers.cu">
+      <Filter>cuda\imported\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\matrix_math.cu">
+      <Filter>cuda\imported\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\Meshing\matrix_kernel.cu">
+      <Filter>cuda\imported\mpm</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cpp">
@@ -98,6 +128,12 @@
     </Filter>
     <Filter Include="cpp\vulkan\interop">
       <UniqueIdentifier>{165aa380-c791-40ad-bda6-09603dbd86c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cuda\imported">
+      <UniqueIdentifier>{f7e7ac0a-b5d3-4b7d-9125-c2a9f3e8cade}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cuda\imported\mpm">
+      <UniqueIdentifier>{6796df23-b30a-4209-be90-c77d4419175e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -203,8 +239,17 @@
     <ClInclude Include="windows_security_attributes.hpp">
       <Filter>includes\interop</Filter>
     </ClInclude>
+    <ClInclude Include="..\CUDATest\index_pair_cuda.cuh">
+      <Filter>includes\imported</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Meshing\vector_cross.cuh">
+      <Filter>includes\imported</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Meshing\matrix.cuh">
+      <Filter>includes\imported</Filter>
+    </ClInclude>
     <ClInclude Include="..\Meshing\mpm.cuh">
-      <Filter>includes\interop</Filter>
+      <Filter>includes\imported</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

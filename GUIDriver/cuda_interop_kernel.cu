@@ -11,31 +11,37 @@ __host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSema
 	void*& device_ptr = cross_memory_handles_[0].cuda_device_ptr,
 		*& host_ptr = cross_memory_handles_[0].cuda_host_ptr;
 	cuda_status = cudaMemsetAsync(device_ptr, 0, cross_memory_handles_[0].TotalAllocationSize(), cuda_stream_);
+	CudaExceptionHandler(cuda_status, "CUDAMemsetAsync");
 
-	dim3 blocks, threads;
+	//dim3 blocks, threads;
 
-	TestKernel<<<blocks, threads, 0, cuda_stream_>>> ((float*) device_ptr);
+	//TestKernel<<<blocks, threads, 0, cuda_stream_>>> ((float*) device_ptr);
+	Grid::SimulateGPU(grid_, cuda_stream_); //WIP
 
-	cuda_status = PostExecutionChecks(cuda_status, "TestKernel");
+	cuda_status = PostExecutionChecks(cuda_status, "MPMKernel");
 
-	cuda_status = cudaMemcpyAsync(host_ptr, device_ptr, cross_memory_handles_[0].TotalAllocationSize(), cudaMemcpyDeviceToHost, cuda_stream_);
+	//cuda_status = cudaMemcpyAsync(host_ptr, device_ptr, cross_memory_handles_[0].TotalAllocationSize(), cudaMemcpyDeviceToHost, cuda_stream_); //NOTE: TEST
 
 	return cuda_status;
 }
 
-__host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
+__host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore, const size_t& size) {
 	cudaError_t cuda_status = cudaSuccess;
 
-	size_t size = 4; //WIP, Test
-
-	AddMemoryHandle(size, sizeof(float)); //Adds memory handle struct
+	AddMemoryHandle(size, sizeof(Vector3D)); //Adds memory handle struct
 
 	cuda_status = CreateStream();
-	CUresult cuda_result = SimulationSetupAllocations(); //Setups the allocation for the simulation
+	ProgramLog::OutputLine("Creating CUDA async stream!");
 
-	for (auto& cross_memory_handle : cross_memory_handles_) {
-		cuda_status = cross_memory_handle.AllocateCudaMemory(); //Allocates CUDA memory across handle structs
-	}
+	CUresult cuda_result = SimulationSetupAllocations(); //Setups the allocation for the simulation
+	ProgramLog::OutputLine("Setting up simulation interop allocations!");
+
+	//for (auto& cross_memory_handle : cross_memory_handles_) {
+		//cuda_status = cross_memory_handle.AllocateCudaMemory(); //Allocates CUDA memory across handle structs
+	//}
+	ProgramLog::OutputLine("CUDA memory allocated successfully!");
+
+	cross_memory_handles_[0].cuda_device_ptr = grid_->particle_velocity_device_;
 
 	cuda_status = InitializeCudaInterop(wait_semaphore, signal_semaphore);
 
@@ -52,10 +58,13 @@ __host__ cudaError_t CudaInterop::InteropDrawFrame(VkSemaphore& wait_semaphore, 
 	signal_params.params.fence.value = 0;
 
 	cudaError_t cuda_status = cudaWaitExternalSemaphoresAsync(&cuda_wait_semaphore_, &wait_params, 1, cuda_stream_);
+	CudaExceptionHandler(cuda_status, "CUDAWaitExternalSemaphoreAsync");
 
 	cuda_status = TestMethod(wait_semaphore, signal_semaphore);
+	CudaExceptionHandler(cuda_status, "ExecuteMethod");
 
-	cudaSignalExternalSemaphoresAsync(&cuda_signal_semaphore_, &signal_params, 1, cuda_stream_);
+	cuda_status = cudaSignalExternalSemaphoresAsync(&cuda_signal_semaphore_, &signal_params, 1, cuda_stream_);
+	CudaExceptionHandler(cuda_status, "CUDASignalExternalSemaphoreAsync");
 
 	return cuda_status;
 }

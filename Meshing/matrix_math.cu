@@ -137,7 +137,7 @@ __host__ __device__ Matrix Matrix::operator*(const float& scalar) {
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
-            matrix.Get(i, j) = Get(i, j) * scalar;
+            matrix.Get(j, i) = Get(j, i) * scalar;
         }
     }
     return matrix;
@@ -146,7 +146,7 @@ __host__ __device__ Matrix Matrix::operator*(const float& scalar) {
 __host__ __device__ void Matrix::AddOnPointer(Matrix* matrix, Matrix add) {
     for (int i = 0; i < matrix->rows; i++) {
         for (int j = 0; j < matrix->columns; j++) {
-            matrix->Get(i, j) += add.Get(i, j);
+            matrix->Get(j, i) += add.Get(j, i);
         }
     }
 }
@@ -154,7 +154,7 @@ __host__ __device__ void Matrix::AddOnPointer(Matrix* matrix, Matrix add) {
 __host__ __device__ void Matrix::MultiplyScalarOnPointer(Matrix* matrix, const float& multi) {
     for (int i = 0; i < matrix->rows; i++) {
         for (int j = 0; j < matrix->columns; j++) {
-            matrix->Get(i, j) *= multi;
+            matrix->Get(j, i) *= multi;
         }
     }
 }

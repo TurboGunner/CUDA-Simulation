@@ -1,6 +1,6 @@
 #include "mpm.cuh"
 
-__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted_stress, Matrix* cell_dist_matrix, Matrix* momentum) {
+__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted_stress, Matrix* cell_dist_matrix, Matrix* momentum, Matrix* viscosity_term) {
 	//Particle Boundaries
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
@@ -19,7 +19,7 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted
 	const size_t traversal_length = 27;
 
 	float density = 0.0f;
-	for (size_t i = 0; i < traversal_length; ++i) {
+	for (size_t i = 0; i < traversal_length; i++) { //NOTE: INCREMENT ORDER
 		int x_weight_idx = (i / 6) % 2,
 			y_weight_idx = (i / 3) % 2,
 			z_weight_idx = i % 2;
@@ -38,7 +38,7 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted
 
 	float pressure = fmax(-0.1f, grid->eos_stiffness * (pow(density / grid->rest_density, grid->eos_power) - 1));
 
-	Matrix& strain_matrix = grid->GetMomentum(incident);
+	Matrix strain_matrix = grid->GetMomentum(incident); //NOTE: Removed reference!
 
 	float trace = strain_matrix.Get(2, 0) + strain_matrix.Get(1, 1) + strain_matrix.Get(0, 2);
 
@@ -48,9 +48,13 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted
 		stress_matrix->Set(-pressure, i, reverse_idx);
 	}
 
-	Matrix viscosity_term = strain_matrix * grid->dynamic_viscosity;
+	Matrix::CopyMatrixOnPointer(viscosity_term, strain_matrix);
 
-	Matrix::AddOnPointer(stress_matrix, viscosity_term);
+	Matrix::MultiplyScalarOnPointer(viscosity_term, grid->dynamic_viscosity);
+
+	//Matrix viscosity_term = strain_matrix * grid->dynamic_viscosity;
+
+	Matrix::AddOnPointer(stress_matrix, *viscosity_term);
 
 	Matrix::MultiplyScalarOnPointer(weighted_stress, -volume * 9 * grid->dt);
 }

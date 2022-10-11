@@ -26,8 +26,6 @@ public:
 
 	__host__ Grid(const Vector3D& sim_size_in, const float& resolution_in = 4.0f);
 
-	__host__ static cudaError_t CreateGrid();
-
 	__host__ void* operator new(size_t size);
 
 	__host__ void operator delete(void* ptr);
@@ -36,7 +34,7 @@ public:
 
 	__host__ cudaError_t HostTransfer();
 
-	__host__ static cudaError_t SimulateGPU(Grid* grid);
+	__host__ static cudaError_t SimulateGPU(Grid* grid, cudaStream_t& cuda_stream);
 
 	__host__ __device__ size_t GetTotalSize() const;
 
@@ -68,15 +66,15 @@ public:
 
 	__host__ __device__ Vector3D& GetCellVelocity(IndexPair incident);
 
-	const float gravity = -0.3f;
+	float gravity = -0.3f;
 
-	const float rest_density = 4.0f;
-	const float dynamic_viscosity = 0.1f;
+	float rest_density = 4.0f;
+	float dynamic_viscosity = 0.1f;
 
-	const float eos_stiffness = 10.0f;
-	const float eos_power = 4;
+	float eos_stiffness = 10.0f;
+	float eos_power = 4;
 
-	const float dt = 0.2f;
+	float dt = 0.2f;
 
 	Grid* device_alloc_;
 
@@ -105,7 +103,7 @@ private:
 
 __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dist_matrix, Matrix* momentum);
 
-__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted_stress, Matrix* cell_dist_matrix, Matrix* momentum); //Stress matrix must be diagonal!
+__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted_stress, Matrix* cell_dist_matrix, Matrix* momentum, Matrix* viscosity_term); //Stress matrix must be diagonal!
 
 __global__ void UpdateGrid(Grid* grid);
 

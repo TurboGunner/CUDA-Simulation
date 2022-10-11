@@ -34,16 +34,6 @@ __host__ Grid::Grid(const Vector3D& sim_size_in, const float& resolution_in) { /
 	is_initialized_ = true;
 }
 
-__host__ cudaError_t Grid::CreateGrid() {
-	size_t dim = 32;
-
-	Grid* grid = new Grid(Vector3D(dim, dim, dim), 4);
-
-	cudaError_t cuda_status = SimulateGPU(grid);
-
-	return cuda_status;
-}
-
 __host__ void* Grid::operator new(size_t size) {
 	void* ptr;
 	cudaMallocHost(&ptr, sizeof(Grid));

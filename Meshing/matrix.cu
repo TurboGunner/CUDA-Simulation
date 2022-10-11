@@ -164,7 +164,7 @@ __host__ __device__ cudaError_t Matrix::Destroy() {
         printf("%s\n", "Could not free memory for the device allocation.");
     }
 #endif
-    free(data);
+    cuda_status = cudaFreeHost(data);
     //printf("%s\n", "Destruction of matrix successful.");
     return cuda_status;
 }
