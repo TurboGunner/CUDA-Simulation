@@ -2,12 +2,14 @@
 
 #include "cuda_runtime.h"
 
+#include "vulkan/vulkan.h"
+
+#include "handler_classes.hpp"
+
 #include <vector>
 #include <string>
 #include <functional>
 #include <fstream>
-
-#include "vulkan/vulkan.h"
 
 using std::string;
 using std::reference_wrapper;
@@ -16,6 +18,8 @@ using std::function;
 
 /// <summary> Throws an invalid argument with the supplied error message when CUDA status is invalid. </summary>
 void CudaExceptionHandler(const cudaError_t& cuda_status, string error_message);
+
+void VulkanExceptionHandler(const VkResult& vulkan_status, const string& error_message);
 
 __host__ __device__ void CudaExceptionHandlerCross(cudaError_t cuda_status, const char* error_message);
 

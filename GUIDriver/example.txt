@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFB026517C0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFB397417C0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -35,7 +35,20 @@ Successfully submitted item to queue!
 
 Swapchain Image View Size: 3
 Framebuffers size: 2560 X 1026.
+Successfully created render fence #0!
+Successfully created render fence #1!
+Successfully created all render fences!
+
+Successfully created render semaphore #0!
+Successfully created render semaphore #1!
+Successfully created all render semaphores!
+
+Successfully created render semaphore #0!
+Successfully created render semaphore #1!
+Successfully created all render semaphores!
+
 Creating CUDA async stream!
+
 CUDA Driver API Error Status for Allocation Granularity: CUDA_SUCCESS | CUDA Driver Error String: no error
 
 CUDA Driver API Error Status for MemAddressReserve: CUDA_SUCCESS | CUDA Driver Error String: no error
@@ -57,38 +70,6 @@ CUDA memory allocated successfully!
 Memory Type: 1
 Created allocation info for video memory.
 Buffer Memory Size: 196608
-Address for Vulkan debug callback: 00007FFB026517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkSemaphoreCreateInfo-pNext-pNext ] Object 0: handle = 0x2eb7a518aa0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x8fe45d78 
- vkCreateSemaphore: pCreateInfo->pNext chain includes a structure with unknown VkStructureType (1000077824); Allowed structures are [VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, VkSemaphoreTypeCreateInfo]. This error is based on the Valid Usage documentation for version 216 of the Vulkan header.  It is possible that you are using a struct from a private extension or an extension that was added to a later version of the Vulkan header, in which case the use of pCreateInfo->pNext is undefined and may not work correctly with validation enabled The Vulkan spec states: Each pNext member of any structure (including this one) in the pNext chain must be either NULL or a pointer to a valid instance of VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, or VkSemaphoreTypeCreateInfo (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSemaphoreCreateInfo-pNext-pNext)
-
-Address for Vulkan debug callback: 00007FFB026517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkSemaphoreCreateInfo-pNext-pNext ] Object 0: handle = 0x2eb7a518aa0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x8fe45d78 
- vkCreateSemaphore: pCreateInfo->pNext chain includes a structure with unknown VkStructureType (1000077824); Allowed structures are [VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, VkSemaphoreTypeCreateInfo]. This error is based on the Valid Usage documentation for version 216 of the Vulkan header.  It is possible that you are using a struct from a private extension or an extension that was added to a later version of the Vulkan header, in which case the use of pCreateInfo->pNext is undefined and may not work correctly with validation enabled The Vulkan spec states: Each pNext member of any structure (including this one) in the pNext chain must be either NULL or a pointer to a valid instance of VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, or VkSemaphoreTypeCreateInfo (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSemaphoreCreateInfo-pNext-pNext)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkSemaphoreCreateInfo-pNext-pNext ] Object 0: handle = 0x2eb7a518aa0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x8fe45d78 
- vkCreateSemaphore: pCreateInfo->pNext chain includes a structure with unknown VkStructureType (1000077824); Allowed structures are [VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, VkSemaphoreTypeCreateInfo]. This error is based on the Valid Usage documentation for version 216 of the Vulkan header.  It is possible that you are using a struct from a private extension or an extension that was added to a later version of the Vulkan header, in which case the use of pCreateInfo->pNext is undefined and may not work correctly with validation enabled The Vulkan spec states: Each pNext member of any structure (including this one) in the pNext chain must be either NULL or a pointer to a valid instance of VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, or VkSemaphoreTypeCreateInfo (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSemaphoreCreateInfo-pNext-pNext)
-
-Successfully created render fence #0!
-Successfully created render fence #1!
-Successfully created all render fences!
-
-Successfully created render semaphore #0!
-Successfully created render semaphore #1!
-Successfully created all render semaphores!
-
-Successfully created render semaphore #0!
-Successfully created render semaphore #1!
-Successfully created all render semaphores!
-
 Successfully read shader file Shaders/vert.spv!
 
 Successfully read shader file Shaders/frag.spv!
@@ -104,7 +85,7 @@ Created color blend attachment for the render pipeline.
 Created color blend state for the render pipeline.
 Created depth stencil state for the render pipeline.
 
-Dynamic State Count: 2.
+Dynamic State Count: 2
 Created graphics pipeline info for render pipeline.
 Name for shader stage (Index 0): main.
 Successfully created graphics pipeline!
@@ -118,47 +99,23 @@ Ended command recording!
 
 Successfully submitted item to queue!
 
-Address for Vulkan debug callback: 00007FFB026517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFB397417C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkSemaphoreCreateInfo-pNext-pNext ] Object 0: handle = 0x2eb7a518aa0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x8fe45d78 
- vkCreateSemaphore: pCreateInfo->pNext chain includes a structure with unknown VkStructureType (1000077824); Allowed structures are [VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, VkSemaphoreTypeCreateInfo]. This error is based on the Valid Usage documentation for version 216 of the Vulkan header.  It is possible that you are using a struct from a private extension or an extension that was added to a later version of the Vulkan header, in which case the use of pCreateInfo->pNext is undefined and may not work correctly with validation enabled The Vulkan spec states: Each pNext member of any structure (including this one) in the pNext chain must be either NULL or a pointer to a valid instance of VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, or VkSemaphoreTypeCreateInfo (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSemaphoreCreateInfo-pNext-pNext)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkSemaphoreCreateInfo-pNext-pNext ] Object 0: handle = 0x2eb7a518aa0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x8fe45d78 
- vkCreateSemaphore: pCreateInfo->pNext chain includes a structure with unknown VkStructureType (1000077824); Allowed structures are [VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, VkSemaphoreTypeCreateInfo]. This error is based on the Valid Usage documentation for version 216 of the Vulkan header.  It is possible that you are using a struct from a private extension or an extension that was added to a later version of the Vulkan header, in which case the use of pCreateInfo->pNext is undefined and may not work correctly with validation enabled The Vulkan spec states: Each pNext member of any structure (including this one) in the pNext chain must be either NULL or a pointer to a valid instance of VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, or VkSemaphoreTypeCreateInfo (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSemaphoreCreateInfo-pNext-pNext)
-[vulkan] Debug report from ObjectType: 4
-Message: 
-
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x2eb7a523a30, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x21752b5bc50, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 
-Address for Vulkan debug callback: 00007FFB026517C0. Debug callback successful![vulkan] Debug report from ObjectType: 3
+Address for Vulkan debug callback: 00007FFB397417C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkSemaphoreCreateInfo-pNext-pNext ] Object 0: handle = 0x2eb7a518aa0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x8fe45d78 
- vkCreateSemaphore: pCreateInfo->pNext chain includes a structure with unknown VkStructureType (1000077824); Allowed structures are [VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, VkSemaphoreTypeCreateInfo]. This error is based on the Valid Usage documentation for version 216 of the Vulkan header.  It is possible that you are using a struct from a private extension or an extension that was added to a later version of the Vulkan header, in which case the use of pCreateInfo->pNext is undefined and may not work correctly with validation enabled The Vulkan spec states: Each pNext member of any structure (including this one) in the pNext chain must be either NULL or a pointer to a valid instance of VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, or VkSemaphoreTypeCreateInfo (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSemaphoreCreateInfo-pNext-pNext)
-[vulkan] Debug report from ObjectType: 3
-Message: 
-
-Validation Error: [ VUID-VkSemaphoreCreateInfo-pNext-pNext ] Object 0: handle = 0x2eb7a518aa0, type = VK_OBJECT_TYPE_DEVICE; 
- MessageID = 0x8fe45d78 
- vkCreateSemaphore: pCreateInfo->pNext chain includes a structure with unknown VkStructureType (1000077824); Allowed structures are [VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, VkSemaphoreTypeCreateInfo]. This error is based on the Valid Usage documentation for version 216 of the Vulkan header.  It is possible that you are using a struct from a private extension or an extension that was added to a later version of the Vulkan header, in which case the use of pCreateInfo->pNext is undefined and may not work correctly with validation enabled The Vulkan spec states: Each pNext member of any structure (including this one) in the pNext chain must be either NULL or a pointer to a valid instance of VkExportSemaphoreCreateInfo, VkExportSemaphoreWin32HandleInfoKHR, or VkSemaphoreTypeCreateInfo (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-VkSemaphoreCreateInfo-pNext-pNext)
-[vulkan] Debug report from ObjectType: 4
-Message: 
-
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x2eb7a523a30, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x21752b5bc50, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 [vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x2eb7a523a30, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x21752b5bc50, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 

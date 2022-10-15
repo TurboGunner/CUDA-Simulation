@@ -1,4 +1,4 @@
-#include "cuda_interop_helper.cuh"
+#include "cross_memory_handle.cuh"
 
 CrossMemoryHandle::CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in, const bool& host_inclusive_in) {
 	size = size_in;

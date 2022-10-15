@@ -6,7 +6,18 @@
 
 void CudaExceptionHandler(const cudaError_t& cuda_status, string error_message) {
     if (cuda_status != cudaSuccess) {
-        std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
+        s_stream << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
+        ProgramLog::OutputLine(s_stream);
+
+        throw std::invalid_argument(error_message);
+    }
+}
+
+void VulkanExceptionHandler(const VkResult& vulkan_status, const string& error_message) {
+    if (vulkan_status != VK_SUCCESS) {
+        s_stream << "Error: " << vulkan_status << "\n" << std::endl;
+        ProgramLog::OutputLine(s_stream);
+
         throw std::invalid_argument(error_message);
     }
 }
@@ -23,7 +34,8 @@ void ErrorLog(const cudaError_t& cuda_status, const string& operation_name, cons
         std::cout << operation_name << " returned error code " << cuda_status << " after launching " << method_name << "\n" << std::endl;
         std::cout << "Error Stacktrace: " << cudaGetErrorString(cuda_status) << "\n" << std::endl;
         if (optional_args.size() > 0) {
-            std::cout << "Additional Stacktrace: " << optional_args << std::endl;
+            s_stream << "Additional Stacktrace: " << optional_args << std::endl;
+            ProgramLog::OutputLine(s_stream);
         }
     }
 }

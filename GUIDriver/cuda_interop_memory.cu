@@ -40,6 +40,10 @@ VkResult CudaInterop::CreateExternalBuffer(const VkDeviceSize& size, const VkBuf
 
 	vulkan_status = vkBindBufferMemory(device_, buffer, buffer_memory, 0);
 
+	if (vulkan_status == VK_SUCCESS) {
+		ProgramLog::OutputLine("Successfully created external buffer for CUDA interop! Size: " + std::to_string(size));
+	}
+
 	return vulkan_status;
 }
 
@@ -209,6 +213,10 @@ cudaError_t CudaInterop::ImportCudaExternalMemory(void** cuda_ptr, cudaExternalM
 	external_mem_buffer_desc.flags = 0;
 
 	cuda_status = cudaExternalMemoryGetMappedBuffer(cuda_ptr, cuda_memory, &external_mem_buffer_desc);
+
+	if (cuda_status != cudaSuccess) {
+		ProgramLog::OutputLine("Successfully created external buffer for CUDA interop! Size: " + std::to_string(size));
+	}
 
 	return cuda_status;
 }

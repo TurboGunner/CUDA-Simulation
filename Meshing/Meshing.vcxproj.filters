@@ -91,5 +91,8 @@
     <ClCompile Include="..\CUDATest\handler_methods.cpp">
       <Filter>cpp\import</Filter>
     </ClCompile>
+    <ClCompile Include="..\CUDATest\handler_classes.cpp">
+      <Filter>cpp\import</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

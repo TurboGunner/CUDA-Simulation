@@ -16,45 +16,15 @@ class ProgramLog {
 public:
 	ProgramLog(const ProgramLog&) = delete;
 
-	~ProgramLog() {
-		Close();
-	}
+	~ProgramLog();
 
-	static ProgramLog& Get() {
-		static ProgramLog instance_;
-		return instance_;
-	}
+	static ProgramLog& Get();
 
-	static void OutputLine(string line, bool is_separate = true) {
-		if (Get().line_count == 0) {
-			Get().file_log.open(Get().file_name);
-		}
+	static void OutputLine(string line, bool is_separate = true);
 
-		Get().file_log << line;
-		Get().line_count++;
-		if (is_separate) {
-			Get().file_log << std::endl;
-		}
-	}
+	static void OutputLine(std::stringstream& line, bool is_separate = true);
 
-	static void OutputLine(std::stringstream& line, bool is_separate = true) {
-		if (Get().line_count == 0) {
-			Get().file_log.open(Get().file_name);
-		}
-
-		Get().file_log << line.str();
-		Get().line_count++;
-		if (is_separate) {
-			Get().file_log << std::endl;
-		}
-		line.clear();
-		s_stream.clear();
-		s_stream.str(string());
-	}
-
-	static void Close() {
-		Get().file_log.close();
-	}
+	static void Close();
 
 private:
 	ProgramLog() = default;
@@ -66,20 +36,9 @@ private:
 
 class RandomFloat {
 public:
-	RandomFloat(float low = 0.0f, float high = 10.0f, unsigned long seed_in = 0) {
-		generator = std::mt19937(0);
-		distribution = std::uniform_real_distribution<float>(low, high);
-		seed = seed_in;
-	}
+	RandomFloat(float low = 0.0f, float high = 10.0f, unsigned long seed_in = 0);
 
-	float Generate() {
-		float random = distribution(generator);
-
-		seed++;
-		generator.seed(seed);
-
-		return random;
-	}
+	float Generate();
 
 private:
 	std::mt19937 generator;

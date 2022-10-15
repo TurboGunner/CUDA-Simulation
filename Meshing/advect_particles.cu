@@ -8,6 +8,9 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current positions
 
+	//NOTE
+	grid->GetVelocity(incident).Reset(); //Sets velocity to zero
+
 	//Current particle variables
 	Vector3D position = grid->GetPosition(incident);
 	Vector3D cell_idx = position.Truncate();
@@ -61,6 +64,7 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 		float wall_max = (float) grid->side_size_ - 4;
 
 		MPMBoundaryConditions(grid, incident, position_normalized, wall_min, wall_max);
+		//printf("%f\n", grid->GetPosition(incident).dim[0]);
 	}
 }
 

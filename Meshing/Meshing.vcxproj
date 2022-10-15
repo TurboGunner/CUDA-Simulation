@@ -102,6 +102,7 @@
     <CudaCompile Include="weighted_least_squares.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\CUDATest\handler_classes.cpp" />
     <ClCompile Include="..\CUDATest\handler_methods.cpp" />
   </ItemGroup>
   <ItemGroup>

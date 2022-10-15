@@ -17,6 +17,10 @@ struct GPUCameraData {
     glm::mat4 view_proj;
 };
 
+struct GPUObjectData {
+    glm::mat4 model_matrix;
+};
+
 class DescriptorSetHandler {
 public:
 	DescriptorSetHandler() = default;
@@ -31,9 +35,14 @@ public:
 
     VkDescriptorSetLayout global_set_layout_ = {}, object_set_layout_ = {};
 
+    vector<GPUObjectData> object_data_;
+    vector<VkBuffer> object_buffers_;
+    vector<VkDeviceMemory> object_buffer_memory_;
+    vector<VkDescriptorSet> object_descriptors_;
+
     vector<GPUCameraData> camera_data_;
     vector<VkBuffer> camera_buffers_;
-    vector<VkDescriptorSet> global_descriptors_;
+    vector<VkDescriptorSet> camera_descriptors_;
     vector<VkDeviceMemory> camera_buffer_memory_;
 
 private:

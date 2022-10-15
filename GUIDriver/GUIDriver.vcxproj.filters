@@ -251,6 +251,9 @@
     <ClInclude Include="..\Meshing\mpm.cuh">
       <Filter>includes\imported</Filter>
     </ClInclude>
+    <ClInclude Include="cross_memory_handle.cuh">
+      <Filter>includes\interop</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GUIDriver.rc" />

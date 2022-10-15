@@ -115,6 +115,7 @@ void ShaderLoader::VertexInputInfo() {
 void ShaderLoader::InputAssemblyInfo() {
     input_assembly_.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     input_assembly_.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    //input_assembly_.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     input_assembly_.primitiveRestartEnable = VK_FALSE;
     input_assembly_.pNext = nullptr;
 
@@ -136,7 +137,7 @@ void ShaderLoader::GraphicsPipelineInfo(VkRenderPass& render_pass) {
     pipeline_info_.pMultisampleState = &multi_sampling_info_;
     pipeline_info_.pDepthStencilState = &depth_stencil_state_;
 
-    ProgramLog::OutputLine("Dynamic State Count: " + std::to_string(dynamic_state_.dynamicStateCount) + ".");
+    ProgramLog::OutputLine("Dynamic State Count: " + std::to_string(dynamic_state_.dynamicStateCount));
 
     pipeline_info_.pColorBlendState = &color_blend_state_;
     pipeline_info_.pDynamicState = nullptr;

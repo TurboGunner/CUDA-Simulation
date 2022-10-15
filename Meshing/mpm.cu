@@ -20,7 +20,9 @@ __host__ Grid::Grid(const Vector3D& sim_size_in, const float& resolution_in) { /
 	cudaError_t cuda_status = cudaSuccess;
 
 	cuda_status = cudaMalloc(&particle_position_device_, GetParticleCount() * sizeof(Vector3D));
-	cuda_status = cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
+	if (host_sync_) {
+		cuda_status = cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
+	}
 
 	cuda_status = cudaMalloc(&particle_velocity_device_, GetParticleCount() * sizeof(Vector3D));
 	cuda_status = cudaMalloc(&particle_mass_device_, GetParticleCount() * sizeof(float));
@@ -32,6 +34,22 @@ __host__ Grid::Grid(const Vector3D& sim_size_in, const float& resolution_in) { /
 	momentum_matrices_ = Matrix::MatrixMassAllocation(GetParticleCount(), 3, 3);
 
 	is_initialized_ = true;
+}
+
+__host__ Grid::~Grid() {
+	cudaError_t cuda_status = cudaFree(particle_position_device_);
+	cuda_status = cudaFree(particle_velocity_device_);
+	cuda_status = cudaFree(particle_mass_device_);
+
+	cuda_status = cudaFree(cell_velocity_device_);
+	cuda_status = cudaFree(cell_mass_device_);
+
+	if (host_sync_) {
+		cuda_status = cudaFreeHost(particle_position_);
+	}
+	for (size_t i = 0; i < GetParticleCount(); i++) {
+		momentum_matrices_[0].Destroy();
+	}
 }
 
 __host__ void* Grid::operator new(size_t size) {

@@ -93,6 +93,9 @@ static void VulkanErrorHandler(VkResult vulkan_status) {
 VKAPI_ATTR static VkBool32 VKAPI_CALL DebugReport(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData) {
     (void)flags; (void)object; (void)location; (void)messageCode; (void)pUserData; (void)pLayerPrefix; // Unused arguments
     string message = pMessage;
+    if (message.find("1000077824") != string::npos) { //Filter
+        return VK_FALSE;
+    }
     auto parts = Split(message, '|');
 
     s_stream << "[vulkan] Debug report from ObjectType: " << objectType << "\nMessage: \n\n";

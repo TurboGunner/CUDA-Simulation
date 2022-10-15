@@ -27,7 +27,7 @@ public:
 
 	__host__ __device__ Matrix(const size_t& rows_in, const size_t& columns_in, const bool& local = false, const bool& host_in = true);
 
-	__host__ __device__ static Matrix* Create(const size_t& rows, const size_t& columns, const bool& local = false);
+	__host__ __device__ static Matrix* Create(const size_t& rows, const size_t& columns, const bool& local = false, const bool& host = false);
 
 	__host__ __device__ cudaError_t Destroy();
 
@@ -101,7 +101,7 @@ private:
 
     bool is_square = true;
 
-	bool device_allocated_status = false, local = false;
+	bool device_allocated_status = false, local = false, host = false;
 };
 
 __global__ void TransposeKernel(Matrix* matrix, Matrix* output);

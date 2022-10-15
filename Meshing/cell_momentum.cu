@@ -29,24 +29,19 @@ __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dis
 			cell_idx.z() + z_weight_idx - 1);
 
 		Vector3D cell_dist = (cell_position - position) + 0.5f;
-		for (int j = 0; j < cell_dist_matrix->columns; j++) {
+		for (int j = 0; j < 3; j++) {
 			cell_dist_matrix->Get(j) = cell_dist.dim[j];
 		}
 
-		dim3 blocks, threads;
-
-		threads = dim3(1, 1);
-		blocks = dim3(ceil((1.0 * cell_dist_matrix->columns)), ceil((1.0f * grid->GetMomentum(incident).rows)), 1); //NOTE: May be backwards
 		Matrix::CopyMatrixOnPointer(momentum_matrix, grid->GetMomentum(incident));
 
-		//cudaStream_t cuda_stream_dyn; //Dynamic parallelism stream
+		//Maybe separate this later, and split the UpdateCell into determined chunks?
+		//The idea is separating the matrix multiplication (without dynamic parallelism) will significantly increase perf
+		//
+		//Maybe we don't need cell_dist_matrix, and can just use the vector?
+		//Maybe also for momentum? Momentum is a 3x1, so Q would not have to be assigned after computation
 
-		//cudaStreamCreateWithFlags(&cuda_stream_dyn, cudaStreamNonBlocking);
-
-		//MultiplyKernel<<<blocks, threads, 1, cuda_stream_dyn>>> (momentum_matrix, cell_dist_matrix, momentum);
-
-		//cudaStreamDestroy(cuda_stream_dyn);
-		for (int l = 0; l < grid->GetMomentum(incident).columns; l++) {
+		for (int l = 0; l < cell_dist_matrix->columns; l++) {
 			for (int j = 0; j < grid->GetMomentum(incident).rows; j++) {
 				unsigned int idx = j * momentum->columns + l;
 				if (y_bounds < momentum->rows && x_bounds < momentum->columns) {
@@ -55,6 +50,7 @@ __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dis
 						Pvalue += momentum_matrix->Get(j * momentum_matrix->columns + k) * cell_dist_matrix->Get(k * cell_dist_matrix->columns + l);
 					}
 					momentum->Get(idx) = Pvalue;
+					//printf("%d\n", idx);
 				}
 			}
 		}

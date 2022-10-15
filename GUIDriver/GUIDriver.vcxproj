@@ -149,6 +149,7 @@
     <ClInclude Include="..\Meshing\mpm.cuh" />
     <ClInclude Include="..\Meshing\vector_cross.cuh" />
     <ClInclude Include="buffer_helpers.hpp" />
+    <ClInclude Include="cross_memory_handle.cuh" />
     <ClInclude Include="cuda_interop_helper.cuh" />
     <ClInclude Include="descriptor_set_handler.hpp" />
     <ClInclude Include="gui_driver.cuh" />

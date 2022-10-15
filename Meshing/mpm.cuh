@@ -3,6 +3,8 @@
 #include "matrix.cuh"
 #include "vector_cross.cuh"
 
+#include "curand_kernel.h"
+
 #include "../CUDATest/index_pair_cuda.cuh"
 
 #include "../CUDATest/handler_methods.hpp"
@@ -25,6 +27,8 @@ public:
 	Grid() = default;
 
 	__host__ Grid(const Vector3D& sim_size_in, const float& resolution_in = 4.0f);
+
+	__host__ ~Grid();
 
 	__host__ void* operator new(size_t size);
 
@@ -66,6 +70,8 @@ public:
 
 	__host__ __device__ Vector3D& GetCellVelocity(IndexPair incident);
 
+	__host__ void CalculateBounds();
+
 	float gravity = -0.3f;
 
 	float rest_density = 4.0f;
@@ -89,14 +95,31 @@ public:
 
 	Matrix* momentum_matrices_;
 
-private:
+	bool host_sync_ = false;
+	bool up_to_date_ = false;
 
+private:
 	Vector3D sim_size_;
 	size_t total_size_;
 
 	bool device_allocated_status = false, is_initialized_ = false;
 
 	float resolution_;
+
+	Matrix* cell_dist_matrix = Matrix::Create(3, 1, false);
+	Matrix* momentum = Matrix::Create(3, 1, false);
+	Matrix* momentum_matrix = Matrix::Create(3, 3, false);
+
+	Matrix* stress_matrix = Matrix::Create(3, 3, false);
+	Matrix* weighted_stress = Matrix::Create(3, 3, false);
+
+	Matrix* B_term = Matrix::Create(3, 3, false);
+	Matrix* weighted_term = Matrix::Create(3, 3, false);
+
+	Matrix* viscosity_term = Matrix::Create(3, 3, false);
+
+	dim3 cell_blocks, cell_threads;
+	dim3 particle_blocks, particle_threads;
 };
 
 //Globals

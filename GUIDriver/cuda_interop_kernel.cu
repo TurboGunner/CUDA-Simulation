@@ -1,10 +1,5 @@
 #include "cuda_interop_helper.cuh"
 
-__global__ void TestKernel(float* data) {
-	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
-	data[x_bounds] = x_bounds;
-}
-
 __host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
 	cudaError_t cuda_status = cudaSuccess;
 
@@ -15,7 +10,6 @@ __host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSema
 
 	//dim3 blocks, threads;
 
-	//TestKernel<<<blocks, threads, 0, cuda_stream_>>> ((float*) device_ptr);
 	Grid::SimulateGPU(grid_, cuda_stream_); //WIP
 
 	cuda_status = PostExecutionChecks(cuda_status, "MPMKernel");
@@ -31,7 +25,7 @@ __host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semap
 	AddMemoryHandle(size, sizeof(Vector3D)); //Adds memory handle struct
 
 	cuda_status = CreateStream();
-	ProgramLog::OutputLine("Creating CUDA async stream!");
+	ProgramLog::OutputLine("Creating CUDA async stream!\n");
 
 	CUresult cuda_result = SimulationSetupAllocations(); //Setups the allocation for the simulation
 	ProgramLog::OutputLine("Setting up simulation interop allocations!");

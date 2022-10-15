@@ -29,12 +29,15 @@ VkResult VulkanParameters::InitVulkan() {
 
 	InFlightObjectsInit();
 
+	SimulationInit();
+
 	VkResult vulkan_status = PipelineInit();
 	return vulkan_status;
 }
 
 VkResult VulkanParameters::InitVulkanStage2() {
 	VkResult vulkan_status = vkDeviceWaitIdle(device_);
+
 	return vulkan_status;
 }
 
@@ -55,11 +58,6 @@ void VulkanParameters::SwapchainInitStage2() {
 	ProgramLog::OutputLine("\nSwapchain Image View Size: " + std::to_string(swap_chain_helper_.swapchain_image_views_.size()));
 
 	swap_chain_helper_.CreateSwapchainFrameBuffers(render_pass_, swap_chain_helper_.swapchain_image_views_, swap_chain_helper_.depth_image_view_);
-
-	grid_ = new Grid(Vector3D(16.0f, 16.0f, 16.0f));
-
-	interop_handler_.grid_ = grid_;
-	interop_handler_.BulkInitializationTest(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_, grid_->GetParticleCount());
 }
 
 void VulkanParameters::ViewportInit() {
@@ -111,6 +109,19 @@ void VulkanParameters::InFlightObjectsInit() {
 	clear_values_[1].depthStencil = { 1.0f, 0 };
 }
 
+void VulkanParameters::SimulationInit() {
+	const float side_size = 16.0f;
+
+	grid_ = new Grid(Vector3D(side_size, side_size, side_size));
+
+	interop_handler_.grid_ = grid_;
+	interop_handler_.BulkInitializationTest(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_, grid_->GetParticleCount());
+
+	CrossMemoryHandle& mesh_handle = interop_handler_.cross_memory_handles_[0]; //NOTE: FIXED
+	mesh_data_.vertices.sync_data_ = mesh_handle;
+
+}
+
 VkResult VulkanParameters::PipelineInit() {
 	//Create Pipeline
 	render_pipeline_ = shader_handler_.Initialize(render_pass_);
@@ -160,7 +171,7 @@ DescriptorSetHandler& VulkanParameters::DescriptorSetHandler() {
 }
 
 VkDescriptorSet& VulkanParameters::CurrentDescriptorSet() {
-	return DescriptorSetHandler().global_descriptors_[current_frame_];
+	return DescriptorSetHandler().camera_descriptors_[current_frame_];
 }
 
 VkCommandBuffer VulkanParameters::BeginSingleTimeCommands() {
@@ -189,4 +200,17 @@ MeshPushConstants VulkanParameters::ViewportRotation() {
 
 cudaError_t VulkanParameters::InteropDrawFrame() {
 	return interop_handler_.InteropDrawFrame(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_);
+}
+
+void VulkanParameters::DrawVerticesCall() {
+	VkCommandBuffer& in_flight_command_buffer = InFlightCommandBuffer();
+	if (mesh_data_.IndexBindingMode() && !mesh_data_.vertices.SyncMode()) {
+		vkCmdDrawIndexed(in_flight_command_buffer, mesh_data_.vertices.Size(), 1, 0, 0, 0);
+	}
+	else if (!mesh_data_.IndexBindingMode() && mesh_data_.vertices.SyncMode()) {
+		interop_handler_.PopulateCommandBuffer(in_flight_command_buffer);
+	}
+	else {
+		ProgramLog::OutputLine("Warning: Incompatible states in the VertexData and contained MeshContainer detected. SyncMode must not have index buffering enabled!");
+	}
 }

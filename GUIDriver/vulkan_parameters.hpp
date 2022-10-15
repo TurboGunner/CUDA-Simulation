@@ -74,6 +74,8 @@ public:
 
 	cudaError_t InteropDrawFrame();
 
+	void DrawVerticesCall();
+
 	VkDevice device_;
 	VkPhysicalDevice physical_device_;
 
@@ -134,6 +136,8 @@ private:
 	void BulkHelperStructInit();
 
 	void InFlightObjectsInit();
+
+	void SimulationInit();
 
 	VkResult PipelineInit();
 

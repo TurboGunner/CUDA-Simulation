@@ -195,12 +195,18 @@ cudaError_t CudaInterop::InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSe
 
     vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer, buffer_memory);
 
+    if (vulkan_status != VK_SUCCESS) {
+        ProgramLog::OutputLine("Importing external buffer failed in InitializeCudaInterop!");
+    }
+
     ProgramLog::OutputLine("Buffer Memory Size: " + std::to_string(alloc_size));
 
     auto mem_semaphore_type = GetPlatformSemaphoreHandle();
 
     vulkan_status = CreateExternalSemaphore(wait_semaphore, mem_semaphore_type);
+    VulkanExceptionHandler(vulkan_status, "Failure creating wait semaphore in InitializeCudaInterop!");
     vulkan_status = CreateExternalSemaphore(signal_semaphore, mem_semaphore_type);
+    VulkanExceptionHandler(vulkan_status, "Failure creating signal semaphore in InitializeCudaInterop!");
 
     cuda_status = ImportCudaExternalSemaphore(cuda_wait_semaphore_, wait_semaphore, mem_semaphore_type);
     CudaExceptionHandler(cuda_status, "ImportCUDAExternalSemaphoreWait");
@@ -238,13 +244,5 @@ bool CudaInterop::IsVkPhysicalDeviceUUID(void* uuid) {
 }
 
 void CudaInterop::PopulateCommandBuffer(VkCommandBuffer& command_buffer) {
-    VkDeviceSize offsets[] = { 0, 0 };
-    vector<VkBuffer> buffers;
-
-    for (auto& cross_memory_handle : cross_memory_handles_) {
-        buffers.push_back(cross_memory_handle.buffer);
-    }
-
-    vkCmdBindVertexBuffers(command_buffer, 0, buffers.size(), buffers.data(), offsets);
     vkCmdDraw(command_buffer, cross_memory_handles_[0].size, 1, 0, 0);
 }

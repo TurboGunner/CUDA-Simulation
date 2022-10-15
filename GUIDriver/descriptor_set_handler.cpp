@@ -37,10 +37,19 @@ VkResult DescriptorSetHandler::AllocateDescriptorSets() {
     camera_data_.resize(MAX_FRAMES_IN_FLIGHT_);
     camera_buffers_.resize(MAX_FRAMES_IN_FLIGHT_);
     camera_buffer_memory_.resize(MAX_FRAMES_IN_FLIGHT_);
-    global_descriptors_.resize(MAX_FRAMES_IN_FLIGHT_);
+    camera_descriptors_.resize(MAX_FRAMES_IN_FLIGHT_);
+
+    object_data_.resize(MAX_FRAMES_IN_FLIGHT_);
+    object_buffers_.resize(MAX_FRAMES_IN_FLIGHT_);
+    object_buffer_memory_.resize(MAX_FRAMES_IN_FLIGHT_);
+    object_descriptors_.resize(MAX_FRAMES_IN_FLIGHT_);
 
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT_; i++) {
         BufferHelpers::CreateBufferCross(device_, physical_device_, queue_, command_pool_, &camera_data_[i], camera_buffers_[i], camera_buffer_memory_[i], VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(GPUCameraData));
+
+        const size_t limit = 10000;
+
+        //BufferHelpers::CreateBufferCross(device_, physical_device_, queue_, command_pool_, &object_data_[i], object_buffers_[i], object_buffer_memory_[i], VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeof(GPUObjectData) * limit);
 
         VkDescriptorSetAllocateInfo alloc_info = {};
 
@@ -50,7 +59,17 @@ VkResult DescriptorSetHandler::AllocateDescriptorSets() {
         alloc_info.descriptorSetCount = 1;
         alloc_info.pSetLayouts = &global_set_layout_;
 
-        vulkan_status = vkAllocateDescriptorSets(device_, &alloc_info, &global_descriptors_[i]);
+        vulkan_status = vkAllocateDescriptorSets(device_, &alloc_info, &camera_descriptors_[i]);
+
+        VkDescriptorSetAllocateInfo object_alloc_info = {};
+
+        object_alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        object_alloc_info.pNext = nullptr;
+        object_alloc_info.descriptorPool = descriptor_pool_;
+        object_alloc_info.descriptorSetCount = 1;
+        object_alloc_info.pSetLayouts = &object_set_layout_;
+
+        //vulkan_status = vkAllocateDescriptorSets(device_, &object_alloc_info, &object_descriptors_[i]);
 
         VkDescriptorBufferInfo buffer_info = {};
 
@@ -58,19 +77,28 @@ VkResult DescriptorSetHandler::AllocateDescriptorSets() {
         buffer_info.offset = 0;
         buffer_info.range = sizeof(GPUCameraData);
 
+        VkDescriptorBufferInfo object_buffer_info = {};
+
+        object_buffer_info.buffer = object_buffers_[i];
+        object_buffer_info.offset = 0;
+        object_buffer_info.range = sizeof(GPUObjectData) * limit;
+
         VkWriteDescriptorSet descriptor_write_info = {};
 
         descriptor_write_info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptor_write_info.pNext = nullptr;
 
         descriptor_write_info.dstBinding = 0;
-        descriptor_write_info.dstSet = global_descriptors_[i];
+        descriptor_write_info.dstSet = camera_descriptors_[i];
 
         descriptor_write_info.descriptorCount = 1;
         descriptor_write_info.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptor_write_info.pBufferInfo = &buffer_info;
 
-        auto descriptor_set_write = BufferHelpers::WriteDescriptorSetInfo(global_descriptors_[i], camera_buffers_[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, sizeof(GPUCameraData));
+        auto camera_set_write = BufferHelpers::WriteDescriptorSetInfo(camera_descriptors_[i], camera_buffers_[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, sizeof(GPUCameraData));
+        //auto object_set_write = BufferHelpers::WriteDescriptorSetInfo(object_descriptors_[i], object_buffers_[i], VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, sizeof(GPUCameraData));
+
+        //array<VkWriteDescriptorSet, 2> descriptor_sets = { camera_set_write, object_set_write };
 
         vkUpdateDescriptorSets(device_, 1, &descriptor_write_info, 0, nullptr);
     }

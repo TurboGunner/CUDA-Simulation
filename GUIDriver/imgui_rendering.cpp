@@ -129,8 +129,8 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBu
     vulkan_parameters_.clear_values_[0].color.float32[3] = clear_color_.w;
 
     FrameRender(draw_data);
-    cudaError_t cuda_status = vulkan_parameters_.InteropDrawFrame();
     FramePresent();
+    cudaError_t cuda_status = vulkan_parameters_.InteropDrawFrame();
 }
 
 void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebuffer& frame_buffer) {
@@ -233,7 +233,9 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     vkCmdPushConstants(in_flight_command_buffer, vulkan_parameters_.mesh_pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
 
-    vkCmdDrawIndexed(in_flight_command_buffer, vulkan_parameters_.mesh_data_.vertices.Size(), 1, 0, 0, 0);
+    //vkCmdDrawIndexed(in_flight_command_buffer, vulkan_parameters_.mesh_data_.vertices.Size(), 1, 0, 0, 0);
+
+    vulkan_parameters_.DrawVerticesCall(); //WIP
 
     ImGui_ImplVulkan_RenderDrawData(draw_data, in_flight_command_buffer);
 

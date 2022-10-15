@@ -1,7 +1,8 @@
 #include "vertex_data.hpp"
 
-MeshContainer::MeshContainer(const bool& collision_mode) {
+MeshContainer::MeshContainer(const bool& collision_mode, const bool& sync_mode_in) {
     collision = collision_mode;
+    sync_mode_ = sync_mode_in;
 }
 
 void MeshContainer::Push(Vertex& coord_in) {
@@ -21,13 +22,29 @@ void MeshContainer::Push(vector<Vertex>& coords_in) {
     }
 }
 
+inline void SyncModeWarning() {
+    ProgramLog::OutputLine("Warning: Sync Mode is enabled. This means non-pointer and dynamic resize operations are disabled!");
+}
+
+inline void SyncModeOperationWarning() {
+    ProgramLog::OutputLine("Warning: Sync Mode is enabled. This means wrapped vector access or modifier operations are disabled!");
+}
+
 void MeshContainer::Push(std::initializer_list<Vertex>& coords_in) {
+    if (sync_mode_) {
+        SyncModeWarning();
+        return;
+    }
     for (auto coord_in : coords_in) {
         Push(coord_in);
     }
 }
 
 bool MeshContainer::CollisionCheck(Vertex& coord_in) {
+    if (sync_mode_) {
+        SyncModeWarning();
+        return false;
+    }
     size_t original_size = vertices_.size();
     map_.try_emplace(coord_in.pos, vertices_.size());
     if (vertices_.size() == original_size) {
@@ -42,6 +59,12 @@ Vertex& MeshContainer::operator[](const int& index) {
 }
 
 Vertex& MeshContainer::Get(const int& index) {
+    if (sync_mode_) {
+        SyncModeOperationWarning();
+        Vertex vertex(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        return vertex;
+    }
+
     if (index < 0 || index >= vertices_.size()) {
         ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
         return vertices_[0];
@@ -50,6 +73,10 @@ Vertex& MeshContainer::Get(const int& index) {
 }
 
 void MeshContainer::Set(Vertex& index_coord, const unsigned int& index) {
+    if (sync_mode_) {
+        SyncModeOperationWarning();
+        return;
+    }
     if (index >= vertices_.size()) {
         ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
         return;
@@ -63,6 +90,10 @@ void MeshContainer::Set(Vertex& index_coord, const unsigned int& index) {
 }
 
 void MeshContainer::Remove(const unsigned int& index) {
+    if (sync_mode_) {
+        SyncModeOperationWarning();
+        return;
+    }
     if (index >= vertices_.size()) {
         ProgramLog::OutputLine("Warning: Out of bounds access on mesh container!");
         return;
@@ -74,6 +105,10 @@ void MeshContainer::Remove(const unsigned int& index) {
 }
 
 void MeshContainer::Clear() {
+    if (sync_mode_) { //NOTE: This could be supported later for sync mode
+        SyncModeOperationWarning();
+        return;
+    }
     vertices_.clear();
     if (collision) {
         map_.clear();
@@ -82,6 +117,12 @@ void MeshContainer::Clear() {
 }
 
 const Vertex* MeshContainer::Data() {
+    if (sync_mode_) {
+        if (sync_data_.size == 0) {
+            ProgramLog::OutputLine("Warning: No vertices stored!");
+        }
+        return (Vertex*) sync_data_.vulkan_ptr; //NOTE: Maybe an incorrect cast? Just a note, also, might not be necessitated
+    }
     if (vertices_.size() == 0) {
         ProgramLog::OutputLine("Warning: No vertices stored!");
     }
@@ -90,4 +131,8 @@ const Vertex* MeshContainer::Data() {
 
 unsigned int MeshContainer::Size() {
     return vertices_.size();
+}
+
+bool MeshContainer::SyncMode() const {
+    return sync_mode_;
 }

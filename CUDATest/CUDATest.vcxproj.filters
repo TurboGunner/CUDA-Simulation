@@ -92,6 +92,9 @@
     <ClCompile Include="handler_methods.cpp">
       <Filter>cuda</Filter>
     </ClCompile>
+    <ClCompile Include="handler_classes.cpp">
+      <Filter>cpp\utility_structures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="linear_solver.cu">

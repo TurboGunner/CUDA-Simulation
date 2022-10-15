@@ -105,7 +105,7 @@ void* CudaInterop::GetSemaphoreHandlePOSIX(VkSemaphore& semaphore, const VkExter
 		ProgramLog::OutputLine("Error: Failed to retrieve handle for semaphore!");
 	}
 
-	return (void*)(uintptr_t)fd;
+	return (void*) (uintptr_t) fd;
 }
 
 cudaError_t CudaInterop::ImportCudaExternalSemaphore(cudaExternalSemaphore_t& cuda_semaphore, VkSemaphore& vk_semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {

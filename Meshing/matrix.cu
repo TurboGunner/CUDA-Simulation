@@ -11,6 +11,7 @@ __host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_
     size_t size_alloc = rows * columns * sizeof(float);
 
     local = local_in;
+    host = host_in;
 
 #ifdef __CUDA_ARCH__
     data_device = (float*) malloc(size_alloc);
@@ -27,7 +28,7 @@ __host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_
 }
 
 
-__host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& columns, const bool& local) {
+__host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& columns, const bool& local, const bool& host) {
     Matrix* matrix = nullptr;
     cudaError_t cuda_status = cudaSuccess;
 
@@ -36,9 +37,11 @@ __host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& col
 
     matrix->device_alloc = matrix;
 #else
-    cuda_status = cudaMallocHost(&matrix, sizeof(Matrix));
-    CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix pointer (host).");
-    *matrix = Matrix(rows, columns, local);
+    //if (host) {
+        cuda_status = cudaMallocHost(&matrix, sizeof(Matrix));
+        CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix pointer (host).");
+        matrix = new Matrix(rows, columns, local);
+    //}
     if (!local) {
         cuda_status = cudaMalloc(&(matrix->device_alloc), sizeof(Matrix));
         CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix pointer (device, on host).");
@@ -54,7 +57,7 @@ __host__ __device__ size_t Matrix::IX(size_t row, size_t column) const {
 
 __host__ __device__ float& Matrix::Get(const int& index) {
     if (index >= rows * columns || index < 0 || rows * columns == 0) {
-        printf("%s%d\n", "Warning: Out of bounds (MatrixGet)! Index: ", index);
+        printf("%s%d Bounds: %d, %d\n", "Warning: Out of bounds (MatrixGet)! Index: ", index, rows, columns);
 #ifdef __CUDA_ARCH__
         return data_device[0];
 #else
@@ -78,7 +81,7 @@ __host__ __device__ float& Matrix::operator[](const int& index) {
 
 __host__ __device__ void Matrix::Set(const float& value, const int& index) {
     if (index >= rows * columns || index < 0) {
-        printf("%s%d\n", "Warning: Out of bounds (MatrixSet)! Index: ", index);
+        printf("%s%d\n Bounds: %d, %d", "Warning: Out of bounds (MatrixSet)! Index: ", index, rows, columns);
         return;
     }
 #ifdef __CUDA_ARCH__

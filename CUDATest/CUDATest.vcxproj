@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="axis_data.cpp" />
     <ClCompile Include="fluid_sim.cpp" />
+    <ClCompile Include="handler_classes.cpp" />
     <ClCompile Include="handler_methods.cpp" />
     <ClCompile Include="openvdb_handler.cpp" />
     <ClCompile Include="vector_field.cpp" />

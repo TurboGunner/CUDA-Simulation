@@ -48,73 +48,78 @@ __global__ void ClearGrid(Grid* grid) {
 	grid->GetCellVelocity(incident).Reset();
 }
 
+__host__ void Grid::CalculateBounds() {
+	unsigned int threads_per_dim = (unsigned int)cbrt(1);
+	unsigned int block_count = ((side_size_ + threads_per_dim) - 1) / (threads_per_dim);
+
+	cell_threads = dim3(threads_per_dim, threads_per_dim, threads_per_dim);
+	cell_blocks = dim3(block_count, block_count, block_count);
+
+	std::cout << "Resolution: " << GetResolution() << std::endl;
+
+	particle_threads = dim3(threads_per_dim * GetResolution(), threads_per_dim, threads_per_dim); //NOTE
+	particle_blocks = dim3(block_count, block_count, block_count);
+}
+
+__global__ inline static void TestInitKernel(Grid* grid) {
+	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
+	unsigned int z_bounds = blockIdx.z * blockDim.z + threadIdx.z;
+
+	IndexPair incident(x_bounds, y_bounds, z_bounds);
+
+	grid->GetParticleMass(incident) = 1.0f;
+}
+
 __host__ cudaError_t Grid::SimulateGPU(Grid* grid, cudaStream_t& cuda_stream) {
-	//Matrix Allocations
 	cudaError_t cuda_status = cudaSuccess;
 
-	Matrix* cell_dist_matrix = Matrix::Create(3, 1, false);
-	Matrix* momentum = Matrix::Create(3, 1, false);
-	Matrix* momentum_matrix = Matrix::Create(3, 3, false);
+	dim3& blocks = grid->cell_blocks, & threads = grid->cell_threads;
+	dim3& blocks2 = grid->particle_blocks, & threads2 = grid->particle_threads;
 
-	Matrix* stress_matrix = Matrix::Create(3, 3, false);
-	Matrix* weighted_stress = Matrix::Create(3, 3, false);
+	if (!grid->up_to_date_) {
+		grid->CalculateBounds();
+		grid->DeviceTransfer(grid);
 
-	Matrix* B_term = Matrix::Create(3, 3, false);
-	Matrix* weighted_term = Matrix::Create(3, 3, false);
+		TestInitKernel<<<blocks2, threads2, 0, cuda_stream>>> (grid);
+		cudaStreamSynchronize(cuda_stream);
+	}
 
-	Matrix* viscosity_term = Matrix::Create(3, 3, false);
+	ClearGrid<<<blocks, threads, 0, cuda_stream>>> (grid);
+	cuda_status = PostExecutionChecks(cuda_status, "ClearGrid", false);
+	CudaExceptionHandler(cuda_status, "ClearGrid failed!");
 
-	grid->DeviceTransfer(grid);
+	//std::cout << "Allocated successfully " << grid->GetTotalSize() << " cells! (host)" << std::endl;
+	//std::cout << "Allocated successfully " << grid->GetParticleCount() << " particles! (host)" << std::endl;
 
-	std::cout << "Allocated successfully " << grid->GetTotalSize() << " cells! (host)" << std::endl;
-	std::cout << "Allocated successfully " << grid->GetParticleCount() << " particles! (host)" << std::endl;
-
-	dim3 blocks, threads;
-	unsigned int threads_per_dim = (unsigned int) cbrt (1);
-	unsigned int block_count = ((grid->side_size_ + threads_per_dim) - 1) / (threads_per_dim);
-
-	threads = dim3(threads_per_dim, threads_per_dim, threads_per_dim);
-	blocks = dim3(block_count, block_count, block_count);
-	dim3 blocks2, threads2;
-
-	std::cout << "Resolution: " << grid->GetResolution() << std::endl;
-
-	threads2 = dim3(threads_per_dim * grid->GetResolution(), threads_per_dim, threads_per_dim); //NOTE
-	blocks2 = dim3(block_count, block_count, block_count);
-
-	UpdateCell<<<blocks2, threads2, 0, cuda_stream>>> (grid->device_alloc_, momentum_matrix->device_alloc, cell_dist_matrix->device_alloc, momentum->device_alloc);
+	UpdateCell<<<blocks2, threads2, 0, cuda_stream>>> (grid, grid->momentum_matrix->device_alloc, grid->cell_dist_matrix->device_alloc, grid->momentum->device_alloc);
 	cuda_status = PostExecutionChecks(cuda_status, "CellMomentum", false);
-
-	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "CellMomentum failed!");
+	//cudaStreamSynchronize(cuda_stream);
 
-	std::cout << "Ran through cell momentum!" << std::endl;
+	//std::cout << "Ran through cell momentum!" << std::endl;
 
-	SimulateGrid<<<blocks2, threads2, 0, cuda_stream>>> (grid->device_alloc_, stress_matrix->device_alloc, weighted_stress->device_alloc, cell_dist_matrix->device_alloc, momentum->device_alloc, viscosity_term); //NOTE
+	SimulateGrid<<<blocks2, threads2, 0, cuda_stream>>> (grid, grid->stress_matrix->device_alloc, grid->weighted_stress->device_alloc, grid->cell_dist_matrix->device_alloc, grid->momentum->device_alloc, grid->viscosity_term->device_alloc); //NOTE
 	cuda_status = PostExecutionChecks(cuda_status, "VelocityGradientSolve", false);
-
-	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "SimulateGrid failed!");
 
-	std::cout << "Ran through the velocity gradient solve!" << std::endl;
+	//std::cout << "Ran through the velocity gradient solve!" << std::endl;
 
-	UpdateGrid<<<blocks, threads, 0, cuda_stream>>> (grid->device_alloc_);
+	UpdateGrid<<<blocks, threads, 0, cuda_stream>>> (grid);
 	cuda_status = PostExecutionChecks(cuda_status, "UpdateGrid", false);
-
-	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "UpdateGrid failed!");
 
-	std::cout << "Updated the grid!" << std::endl;
+	//std::cout << "Updated the grid!" << std::endl;
 
-	AdvectParticles<<<blocks2, threads2, 0, cuda_stream>>> (grid->device_alloc_, B_term, weighted_term);
+	AdvectParticles<<<blocks2, threads2, 0, cuda_stream>>> (grid, grid->B_term->device_alloc, grid->weighted_term->device_alloc);
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectParticles", false);
-
-	//cuda_status = cudaDeviceSynchronize();
 	CudaExceptionHandler(cuda_status, "AdvectParticles failed!");
 
-	std::cout << "Advected the particles!" << std::endl;
+	cudaStreamSynchronize(cuda_stream);
 
-	cuda_status = grid->HostTransfer();
+	//std::cout << "Advected the particles!" << std::endl;
+
+	//cuda_status = grid->HostTransfer();
 
 	return cuda_status;
 }

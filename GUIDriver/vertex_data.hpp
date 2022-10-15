@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cross_memory_handle.cuh"
+
 #include "vulkan_helpers.hpp"
 
 #include "../CUDATest/handler_classes.hpp"
@@ -49,7 +51,7 @@ struct Vertex {
 
 class MeshContainer {
 public:
-    MeshContainer(const bool& collision_mode = false);
+    MeshContainer(const bool& collision_mode = false, const bool& sync_mode_in = true);
 
     void Push(Vertex& coord_in);
 
@@ -73,8 +75,15 @@ public:
 
     unsigned int Size();
 
+    bool SyncMode() const;
+
+    CrossMemoryHandle sync_data_;
+
 private:
     vector<Vertex> vertices_;
+
+    bool sync_mode_ = true;
+
     unordered_map<glm::vec3, unsigned int, VectorHash> map_;
     bool collision = false;
 };

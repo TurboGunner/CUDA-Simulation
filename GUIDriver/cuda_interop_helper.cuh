@@ -7,6 +7,8 @@
 #include "buffer_helpers.hpp"
 #include "vulkan_helpers.hpp"
 
+#include "cross_memory_handle.cuh"
+
 #include "../CUDATest/handler_methods.hpp"
 
 //Logging
@@ -18,13 +20,6 @@
 
 #include <vulkan/vulkan.h>
 
-#ifdef _WIN64
-#include <vulkan/vulkan_win32.h>
-typedef HANDLE ShareableHandle;
-#else
-typedef int ShareableHandle;
-#endif
-
 #include <algorithm>
 #include <unordered_map>
 #include <string>
@@ -35,36 +30,6 @@ using std::unordered_map;
 using std::vector;
 
 enum OperatingSystem { WINDOWS_MODERN, WINDOWS_OLD, LINUX };
-
-class CrossMemoryHandle {
-public:
-	CrossMemoryHandle() = default;
-
-	CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in, const bool& host_inclusive_in = true);
-
-	VkDeviceSize TotalAllocationSize() const;
-
-	cudaError_t AllocateCudaMemory();
-
-	cudaError_t DeallocateCudaMemory();
-
-	VkBuffer buffer;
-	VkDeviceMemory buffer_memory;
-
-	CUmemGenericAllocationHandle cuda_handle;
-	ShareableHandle shareable_handle;
-
-	void* vulkan_ptr = nullptr;
-	void* cuda_host_ptr = nullptr, *cuda_device_ptr = nullptr;
-
-	size_t size = 0;
-	size_t granularity_size = 0;
-	size_t type_size = 0;
-private:
-	bool host_inclusive = true;
-};
-
-__global__ void TestKernel(float* data);
 
 class CudaInterop {
 public:
@@ -150,6 +115,7 @@ public:
 	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
 	Grid* grid_;
 
+	vector<CrossMemoryHandle> cross_memory_handles_;
 private:
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
@@ -158,7 +124,6 @@ private:
 	CUmemAllocationProp current_alloc_prop_ = {};
 	CUmemAccessDesc access_descriptor_ = {};
 
-	vector<CrossMemoryHandle> cross_memory_handles_;
 	size_t total_alloc_size_ = 0;
 
 	cudaStream_t cuda_stream_;

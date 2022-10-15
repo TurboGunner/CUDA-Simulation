@@ -1,10 +1,11 @@
 #include "mesh_manager.hpp"
 
-VertexData::VertexData(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in, const size_t& max_frames_const_in) {
+VertexData::VertexData(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in, const size_t& max_frames_const_in, const bool& binding_mode_in) {
     device_ = device_in;
     physical_device_ = phys_device_in;
     queue_ = queue_in;
 
+    /*
     vector<Vertex> vertices_in = {
         Vertex(0.5f, -0.5f, 0.0f, 1.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f),
         Vertex(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f),
@@ -16,6 +17,9 @@ VertexData::VertexData(VkDevice& device_in, VkPhysicalDevice& phys_device_in, Vk
 
     vertices.Push(vertices_in);
     size_ = sizeof(vertices[0]) * vertices.Size();
+    */
+
+    index_binding_mode_ = binding_mode_in;
 
     MAX_FRAMES_IN_FLIGHT_ = max_frames_const_in;
 }
@@ -23,28 +27,24 @@ VertexData::VertexData(VkDevice& device_in, VkPhysicalDevice& phys_device_in, Vk
 void VertexData::BindPipeline(VkCommandBuffer& command_buffer, VkCommandPool& command_pool) {
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffer_, offsets);
-    vkCmdBindIndexBuffer(command_buffer, index_buffer_, 0, VK_INDEX_TYPE_UINT16);
+    if (index_binding_mode_) {
+        vkCmdBindIndexBuffer(command_buffer, index_buffer_, 0, VK_INDEX_TYPE_UINT16);
+    }
 }
 
 VkResult VertexData::Initialize(VkCommandPool& command_pool) {
     VkResult vulkan_status = VK_SUCCESS;
 
-    VkBuffer staging_buffer;
-    VkDeviceMemory staging_buffer_memory;
+    if (vertices.SyncMode()) {
+        vertex_buffer_ = vertices.sync_data_.buffer;
+        vertex_buffer_memory_ = vertices.sync_data_.buffer_memory;
 
-    //Staging Buffer
-    vulkan_status = BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size_, staging_buffer, staging_buffer_memory);
+        return vulkan_status;
+    }
 
-    void* data = BufferHelpers::MapMemory(device_, vertices.Data(), size_, staging_buffer_memory);
+    void* data = nullptr;
 
-    //Vertex Buffer
-    vulkan_status = BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size_, vertex_buffer_, vertex_buffer_memory_);
-
-    vulkan_status = BufferHelpers::CopyBuffer(device_, queue_, command_pool, staging_buffer, vertex_buffer_, size_);
-
-    //Destroying Staging Buffer
-    vkDestroyBuffer(device_, staging_buffer, nullptr);
-    vkFreeMemory(device_, staging_buffer_memory, nullptr);
+    vulkan_status = BufferHelpers::CreateBufferCross(device_, physical_device_, queue_, command_pool, data, index_buffer_, index_buffer_memory_, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, size_);
 
     return vulkan_status;
 }
@@ -52,23 +52,21 @@ VkResult VertexData::Initialize(VkCommandPool& command_pool) {
 VkResult VertexData::InitializeIndex(VkCommandPool& command_pool) {
     VkResult vulkan_status = VK_SUCCESS;
 
-    const vector<uint16_t> indices = { 0, 1, 2, 0, 3, 2 }; //Make this a data member for the vert
+    if (vertices.SyncMode() || !index_binding_mode_) {
+        return vulkan_status;
+    }
 
-    VkBuffer staging_buffer;
-    VkDeviceMemory staging_buffer_memory;
+    const vector<uint16_t> indices = { 0, 1, 2, 0, 3, 2 }; //Make this a data member for the vert?
 
-    vulkan_status = BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, size_, staging_buffer, staging_buffer_memory);
+    void* data = nullptr;
 
-    void* data = BufferHelpers::MapMemory(device_, indices.data(), size_, staging_buffer_memory);
-
-    vulkan_status = BufferHelpers::CreateBuffer(device_, physical_device_, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, size_, index_buffer_, index_buffer_memory_);
-
-    BufferHelpers::CopyBuffer(device_, queue_, command_pool, staging_buffer, index_buffer_, size_);
-
-    vkDestroyBuffer(device_, staging_buffer, nullptr);
-    vkFreeMemory(device_, staging_buffer_memory, nullptr);
+    vulkan_status = BufferHelpers::CreateBufferCross(device_, physical_device_, queue_, command_pool, data, index_buffer_, index_buffer_memory_, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, size_);
 
     return vulkan_status;
+}
+
+bool VertexData::IndexBindingMode() const {
+    return index_binding_mode_;
 }
 
 void VertexData::Clean() {
