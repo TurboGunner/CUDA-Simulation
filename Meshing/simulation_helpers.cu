@@ -115,7 +115,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid, cudaStream_t& cuda_stream) {
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectParticles", false);
 	CudaExceptionHandler(cuda_status, "AdvectParticles failed!");
 
-	cudaStreamSynchronize(cuda_stream);
+	//cudaStreamSynchronize(cuda_stream);
 
 	//std::cout << "Advected the particles!" << std::endl;
 

@@ -14,10 +14,6 @@ public:
 
     SECURITY_ATTRIBUTES* operator&();
 
-    SECURITY_ATTRIBUTES SecurityAttributes() {
-        return win_security_attributes_;
-    }
-
 protected:
     SECURITY_ATTRIBUTES win_security_attributes_ = {};
     PSECURITY_DESCRIPTOR win_psecurity_descriptor_ = NULL;

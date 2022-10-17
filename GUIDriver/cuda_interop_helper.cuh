@@ -113,9 +113,10 @@ public:
 	vector<const char*> interop_extensions_, interop_device_extensions_;
 
 	cudaExternalSemaphore_t cuda_wait_semaphore_ = {}, cuda_signal_semaphore_ = {};
-	Grid* grid_;
+	Grid* grid_ = nullptr;
 
 	vector<CrossMemoryHandle> cross_memory_handles_;
+
 private:
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;

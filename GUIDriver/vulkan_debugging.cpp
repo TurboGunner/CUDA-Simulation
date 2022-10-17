@@ -15,16 +15,16 @@ void VulkanGUIDriver::DebugErrorCallback() {
 
 void VulkanGUIDriver::DebugOptionInitialization() {
     // Enabling validation layers
-    const char* layers[] = { "VK_LAYER_KHRONOS_validation" };
+    vector<const char*> layers = { "VK_LAYER_KHRONOS_validation" };
     instance_info_.enabledLayerCount = 1;
-    instance_info_.ppEnabledLayerNames = layers;
+    instance_info_.ppEnabledLayerNames = layers.data();
 
     // Enable debug report extension (we need additional storage, so we duplicate the user array to add our new extension to it)
 
     VkApplicationInfo app_info = {};
 
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    app_info.pApplicationName = "CUDA Sim";
+    app_info.pApplicationName = "CUDA + Vulkan Simulator";
     app_info.applicationVersion = VK_MAKE_VERSION(1, 3, 2);
     app_info.pEngineName = "BloodFlow";
     app_info.engineVersion = VK_MAKE_VERSION(1, 3, 2);
