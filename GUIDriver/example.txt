@@ -1,8 +1,26 @@
 Created a window with size 2560 X 1026.
-Address for Vulkan debug callback: 00007FFB397417C0. Debug callback successful!
+Vulkan Physical Device Extension Count: 7
+Extension Name: VK_KHR_device_group_creation
+Extension Name: VK_KHR_external_fence_capabilities
+Extension Name: VK_KHR_external_memory_capabilities
+Extension Name: VK_KHR_external_semaphore_capabilities
+Extension Name: VK_KHR_get_physical_device_properties2
+Extension Name: VK_KHR_get_surface_capabilities2
+Extension Name: VK_KHR_surface
+Extension Name: VK_KHR_surface_protected_capabilities
+Extension Name: VK_KHR_win32_surface
+Extension Name: VK_EXT_debug_report
+Extension Name: VK_EXT_debug_utils
+Extension Name: VK_EXT_swapchain_colorspace
+Extension Name: VK_NV_external_memory_capabilities
+Extension Name: VK_KHR_portability_enumeration
+Extension Name: VK_EXT_validation_features
+
+Address for Vulkan debug callback: 00007FF90477FAF0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
+GPU Device Name: NVIDIA GeForce RTX 3070 Laptop GPU
 GPU Device #0 has been selected for Vulkan Rendering successfully!
 No errors detected while selecting Vulkan queue family. 
 Vulkan Device Extension Count: 5
@@ -70,9 +88,10 @@ CUDA memory allocated successfully!
 Memory Type: 1
 Created allocation info for video memory.
 Buffer Memory Size: 196608
-Successfully read shader file Shaders/vert.spv!
+External Semaphore Enum: 2
+Successfully read shader file Shaders/shader_vert_test.spv!
 
-Successfully read shader file Shaders/frag.spv!
+Successfully read shader file Shaders/shader_frag_test.spv!
 
 Initialized input assembly info struct (vertex) for the render pipeline.
 Initialized input assembly info struct (frag) for the render pipeline.
@@ -90,7 +109,7 @@ Created graphics pipeline info for render pipeline.
 Name for shader stage (Index 0): main.
 Successfully created graphics pipeline!
 Successfully created mesh pipeline!
-Created a window with size 2560 X 1026.
+
 
 Address for Vulkan Render Pass: EC4BEC000000000B.
 
@@ -99,23 +118,31 @@ Ended command recording!
 
 Successfully submitted item to queue!
 
-Address for Vulkan debug callback: 00007FFB397417C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
-Message: 
-
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x21752b5bc50, type = VK_OBJECT_TYPE_QUEUE; 
- MessageID = 0xc7aabc16 
- vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
-
-Address for Vulkan debug callback: 00007FFB397417C0. Debug callback successful![vulkan] Debug report from ObjectType: 4
-Message: 
-
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x21752b5bc50, type = VK_OBJECT_TYPE_QUEUE; 
- MessageID = 0xc7aabc16 
- vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 [vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x21752b5bc50, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x2865f580850, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+
+[vulkan] Debug report from ObjectType: 4
+Message: 
+
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x2865f580850, type = VK_OBJECT_TYPE_QUEUE; 
+ MessageID = 0xc7aabc16 
+ vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+
+[vulkan] Debug report from ObjectType: 1
+Message: 
+
+Validation Error: [ VUID-vkDestroyBuffer-buffer-parameter ] Object 0: handle = 0x28655af8480, type = VK_OBJECT_TYPE_INSTANCE; 
+ MessageID = 0xb374a60f 
+ Invalid VkBuffer Object 0xcccccccccccccccc. The Vulkan spec states: If buffer is not VK_NULL_HANDLE, buffer must be a valid VkBuffer handle (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-vkDestroyBuffer-buffer-parameter)
+
+[vulkan] Debug report from ObjectType: 1
+Message: 
+
+Validation Error: [ VUID-vkFreeMemory-memory-parameter ] Object 0: handle = 0x28655af8480, type = VK_OBJECT_TYPE_INSTANCE; 
+ MessageID = 0x4bcc6567 
+ Invalid VkDeviceMemory Object 0xcccccccccccccccc. The Vulkan spec states: If memory is not VK_NULL_HANDLE, memory must be a valid VkDeviceMemory handle (https://vulkan.lunarg.com/doc/view/1.3.216.0/windows/1.3-extensions/vkspec.html#VUID-vkFreeMemory-memory-parameter)
 

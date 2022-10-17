@@ -9,7 +9,7 @@ void VulkanGUIDriver::LoadInstanceProperties() {
 }
 
 void VulkanGUIDriver::VulkanInstantiation() {
-    LoadInstanceProperties();
+    //LoadInstanceProperties();
 
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
     DebugOptionInitialization();
@@ -68,10 +68,13 @@ void VulkanGUIDriver::SelectGPU() {
         }
     }
 
+    s_stream << "GPU Device Name: " << device_properties_.deviceName;
+    ProgramLog::OutputLine(s_stream);
+
     physical_device_ = gpus[use_gpu];
     s_stream << "GPU Device #" << use_gpu << " has been selected for Vulkan Rendering successfully!";
     ProgramLog::OutputLine(s_stream);
-    free(gpus);;
+    free(gpus);
 }
 
 void VulkanGUIDriver::PoolDescriptionInitialization() {
@@ -121,6 +124,7 @@ void VulkanGUIDriver::LogicalDeviceInitialization() {
     const float queue_priority[] = { 1.0f };
 
     VkDeviceQueueCreateInfo queue_info[1] = {};
+
     queue_info[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queue_info[0].queueFamilyIndex = queue_family_;
     queue_info[0].queueCount = 1;

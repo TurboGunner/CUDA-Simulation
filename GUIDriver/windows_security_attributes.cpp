@@ -3,6 +3,10 @@
 WindowsSecurityAttributes::WindowsSecurityAttributes() {
     win_psecurity_descriptor_ = (PSECURITY_DESCRIPTOR) calloc(1, SECURITY_DESCRIPTOR_MIN_LENGTH + 2 * sizeof(void**));
 
+    if (!win_psecurity_descriptor_) {
+        throw std::runtime_error("Failed to allocate memory for security descriptor");
+    }
+
     //NOTE: PSID = pointer
     PSID* security_id_double_ptr = (PSID*) ((PBYTE) win_psecurity_descriptor_ + SECURITY_DESCRIPTOR_MIN_LENGTH);
 
@@ -24,8 +28,8 @@ WindowsSecurityAttributes::WindowsSecurityAttributes() {
     win_security_attributes_.bInheritHandle = TRUE;
 }
 
-EXPLICIT_ACCESS WindowsSecurityAttributes::ExplicitAccessInfo(PSID*& security_id_double_ptr) {
-    EXPLICIT_ACCESS explicit_access;
+EXPLICIT_ACCESS WindowsSecurityAttributes::ExplicitAccessInfo(PSID* security_id_double_ptr) {
+    EXPLICIT_ACCESS explicit_access = {};
 
     ZeroMemory(&explicit_access, sizeof(EXPLICIT_ACCESS));
 

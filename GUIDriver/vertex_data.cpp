@@ -1,4 +1,5 @@
 #include "vertex_data.hpp"
+#include "../Meshing/vector_cross.cuh"
 
 __host__ __device__ Vertex::Vertex(float pos_x, float pos_y, float pos_z, float r, float g, float b, float n_x, float n_y, float n_z) {
     pos = glm::vec3(pos_x, pos_y, pos_z);
@@ -31,7 +32,7 @@ vector<VkVertexInputBindingDescription> Vertex::GetBindingDescription() {
     VkVertexInputBindingDescription binding_description = {};
 
     binding_description.binding = 0;
-    binding_description.stride = sizeof(Vertex);
+    binding_description.stride = sizeof(Vector3D);
     binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     return { binding_description };
@@ -44,7 +45,7 @@ vector<VkVertexInputAttributeDescription> Vertex::GetAttributeDescriptions() {
     pos_description.binding = 0;
     pos_description.location = 0;
     pos_description.format = VK_FORMAT_R32G32_SFLOAT;
-    pos_description.offset = offsetof(Vertex, pos);
+    pos_description.offset = 0;
 
     VkVertexInputAttributeDescription normal_description = {};
     normal_description.binding = 0;
@@ -58,7 +59,8 @@ vector<VkVertexInputAttributeDescription> Vertex::GetAttributeDescriptions() {
     color_description.format = VK_FORMAT_R32G32B32_SFLOAT;
     color_description.offset = offsetof(Vertex, color);
 
-    attribute_descriptions.insert(attribute_descriptions.end(), { pos_description, normal_description, color_description });
+    //attribute_descriptions.insert(attribute_descriptions.end(), { pos_description, normal_description, color_description });
+    attribute_descriptions.insert(attribute_descriptions.end(), { pos_description });
 
     return attribute_descriptions;
 }

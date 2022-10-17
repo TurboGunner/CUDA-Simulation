@@ -203,6 +203,8 @@ cudaError_t CudaInterop::InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSe
 
     auto mem_semaphore_type = GetPlatformSemaphoreHandle();
 
+    ProgramLog::OutputLine("External Semaphore Enum: " + std::to_string(mem_semaphore_type));
+
     vulkan_status = CreateExternalSemaphore(wait_semaphore, mem_semaphore_type);
     VulkanExceptionHandler(vulkan_status, "Failure creating wait semaphore in InitializeCudaInterop!");
     vulkan_status = CreateExternalSemaphore(signal_semaphore, mem_semaphore_type);
@@ -244,5 +246,6 @@ bool CudaInterop::IsVkPhysicalDeviceUUID(void* uuid) {
 }
 
 void CudaInterop::PopulateCommandBuffer(VkCommandBuffer& command_buffer) {
+    //ProgramLog::OutputLine("Size: " + std::to_string(cross_memory_handles_[0].size));
     vkCmdDraw(command_buffer, cross_memory_handles_[0].size, 1, 0, 0);
 }

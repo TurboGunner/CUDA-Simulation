@@ -151,10 +151,10 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
 
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_parameters_.render_pipeline_);
 
-    vulkan_parameters_.mesh_data_.BindPipeline(command_buffer, vulkan_parameters_.command_pool_);
-
     //uint32_t uniform_offset = BufferHelpers::PadUniformBufferSize(device_properties_, frame_index_);
     vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_parameters_.mesh_pipeline_layout_, 0, 1, &vulkan_parameters_.CurrentDescriptorSet(), 0, nullptr);
+
+    vulkan_parameters_.mesh_data_.BindPipeline(command_buffer, vulkan_parameters_.command_pool_);
 }
 
 void VulkanGUIDriver::EndRenderPass() {

@@ -10,6 +10,11 @@
 
 #include <functional>
 
+//Debugging
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 using std::function;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow) {
@@ -20,6 +25,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
         cuda_status, "Do you have a CUDA-capable GPU installed?");
 
     VulkanGUIDriver gui_driver;
+
+    _CrtDumpMemoryLeaks();
+    _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
 
     gui_driver.RunGUI();
 

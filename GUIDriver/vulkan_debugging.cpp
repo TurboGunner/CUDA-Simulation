@@ -22,17 +22,30 @@ void VulkanGUIDriver::DebugOptionInitialization() {
     // Enable debug report extension (we need additional storage, so we duplicate the user array to add our new extension to it)
 
     VkApplicationInfo app_info = {};
+
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     app_info.pApplicationName = "CUDA Sim";
     app_info.applicationVersion = VK_MAKE_VERSION(1, 3, 2);
     app_info.pEngineName = "BloodFlow";
     app_info.engineVersion = VK_MAKE_VERSION(1, 3, 2);
-    app_info.apiVersion = VK_MAKE_VERSION(1, 3, 2);
+    app_info.apiVersion = VK_MAKE_API_VERSION(0, 1, 3, 205);
 
     phys_device_extensions_.push_back("VK_EXT_debug_report");
+
+    ProgramLog::OutputLine("Vulkan Physical Device Extension Count: " + std::to_string(phys_device_extensions_.size()));
+
     instance_info_.enabledExtensionCount = phys_device_extensions_.size();
     instance_info_.ppEnabledExtensionNames = phys_device_extensions_.data();
     instance_info_.pApplicationInfo = &app_info;
+
+    uint32_t count;
+    vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr); //get number of extensions
+    vector<VkExtensionProperties> extensions(count);
+    vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data()); //populate buffer
+    for (auto& extension_properties : extensions) {
+        s_stream << "Extension Name: " << extension_properties.extensionName << std::endl;
+    }
+    ProgramLog::OutputLine(s_stream);
 
     // Create Vulkan Instance
     vulkan_status = vkCreateInstance(&instance_info_, allocators_, &instance_);

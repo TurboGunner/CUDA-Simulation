@@ -124,6 +124,7 @@
     <CudaCompile Include="swap_chain_manager_init.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\CUDATest\handler_classes.cpp" />
     <ClCompile Include="..\CUDATest\handler_methods.cpp" />
     <ClCompile Include="buffer_helpers.cpp" />
     <ClCompile Include="descriptor_set_handler.cpp" />

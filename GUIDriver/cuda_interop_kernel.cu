@@ -39,6 +39,8 @@ __host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semap
 
 	cuda_status = InitializeCudaInterop(wait_semaphore, signal_semaphore);
 
+	CudaExceptionHandler(cuda_status, "CUDA Interop");
+
 	return cuda_status;
 }
 

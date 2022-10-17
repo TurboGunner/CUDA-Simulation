@@ -32,6 +32,7 @@ void ProgramLog::OutputLine(std::stringstream& line, bool is_separate) {
 		Get().file_log << std::endl;
 	}
 	line.clear();
+	line.str(string());
 	s_stream.clear();
 	s_stream.str(string());
 }

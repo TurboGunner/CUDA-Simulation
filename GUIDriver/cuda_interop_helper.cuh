@@ -42,9 +42,9 @@ public:
 
 	VkResult CreateExternalSemaphore(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
-	VkExportSemaphoreWin32HandleInfoKHR ExportSemaphoreHandleWin32();
+	VkExportSemaphoreWin32HandleInfoKHR ExportSemaphoreHandleWin32(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
-	VkExportSemaphoreCreateInfoKHR& ExportSemaphoreCreationSettings(const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
+	void ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
 
 	VkResult CreateExternalBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkExternalMemoryHandleTypeFlagsKHR& external_mem_handle_type, VkBuffer& buffer, VkDeviceMemory& buffer_memory);
 
@@ -112,7 +112,7 @@ public:
 
 	vector<const char*> interop_extensions_, interop_device_extensions_;
 
-	cudaExternalSemaphore_t cuda_wait_semaphore_, cuda_signal_semaphore_;
+	cudaExternalSemaphore_t cuda_wait_semaphore_ = {}, cuda_signal_semaphore_ = {};
 	Grid* grid_;
 
 	vector<CrossMemoryHandle> cross_memory_handles_;

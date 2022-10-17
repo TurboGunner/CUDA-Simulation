@@ -13,18 +13,28 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 
 	VkSemaphoreCreateInfo semaphore_info = {};
 	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	semaphore_info.flags = 0;
 
-	VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = ExportSemaphoreCreationSettings(handle_type);
+	//VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = ExportSemaphoreCreationSettings(handle_type);
+	VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = {};
+
+	ExportSemaphoreCreationSettings(export_semaphore_create_info, handle_type);
 
 	semaphore_info.pNext = &export_semaphore_create_info;
 
-	if (vkCreateSemaphore(device_, &semaphore_info, nullptr, &semaphore) != VK_SUCCESS) {
-		ProgramLog::OutputLine("Failed to create synchronization objects for CUDA-Vulkan interop!");
+	vulkan_status = vkCreateSemaphore(device_, &semaphore_info, nullptr, &semaphore);
+
+	if (vulkan_status != VK_SUCCESS) {
+		s_stream << "Failed to create synchronization objects for CUDA-Vulkan interop! Error: " << vulkan_status;
+		ProgramLog::OutputLine(s_stream);
 	}
+	//s_stream << export_semaphore_win32_handle.sType << std::endl;
+	//ProgramLog::OutputLine(s_stream);
+
 	return vulkan_status;
 }
 
-VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32() {
+VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {
 	WindowsSecurityAttributes win_security_attributes;
 
 	VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = {};
@@ -32,29 +42,30 @@ VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32() {
 	export_semaphore_win32_handle.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
 	export_semaphore_win32_handle.pNext = nullptr;
 
-	export_semaphore_win32_handle.pAttributes = &win_security_attributes;
 	export_semaphore_win32_handle.dwAccess = DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE;
 
 	export_semaphore_win32_handle.name = (LPCWSTR) nullptr;
+	export_semaphore_win32_handle.pAttributes = &win_security_attributes;
+
+	//export_semaphore_create_info.pNext = (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) ? &export_semaphore_win32_handle : nullptr;
 
 	return export_semaphore_win32_handle;
 }
 
-VkExportSemaphoreCreateInfoKHR& CudaInterop::ExportSemaphoreCreationSettings(const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {
-	VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = {};
+void CudaInterop::ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {
 	export_semaphore_create_info.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
 
 	if (os_ != LINUX) {
-		WindowsSecurityAttributes win_security_attributes;
-		VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = ExportSemaphoreHandleWin32();
-		export_semaphore_create_info.pNext = (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) ? &export_semaphore_win32_handle : nullptr;
+		ExportSemaphoreHandleWin32(export_semaphore_create_info, handle_type);
 	}
+
 	else {
 		export_semaphore_create_info.pNext = nullptr;
 	}
+
 	export_semaphore_create_info.handleTypes = handle_type;
 
-	return export_semaphore_create_info;
+	//return export_semaphore_create_info;
 }
 
 void* CudaInterop::GetSemaphoreHandle(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {
@@ -76,7 +87,7 @@ void* CudaInterop::GetSemaphoreHandleWin32(VkSemaphore& semaphore, const VkExter
 	semaphore_get_win32_handle_info.semaphore = semaphore;
 	semaphore_get_win32_handle_info.handleType = handle_type;
 
-	PFN_vkGetSemaphoreWin32HandleKHR func_get_semaphore_win32_handle = (PFN_vkGetSemaphoreWin32HandleKHR)vkGetDeviceProcAddr(device_, "vkGetSemaphoreWin32HandleKHR");
+	PFN_vkGetSemaphoreWin32HandleKHR func_get_semaphore_win32_handle = (PFN_vkGetSemaphoreWin32HandleKHR) vkGetDeviceProcAddr(device_, "vkGetSemaphoreWin32HandleKHR");
 	if (!func_get_semaphore_win32_handle) {
 		ProgramLog::OutputLine("Error: Failed to retrieve vkGetSemaphoreWin32HandleKHR!");
 	}

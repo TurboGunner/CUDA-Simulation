@@ -67,8 +67,8 @@ VkPipelineLayoutCreateInfo ShaderLoader::PipelineLayoutInfo() {
 }
 
 VkPipeline ShaderLoader::Initialize(VkRenderPass & render_pass) {
-    auto vert_shader_code = ReadFile("Shaders/vert.spv");
-    auto frag_shader_code = ReadFile("Shaders/frag.spv");
+    auto vert_shader_code = ReadFile("Shaders/shader_vert_test.spv");
+    auto frag_shader_code = ReadFile("Shaders/shader_frag_test.spv");
 
     vert_shader_module_ = CreateShaderModule(vert_shader_code);
     frag_shader_module_ = CreateShaderModule(frag_shader_code);

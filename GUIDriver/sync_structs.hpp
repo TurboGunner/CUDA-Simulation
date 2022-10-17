@@ -37,7 +37,7 @@ public:
 
 	vector<VkSemaphore> wait_semaphores_, signal_semaphores_;
 
-	VkSemaphore vk_wait_semaphore_, vk_signal_semaphore_;
+	VkSemaphore vk_wait_semaphore_ = {}, vk_signal_semaphore_ = {};
 
 	vector<VkPipelineStageFlags> wait_stages_;
 

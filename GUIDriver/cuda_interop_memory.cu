@@ -43,6 +43,9 @@ VkResult CudaInterop::CreateExternalBuffer(const VkDeviceSize& size, const VkBuf
 	if (vulkan_status == VK_SUCCESS) {
 		ProgramLog::OutputLine("Successfully created external buffer for CUDA interop! Size: " + std::to_string(size));
 	}
+	else {
+		ProgramLog::OutputLine("Error: Failed to create external buffer for CUDA interop!");
+	}
 
 	return vulkan_status;
 }
