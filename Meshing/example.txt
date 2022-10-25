@@ -1,0 +1,11 @@
+Resolution: 4.000000
+Threads (Total): 4096
+Cells (Total): 4096
+0 0 0
+
+0 0 0
+
+0 0 0
+
+0 0 0
+

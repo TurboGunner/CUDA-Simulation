@@ -29,7 +29,7 @@ __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dis
 			cell_idx.z() + z_weight_idx - 1);
 
 		Vector3D cell_dist = (cell_position - position) + 0.5f;
-		for (int j = 0; j < 3; j++) {
+		for (int j = 0; j < 2; j++) {
 			cell_dist_matrix->Get(j) = cell_dist.dim[j];
 		}
 
@@ -37,16 +37,17 @@ __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dis
 
 		//Maybe separate this later, and split the UpdateCell into determined chunks?
 		//The idea is separating the matrix multiplication (without dynamic parallelism) will significantly increase perf
+		// CuBLAS with coalesced memory for strided or parallelized multiplication with tensor cores?
 		//
 		//Maybe we don't need cell_dist_matrix, and can just use the vector?
 		//Maybe also for momentum? Momentum is a 3x1, so Q would not have to be assigned after computation
 
-		for (int l = 0; l < cell_dist_matrix->columns; l++) {
-			for (int j = 0; j < grid->GetMomentum(incident).rows; j++) {
+		for (size_t l = 0; l < cell_dist_matrix->columns; l++) {
+			for (size_t j = 0; j < grid->GetMomentum(incident).rows; j++) {
 				unsigned int idx = j * momentum->columns + l;
 				if (y_bounds < momentum->rows && x_bounds < momentum->columns) {
-					float Pvalue = 0;
-					for (int k = 0; k < momentum_matrix->columns; ++k) {
+					float Pvalue = 0.0f;
+					for (size_t k = 0; k < momentum_matrix->columns; ++k) {
 						Pvalue += momentum_matrix->Get(j * momentum_matrix->columns + k) * cell_dist_matrix->Get(k * cell_dist_matrix->columns + l);
 					}
 					momentum->Get(idx) = Pvalue;

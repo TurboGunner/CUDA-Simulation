@@ -12,9 +12,8 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 	VkResult vulkan_status = VK_SUCCESS;
 
 	VkSemaphoreCreateInfo semaphore_info = {};
-
 	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	semaphore_info.flags = 0;
+	//semaphore_info.flags = 0;
 
 	//VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = ExportSemaphoreCreationSettings(handle_type);
 	VkExportSemaphoreCreateInfoKHR export_semaphore_create_info = {};
@@ -24,12 +23,6 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 	semaphore_info.pNext = &export_semaphore_create_info;
 
 	vulkan_status = vkCreateSemaphore(device_, &semaphore_info, nullptr, &semaphore);
-
-	if (os_ != LINUX) {
-		auto export_semaphore_win32_handle = ExportSemaphoreHandleWin32(export_semaphore_create_info, handle_type);
-
-		export_semaphore_create_info.pNext = (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) ? &export_semaphore_win32_handle : nullptr;
-	}
 
 	if (vulkan_status != VK_SUCCESS) {
 		s_stream << "Failed to create synchronization objects for CUDA-Vulkan interop! Error: " << vulkan_status;
@@ -49,10 +42,10 @@ VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32(VkEx
 	export_semaphore_win32_handle.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
 	export_semaphore_win32_handle.pNext = nullptr;
 
+	export_semaphore_win32_handle.pAttributes = &win_security_attributes;
 	export_semaphore_win32_handle.dwAccess = DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE;
 
 	export_semaphore_win32_handle.name = (LPCWSTR) nullptr;
-	export_semaphore_win32_handle.pAttributes = &win_security_attributes;
 
 	//export_semaphore_create_info.pNext = (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) ? &export_semaphore_win32_handle : nullptr;
 
@@ -63,9 +56,7 @@ void CudaInterop::ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR
 	export_semaphore_create_info.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
 
 	if (os_ != LINUX) {
-		//auto export_semaphore_win32_handle = ExportSemaphoreHandleWin32(export_semaphore_create_info, handle_type);
-
-		//export_semaphore_create_info.pNext = (handle_type & VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT) ? &export_semaphore_win32_handle : nullptr;
+		ExportSemaphoreHandleWin32(export_semaphore_create_info, handle_type);
 	}
 
 	else {
@@ -104,7 +95,7 @@ void* CudaInterop::GetSemaphoreHandleWin32(VkSemaphore& semaphore, const VkExter
 		ProgramLog::OutputLine("Error: Failed to retrieve handle for semaphore!");
 	}
 
-	return (void*) handle;
+	return (void*)handle;
 }
 
 void* CudaInterop::GetSemaphoreHandlePOSIX(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {

@@ -35,7 +35,7 @@ __host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semap
 	//}
 	ProgramLog::OutputLine("CUDA memory allocated successfully!");
 
-	cross_memory_handles_[0].cuda_device_ptr = grid_->particle_velocity_device_;
+	cross_memory_handles_[0].cuda_device_ptr = grid_->particle_position_device_;
 
 	cuda_status = InitializeCudaInterop(wait_semaphore, signal_semaphore);
 

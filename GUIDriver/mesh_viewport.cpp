@@ -1,7 +1,5 @@
 #include "mesh_viewport.hpp"
 
-#include "mesh_viewport.hpp"
-
 MeshViewport::MeshViewport() {
     cam_pos_ = default_pos_;
 

@@ -25,7 +25,7 @@ VertexData::VertexData(VkDevice& device_in, VkPhysicalDevice& phys_device_in, Vk
 }
 
 void VertexData::BindPipeline(VkCommandBuffer& command_buffer, VkCommandPool& command_pool) {
-    VkDeviceSize offsets[] = { 0, 0 };
+    VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffer_, offsets);
     //vkCmdDraw(command_buffer, vertices.sync_data_.size, 1, 0, 0);
     if (index_binding_mode_) {

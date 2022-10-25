@@ -100,10 +100,12 @@ VkPipeline ShaderLoader::Initialize(VkRenderPass & render_pass) {
     VkPipelineVertexInputStateCreateInfo vertex_input_info = {};
 
     vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
     vertex_input_info.vertexBindingDescriptionCount = binding_description.size();
     vertex_input_info.vertexAttributeDescriptionCount = attribute_descriptions.size();
     vertex_input_info.pVertexBindingDescriptions = binding_description.data();
     vertex_input_info.pVertexAttributeDescriptions = attribute_descriptions.data();
+
     vertex_input_info.flags = 0;
 
     pipeline_info_.pVertexInputState = &vertex_input_info;

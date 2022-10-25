@@ -13,12 +13,15 @@
 #include <thrust/fill.h>
 #include <thrust/sequence.h>
 
+#include <assert.h>
 #include <stdio.h>
 
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
+using std::string;
 using std::vector;
 
 class Matrix {
@@ -29,9 +32,9 @@ public:
 
 	__host__ __device__ static Matrix* Create(const size_t& rows, const size_t& columns, const bool& local = false, const bool& host = false);
 
-	__host__ __device__ cudaError_t Destroy();
+	__host__ cudaError_t Destroy();
 
-	__host__ static void DeleteAllocations(vector<Matrix*> matrices);
+	__host__ static void DeleteAllocations(const vector<Matrix*>& matrices);
 
 	__host__ __device__ static Matrix* MatrixMassAllocation(const size_t& size, const size_t& rows, const size_t& columns);
 
@@ -84,6 +87,8 @@ public:
 
 	__host__ cudaError_t HostTransfer();
 
+	__host__ string ToString(const char* label = nullptr);
+
 	__host__ __device__ void PrintMatrix(const char* label = nullptr);
 
 	__host__ static cudaError_t PopulateRandomHost(Matrix* matrix, const float& min, const float& max);
@@ -95,6 +100,13 @@ public:
     Matrix* device_alloc;
 
 	size_t rows, columns;
+
+	float* Data(bool device_mode = true) const {
+		if (device_mode) {
+			return data_device;
+		}
+		return data;
+	}
 
 private:
 	float* data, *data_device;

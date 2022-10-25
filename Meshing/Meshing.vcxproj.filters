@@ -86,6 +86,9 @@
     <CudaCompile Include="simulation_initialization.cu">
       <Filter>cuda\mpm</Filter>
     </CudaCompile>
+    <CudaCompile Include="simulation_helper_kernel.cu">
+      <Filter>cuda\mpm</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CUDATest\handler_methods.cpp">

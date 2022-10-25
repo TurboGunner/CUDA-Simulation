@@ -44,7 +44,7 @@ vector<VkVertexInputAttributeDescription> Vertex::GetAttributeDescriptions() {
     VkVertexInputAttributeDescription pos_description = {};
     pos_description.binding = 0;
     pos_description.location = 0;
-    pos_description.format = VK_FORMAT_R32G32_SFLOAT;
+    pos_description.format = VK_FORMAT_R32G32B32_SFLOAT; //NOTE
     pos_description.offset = 0;
 
     VkVertexInputAttributeDescription normal_description = {};

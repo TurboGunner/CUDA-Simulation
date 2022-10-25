@@ -56,14 +56,7 @@ __host__ __device__ size_t Matrix::IX(size_t row, size_t column) const {
 }
 
 __host__ __device__ float& Matrix::Get(const int& index) {
-    if (index >= rows * columns || index < 0 || rows * columns == 0) {
-        printf("%s%d Bounds: %d, %d\n", "Warning: Out of bounds (MatrixGet)! Index: ", index, rows, columns);
-#ifdef __CUDA_ARCH__
-        return data_device[0];
-#else
-        return data[0];
-#endif
-    }
+    assert(index < rows * columns && index >= 0);
 #ifdef __CUDA_ARCH__
     return data_device[index];
 #else
@@ -80,10 +73,7 @@ __host__ __device__ float& Matrix::operator[](const int& index) {
 }
 
 __host__ __device__ void Matrix::Set(const float& value, const int& index) {
-    if (index >= rows * columns || index < 0) {
-        printf("%s%d\n Bounds: %d, %d", "Warning: Out of bounds (MatrixSet)! Index: ", index, rows, columns);
-        return;
-    }
+    assert(index < rows * columns && index >= 0);
 #ifdef __CUDA_ARCH__
     data_device[index] = value;
 #else
@@ -122,6 +112,23 @@ __host__ cudaError_t Matrix::DeviceTransfer(Matrix* src) {
     return cuda_status;
 }
 
+__host__ string Matrix::ToString(const char* label) {
+    string output;
+    if (label) { // Nullptr default check
+        output += label;
+    }
+    else {
+        output += "\n\n";
+    }
+    for (size_t i = 0; i < rows; i++) {
+        output += "\n";
+        for (size_t j = 0; j < columns; j++) {
+            output += " " + std::to_string(Get(IX(j, i)));
+        }
+    }
+    return output;
+}
+
 __host__ __device__ void Matrix::PrintMatrix(const char* label) {
     if (label) { // Nullptr default check
         printf("\n\n%s", label);
@@ -138,7 +145,7 @@ __host__ __device__ void Matrix::PrintMatrix(const char* label) {
 }
 
 __host__ __device__ float* Matrix::Row(const size_t& index) {
-    float* output = (float*) malloc(columns * sizeof(float));
+    float* output = (float*) malloc(columns * sizeof(float)); //Maybe use memcpy later?
     for (int i = 0; i < columns; i++) {
         output[i] = Get(i, index);
     }
@@ -146,40 +153,41 @@ __host__ __device__ float* Matrix::Row(const size_t& index) {
 }
 
 __host__ __device__ float* Matrix::Column(const size_t& index) {
-    float* output = (float*)malloc(rows * sizeof(float));
+    float* output = (float*)malloc(rows * sizeof(float)); //Maybe use memcpy later?
     for (int i = 0; i < rows; i++) {
         output[i] = Get(index, i);
     }
     return output;
 }
 
-__host__ __device__ cudaError_t Matrix::Destroy() {
+__host__ cudaError_t Matrix::Destroy() {
     cudaError_t cuda_status = cudaSuccess;
-#ifndef __CUDA_ARCH__
+
     if (!local) {
         cuda_status = cudaFree(data_device);
         if (cuda_status != cudaSuccess) {
             printf("%s\n", "Could not free memory for the data device.");
         }
     }
+
     if (device_allocated_status) {
         cuda_status = cudaFree(device_alloc);
         printf("%s\n", "Could not free memory for the device allocation.");
     }
-#endif
+
     cuda_status = cudaFreeHost(data);
     //printf("%s\n", "Destruction of matrix successful.");
     return cuda_status;
 }
 
-__host__ void Matrix::DeleteAllocations(vector<Matrix*> matrices) {
+__host__ void Matrix::DeleteAllocations(const vector<Matrix*>& matrices) {
     for (auto matrix : matrices) {
         matrix->Destroy();
     }
 }
 
 cudaError_t Matrix::PopulateRandomHost(Matrix* matrix, const float& min, const float& max) {
-    RandomFloat random(min, max, 3);
+    RandomFloat random(min, max);
 
     for (size_t i = 0; i < matrix->rows; i++) {
         for (size_t j = 0; j < matrix->columns; j++) {

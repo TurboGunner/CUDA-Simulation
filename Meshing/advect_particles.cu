@@ -17,7 +17,13 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 
 	Vector3D cell_difference = (position - cell_idx) - 0.5f;
 
-	Vector3D* weights = GetWeights(cell_difference);
+	//Vector3D* weights = GetWeights(cell_difference);
+
+	Vector3D weights[3] {}; //Array of weights, testing a different method here
+
+	weights[0] = (cell_difference.Negative() + 0.5f).Squared() * 0.5f;
+	weights[1] = cell_difference.Squared().Negative() + 0.75f;
+	weights[2] = (cell_difference + 0.5f).Squared() * 0.5f;
 
 	const size_t traversal_length = 27;
 
@@ -51,12 +57,12 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 
 		grid->GetVelocity(incident) += weighted_velocity;
 
-		Matrix::MultiplyScalarOnPointer(B_term, 9);
+		Matrix::MultiplyScalarOnPointer(B_term, 4);
 
 		grid->GetMomentum(incident) = *B_term;
 
 		grid->GetPosition(incident) += grid->GetVelocity(incident) * grid->dt;
-
+		//Clamp enforces particles not exiting simulation domain in this instance
 		grid->GetPosition(incident) = grid->GetPosition(incident).Clamp(1, grid->side_size_ - 2);
 
 		Vector3D position_normalized = grid->GetPosition(incident) + grid->GetVelocity(incident);
@@ -64,7 +70,7 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 		float wall_max = (float) grid->side_size_ - 4;
 
 		MPMBoundaryConditions(grid, incident, position_normalized, wall_min, wall_max);
-		//printf("%f\n", grid->GetPosition(incident).dim[0]);
+		//printf("%f\n", grid->GetMomentum(incident).Get(5));
 	}
 }
 

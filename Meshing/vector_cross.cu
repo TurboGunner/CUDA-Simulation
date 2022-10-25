@@ -181,9 +181,9 @@ __host__ __device__ void Vector3D::ToMatrix(Matrix* matrix) {
 }
 
 __host__ __device__ void Vector3D::Reset() {
-	dim[0] = 0;
-	dim[1] = 0;
-	dim[2] = 0;
+	dim[0] = 0.0f;
+	dim[1] = 0.0f;
+	dim[2] = 0.0f;
 }
 
 __host__ __device__ Vector3D Vector3D::Clamp(float min, float max) {

@@ -3,6 +3,7 @@
 #include "matrix.cuh"
 #include "vector_cross.cuh"
 
+#include "curand.h"
 #include "curand_kernel.h"
 
 #include "../CUDATest/index_pair_cuda.cuh"
@@ -126,7 +127,7 @@ private:
 
 __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dist_matrix, Matrix* momentum);
 
-__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* weighted_stress, Matrix* cell_dist_matrix, Matrix* momentum, Matrix* viscosity_term); //Stress matrix must be diagonal!
+__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* momentum, Matrix* viscosity_term); //Stress matrix must be diagonal!
 
 __global__ void UpdateGrid(Grid* grid);
 
@@ -140,3 +141,5 @@ __host__ cudaError_t InitializeGridHost(Grid* grid);
 //Device Methods
 
 __device__ Vector3D* GetWeights(Vector3D cell_difference);
+
+__host__ static void GenerateRandomParticles(Grid* grid);
