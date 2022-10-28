@@ -45,8 +45,8 @@ private:
     VkQueue queue_;
     VkDeviceSize size_;
 
-    VkBuffer vertex_buffer_, index_buffer_, mesh_buffer_;
-    VkDeviceMemory vertex_buffer_memory_, index_buffer_memory_, mesh_buffer_memory_;
+    VkBuffer vertex_buffer_ = {}, index_buffer_ = {}, mesh_buffer_ = {};
+    VkDeviceMemory vertex_buffer_memory_ = {}, index_buffer_memory_ = {}, mesh_buffer_memory_ = {};
 
     bool index_binding_mode_ = false;
 

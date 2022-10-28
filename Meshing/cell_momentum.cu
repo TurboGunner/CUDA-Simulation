@@ -24,11 +24,15 @@ __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dis
 			z_weight_idx = i % 2;
 
 		float weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
+
 		Vector3D cell_position(cell_idx.x() + x_weight_idx - 1,
 			cell_idx.y() + y_weight_idx - 1,
 			cell_idx.z() + z_weight_idx - 1);
 
+		IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
+
 		Vector3D cell_dist = (cell_position - position) + 0.5f;
+
 		for (int j = 0; j < 2; j++) {
 			cell_dist_matrix->Get(j) = cell_dist.dim[j];
 		}
@@ -56,12 +60,11 @@ __global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dis
 			}
 		}
 
-		IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
-
 		Vector3D Q = Vector3D(momentum->Get(0), momentum->Get(1), momentum->Get(2));
 
 		float mass_contribution = weight * grid->GetCellMass(cell_incident);
 
+		//Updates mass and velocity
 		grid->GetCellMass(cell_incident) += mass_contribution;
 		grid->GetCellVelocity(cell_incident) += (grid->GetVelocity(cell_incident) + Q) * mass_contribution;
 	}

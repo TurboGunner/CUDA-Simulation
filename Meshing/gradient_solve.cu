@@ -26,9 +26,9 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* momentum
 
 	float weight = 0.0f;
 
-	Vector3D cell_position;
+	Vector3D cell_position = {};
 
-	IndexPair cell_incident;
+	IndexPair cell_incident = {};
 
 	//Estimation of particle volume by summing up the particle neighborhood weighted mass contribution
 	for (size_t i = 0; i < traversal_length; i++) { //NOTE: INCREMENT ORDER
@@ -89,7 +89,7 @@ __global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* momentum
 
 		Vector3D cell_dist = (cell_position - position) + 0.5f;
 
-		Vector3D constitutive_vector; //NOTE
+		Vector3D constitutive_vector = {}; //NOTE
 
 		for (size_t j = 0; j < 2; j++) {
 			constitutive_vector.dim[j] = stress_matrix->Get(j);

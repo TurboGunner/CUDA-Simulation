@@ -89,7 +89,7 @@ void VulkanGUIDriver::PoolDescriptionInitialization() {
         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 },
     };
 
     LoadPoolDescriptionProperties(pool_info_, pool_sizes);

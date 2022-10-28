@@ -3,9 +3,7 @@
 __host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
 	cudaError_t cuda_status = cudaSuccess;
 
-	void*& device_ptr = cross_memory_handles_[0].cuda_device_ptr,
-		*& host_ptr = cross_memory_handles_[0].cuda_host_ptr;
-	cuda_status = cudaMemsetAsync(device_ptr, 0, cross_memory_handles_[0].TotalAllocationSize(), cuda_stream_);
+	cuda_status = cudaMemsetAsync(cross_memory_handles_[0].cuda_device_ptr, 0, cross_memory_handles_[0].TotalAllocationSize(), cuda_stream_);
 	CudaExceptionHandler(cuda_status, "CUDAMemsetAsync");
 
 	//dim3 blocks, threads;
@@ -14,6 +12,16 @@ __host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSema
 
 	cuda_status = PostExecutionChecks(cuda_status, "MPMKernel");
 
+	cudaStreamSynchronize(cuda_stream_);
+
+	Vector3D* host_test = new Vector3D();
+
+	cuda_status = cudaMemcpy(host_test, &((Vector3D*)cross_memory_handles_[0].cuda_device_ptr)[163], sizeof(Vector3D), cudaMemcpyDeviceToHost);
+
+	s_stream << host_test->x() << " " << host_test->y() << " " << host_test->z() << std::endl; //WIP, DEBUG!
+	ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
+
+	delete host_test;
 	//cuda_status = cudaMemcpyAsync(host_ptr, device_ptr, cross_memory_handles_[0].TotalAllocationSize(), cudaMemcpyDeviceToHost, cuda_stream_); //NOTE: TEST
 
 	return cuda_status;
@@ -27,6 +35,8 @@ __host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semap
 	cuda_status = CreateStream();
 	ProgramLog::OutputLine("Creating CUDA async stream!\n");
 
+	cross_memory_handles_[0].cuda_device_ptr = grid_->particle_position_device_;
+
 	CUresult cuda_result = SimulationSetupAllocations(); //Setups the allocation for the simulation
 	ProgramLog::OutputLine("Setting up simulation interop allocations!");
 
@@ -34,8 +44,6 @@ __host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semap
 		//cuda_status = cross_memory_handle.AllocateCudaMemory(); //Allocates CUDA memory across handle structs
 	//}
 	ProgramLog::OutputLine("CUDA memory allocated successfully!");
-
-	cross_memory_handles_[0].cuda_device_ptr = grid_->particle_position_device_;
 
 	cuda_status = InitializeCudaInterop(wait_semaphore, signal_semaphore);
 

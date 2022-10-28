@@ -40,6 +40,8 @@ VkResult VertexData::Initialize(VkCommandPool& command_pool) {
         vertex_buffer_ = vertices.sync_data_.buffer;
         vertex_buffer_memory_ = vertices.sync_data_.buffer_memory;
 
+        ProgramLog::OutputLine("Transferred vertex buffer and memory!");
+
         return vulkan_status;
     }
 

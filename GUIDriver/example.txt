@@ -15,7 +15,7 @@ Extension Name: VK_EXT_swapchain_colorspace
 Extension Name: VK_NV_external_memory_capabilities
 Extension Name: VK_KHR_portability_enumeration
 
-Address for Vulkan debug callback: 00007FF854A8FAF0. Debug callback successful!
+Address for Vulkan debug callback: 00007FF8FFFAFAF0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -84,8 +84,7 @@ CUDA Driver API Error Status for SetMemoryAccess: CUDA_SUCCESS | CUDA Driver Err
 
 Setting up simulation interop allocations!
 CUDA memory allocated successfully!
-Memory Type: 1
-Created allocation info for video memory.
+Mem Allocation Size for Imported Interop Memory: 12582912
 Buffer Memory Size: 12582912
 External Semaphore Enum: 2
 Successfully read shader file Shaders/shader_vert_test.spv!
@@ -108,6 +107,7 @@ Created graphics pipeline info for render pipeline.
 Name for shader stage (Index 0): main.
 Successfully created graphics pipeline!
 Successfully created mesh pipeline!
+Transferred vertex buffer and memory!
 
 
 Address for Vulkan Render Pass: EC4BEC000000000B.
@@ -120,14 +120,45 @@ Successfully submitted item to queue!
 Resolution: 4.000000
 Threads (Total): 262144
 Cells (Total): 262144
-0 0 0
+1.2 1.2 0.6
 
-0 0 0
+[vulkan] Debug report from ObjectType: 4
+Message: 
 
-0 0 0
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x1b3ec857230, type = VK_OBJECT_TYPE_QUEUE; 
+ MessageID = 0xc7aabc16 
+ vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 
-0 0 0
+0.6 1.2 0.6
 
-Error Stacktrace: device-side assert triggered
+[vulkan] Debug report from ObjectType: 4
+Message: 
 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x1b3ec857230, type = VK_OBJECT_TYPE_QUEUE; 
+ MessageID = 0xc7aabc16 
+ vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+
+1.2 0.6 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
+
+1.2 1.2 1.2
 

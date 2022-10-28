@@ -56,22 +56,21 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 		Matrix::AddOnPointer(B_term, *weighted_term);
 
 		grid->GetVelocity(incident) += weighted_velocity;
-
-		Matrix::MultiplyScalarOnPointer(B_term, 4);
-
-		grid->GetMomentum(incident) = *B_term;
-
-		grid->GetPosition(incident) += grid->GetVelocity(incident) * grid->dt;
-		//Clamp enforces particles not exiting simulation domain in this instance
-		grid->GetPosition(incident) = grid->GetPosition(incident).Clamp(1, grid->side_size_ - 2);
-
-		Vector3D position_normalized = grid->GetPosition(incident) + grid->GetVelocity(incident);
-		const float wall_min = 3;
-		float wall_max = (float) grid->side_size_ - 4;
-
-		MPMBoundaryConditions(grid, incident, position_normalized, wall_min, wall_max);
-		//printf("%f\n", grid->GetMomentum(incident).Get(5));
 	}
+	Matrix::MultiplyScalarOnPointer(B_term, 4);
+
+	grid->GetMomentum(incident) = *B_term;
+
+	grid->GetPosition(incident) += grid->GetVelocity(incident) * grid->dt;
+
+	grid->GetPosition(incident) = grid->GetPosition(incident).Clamp(1, grid->side_size_ - 2); //Clamp enforces particles not exiting simulation domain in this instance
+
+	//Boundaries
+	Vector3D position_normalized = grid->GetPosition(incident) + grid->GetVelocity(incident);
+	const float wall_min = 3;
+	float wall_max = (float) grid->side_size_ - 4;
+
+	MPMBoundaryConditions(grid, incident, position_normalized, wall_min, wall_max);
 }
 
 __device__ void MPMBoundaryConditions(Grid* grid, IndexPair incident, const Vector3D& position_normalized, const float& wall_min, const float& wall_max) {

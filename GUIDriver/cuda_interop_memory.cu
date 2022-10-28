@@ -100,7 +100,7 @@ VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryH
 
 	vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
 
-	if (os_ != LINUX) {
+#ifdef _WIN64
 		VkImportMemoryWin32HandleInfoKHR handle_info = {};
 
 		handle_info.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
@@ -108,19 +108,29 @@ VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryH
 		handle_info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
 		handle_info.handle = handle;
 		handle_info.name = nullptr;
-	}
-	else {
+#else
 		VkImportMemoryFdInfoKHR handle_info = {};
 
 		handle_info.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
 		handle_info.pNext = nullptr;
-		handle_info.fd = (int)(uintptr_t)handle;
+		handle_info.fd = (int)(uintptr_t) handle;
 		handle_info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-	}
+#endif
 
-	VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(phys_device_, mem_requirements, properties, true);
+	//VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(phys_device_, mem_requirements, properties, true);
 
-	if (vkAllocateMemory(device_, &alloc_info, nullptr, &buffer_memory) != VK_SUCCESS) {
+	VkMemoryAllocateInfo alloc_info = {};
+
+	alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	alloc_info.pNext = &handle_info;
+	alloc_info.allocationSize = mem_requirements.size;
+	alloc_info.memoryTypeIndex = VulkanHelper::FindMemoryType(phys_device_, mem_requirements.memoryTypeBits, properties, false);
+
+	ProgramLog::OutputLine("Mem Allocation Size for Imported Interop Memory: " + std::to_string(alloc_info.allocationSize));
+
+	vulkan_status = vkAllocateMemory(device_, &alloc_info, nullptr, &buffer_memory);
+
+	if (vulkan_status != VK_SUCCESS) {
 		ProgramLog::OutputLine("Error: Failed to allocate buffer memory!");
 	}
 
@@ -148,7 +158,7 @@ void* CudaInterop::GetMemoryHandleWin32(VkDeviceMemory& memory, const VkExternal
 	vk_memory_get_win32_handle_info.memory = memory;
 	vk_memory_get_win32_handle_info.handleType = handle_type;
 
-	PFN_vkGetMemoryWin32HandleKHR func_get_memory_win32_handle = (PFN_vkGetMemoryWin32HandleKHR)vkGetDeviceProcAddr(device_, "vkGetMemoryWin32HandleKHR");
+	PFN_vkGetMemoryWin32HandleKHR func_get_memory_win32_handle = (PFN_vkGetMemoryWin32HandleKHR) vkGetDeviceProcAddr(device_, "vkGetMemoryWin32HandleKHR");
 	if (!func_get_memory_win32_handle) {
 		ProgramLog::OutputLine("Error: Failed to retrieve vkGetMemoryWin32HandleKHR!");
 	}

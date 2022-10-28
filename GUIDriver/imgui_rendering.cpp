@@ -204,13 +204,6 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
         return;
     }
 
-    VulkanErrorHandler(vulkan_status);
-    vulkan_status = vkWaitForFences(device_, 1, &in_flight_fence, VK_TRUE, UINT64_MAX); //Has indefinite wait instead of periodic checks
-    VulkanErrorHandler(vulkan_status);
-
-    vulkan_status = vkResetFences(device_, 1, &in_flight_fence);
-    VulkanErrorHandler(vulkan_status);
-
     //WIP, maybe move order after Fence reset if it doesn't work
 
     //Wait Semaphores (CUDA <-> Vulkan Sync)
@@ -222,6 +215,13 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
     vulkan_parameters_.sync_struct_.signal_semaphores_.push_back(in_flight_render_semaphore);
 
     //WIP
+
+    VulkanErrorHandler(vulkan_status);
+    vulkan_status = vkWaitForFences(device_, 1, &in_flight_fence, VK_TRUE, UINT64_MAX); //Has indefinite wait instead of periodic checks
+    VulkanErrorHandler(vulkan_status);
+
+    vulkan_status = vkResetFences(device_, 1, &in_flight_fence);
+    VulkanErrorHandler(vulkan_status);
 
     VkCommandBuffer in_flight_command_buffer = vulkan_parameters_.InFlightCommandBuffer();
 

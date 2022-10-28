@@ -32,6 +32,7 @@ VkResult VulkanParameters::InitVulkan() {
 	SimulationInit();
 
 	VkResult vulkan_status = PipelineInit();
+
 	return vulkan_status;
 }
 

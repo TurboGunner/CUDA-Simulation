@@ -29,14 +29,14 @@ public:
 
 	cudaError_t DeallocateCudaMemory();
 
-	VkBuffer buffer;
-	VkDeviceMemory buffer_memory;
+	VkBuffer buffer = {};
+	VkDeviceMemory buffer_memory = {};
 
-	CUmemGenericAllocationHandle cuda_handle;
-	ShareableHandle shareable_handle;
+	CUmemGenericAllocationHandle cuda_handle = {};
+	ShareableHandle shareable_handle = {};
 
 	void* vulkan_ptr = nullptr;
-	void* cuda_host_ptr = nullptr, * cuda_device_ptr = nullptr;
+	void* cuda_host_ptr = nullptr, *cuda_device_ptr = nullptr;
 
 	size_t size = 0;
 	size_t granularity_size = 0;
