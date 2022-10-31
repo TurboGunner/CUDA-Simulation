@@ -1,6 +1,6 @@
 #include "cuda_interop_helper.cuh"
 
-__host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore) {
+__host__ cudaError_t CudaInterop::TestMethod() {
 	cudaError_t cuda_status = cudaSuccess;
 
 	cuda_status = cudaMemsetAsync(cross_memory_handles_[0].cuda_device_ptr, 0, cross_memory_handles_[0].TotalAllocationSize(), cuda_stream_);
@@ -12,13 +12,18 @@ __host__ cudaError_t CudaInterop::TestMethod(VkSemaphore& wait_semaphore, VkSema
 
 	cuda_status = PostExecutionChecks(cuda_status, "MPMKernel");
 
-	cudaStreamSynchronize(cuda_stream_);
+	//cudaStreamSynchronize(cuda_stream_);
 
-	Vector3D* host_test = new Vector3D();
+	float* host_test = new float();
 
-	cuda_status = cudaMemcpy(host_test, &((Vector3D*)cross_memory_handles_[0].cuda_device_ptr)[163], sizeof(Vector3D), cudaMemcpyDeviceToHost);
+	cuda_status = cudaMemcpyAsync(host_test, &((Vector3D*) cross_memory_handles_[0].cuda_device_ptr)[163].dim[0], sizeof(float), cudaMemcpyDeviceToHost, cuda_stream_);
 
-	s_stream << host_test->x() << " " << host_test->y() << " " << host_test->z() << std::endl; //WIP, DEBUG!
+	//cudaFree(cross_memory_handles_[0].cuda_device_ptr);
+
+	s_stream << "Host Test: " << *host_test << std::endl; //WIP, DEBUG!
+	ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
+
+	s_stream << "Pointer Test: " << cross_memory_handles_[0].vulkan_ptr << std::endl; //WIP, DEBUG!
 	ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
 
 	delete host_test;
@@ -64,21 +69,11 @@ __host__ cudaError_t CudaInterop::InteropDrawFrame(VkSemaphore& wait_semaphore, 
 	cudaError_t cuda_status = cudaWaitExternalSemaphoresAsync(&cuda_wait_semaphore_, &wait_params, 1, cuda_stream_);
 	CudaExceptionHandler(cuda_status, "CUDAWaitExternalSemaphoreAsync");
 
-	cuda_status = TestMethod(wait_semaphore, signal_semaphore);
+	cuda_status = TestMethod();
 	CudaExceptionHandler(cuda_status, "ExecuteMethod");
 
 	cuda_status = cudaSignalExternalSemaphoresAsync(&cuda_signal_semaphore_, &signal_params, 1, cuda_stream_);
 	CudaExceptionHandler(cuda_status, "CUDASignalExternalSemaphoreAsync");
 
 	return cuda_status;
-}
-
-__host__ void CudaInterop::DriverLog(CUresult& cuda_result, const string& label) {
-	const char* name_output, *str_output;
-
-	cuda_result = cuGetErrorName(cuda_result, &name_output);
-	cuda_result = cuGetErrorString(cuda_result, &str_output);
-
-	s_stream << "CUDA Driver API Error Status for " << label << ": " << name_output << " | CUDA Driver Error String: " << str_output << std::endl;
-	ProgramLog::OutputLine(s_stream);
 }

@@ -70,6 +70,9 @@
     <CudaCompile Include="..\Meshing\matrix_kernel.cu">
       <Filter>cuda\imported\mpm</Filter>
     </CudaCompile>
+    <CudaCompile Include="interop_memory_allocator.cu">
+      <Filter>cuda\interop</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cpp">
@@ -255,6 +258,9 @@
       <Filter>includes\imported</Filter>
     </ClInclude>
     <ClInclude Include="cross_memory_handle.cuh">
+      <Filter>includes\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="interop_memory_allocator.cuh">
       <Filter>includes\interop</Filter>
     </ClInclude>
   </ItemGroup>

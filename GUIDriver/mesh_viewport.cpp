@@ -107,7 +107,7 @@ MeshPushConstants MeshViewport::ViewportRotation(const size_t& frame_index, cons
     //Calculates the final mesh matrix
     glm::mat4 mesh_matrix = projection_ * view_;
 
-    MeshPushConstants constants;
+    MeshPushConstants constants = {};
     constants.render_matrix = mesh_matrix;
 
     return constants;

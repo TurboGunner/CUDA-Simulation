@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cuda_runtime.h"
+#include <cuda_runtime_api.h>
 
 #include "vulkan/vulkan.h"
 
@@ -10,6 +11,7 @@
 #include <string>
 #include <functional>
 #include <fstream>
+#include <cuda.h>
 
 using std::string;
 using std::reference_wrapper;
@@ -46,3 +48,5 @@ cudaError_t PostExecutionChecks(cudaError_t status, string method_name, bool syn
 /// <summary> Allocates threads based on given vector field lengths and threads allocated per dimension. Order: blocks, threads. 
 /// <para> Delegated specificially for the BoundaryConditions check. </para> </summary>
 void ThreadAllocator2D(dim3& blocks, dim3& threads, const unsigned int& length, const unsigned int& threads_per_block = 16);
+
+__host__ void CudaDriverLog(CUresult& cuda_result, const string& label = "");

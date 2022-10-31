@@ -20,6 +20,14 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 
 	ExportSemaphoreCreationSettings(export_semaphore_create_info, handle_type);
 
+	WindowsSecurityAttributes win_security_attributes;
+	if (os_ != LINUX) {
+		auto export_semaphore_win32_handle = ExportSemaphoreHandleWin32(export_semaphore_create_info, handle_type);
+		export_semaphore_win32_handle.pAttributes = &win_security_attributes;
+		export_semaphore_create_info.pNext = &export_semaphore_win32_handle;
+	}
+
+
 	semaphore_info.pNext = &export_semaphore_create_info;
 
 	vulkan_status = vkCreateSemaphore(device_, &semaphore_info, nullptr, &semaphore);
@@ -35,14 +43,14 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 }
 
 VkExportSemaphoreWin32HandleInfoKHR CudaInterop::ExportSemaphoreHandleWin32(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type) {
-	WindowsSecurityAttributes win_security_attributes;
+	//WindowsSecurityAttributes win_security_attributes;
 
 	VkExportSemaphoreWin32HandleInfoKHR export_semaphore_win32_handle = {};
 
 	export_semaphore_win32_handle.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
 	export_semaphore_win32_handle.pNext = nullptr;
 
-	export_semaphore_win32_handle.pAttributes = &win_security_attributes;
+	//export_semaphore_win32_handle.pAttributes = &win_security_attributes;
 	export_semaphore_win32_handle.dwAccess = DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE;
 
 	export_semaphore_win32_handle.name = (LPCWSTR) nullptr;
@@ -56,7 +64,8 @@ void CudaInterop::ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR
 	export_semaphore_create_info.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
 
 	if (os_ != LINUX) {
-		ExportSemaphoreHandleWin32(export_semaphore_create_info, handle_type);
+		//auto export_semaphore_win32_handle = ExportSemaphoreHandleWin32(export_semaphore_create_info, handle_type);
+		//export_semaphore_create_info.pNext = &export_semaphore_win32_handle;
 	}
 
 	else {

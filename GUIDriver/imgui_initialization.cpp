@@ -31,14 +31,12 @@ void VulkanGUIDriver::FramePresent() {
         return;
     }
 
-    VkSemaphore in_flight_render_semaphore = vulkan_parameters_.InFlightRenderSemaphore();
-
     VkPresentInfoKHR info = {};
 
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
     info.waitSemaphoreCount = 1;
-    info.pWaitSemaphores = &in_flight_render_semaphore;
+    info.pWaitSemaphores = &vulkan_parameters_.InFlightRenderSemaphore();
 
     info.swapchainCount = 1;
 

@@ -88,7 +88,7 @@ VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryH
 	VkExternalMemoryBufferCreateInfo external_buffer_memory_info = {};
 
 	external_buffer_memory_info.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
-	external_buffer_memory_info.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+	external_buffer_memory_info.handleTypes = handle_type;
 
 	buffer_info.pNext = &external_buffer_memory_info;
 
@@ -96,7 +96,7 @@ VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryH
 		ProgramLog::OutputLine("Error: Failed to properly create buffer!");
 	}
 
-	VkMemoryRequirements mem_requirements;
+	VkMemoryRequirements mem_requirements = {};
 
 	vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
 
@@ -135,6 +135,7 @@ VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryH
 	}
 
 	vulkan_status = vkBindBufferMemory(device_, buffer, buffer_memory, 0);
+	VulkanExceptionHandler(vulkan_status, "Error: Failed to bind external buffer memory!");
 
 	return vulkan_status;
 }
@@ -166,7 +167,7 @@ void* CudaInterop::GetMemoryHandleWin32(VkDeviceMemory& memory, const VkExternal
 		ProgramLog::OutputLine("Error: Failed to retrieve handle for buffer!");
 	}
 
-	return (void*)handle;
+	return (void*) handle;
 }
 
 void* CudaInterop::GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits& handle_type) {

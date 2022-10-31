@@ -29,6 +29,7 @@ VkBufferCreateInfo BufferHelpers::CreateBufferInfo(const VkDeviceSize& size, con
     buffer_info.size = size;
     buffer_info.usage = usage;
     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    buffer_info.pQueueFamilyIndices = nullptr;
 
     return buffer_info;
 }

@@ -130,7 +130,9 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBu
 
     FrameRender(draw_data);
     FramePresent();
+
     cudaError_t cuda_status = vulkan_parameters_.InteropDrawFrame();
+    VkResult vulkan_status = vkDeviceWaitIdle(device_);
 }
 
 void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebuffer& frame_buffer) {

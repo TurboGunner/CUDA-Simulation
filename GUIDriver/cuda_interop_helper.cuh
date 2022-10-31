@@ -29,8 +29,6 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
-enum OperatingSystem { WINDOWS_MODERN, WINDOWS_OLD, LINUX };
-
 class CudaInterop {
 public:
 	CudaInterop() = default;
@@ -102,13 +100,11 @@ public:
 
 	bool IsVkPhysicalDeviceUUID(void* uuid);
 
-	__host__ cudaError_t TestMethod(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
+	__host__ cudaError_t TestMethod();
 
 	__host__ cudaError_t BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore, const size_t& size);
 
 	__host__ cudaError_t InteropDrawFrame(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
-
-	__host__ void DriverLog(CUresult& cuda_result, const string& label = "");
 
 	vector<const char*> interop_extensions_, interop_device_extensions_;
 
@@ -121,7 +117,7 @@ private:
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
 
-	CUmemAllocationHandleType ipc_handle_type_flag_;
+	CUmemAllocationHandleType ipc_handle_type_flag_ = {};
 	CUmemAllocationProp current_alloc_prop_ = {};
 	CUmemAccessDesc access_descriptor_ = {};
 

@@ -6,6 +6,29 @@ CrossMemoryHandle::CrossMemoryHandle(const size_t& size_in, const size_t& type_s
 	host_inclusive = host_inclusive_in;
 }
 
+CrossMemoryHandle& CrossMemoryHandle::operator=(const CrossMemoryHandle& src_handle) {
+	if (this == &src_handle) {
+		return *this;
+	}
+	size = src_handle.size;
+	type_size = src_handle.type_size;
+	host_inclusive = src_handle.host_inclusive;
+
+	buffer = src_handle.buffer;
+	buffer_memory = src_handle.buffer_memory;
+
+	if (host_inclusive) {
+		cuda_host_ptr = src_handle.cuda_host_ptr;
+	}
+	cuda_device_ptr = src_handle.cuda_device_ptr;
+	vulkan_ptr = src_handle.vulkan_ptr;
+
+	cuda_handle = src_handle.cuda_handle;
+	shareable_handle = src_handle.shareable_handle;
+
+	granularity_size = src_handle.granularity_size;
+}
+
 VkDeviceSize CrossMemoryHandle::TotalAllocationSize() const {
 	return size * type_size;
 }

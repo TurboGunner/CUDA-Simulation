@@ -116,6 +116,7 @@
     <CudaCompile Include="cuda_interop_semaphore.cu" />
     <CudaCompile Include="gui_display.cu" />
     <CudaCompile Include="gui.cu" />
+    <CudaCompile Include="interop_memory_allocator.cu" />
     <CudaCompile Include="rasterizer.cu" />
     <CudaCompile Include="shader_loader.cu" />
     <CudaCompile Include="shader_loader_init.cu" />
@@ -155,6 +156,7 @@
     <ClInclude Include="descriptor_set_handler.hpp" />
     <ClInclude Include="gui_driver.cuh" />
     <ClInclude Include="image_helpers.hpp" />
+    <ClInclude Include="interop_memory_allocator.cuh" />
     <ClInclude Include="mesh_manager.hpp" />
     <ClInclude Include="mesh_viewport.hpp" />
     <ClInclude Include="rasterizer.cuh" />

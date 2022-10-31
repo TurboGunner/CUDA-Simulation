@@ -81,6 +81,9 @@ __host__ void GenerateRandomParticles(Grid* grid) {
 	CurandCallCheck(curand_status);
 	curand_status = curandDestroyGenerator(gen);
 	CurandCallCheck(curand_status);
+	Vector3D vec_test(1.0f, 1.0f, 1.0f);
+
+	cudaMemcpy(&grid->particle_position_device_[163], &vec_test, sizeof(Vector3D), cudaMemcpyHostToDevice);
 }
 
 __host__ static cudaError_t DebugGPU(Grid* grid, cudaStream_t& cuda_stream) {
@@ -120,7 +123,7 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid, cudaStream_t& cuda_stream) {
 		GenerateRandomParticles(grid);
 
 		grid->up_to_date_ = true;
-		cuda_status = cudaStreamSynchronize(cuda_stream);
+		//cuda_status = cudaStreamSynchronize(cuda_stream);
 	}
 
 	ClearGrid<<<blocks, threads, 0, cuda_stream>>> (grid);
@@ -150,6 +153,8 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid, cudaStream_t& cuda_stream) {
 	AdvectParticles<<<blocks2, threads2, 0, cuda_stream>>> (grid, grid->B_term->device_alloc, grid->weighted_term->device_alloc);
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectParticles", false);
 	CudaExceptionHandler(cuda_status, "AdvectParticles failed!");
+
+	cudaStreamSynchronize(cuda_stream);
 
 	//DebugGPU(grid, cuda_stream);
 

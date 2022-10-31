@@ -111,15 +111,15 @@ void VulkanParameters::InFlightObjectsInit() {
 }
 
 void VulkanParameters::SimulationInit() {
-	const float side_size = 64.0f;
+	const float side_size = 16.0f;
 
 	grid_ = new Grid(Vector3D(side_size, side_size, side_size));
 
 	interop_handler_.grid_ = grid_;
 	interop_handler_.BulkInitializationTest(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_, grid_->GetParticleCount());
 
-	CrossMemoryHandle& mesh_handle = interop_handler_.cross_memory_handles_[0]; //NOTE: FIXED
-	mesh_data_.vertices.sync_data_ = mesh_handle;
+	//CrossMemoryHandle& mesh_handle = interop_handler_.cross_memory_handles_[0]; //NOTE: FIXED
+	mesh_data_.vertices.sync_data_ = interop_handler_.cross_memory_handles_[0];
 
 }
 

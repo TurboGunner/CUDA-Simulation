@@ -108,37 +108,52 @@ CUresult CudaInterop::SimulationSetupAllocations() {
     MemoryAllocationProp();
 
     cuda_result = cuMemGetAllocationGranularity(&granularity, &current_alloc_prop_, CU_MEM_ALLOC_GRANULARITY_RECOMMENDED);
-    DriverLog(cuda_result, "Allocation Granularity");
+    CudaDriverLog(cuda_result, "Allocation Granularity");
 
     CalculateTotalMemorySize(granularity);
 
     uintptr_t device_address = reinterpret_cast<uintptr_t>(cross_memory_handles_[0].cuda_device_ptr);
     d_ptr = (CUdeviceptr)device_address;
 
-    cuda_result = cuMemAddressReserve(&d_ptr, total_alloc_size_, granularity, 0U, 0);
-    DriverLog(cuda_result, "MemAddressReserve");
+    //size_t reserve_size = total_alloc_size_ - cross_memory_handles_[0].TotalAllocationSize();
+
+   // cuda_result = cuMemAddressReserve(&d_ptr, total_alloc_size_, granularity, 0, 0);
+    //DriverLog(cuda_result, "MemAddressReserve");
+
+
+    Vector3D* host_test = new Vector3D();
+    Vector3D* device_test_host = new Vector3D(1, 1, 1);
+
+    cudaError_t cuda_status = cudaMemcpy(&(((Vector3D*)cross_memory_handles_[0].cuda_device_ptr)[163]), device_test_host, sizeof(Vector3D), cudaMemcpyHostToDevice);
+    cuda_status = cudaMemcpy(host_test, &((Vector3D*)d_ptr)[163], sizeof(Vector3D), cudaMemcpyDeviceToHost);
+    s_stream << "Pointer Test: " << host_test->dim[0] << std::endl; //WIP, DEBUG!
+    ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
+
+    delete host_test;
 
     ProgramLog::OutputLine("Granularity: " + std::to_string(granularity) + "\n");
 
     cuda_result = cuMemCreate(&cross_memory_handles_[0].cuda_handle, cross_memory_handles_[0].granularity_size, &current_alloc_prop_, 0);
-    DriverLog(cuda_result, "MemCreate");
-
+    CudaDriverLog(cuda_result, "MemCreate");
+    //cudaIpcMemHandle_t handle = {};
+    //cudaIpcGetMemHandle(&handle, cross_memory_handles_[0].cuda_device_ptr);
     cuda_result = cuMemExportToShareableHandle(&cross_memory_handles_[0].shareable_handle, cross_memory_handles_[0].cuda_handle, ipc_handle_type_flag_, 0);
-    DriverLog(cuda_result, "ExportToShareableHandle");
+    CudaDriverLog(cuda_result, "ExportToShareableHandle");
 
     CUdeviceptr va_position = d_ptr; //NOTE: When having other pointers, this will adding the offsets in order to properly account for fitting into the contiguous VA range.
-    cross_memory_handles_[0].vulkan_ptr = (void*) va_position;
+    //cross_memory_handles_[0].vulkan_ptr = (void*) va_position;
+    cross_memory_handles_[0].vulkan_ptr = cross_memory_handles_[0].cuda_device_ptr;
 
     cuda_result = cuMemMap(va_position, cross_memory_handles_[0].granularity_size, 0, cross_memory_handles_[0].cuda_handle, 0);
-    DriverLog(cuda_result, "MapMemory");
+    CudaDriverLog(cuda_result, "MapMemory");
 
     cuda_result = cuMemRelease(cross_memory_handles_[0].cuda_handle);
-    DriverLog(cuda_result, "ReleaseMemory");
+    CudaDriverLog(cuda_result, "ReleaseMemory");
 
     MemoryAccessDescriptor();
 
     cuda_result = cuMemSetAccess(d_ptr, total_alloc_size_, &access_descriptor_, 1); //Adds read-write access to the whole VA range.
-    DriverLog(cuda_result, "SetMemoryAccess");
+    CudaDriverLog(cuda_result, "SetMemoryAccess");
 
     return cuda_result;
 }
@@ -147,7 +162,7 @@ CUresult CudaInterop::Clean() {
     CUresult cuda_result;
     for (const auto& mem_handle : cross_memory_handles_) { //Ensures that all allocations are mapped before attempting to unmap memory
         if (!mem_handle.vulkan_ptr) {
-            DriverLog(cuda_result, "Clean");
+            CudaDriverLog(cuda_result, "Clean");
             return cuda_result;
         }
     }
@@ -155,7 +170,7 @@ CUresult CudaInterop::Clean() {
     IPCCloseShareableHandle(cross_memory_handles_[0].shareable_handle);
 
     cuda_result = cuMemAddressFree((CUdeviceptr) cross_memory_handles_[0].vulkan_ptr, total_alloc_size_);
-    DriverLog(cuda_result, "VulkanPtrCUDAFree");
+    CudaDriverLog(cuda_result, "VulkanPtrCUDAFree");
 
     return cuda_result;
 }
@@ -193,10 +208,7 @@ cudaError_t CudaInterop::InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSe
     auto mem_handle_type = GetPlatformMemoryHandle();
     void* mem_handle = (void*) (uintptr_t) cross_memory_handles_[0].shareable_handle;
 
-    VkBuffer& buffer = cross_memory_handles_[0].buffer;
-    VkDeviceMemory& buffer_memory = cross_memory_handles_[0].buffer_memory;
-
-    vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer, buffer_memory);
+    vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, cross_memory_handles_[0].buffer, cross_memory_handles_[0].buffer_memory);
 
     if (vulkan_status != VK_SUCCESS) {
         ProgramLog::OutputLine("Importing external buffer failed in InitializeCudaInterop!");
