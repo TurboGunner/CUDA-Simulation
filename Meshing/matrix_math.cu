@@ -92,7 +92,7 @@ __host__ __device__ bool Matrix::Inverse(Matrix& matrix, Matrix& inverse) {
     return true;
 }
 
-__host__ __device__ Matrix* Matrix::DiagonalMatrix(const float* points, const size_t& rows, const size_t& columns) {
+__host__ __device__ Matrix* Matrix::DiagonalMatrix(const float* points, const size_t rows, const size_t columns) {
     Matrix* output = Matrix::Create(rows, columns);
     for (int i = 0; i < rows; i++) {
          output->Get(i, i) = points[i];
@@ -101,7 +101,7 @@ __host__ __device__ Matrix* Matrix::DiagonalMatrix(const float* points, const si
     return output;
 }
 
-__host__ __device__ void Matrix::PopulateDiagonalMatrix(Matrix* matrix, const float* points, const size_t& row, const size_t& column) {
+__host__ __device__ void Matrix::PopulateDiagonalMatrix(Matrix* matrix, const float* points, const size_t row, const size_t column) {
     for (int i = 0; i < matrix->rows; i++) {
         matrix->Get(i, i) = points[i];
     }
@@ -132,7 +132,7 @@ __host__ __device__ Matrix Matrix::Reciprocal() {
     return output;
 }
 
-__host__ __device__ Matrix Matrix::operator*(const float& scalar) {
+__host__ __device__ Matrix Matrix::operator*(const float scalar) {
     Matrix matrix(rows, columns);
 
     for (int i = 0; i < rows; i++) {
@@ -143,6 +143,24 @@ __host__ __device__ Matrix Matrix::operator*(const float& scalar) {
     return matrix;
 }
 
+__host__ __device__ Matrix& Matrix::operator*=(const float scalar) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+            Get(j, i) *= scalar;
+        }
+    }
+    return *this;
+}
+
+__host__ __device__ Matrix& Matrix::operator+=(const Matrix& matrix) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+            Get(j, i) += matrix.Get(j, i);
+        }
+    }
+    return *this;
+}
+
 __host__ __device__ void Matrix::AddOnPointer(Matrix* matrix, Matrix add) {
     for (int i = 0; i < matrix->rows; i++) {
         for (int j = 0; j < matrix->columns; j++) {
@@ -151,7 +169,7 @@ __host__ __device__ void Matrix::AddOnPointer(Matrix* matrix, Matrix add) {
     }
 }
 
-__host__ __device__ void Matrix::MultiplyScalarOnPointer(Matrix* matrix, const float& multi) {
+__host__ __device__ void Matrix::MultiplyScalarOnPointer(Matrix* matrix, const float multi) {
     for (int i = 0; i < matrix->rows; i++) {
         for (int j = 0; j < matrix->columns; j++) {
             matrix->Get(j, i) *= multi;

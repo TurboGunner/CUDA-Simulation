@@ -27,7 +27,7 @@ class Grid {
 public:
 	Grid() = default;
 
-	__host__ Grid(const Vector3D& sim_size_in, const float& resolution_in = 4.0f);
+	__host__ Grid(const Vector3D& sim_size_in, const float resolution_in = 4.0f, const bool late_init_in = true);
 
 	__host__ ~Grid();
 
@@ -47,27 +47,27 @@ public:
 
 	__host__ __device__ float GetResolution() const;
 
-	__host__ __device__ Vector3D& GetVelocity(const size_t& index);
+	__host__ __device__ Vector3D& GetVelocity(const size_t index);
 								 
 	__host__ __device__ Vector3D& GetVelocity(IndexPair incident);
 
-	__host__ __device__ Vector3D& GetPosition(const size_t& index);
+	__host__ __device__ Vector3D& GetPosition(const size_t index);
 
 	__host__ __device__ Vector3D& GetPosition(IndexPair incident);
 
-	__host__ __device__ Matrix& GetMomentum(const size_t& index);
+	__host__ __device__ Matrix& GetMomentum(const size_t index);
 
 	__host__ __device__ Matrix& GetMomentum(IndexPair incident);
 
-	__host__ __device__ float& GetParticleMass(const size_t& index);
+	__host__ __device__ float& GetParticleMass(const size_t index);
 
 	__host__ __device__ float& GetParticleMass(IndexPair incident);
 
-	__host__ __device__ float& GetCellMass(const size_t& index);
+	__host__ __device__ float& GetCellMass(const size_t index);
 
 	__host__ __device__ float& GetCellMass(IndexPair incident);
 
-	__host__ __device__ Vector3D& GetCellVelocity(const size_t& index);
+	__host__ __device__ Vector3D& GetCellVelocity(const size_t index);
 
 	__host__ __device__ Vector3D& GetCellVelocity(IndexPair incident);
 
@@ -98,26 +98,15 @@ public:
 
 	bool host_sync_ = false;
 	bool up_to_date_ = false;
+	bool late_init_ = true;
 
 private:
 	Vector3D sim_size_;
-	size_t total_size_;
+	size_t total_size_ = 0;
 
 	bool device_allocated_status = false, is_initialized_ = false;
 
 	float resolution_;
-
-	Matrix* cell_dist_matrix = Matrix::Create(3, 1, false);
-	Matrix* momentum = Matrix::Create(3, 1, false);
-	Matrix* momentum_matrix = Matrix::Create(3, 3, false);
-
-	Matrix* stress_matrix = Matrix::Create(3, 3, false);
-	Matrix* weighted_stress = Matrix::Create(3, 3, false);
-
-	Matrix* B_term = Matrix::Create(3, 3, false);
-	Matrix* weighted_term = Matrix::Create(3, 3, false);
-
-	Matrix* viscosity_term = Matrix::Create(3, 3, false);
 
 	dim3 cell_blocks, cell_threads;
 	dim3 particle_blocks, particle_threads;
@@ -125,18 +114,18 @@ private:
 
 //Globals
 
-__global__ void UpdateCell(Grid* grid, Matrix* momentum_matrix, Matrix* cell_dist_matrix, Matrix* momentum);
+__global__ void UpdateCell(Grid* grid);
 
-__global__ void SimulateGrid(Grid* grid, Matrix* stress_matrix, Matrix* momentum, Matrix* viscosity_term); //Stress matrix must be diagonal!
+__global__ void SimulateGrid(Grid* grid); //Stress matrix must be diagonal!
 
 __global__ void UpdateGrid(Grid* grid);
 
-__global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_term);
-__device__ void MPMBoundaryConditions(Grid* grid, IndexPair incident, const Vector3D& position_normalized, const float& wall_min, const float& wall_max);
+__global__ void AdvectParticles(Grid* grid);
+__device__ void MPMBoundaryConditions(Grid* grid, IndexPair incident, const Vector3D& position_normalized, const float wall_min, const float wall_max);
 
 __global__ void ClearGrid(Grid* grid);
 
-__host__ cudaError_t InitializeGridHost(Grid* grid);
+__global__ void SetValue(Grid* grid);
 
 //Device Methods
 

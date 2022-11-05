@@ -15,7 +15,7 @@ Extension Name: VK_EXT_swapchain_colorspace
 Extension Name: VK_NV_external_memory_capabilities
 Extension Name: VK_KHR_portability_enumeration
 
-Address for Vulkan debug callback: 00007FF8FAFDFAF0. Debug callback successful!
+Address for Vulkan debug callback: 00007FF88DC8FAF0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -68,7 +68,122 @@ Creating CUDA async stream!
 
 CUDA Driver API Error Status for Allocation Granularity: CUDA_SUCCESS | CUDA Driver Error String: no error
 
-CUDA Driver API Error Status for MemAddressReserve: CUDA_ERROR_INVALID_VALUE | CUDA Driver Error String: no error
+Allocation Granularity: 2097152
+CUDA Driver API Error Status for MemAddressReserve: CUDA_SUCCESS | CUDA Driver Error String: no error
 
-Pointer Test: 0
+CUDA Driver API Error Status for MemCreate: CUDA_SUCCESS | CUDA Driver Error String: no error
+
+CUDA Driver API Error Status for ExportToShareableHandle: CUDA_SUCCESS | CUDA Driver Error String: no error
+
+CUDA Driver API Error Status for MapMemory: CUDA_SUCCESS | CUDA Driver Error String: no error
+
+CUDA Driver API Error Status for ReleaseMemory: CUDA_SUCCESS | CUDA Driver Error String: no error
+
+Device Pointer on First CrossMemoryHandle: 12962496512
+CUDA Driver API Error Status for SetMemoryAccess: CUDA_SUCCESS | CUDA Driver Error String: no error
+
+Setting up simulation interop allocations!
+Mem Allocation Size for Imported Interop Memory: 196608
+Buffer Memory Size: 196608
+External Semaphore Enum: 2
+Successfully read shader file Shaders/shader_vert_test.spv!
+
+Successfully read shader file Shaders/shader_frag_test.spv!
+
+Initialized input assembly info struct (vertex) for the render pipeline.
+Initialized input assembly info struct (frag) for the render pipeline.
+Initialized vertex input info struct for the render pipeline.
+Initialized input assembly info struct for the render pipeline.
+Initialized viewport state values for the render pipeline.
+Initialized dynamic states for the render pipeline.
+
+Created color blend attachment for the render pipeline.
+Created color blend state for the render pipeline.
+Created depth stencil state for the render pipeline.
+
+Dynamic State Count: 2
+Created graphics pipeline info for render pipeline.
+Name for shader stage (Index 0): main.
+Successfully created graphics pipeline!
+Successfully created mesh pipeline!
+Transferred vertex buffer and memory!
+
+
+Address for Vulkan Render Pass: EC4BEC000000000B.
+
+Started command recording!
+Ended command recording!
+
+Successfully submitted item to queue!
+
+Resolution: 4.000000
+Threads (Total): 4096
+Cells (Total): 4096
+
+
+BREAK
+
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+Host Test: 2.8
+
+[vulkan] Debug report from ObjectType: 4
+Message: 
+
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x293535663e0, type = VK_OBJECT_TYPE_QUEUE; 
+ MessageID = 0xc7aabc16 
+ vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+
+
+
+BREAK
+
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+Host Test: -7.56352e+10
+
+[vulkan] Debug report from ObjectType: 4
+Message: 
+
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x293535663e0, type = VK_OBJECT_TYPE_QUEUE; 
+ MessageID = 0xc7aabc16 
+ vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+
+
+
+BREAK
+
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+0 0 0
+
+Host Test: 0
+
+Error Stacktrace: device-side assert triggered
+
 

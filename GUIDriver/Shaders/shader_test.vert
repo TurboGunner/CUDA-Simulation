@@ -20,6 +20,6 @@ layout( push_constant ) uniform constants {
 void main() {
 	mat4 transform_matrix = (CameraData.view_proj * PushConstants.render_matrix);
 
-    gl_Position = vec4(inPos, 1.0f);
+    gl_Position = transform_matrix * vec4(inPos, 1.0f);
     vertColor = vec3(1.0f, 1.0f, 1.0f);
 }

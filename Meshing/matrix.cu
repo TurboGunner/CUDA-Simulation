@@ -1,6 +1,6 @@
 #include "matrix.cuh"
 
-__host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_in, const bool& local_in, const bool& host_in) {
+__host__ __device__ Matrix::Matrix(const size_t rows_in, const size_t columns_in, const bool local_in, const bool host_in) {
     rows = rows_in;
     columns = columns_in;
 
@@ -14,6 +14,7 @@ __host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_
     host = host_in;
 
 #ifdef __CUDA_ARCH__
+    printf("%s\n", "oof");
     data_device = (float*) malloc(size_alloc);
 #else
     if (host_in) {
@@ -21,6 +22,7 @@ __host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_
         CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix (host).");
     }
     if (!local) {
+        printf("%s\n", "oof2");
         cuda_status = cudaMalloc(&data_device, size_alloc);
         CudaExceptionHandler(cuda_status, "Could not allocate the memory for the matrix (device, on host).");
     }
@@ -28,7 +30,7 @@ __host__ __device__ Matrix::Matrix(const size_t& rows_in, const size_t& columns_
 }
 
 
-__host__ __device__ Matrix* Matrix::Create(const size_t& rows, const size_t& columns, const bool& local, const bool& host) {
+__host__ __device__ Matrix* Matrix::Create(const size_t rows, const size_t columns, const bool local, const bool host) {
     Matrix* matrix = nullptr;
     cudaError_t cuda_status = cudaSuccess;
 
@@ -55,7 +57,7 @@ __host__ __device__ size_t Matrix::IX(size_t row, size_t column) const {
     return column + (rows * row);
 }
 
-__host__ __device__ float& Matrix::Get(const int& index) {
+__host__ __device__ float& Matrix::Get(const int index) const {
     assert(index < rows * columns && index >= 0);
 #ifdef __CUDA_ARCH__
     return data_device[index];
@@ -64,15 +66,15 @@ __host__ __device__ float& Matrix::Get(const int& index) {
 #endif
 }
 
-__host__ __device__ float& Matrix::Get(const size_t& row, const size_t& column) {
+__host__ __device__ float& Matrix::Get(const size_t row, const size_t column)  const{
     return Get(IX(row, column));
 }
 
-__host__ __device__ float& Matrix::operator[](const int& index) {
+__host__ __device__ float& Matrix::operator[](const int index) {
     return Get(index);
 }
 
-__host__ __device__ void Matrix::Set(const float& value, const int& index) {
+__host__ __device__ void Matrix::Set(const float value, const int index) {
     assert(index < rows * columns && index >= 0);
 #ifdef __CUDA_ARCH__
     data_device[index] = value;
@@ -81,7 +83,7 @@ __host__ __device__ void Matrix::Set(const float& value, const int& index) {
 #endif
 }
 
-__host__ __device__ void Matrix::Set(const float& value, const size_t& row, const size_t& column) {
+__host__ __device__ void Matrix::Set(const float value, const size_t row, const size_t column) {
     Set(value, IX(row, column));
 }
 
@@ -144,7 +146,7 @@ __host__ __device__ void Matrix::PrintMatrix(const char* label) {
     }
 }
 
-__host__ __device__ float* Matrix::Row(const size_t& index) {
+__host__ __device__ float* Matrix::Row(const size_t index) {
     float* output = (float*) malloc(columns * sizeof(float)); //Maybe use memcpy later?
     for (int i = 0; i < columns; i++) {
         output[i] = Get(i, index);
@@ -152,7 +154,7 @@ __host__ __device__ float* Matrix::Row(const size_t& index) {
     return output;
 }
 
-__host__ __device__ float* Matrix::Column(const size_t& index) {
+__host__ __device__ float* Matrix::Column(const size_t index) {
     float* output = (float*)malloc(rows * sizeof(float)); //Maybe use memcpy later?
     for (int i = 0; i < rows; i++) {
         output[i] = Get(index, i);
@@ -186,7 +188,7 @@ __host__ void Matrix::DeleteAllocations(const vector<Matrix*>& matrices) {
     }
 }
 
-cudaError_t Matrix::PopulateRandomHost(Matrix* matrix, const float& min, const float& max) {
+cudaError_t Matrix::PopulateRandomHost(Matrix* matrix, const float min, const float max) {
     RandomFloat random(min, max);
 
     for (size_t i = 0; i < matrix->rows; i++) {
@@ -198,16 +200,19 @@ cudaError_t Matrix::PopulateRandomHost(Matrix* matrix, const float& min, const f
     return matrix->DeviceTransfer(matrix);
 }
 
-__host__ __device__ Matrix* Matrix::MatrixMassAllocation(const size_t& size, const size_t& rows, const size_t& columns) {
+__host__ __device__ static inline Matrix CreateFunc() {
+    return Matrix(3, 3, false, false);
+}
+
+__host__ Matrix* Matrix::MatrixMassAllocation(const size_t size, const size_t rows, const size_t columns) {
     cudaError_t cuda_status = cudaSuccess;
 
-    Matrix* output = nullptr;
-    cuda_status = cudaMalloc(&output, sizeof(Matrix) * size * rows * columns);
-    thrust::device_ptr<Matrix> thrust_alloc(output);
+    thrust::device_vector<Matrix> thrust_alloc(size);
 
-    thrust::fill(thrust_alloc, thrust_alloc + size, Matrix(rows, columns, false, false));
+    //thrust::fill(thrust_alloc, thrust_alloc + size, Matrix(rows, columns, false, false));
+    thrust::generate(thrust_alloc.begin(), thrust_alloc.end(), CreateFunc);
 
-    return thrust_alloc.get();
+    return thrust_alloc.data().get();
 }
 
 __host__ __device__ void Matrix::CopyMatrixOnPointer(Matrix* matrix, Matrix& copy) {

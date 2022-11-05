@@ -121,7 +121,7 @@ const Vertex* MeshContainer::Data() {
         if (sync_data_.size == 0) {
             ProgramLog::OutputLine("Warning: No vertices stored!");
         }
-        return (Vertex*) sync_data_.vulkan_ptr; //NOTE: Maybe an incorrect cast? Just a note, also, might not be necessitated
+        return (Vertex*) sync_data_.cuda_device_ptr; //NOTE: Maybe an incorrect cast? Just a note, also, might not be necessitated
     }
     if (vertices_.size() == 0) {
         ProgramLog::OutputLine("Warning: No vertices stored!");

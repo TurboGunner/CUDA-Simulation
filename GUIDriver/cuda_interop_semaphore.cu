@@ -36,8 +36,6 @@ VkResult CudaInterop::CreateExternalSemaphore(VkSemaphore& semaphore, const VkEx
 		s_stream << "Failed to create synchronization objects for CUDA-Vulkan interop! Error: " << vulkan_status;
 		ProgramLog::OutputLine(s_stream);
 	}
-	//s_stream << export_semaphore_win32_handle.sType << std::endl;
-	//ProgramLog::OutputLine(s_stream);
 
 	return vulkan_status;
 }

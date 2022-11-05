@@ -1,3 +1,10 @@
 Resolution: 4.000000
-Threads (Total): 4096
-Cells (Total): 4096
+Threads (Total): 262144
+Cells (Total): 262144
+
+
+BREAK
+
+
+50.75 48 3
+

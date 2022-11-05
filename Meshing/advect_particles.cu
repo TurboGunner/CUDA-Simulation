@@ -1,6 +1,6 @@
 #include "mpm.cuh"
 
-__global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_term) {
+__global__ void AdvectParticles(Grid* grid) {
 	//Particle Boundaries
 	unsigned int x_bounds = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int y_bounds = blockIdx.y * blockDim.y + threadIdx.y;
@@ -25,41 +25,54 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 	weights[1] = cell_difference.Squared().Negative() + 0.75f;
 	weights[2] = (cell_difference + 0.5f).Squared() * 0.5f;
 
-	const size_t traversal_length = 27;
 
-	for (size_t i = 0; i < traversal_length; i++) {
-		int x_weight_idx = (i / 6) % 2,
-			y_weight_idx = (i / 3) % 2,
-			z_weight_idx = i % 2;
+	int x_weight_idx = 0,
+		y_weight_idx = 0,
+		z_weight_idx = 0;
 
-		float weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
+	const size_t traversal_length = 3;
 
-		Vector3D cell_position(cell_idx.x() + x_weight_idx - 1,
-			cell_idx.y() + y_weight_idx - 1,
-			cell_idx.z() + z_weight_idx - 1);
+	printf("Data1: %f\n", grid->GetMomentum(incident)[0]);
 
-		IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
+	//Matrix::MultiplyScalarOnPointer(B_term, 0);
 
-		Vector3D dist = (cell_position - position) + 0.5f;
-		Vector3D weighted_velocity = grid->GetCellVelocity(cell_incident) * weight;
+	Matrix B_term(3, 3, true, false);
+	Matrix weighted_term(3, 3, true, false);
 
-		Vector3D weighted_x = weighted_velocity * dist.x(),
-			weighted_y = weighted_velocity * dist.y(),
-			weighted_z = weighted_velocity * dist.z();
+	for (x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
+		for (y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
+			for (z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
 
-		for (size_t j = 0; j < 2; j++) { //Full array assignment to weighting terms
-			weighted_term->Get(0, j) = weighted_x.dim[j];
-			weighted_term->Get(1, j) = weighted_y.dim[j];
-			weighted_term->Get(2, j) = weighted_z.dim[j];
+				float weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
+
+				Vector3D cell_position(cell_idx.x() + x_weight_idx - 1,
+					cell_idx.y() + y_weight_idx - 1,
+					cell_idx.z() + z_weight_idx - 1);
+
+				IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
+
+				Vector3D dist = (cell_position - position) + 0.5f;
+				Vector3D weighted_velocity = grid->GetCellVelocity(cell_incident) * weight;
+
+				Vector3D weighted_x = weighted_velocity * dist.x(),
+					weighted_y = weighted_velocity * dist.y(),
+					weighted_z = weighted_velocity * dist.z();
+
+				for (size_t j = 0; j < 3; j++) { //Full array assignment to weighting terms
+					weighted_term.Get(0, j) = weighted_x.dim[j];
+					weighted_term.Get(1, j) = weighted_y.dim[j];
+					weighted_term.Get(2, j) = weighted_z.dim[j];
+				}
+
+				B_term += weighted_term;
+
+				grid->GetVelocity(incident) += weighted_velocity;
+			}
 		}
-
-		Matrix::AddOnPointer(B_term, *weighted_term);
-
-		grid->GetVelocity(incident) += weighted_velocity;
 	}
-	Matrix::MultiplyScalarOnPointer(B_term, 4);
+	B_term *= 4.0f;
 
-	grid->GetMomentum(incident) = *B_term;
+	grid->GetMomentum(incident) = B_term;
 
 	grid->GetPosition(incident) += grid->GetVelocity(incident) * grid->dt;
 
@@ -67,15 +80,16 @@ __global__ void AdvectParticles(Grid* grid, Matrix* B_term, Matrix* weighted_ter
 
 	//Boundaries
 	Vector3D position_normalized = grid->GetPosition(incident) + grid->GetVelocity(incident);
-	const float wall_min = 3;
-	float wall_max = (float) grid->side_size_ - 4;
+	const float wall_min = 3.0f;
+	float wall_max = (float) grid->side_size_ - 4.0f;
 
 	MPMBoundaryConditions(grid, incident, position_normalized, wall_min, wall_max);
 }
 
-__device__ void MPMBoundaryConditions(Grid* grid, IndexPair incident, const Vector3D& position_normalized, const float& wall_min, const float& wall_max) {
+__device__ void MPMBoundaryConditions(Grid* grid, IndexPair incident, const Vector3D& position_normalized, const float wall_min, const float wall_max) {
 	if (position_normalized.x() < wall_min) {
 		grid->GetVelocity(incident).dim[0] += wall_min - position_normalized.x();
+		printf("Data: %f\n", position_normalized.x());
 	}
 	if (position_normalized.x() > wall_max) {
 		grid->GetVelocity(incident).dim[0] += wall_max - position_normalized.x();

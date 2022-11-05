@@ -119,7 +119,7 @@ void VulkanParameters::SimulationInit() {
 	interop_handler_.BulkInitializationTest(sync_struct_.vk_wait_semaphore_, sync_struct_.vk_signal_semaphore_, grid_->GetParticleCount());
 
 	//CrossMemoryHandle& mesh_handle = interop_handler_.cross_memory_handles_[0]; //NOTE: FIXED
-	mesh_data_.vertices.sync_data_ = interop_handler_.cross_memory_handles_[0];
+	mesh_data_.vertices.sync_data_ = InteropMemoryHandler::CrossMemoryHandles()[0];
 
 }
 

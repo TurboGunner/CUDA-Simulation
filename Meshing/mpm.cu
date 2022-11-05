@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-__host__ Grid::Grid(const Vector3D& sim_size_in, const float& resolution_in) { //Make sure these are integers!
+__host__ Grid::Grid(const Vector3D& sim_size_in, const float resolution_in, const bool late_init_in) { //Make sure these are integers!
 	sim_size_ = sim_size_in;
 
 	side_size_ = sim_size_.x();
@@ -17,11 +17,15 @@ __host__ Grid::Grid(const Vector3D& sim_size_in, const float& resolution_in) { /
 		resolution_ = resolution_in;
 	}
 
-	cudaError_t cuda_status = cudaSuccess;
+	late_init_ = late_init_in;
 
-	cuda_status = cudaMalloc(&particle_position_device_, GetParticleCount() * sizeof(Vector3D));
-	if (host_sync_) {
-		cuda_status = cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
+	cudaError_t cuda_status = cudaSuccess;
+	
+	if (!late_init_) {
+		cuda_status = cudaMalloc(&particle_position_device_, GetParticleCount() * sizeof(Vector3D));
+		if (host_sync_) {
+			cuda_status = cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
+		}
 	}
 
 	cuda_status = cudaMalloc(&particle_velocity_device_, GetParticleCount() * sizeof(Vector3D));
@@ -76,7 +80,6 @@ __host__ cudaError_t Grid::DeviceTransfer(Grid*& src) {
 __host__ cudaError_t Grid::HostTransfer() { //NOTE
 	cudaError_t cuda_status = cudaSuccess;
 	cuda_status = CopyFunction("HostTransferParticlesPosition", particle_position_, particle_position_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(Vector3D), GetParticleCount());
-	//cuda_status = CopyFunction("HostTransferCells", cells_, cells_device_, cudaMemcpyDeviceToHost, cuda_status, sizeof(cells_), 1);
 	cuda_status = cudaDeviceSynchronize();
 
 	return cuda_status;
@@ -106,7 +109,8 @@ __host__ __device__ float Grid::GetResolution() const {
 #endif
 }
 
-__host__ __device__ Vector3D& Grid::GetVelocity(const size_t& index) {
+__host__ __device__ Vector3D& Grid::GetVelocity(const size_t index) {
+	assert(index <= GetParticleCount());
 #ifdef __CUDA_ARCH__
 	return particle_velocity_device_[index];
 #else
@@ -119,10 +123,8 @@ __host__ __device__ Vector3D& Grid::GetVelocity(IndexPair incident) {
 	return GetVelocity(index);
 }
 
-__host__ __device__ Vector3D& Grid::GetPosition(const size_t& index) {
-	if (index > GetParticleCount()) {
-		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
-}
+__host__ __device__ Vector3D& Grid::GetPosition(const size_t index) {
+	assert(index <= GetParticleCount());
 #ifdef __CUDA_ARCH__
 	return particle_position_device_[index];
 #else
@@ -135,10 +137,8 @@ __host__ __device__ Vector3D& Grid::GetPosition(IndexPair incident) {
 	return GetPosition(index);
 }
 
-__host__ __device__ Matrix& Grid::GetMomentum(const size_t& index) { //NOTE: DEVICE ONLY!
-	if (index >= GetParticleCount()) {
-		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
-	}
+__host__ __device__ Matrix& Grid::GetMomentum(const size_t index) { //NOTE: DEVICE ONLY!
+	assert(index <= GetParticleCount());
 	return momentum_matrices_[index];
 }
 
@@ -147,10 +147,8 @@ __host__ __device__ Matrix& Grid::GetMomentum(IndexPair incident) {
 	return GetMomentum(index);
 }
 
-__host__ __device__ float& Grid::GetParticleMass(const size_t& index) {
-	if (index >= GetParticleCount()) {
-		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
-	}
+__host__ __device__ float& Grid::GetParticleMass(const size_t index) {
+	assert(index <= GetParticleCount());
 #ifdef __CUDA_ARCH__
 	return particle_mass_device_[index];
 #else
@@ -163,10 +161,8 @@ __host__ __device__ float& Grid::GetParticleMass(IndexPair incident) {
 	return GetParticleMass(index);
 }
 
-__host__ __device__ float& Grid::GetCellMass(const size_t& index) {
-	if (index >= total_size_) {
-		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
-	}
+__host__ __device__ float& Grid::GetCellMass(const size_t index) {
+	assert(index <= total_size_);
 #ifdef __CUDA_ARCH__
 	return cell_mass_device_[index];
 #else
@@ -179,10 +175,8 @@ __host__ __device__ float& Grid::GetCellMass(IndexPair incident) {
 	return GetCellMass(index);
 }
 
-__host__ __device__ Vector3D& Grid::GetCellVelocity(const size_t& index) {
-	if (index >= total_size_) {
-		printf("%s%d\n", "Index out of bounds (ParticleMass)! Index: ", index);
-	}
+__host__ __device__ Vector3D& Grid::GetCellVelocity(const size_t index) {
+	assert(index <= total_size_);
 #ifdef __CUDA_ARCH__
 	return cell_velocity_device_[index];
 #else

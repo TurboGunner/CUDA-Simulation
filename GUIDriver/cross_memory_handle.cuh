@@ -39,7 +39,6 @@ public:
 	CUmemGenericAllocationHandle cuda_handle = {};
 	ShareableHandle shareable_handle = {};
 
-	void* vulkan_ptr = nullptr; //NOTE: Get rid of later
 	void* cuda_host_ptr = nullptr, *cuda_device_ptr = nullptr;
 
 	size_t size = 0;

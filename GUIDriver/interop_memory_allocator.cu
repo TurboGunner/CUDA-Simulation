@@ -1,8 +1,7 @@
 #include "interop_memory_allocator.cuh"
+#include "../Meshing/vector_cross.cuh"
 
 InteropMemoryHandler::InteropMemoryHandler() {
-	cudaError_t cuda_status = cudaSuccess;
-
 #ifdef _WIN64
 	os_ = IsWindows8OrGreater() ? WINDOWS_MODERN : WINDOWS_OLD;
 #else
@@ -15,7 +14,14 @@ InteropMemoryHandler::InteropMemoryHandler() {
 		ipc_handle_type_flag_ = CU_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR;
 	}
 
-	cuda_status = cudaGetDevice(&cuda_device_); //Inits device
+	
+	cudaError_t cuda_status = cudaGetDeviceCount(&device_count_); //Gets current CUDA device
+
+	if (device_count_ > 1) {
+		ProgramLog::OutputLine("Warning: There are multiple CUDA devices!");
+	}
+
+	cuda_status = cudaGetDevice(&cuda_device_);
 
 	//Allocates CUDA driver allocation prop settings
 	current_alloc_prop_.type = CU_MEM_ALLOCATION_TYPE_PINNED;
@@ -37,14 +43,11 @@ InteropMemoryHandler::InteropMemoryHandler() {
 	GetAllocationGranularity();
 }
 
-InteropMemoryHandler& InteropMemoryHandler::Get() {
-	static InteropMemoryHandler instance_;
-	return instance_;
-}
-
 CUresult InteropMemoryHandler::GetAllocationGranularity(const CUmemAllocationGranularity_flags flags) {
 	CUresult cuda_result = cuMemGetAllocationGranularity(&granularity, &current_alloc_prop_, flags);
 	CudaDriverLog(cuda_result, "Allocation Granularity");
+
+	ProgramLog::OutputLine("Allocation Granularity: " + std::to_string(granularity));
 
 	return cuda_result;
 }
@@ -71,10 +74,10 @@ void InteropMemoryHandler::GetDefaultSecurityDescriptor(CUmemAllocationProp* pro
 	prop->win32HandleMetaData = &obj_attributes;
 }
 
-size_t InteropMemoryHandler::CalculateTotalMemorySize(const vector<CrossMemoryHandle>& memory_handles, const size_t granularity) {
+size_t InteropMemoryHandler::CalculateTotalMemorySize(vector<CrossMemoryHandle>& memory_handles, const size_t granularity) {
 	size_t total_granularity_size = 0;
 
-	for (auto& mem_handle : cross_memory_handles_) {
+	for (auto& mem_handle : memory_handles) {
 		size_t current_granularity_size = RoundWarpGranularity(mem_handle.TotalAllocationSize(), granularity);
 		total_granularity_size += current_granularity_size;
 		mem_handle.granularity_size = current_granularity_size;
@@ -84,46 +87,33 @@ size_t InteropMemoryHandler::CalculateTotalMemorySize(const vector<CrossMemoryHa
 }
 
 CUresult InteropMemoryHandler::CreateNewAllocation() {
-	if (allocation_queue_.size() == 0) {
+	if (Get().allocation_queue_.size() == 0) {
 		ProgramLog::OutputLine("Warning: There was no elements in the allocation queue!");
 		return CUDA_SUCCESS;
 	}
 	//Initialize nullptr equivalent
-	size_t local_total_granularity_size = CalculateTotalMemorySize(allocation_queue_, granularity);
-	va_ptrs_.push_back(0U);
+	Get().total_granularity_size_ = CalculateTotalMemorySize(Get().allocation_queue_, Get().granularity);
+	Get().va_ptrs_.push_back(0U);
 
 	//Takes the latest VA CUDA Device pointer and then reserves the total granularity size
-	CUresult cuda_result = cuMemAddressReserve(&va_ptrs_[va_ptrs_.size() - 1], total_granularity_size_, granularity, 0, 0);
+	CUresult cuda_result = cuMemAddressReserve(&Get().va_ptrs_[Get().va_ptrs_.size() - 1], Get().total_granularity_size_, Get().granularity, 0, 0);
 	CudaDriverLog(cuda_result, "MemAddressReserve");
 
-	CUdeviceptr total = 0U;
+	CUdeviceptr total = Get().va_ptrs_[Get().va_ptrs_.size() - 1];
 
 	//Traverses through all memory handles
-	for (auto& memory_handle : allocation_queue_) {
-		//Creates handle, and then exports it
-		cuda_result = cuMemCreate(&memory_handle.cuda_handle, memory_handle.granularity_size, &current_alloc_prop_, 0);
-		CudaDriverLog(cuda_result, "MemCreate");
-		cuda_result = cuMemExportToShareableHandle(&memory_handle.shareable_handle, memory_handle.cuda_handle, ipc_handle_type_flag_, 0);
-		CudaDriverLog(cuda_result, "ExportToShareableHandle");
-
-		//Adds stride to memory address
-		total += memory_handle.granularity_size;
-
-		//Sets pointer to the handle
-		memory_handle.cuda_device_ptr = (void*) memory_handle.cuda_handle;
-
-		//Maps allocation to VA handle
-		cuda_result = cuMemMap(total, memory_handle.granularity_size, 0, memory_handle.cuda_handle, 0);
-		CudaDriverLog(cuda_result, "MapMemory");
-
-		//Releases memory
-		cuda_result = cuMemRelease(memory_handle.cuda_handle);
-		CudaDriverLog(cuda_result, "ReleaseMemory");
+	for (auto& memory_handle : Get().allocation_queue_) {
+		AllocateMMAP(total, memory_handle);
+		total += memory_handle.granularity_size; //Adds stride to memory address
 	}
+
+	ProgramLog::OutputLine("Device Pointer on First CrossMemoryHandle: " + std::to_string((uintptr_t) Get().allocation_queue_[0].cuda_device_ptr));
+
 	//Sets permission for whole VA range
-	cuda_result = cuMemSetAccess(va_ptrs_[va_ptrs_.size() - 1], total_granularity_size_, &access_descriptor_, 1);
+	cuda_result = cuMemSetAccess(Get().va_ptrs_[Get().va_ptrs_.size() - 1], Get().total_granularity_size_, &Get().access_descriptor_, 1);
 	CudaDriverLog(cuda_result, "SetMemoryAccess");
-	allocation_queue_.clear();
+	Get().cross_memory_handles_.insert(Get().cross_memory_handles_.begin(), Get().allocation_queue_.begin(), Get().allocation_queue_.end());
+	Get().allocation_queue_.clear();
 
 	return cuda_result;
 }
@@ -133,48 +123,93 @@ CUresult InteropMemoryHandler::MapExistingPointer(void* ptr, const size_t size, 
 		ProgramLog::OutputLine("Warning: This pointer is null!");
 	}
 
-	va_ptrs_.push_back((uintptr_t) ptr);
+	Get().AddMemoryHandle(size, type_size, false);
+	CrossMemoryHandle& current = Get().cross_memory_handles_[Get().cross_memory_handles_.size() - 1];
 
-	CUresult cuda_result = cuMemAddressReserve(&va_ptrs_[va_ptrs_.size() - 1], total_granularity_size_, granularity, 0, 0);
+	Get().total_granularity_size_ = CalculateTotalMemorySize(Get().cross_memory_handles_, Get().granularity);
+
+	Get().va_ptrs_.push_back(0U);
+
+	size_t granularity_offset = ((uintptr_t) ptr % Get().granularity) * Get().granularity;
+
+	s_stream << "Device Pointer Address: " << (uintptr_t) ptr;
+	ProgramLog::OutputLine(s_stream);
+	ProgramLog::OutputLine("VA Mapping Granularity Offset: " + std::to_string(granularity_offset));
+	size_t alignment = Get().granularity;
+
+	CUresult cuda_result = cuMemAddressReserve(&Get().va_ptrs_[Get().va_ptrs_.size() - 1], Get().total_granularity_size_, alignment, granularity_offset, 0);
 	CudaDriverLog(cuda_result, "MemAddressReserve");
 
-	AddMemoryHandle(size, type_size, false);
-	CrossMemoryHandle& current = cross_memory_handles_[cross_memory_handles_.size() - 1];
+	CUdeviceptr va_position = (uintptr_t) Get().va_ptrs_[Get().va_ptrs_.size() - 1];
+	cuda_result = AllocateMMAP(va_position, current);
 
-	cuda_result = cuMemCreate(&current.cuda_handle, current.granularity_size, &current_alloc_prop_, 0);
+	s_stream << "Pointer Test (VA): " << Get().va_ptrs_[Get().va_ptrs_.size() - 1];
+	ProgramLog::OutputLine(s_stream);
+
+	cuda_result = cuMemSetAccess(Get().va_ptrs_[Get().va_ptrs_.size() - 1], Get().total_granularity_size_, &Get().access_descriptor_, 1);
+	CudaDriverLog(cuda_result, "SetMemoryAccess");
+
+	DebugGPU(Get().va_ptrs_[Get().va_ptrs_.size() - 1], current, 163);
+
+	return cuda_result;
+}
+
+CUresult InteropMemoryHandler::AllocateMMAP(CUdeviceptr& va_position, CrossMemoryHandle& memory_handle) {
+	CUresult cuda_result;
+	cuda_result = cuMemCreate(&memory_handle.cuda_handle, memory_handle.granularity_size, &Get().current_alloc_prop_, 0);
 	CudaDriverLog(cuda_result, "MemCreate");
-	cuda_result = cuMemExportToShareableHandle(&current.shareable_handle, current.cuda_handle, ipc_handle_type_flag_, 0);
+	cuda_result = cuMemExportToShareableHandle(&memory_handle.shareable_handle, memory_handle.cuda_handle, Get().ipc_handle_type_flag_, 0);
 	CudaDriverLog(cuda_result, "ExportToShareableHandle");
 
-	current.cuda_device_ptr = (void*) current.cuda_handle;
+	//Sets pointer to the handle
+	memory_handle.cuda_device_ptr = (void*) va_position;
 
-	CUdeviceptr va_position = (uintptr_t) va_ptrs_[va_ptrs_.size() - 1];
-
-	cuda_result = cuMemMap(va_position, current.granularity_size, 0, current.cuda_handle, 0);
+	//Maps allocation to VA handle
+	cuda_result = cuMemMap(va_position, memory_handle.granularity_size, 0, memory_handle.cuda_handle, 0);
 	CudaDriverLog(cuda_result, "MapMemory");
 
-	cuda_result = cuMemRelease(current.cuda_handle);
+	//Releases memory
+	cuda_result = cuMemRelease(memory_handle.cuda_handle);
 	CudaDriverLog(cuda_result, "ReleaseMemory");
-
-	cuda_result = cuMemSetAccess(va_ptrs_[va_ptrs_.size() - 1], total_granularity_size_, &access_descriptor_, 1);
-	CudaDriverLog(cuda_result, "SetMemoryAccess");
 
 	return cuda_result;
 }
 
 CUresult InteropMemoryHandler::Clean() {
 	CUresult cuda_result;
-	for (const auto& mem_handle : cross_memory_handles_) { //Ensures that all allocations are mapped before attempting to unmap memory
-		if (!mem_handle.vulkan_ptr) {
+	for (const auto& mem_handle : Get().cross_memory_handles_) { //Ensures that all allocations are mapped before attempting to unmap memory
+		if (!mem_handle.cuda_device_ptr) {
 			CudaDriverLog(cuda_result, "Clean");
 			return cuda_result;
 		}
 	}
-	for (const auto& mem_handle : cross_memory_handles_) {
+	for (const auto& mem_handle : Get().cross_memory_handles_) {
 		CloseHandle(mem_handle.shareable_handle);
 
-		cuda_result = cuMemAddressFree((CUdeviceptr) mem_handle.cuda_device_ptr, total_granularity_size_);
+		cuda_result = cuMemAddressFree((CUdeviceptr) mem_handle.cuda_device_ptr, Get().total_granularity_size_);
 		CudaDriverLog(cuda_result, "VulkanPtrCUDAFree");
 	}
 	return cuda_result;
+}
+
+void InteropMemoryHandler::DebugGPU(CUdeviceptr& va_ptr, CrossMemoryHandle& memory_handle, const unsigned int index) {
+	if (memory_handle.size <= index) {
+		ProgramLog::OutputLine("Warning: Invalid Index! No debug will be called.");
+		return;
+	}
+
+	Vector3D* host_test = new Vector3D();
+	Vector3D* device_test_host = new Vector3D(1, 1, 1);
+
+	Vector3D* vector_device_ptr = (Vector3D*)memory_handle.cuda_device_ptr;
+	Vector3D* vector_va_ptr = (Vector3D*)va_ptr;
+
+	cudaError_t cuda_status = cudaMemcpy(&(vector_device_ptr[163]), device_test_host, sizeof(Vector3D), cudaMemcpyHostToDevice);
+	cuda_status = cudaMemcpy(host_test, &(vector_va_ptr[163]), sizeof(Vector3D), cudaMemcpyDeviceToHost);
+
+	s_stream << "Pointer Test: " << host_test->dim[0] << std::endl;
+	ProgramLog::OutputLine(s_stream);
+
+	delete host_test;
+	delete device_test_host;
 }

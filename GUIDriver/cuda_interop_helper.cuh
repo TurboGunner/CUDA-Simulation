@@ -7,6 +7,7 @@
 #include "buffer_helpers.hpp"
 #include "vulkan_helpers.hpp"
 
+#include "interop_memory_allocator.cuh"
 #include "cross_memory_handle.cuh"
 
 #include "../CUDATest/handler_methods.hpp"
@@ -68,31 +69,14 @@ public:
 
 	cudaError_t ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize& size, const VkExternalMemoryHandleTypeFlagBits& handle_type);
 
-	void GetDefaultSecurityDescriptor(CUmemAllocationProp* prop);
-
-	size_t RoundWarpGranularity(const size_t& size, const size_t& granularity);
-
-	void CalculateTotalMemorySize(const size_t& granularity);
-
-	void AddMemoryHandle(const size_t& size, const size_t& type_size);
-
-	cudaError_t CreateStream(const unsigned int& flags = cudaStreamNonBlocking);
+	cudaError_t CreateStream(const unsigned int flags = cudaStreamNonBlocking);
 
 	void PopulateCommandBuffer(VkCommandBuffer& command_buffer);
-
-	void MemoryAllocationProp();
-
-	void MemoryAccessDescriptor();
-
-	CUresult SimulationSetupAllocations();
 
 	CUresult Clean();
 
 	cudaError_t CleanSynchronization();
 
-	void InteropExtensions();
-
-	void InteropDeviceExtensions();
 
 	int IPCCloseShareableHandle(ShareableHandle sh_handle);
 
@@ -106,20 +90,31 @@ public:
 
 	__host__ cudaError_t InteropDrawFrame(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 
-	vector<const char*> interop_extensions_, interop_device_extensions_;
+	vector<const char*> interop_extensions_ = {
+		VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
+		VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME,
+		VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME,
+		VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
+	};
+
+	vector<const char*> interop_device_extensions_ = {
+		VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+		VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+#ifdef _WIN64
+		VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME,
+		VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME
+#else
+		VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME,
+		VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
+#endif
+	};
 
 	cudaExternalSemaphore_t cuda_wait_semaphore_ = {}, cuda_signal_semaphore_ = {};
 	Grid* grid_ = nullptr;
 
-	vector<CrossMemoryHandle> cross_memory_handles_;
-
 private:
 	VkDevice device_;
 	VkPhysicalDevice phys_device_;
-
-	CUmemAllocationHandleType ipc_handle_type_flag_ = {};
-	CUmemAllocationProp current_alloc_prop_ = {};
-	CUmemAccessDesc access_descriptor_ = {};
 
 	size_t total_alloc_size_ = 0;
 

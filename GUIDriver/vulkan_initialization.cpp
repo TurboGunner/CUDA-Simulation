@@ -110,7 +110,6 @@ void VulkanGUIDriver::LoadPoolDescriptionProperties(VkDescriptorPoolCreateInfo& 
 }
 
 void VulkanGUIDriver::LogicalDeviceInitialization() {
-    vulkan_parameters_.interop_handler_.InteropDeviceExtensions();
 
     vector<const char*> device_extensions;
     vector<const char*>& interop_device_extensions = vulkan_parameters_.interop_handler_.interop_device_extensions_;

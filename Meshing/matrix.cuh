@@ -9,9 +9,12 @@
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 
+#include <thrust/iterator/counting_iterator.h>
+
 #include <thrust/copy.h>
 #include <thrust/fill.h>
 #include <thrust/sequence.h>
+#include <thrust/transform.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -28,15 +31,15 @@ class Matrix {
 public:
 	__host__ __device__ Matrix() = default;
 
-	__host__ __device__ Matrix(const size_t& rows_in, const size_t& columns_in, const bool& local = false, const bool& host_in = true);
+	__host__ __device__ Matrix(const size_t rows_in, const size_t columns_in, const bool local = false, const bool host_in = true);
 
-	__host__ __device__ static Matrix* Create(const size_t& rows, const size_t& columns, const bool& local = false, const bool& host = false);
+	__host__ __device__ static Matrix* Create(const size_t rows, const size_t columns, const bool local = false, const bool host = false);
 
 	__host__ cudaError_t Destroy();
 
 	__host__ static void DeleteAllocations(const vector<Matrix*>& matrices);
 
-	__host__ __device__ static Matrix* MatrixMassAllocation(const size_t& size, const size_t& rows, const size_t& columns);
+	__host__ static Matrix* MatrixMassAllocation(const size_t size, const size_t rows, const size_t columns);
 
 	__host__ __device__ static void CopyMatrixOnPointer(Matrix* matrix, Matrix& copy);
 
@@ -47,23 +50,27 @@ public:
 	__host__ __device__ static Matrix* TransposeGPU(Matrix* matrix);
 	__host__ __device__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
 
-	__host__ __device__ Matrix operator*(const float& scalar);
+	__host__ __device__ Matrix operator*(const float scalar);
 
-	__host__ __device__ float& Get(const int& index);
-	__host__ __device__ float& Get(const size_t& row, const size_t& column);
+	__host__ __device__ Matrix& operator*=(const float scalar);
 
-	__host__ __device__ float& operator[](const int& index);
+	__host__ __device__ Matrix& operator+=(const Matrix& matrix);
 
-	__host__ __device__ static Matrix* DiagonalMatrix(const float* points, const size_t& row, const size_t& column);
+	__host__ __device__ float& Get(const int index) const;
+	__host__ __device__ float& Get(const size_t row, const size_t column) const;
 
-	__host__ __device__ static void PopulateDiagonalMatrix(Matrix* matrix, const float* points, const size_t& row, const size_t& column);
+	__host__ __device__ float& operator[](const int index);
 
-	__host__ __device__ float* Row(const size_t& index);
+	__host__ __device__ static Matrix* DiagonalMatrix(const float* points, const size_t row, const size_t column);
 
-	__host__ __device__ float* Column(const size_t& index);
+	__host__ __device__ static void PopulateDiagonalMatrix(Matrix* matrix, const float* points, const size_t row, const size_t column);
 
-	__host__ __device__ void Set(const float& value, const int& index);
-	__host__ __device__ void Set(const float& value, const size_t& row, const size_t& column);
+	__host__ __device__ float* Row(const size_t index);
+
+	__host__ __device__ float* Column(const size_t index);
+
+	__host__ __device__ void Set(const float value, const int index);
+	__host__ __device__ void Set(const float value, const size_t row, const size_t column);
 
     __host__ __device__  void GetCofactor(Matrix& output_matrix, int p, int q, int n);
 
@@ -91,11 +98,22 @@ public:
 
 	__host__ __device__ void PrintMatrix(const char* label = nullptr);
 
-	__host__ static cudaError_t PopulateRandomHost(Matrix* matrix, const float& min, const float& max);
+	__host__ static cudaError_t PopulateRandomHost(Matrix* matrix, const float min, const float max);
 
 	__host__ __device__ static void AddOnPointer(Matrix* matrix, Matrix add);
 
-	__host__ __device__ static void MultiplyScalarOnPointer(Matrix* matrix, const float& multi);
+	__host__ __device__ static void MultiplyScalarOnPointer(Matrix* matrix, const float multi);
+
+	__host__ __device__ void operator=(const Matrix& copy) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				Get(j, i) += copy.Get(j, i);
+			}
+		}
+
+		rows = copy.rows;
+		columns = copy.columns;
+	}
 
     Matrix* device_alloc;
 

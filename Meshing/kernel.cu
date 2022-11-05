@@ -28,15 +28,20 @@ int main() {
 
     //Matrix::WeightedLeastSquares(matrix);
 
-    size_t dim = 16;
+    size_t dim = 64;
 
-    Grid* grid = new Grid(Vector3D(dim, dim, dim), 4);
+    Grid* grid = new Grid(Vector3D(dim, dim, dim), 4, false);
 
     cudaStream_t stream;
 
     cuda_status = cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
 
-    cuda_status = Grid::SimulateGPU(grid, stream);
+    size_t frames = 20;
+
+    for (int i = 0; i < frames; i++) {
+        cuda_status = Grid::SimulateGPU(grid, stream);
+        CudaExceptionHandler(cuda_status, "GPU sim at " + std::to_string(frames) + " failed!");
+    }
 
     cuda_status = cudaDeviceReset();
     CudaExceptionHandler(cuda_status, "cudaDeviceReset failed!");

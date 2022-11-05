@@ -1,6 +1,7 @@
 #pragma once
 
-#include "cuda_runtime.h"
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 
 #include "vulkan/vulkan.h"
@@ -11,7 +12,6 @@
 #include <string>
 #include <functional>
 #include <fstream>
-#include <cuda.h>
 
 using std::string;
 using std::reference_wrapper;

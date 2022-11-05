@@ -21,7 +21,6 @@ CrossMemoryHandle& CrossMemoryHandle::operator=(const CrossMemoryHandle& src_han
 		cuda_host_ptr = src_handle.cuda_host_ptr;
 	}
 	cuda_device_ptr = src_handle.cuda_device_ptr;
-	vulkan_ptr = src_handle.vulkan_ptr;
 
 	cuda_handle = src_handle.cuda_handle;
 	shareable_handle = src_handle.shareable_handle;
