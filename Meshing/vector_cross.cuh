@@ -11,9 +11,17 @@ class Vector3D {
 public:
 	__host__ __device__ Vector3D() = default;
 
-	__host__ __device__ Vector3D(float x_in, float y_in, float z_in);
+	__host__ __device__ Vector3D(float x_in, float y_in, float z_in) {
+		dim[0] = x_in;
+		dim[1] = y_in;
+		dim[2] = z_in;
+	}
 
-	__host__ __device__  void operator=(const Vector3D& vector);
+	__host__ __device__  void operator=(const Vector3D& vector) {
+		dim[0] = vector.dim[0];
+		dim[1] = vector.dim[1];
+		dim[2] = vector.dim[2];
+	}
 
 	__host__ __device__ inline float x() const {
 		return dim[0];
@@ -27,29 +35,117 @@ public:
 		return dim[2];
 	}
 
-	__host__ __device__ Vector3D operator+(const float t);
+	__host__ __device__ Vector3D operator+(const float t) {
+		Vector3D output(dim[0], dim[1], dim[2]);
 
-	__host__ __device__ Vector3D operator-(const float t);
+		output.dim[0] += t;
+		output.dim[1] += t;
+		output.dim[2] += t;
 
-	__host__ __device__ Vector3D operator*(const float t);
+		return output;
+	}
 
-	__host__ __device__ Vector3D operator/(const float t);
+	__host__ __device__ Vector3D operator-(const float t) {
+		Vector3D output(dim[0], dim[1], dim[2]);
 
-	__host__ __device__ Vector3D operator+(const Vector3D& vector);
+		output.dim[0] -= t;
+		output.dim[1] -= t;
+		output.dim[2] -= t;
 
-	__host__ __device__ Vector3D operator-(const Vector3D& vector);
+		return output;
+	}
 
-	__host__ __device__ Vector3D operator*(const Vector3D& vector);
+	__host__ __device__ Vector3D operator*(const float t) {
+		Vector3D output(dim[0], dim[1], dim[2]);
 
-	__host__ __device__ Vector3D& operator*=(const float t);
+		output.dim[0] *= t;
+		output.dim[1] *= t;
+		output.dim[2] *= t;
 
-	__host__ __device__ Vector3D operator/(const Vector3D& vector);
+		return output;
+	}
 
-	__host__ __device__ Vector3D& operator+=(const Vector3D& vector);
+	__host__ __device__ Vector3D operator/(const float t) {
+		Vector3D output(dim[0], dim[1], dim[2]);
 
-	__host__ __device__ Vector3D& operator/=(const Vector3D& vector);
+		output.dim[0] /= t;
+		output.dim[1] /= t;
+		output.dim[2] /= t;
 
-	__host__ __device__ Vector3D& operator/=(const float t);
+		return output;
+	}
+
+	__host__ __device__ Vector3D operator+(const Vector3D& vector) {
+		Vector3D output(dim[0], dim[1], dim[2]);
+
+		output.dim[0] += vector.dim[0];
+		output.dim[1] += vector.dim[1];
+		output.dim[2] += vector.dim[2];
+
+		return output;
+	}
+
+	__host__ __device__ Vector3D operator-(const Vector3D& vector) {
+		Vector3D output(dim[0], dim[1], dim[2]);
+
+		output.dim[0] -= vector.dim[0];
+		output.dim[1] -= vector.dim[1];
+		output.dim[2] -= vector.dim[2];
+
+		return output;
+	}
+
+	__host__ __device__ Vector3D operator*(const Vector3D& vector) {
+		Vector3D output(dim[0], dim[1], dim[2]);
+
+		output.dim[0] *= vector.dim[0];
+		output.dim[1] *= vector.dim[1];
+		output.dim[2] *= vector.dim[2];
+
+		return output;
+	}
+
+	__host__ __device__ Vector3D& operator*=(const float t) {
+		dim[0] *= t;
+		dim[1] *= t;
+		dim[2] *= t;
+
+		return *this;
+	}
+
+	__host__ __device__ Vector3D operator/(const Vector3D& vector) {
+		Vector3D output(dim[0], dim[1], dim[2]);
+
+		output.dim[0] /= vector.dim[0];
+		output.dim[1] /= vector.dim[1];
+		output.dim[2] /= vector.dim[2];
+
+		return output;
+	}
+
+	__host__ __device__ Vector3D& operator+=(const Vector3D& vector) {
+		dim[0] += vector.dim[0];
+		dim[1] += vector.dim[1];
+		dim[2] += vector.dim[2];
+
+		return *this;
+	}
+
+	__host__ __device__ Vector3D& operator/=(const Vector3D& vector) {
+		dim[0] /= vector.dim[0];
+		dim[1] /= vector.dim[1];
+		dim[2] /= vector.dim[2];
+
+		return *this;
+	}
+
+	__host__ __device__ Vector3D& operator/=(const float t) {
+		dim[0] /= t;
+		dim[1] /= t;
+		dim[2] /= t;
+
+		return *this;
+	}
 
 	__host__ __device__ inline Vector3D Squared() {
 		return Vector3D(dim[0] * dim[0], dim[1] * dim[1], dim[2] * dim[2]);
@@ -83,16 +179,38 @@ public:
 	}
 
 	__host__ __device__ inline Vector3D Truncate() {
-		return Vector3D((int)dim[0], (int)dim[1], (int)dim[2]);
+		return Vector3D(truncf(dim[0]), truncf(dim[1]), truncf(dim[2]));
 	}
 
-	__host__ __device__ Matrix ToMatrix();
+	__host__ __device__ Matrix<1, 3> ToMatrix() {
+		Matrix<1, 3> matrix;
+		for (size_t i = 0; i < 3; i++) {
+			matrix.Set(dim[i], i);
+		}
+		return matrix;
+	}
 
-	__host__ __device__ void ToMatrix(Matrix* matrix);
+	__host__ __device__ void ToMatrix(Matrix<1, 3>* matrix) {
+		for (size_t i = 0; i < 3; i++) {
+			matrix->Set(dim[i], i);
+		}
+	}
 
-	__host__ __device__ void Reset();
+	__host__ __device__ void Reset() {
+		dim[0] = 0.0f;
+		dim[1] = 0.0f;
+		dim[2] = 0.0f;
+	}
 
-	__host__ __device__ Vector3D Clamp(const float min, const float max);
+	__host__ __device__ Vector3D Clamp(const float min, const float max) {
+		Vector3D output(dim[0], dim[1], dim[2]);
+
+		for (size_t i = 0; i < 3; i++) {
+			output.dim[i] = dim[i] < min ? min : dim[i];
+			output.dim[i] = dim[i] > max ? max : dim[i];
+		}
+		return output;
+	}
 
 	float dim[3];
 };

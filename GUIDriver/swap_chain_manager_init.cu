@@ -1,9 +1,11 @@
 #include "swap_chain_manager.cuh"
 
-void SwapChainProperties::AllocateImages(uint32_t image_count) {
-    vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain_, &image_count, nullptr);
+VkResult SwapChainProperties::AllocateImages(uint32_t image_count) {
+    VkResult vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain_, &image_count, nullptr);
     swapchain_images_.resize(image_count);
     vulkan_status = vkGetSwapchainImagesKHR(device_, swapchain_, &image_count, swapchain_images_.data());
+
+    return vulkan_status;
 }
 
 VkSwapchainCreateInfoKHR SwapChainProperties::SwapChainInfo(VkSurfaceKHR& surface, uint32_t image_count) {
@@ -31,8 +33,8 @@ VkSwapchainCreateInfoKHR SwapChainProperties::SwapChainInfo(VkSurfaceKHR& surfac
     return create_info;
 }
 
-void SwapChainProperties::InitializeSurfaceCapabilities(VkSurfaceKHR& surface) {
-    vulkan_status = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities_);
+VkResult SwapChainProperties::InitializeSurfaceCapabilities(VkSurfaceKHR& surface) {
+    VkResult vulkan_status = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities_);
 
     uint32_t format_count;
     vulkan_status = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &format_count, nullptr);
@@ -49,6 +51,7 @@ void SwapChainProperties::InitializeSurfaceCapabilities(VkSurfaceKHR& surface) {
         present_modes_.resize(present_mode_count);
         vulkan_status = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface, &present_mode_count, present_modes_.data());
     }
+    return vulkan_status;
 }
 
 VkSurfaceFormatKHR SwapChainProperties::ChooseSwapSurfaceFormat() {
@@ -90,7 +93,6 @@ void SwapChainProperties::CreateImageViews() {
 }
 
 VkImageView SwapChainProperties::DepthImageView() {
-
     auto format = ImageHelper::FindDepthFormat(physical_device_);
 
     ImageHelper::InitializeImage(device_, physical_device_, depth_memory_, depth_image_, size_, format, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_IMAGE_TYPE_2D);

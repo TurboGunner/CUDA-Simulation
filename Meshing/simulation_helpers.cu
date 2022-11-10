@@ -13,9 +13,8 @@ __global__ void UpdateGrid(Grid* grid) {
 	unsigned int z_bounds = blockIdx.z * blockDim.z + threadIdx.z;
 
 	IndexPair incident(x_bounds, y_bounds, z_bounds); //Current Index
-	if (grid->GetCellMass(incident) > 0) {
+	if (grid->GetCellMass(incident) > 0.0f) {
 		grid->GetCellVelocity(incident) /= grid->GetCellMass(incident); //Converting momentum to velocity
-		printf("%f\n", grid->GetCellMass(incident));
 
 		//Applying gravity to velocity
 		Vector3D gravity_vector(0.0f, 0.0f, grid->gravity);
@@ -57,13 +56,20 @@ __global__ void SetValue(Grid* grid) {
 	Vector3D vector_pos((float) x_bounds / grid->GetResolution(), y_bounds, z_bounds);
 
 	for (int i = 0; i < 3; i++) { //NOTE
-		if (vector_pos.dim[i] > grid->side_size_ - 2) {
-			vector_pos.dim[i] -= 2;
+		if (vector_pos.dim[i] > grid->side_size_ - 3) {
+			vector_pos.dim[i] -= 3;
 		}
-		if (vector_pos.dim[i] < 2) {
-			vector_pos.dim[i] += 2;
+		if (vector_pos.dim[i] <= 3) {
+			vector_pos.dim[i] += 3;
 		}
+		grid->GetMomentum(incident).Set(0.0f, i);
+		grid->GetMomentum(incident).Set(0.0f, i, 1);
+		grid->GetMomentum(incident).Set(0.0f, i, 2);
 	}
+
+	grid->GetVelocity(incident).Reset();
+
+	grid->GetParticleMass(incident) = fminf(grid->GetParticleMass(incident) * 10.0f, 1.0f);
 
 	grid->GetPosition(incident) = vector_pos;
 	assert(vector_pos.dim[0] <= grid->side_size_ && vector_pos.dim[0] >= 0.0f);
@@ -121,6 +127,8 @@ __host__ static cudaError_t DebugGPU(Grid* grid, cudaStream_t& cuda_stream) {
 
 	s_stream << host_test->x() << " " << host_test->y() << " " << host_test->z() << std::endl; //WIP, DEBUG!
 	ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
+	assert(host_test->x() != NAN);
+	cuda_status = cudaStreamSynchronize(cuda_stream);
 	delete host_test;
 
 	return cuda_status;
@@ -176,11 +184,15 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid, cudaStream_t& cuda_stream) {
 
 	DebugGPU(grid, cuda_stream);
 
+	cudaStreamSynchronize(cuda_stream);
+
 	UpdateGrid<<<blocks, threads, 0, cuda_stream>>> (grid);
 	cuda_status = PostExecutionChecks(cuda_status, "UpdateGrid", false);
 	CudaExceptionHandler(cuda_status, "UpdateGrid failed!");
 
 	DebugGPU(grid, cuda_stream);
+
+	cudaStreamSynchronize(cuda_stream);
 
 	AdvectParticles<<<blocks2, threads2, 0, cuda_stream>>> (grid);
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectParticles", false);

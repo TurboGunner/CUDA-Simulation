@@ -28,7 +28,9 @@ public:
 
     SwapChainProperties(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkSurfaceKHR& surface_in, VkQueue& queue_in, uint2& size_in);
 
-    static uint32_t ClampNum(const uint32_t& value, const uint32_t& min, const uint32_t& max);
+    static inline uint32_t ClampNum(const uint32_t value, const uint32_t min, const uint32_t max) {
+        return std::max(min, std::min(max, value));
+    }
 
     VkSwapchainKHR Initialize();
 
@@ -36,7 +38,7 @@ public:
 
     void CreateSwapchainFrameBuffers(VkRenderPass& render_pass, vector<VkImageView>& swapchain_image_views, VkImageView& depth_image_view);
 
-    void RecreateSwapChain(VkRenderPass& render_pass, VkCommandPool& command_pool);
+    VkResult RecreateSwapChain(VkRenderPass& render_pass, VkCommandPool& command_pool);
 
     void Clean();
 
@@ -56,11 +58,11 @@ public:
     VkPresentModeKHR present_mode_;
 
 private:
-    void AllocateImages(uint32_t image_count);
+    VkResult AllocateImages(uint32_t image_count);
 
     VkSwapchainCreateInfoKHR SwapChainInfo(VkSurfaceKHR& surface, uint32_t image_count);
 
-    void InitializeSurfaceCapabilities(VkSurfaceKHR& surface);
+    VkResult InitializeSurfaceCapabilities(VkSurfaceKHR& surface);
 
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat();
 
@@ -87,6 +89,4 @@ private:
 
     vector<VkSurfaceFormatKHR> formats_;
     vector<VkPresentModeKHR> present_modes_;
-
-    VkResult vulkan_status;
 };

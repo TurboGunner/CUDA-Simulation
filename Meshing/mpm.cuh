@@ -55,9 +55,9 @@ public:
 
 	__host__ __device__ Vector3D& GetPosition(IndexPair incident);
 
-	__host__ __device__ Matrix& GetMomentum(const size_t index);
+	__host__ __device__ Matrix<3, 3>& GetMomentum(const size_t index);
 
-	__host__ __device__ Matrix& GetMomentum(IndexPair incident);
+	__host__ __device__ Matrix<3, 3>& GetMomentum(IndexPair incident);
 
 	__host__ __device__ float& GetParticleMass(const size_t index);
 
@@ -79,7 +79,7 @@ public:
 	float dynamic_viscosity = 0.1f;
 
 	float eos_stiffness = 10.0f;
-	float eos_power = 4;
+	float eos_power = 4.0f;
 
 	float dt = 0.2f;
 
@@ -94,7 +94,7 @@ public:
 	Vector3D* cell_velocity_, *cell_velocity_device_;
 	float* cell_mass_, *cell_mass_device_;
 
-	Matrix* momentum_matrices_;
+	Matrix<3, 3>* momentum_matrices_;
 
 	bool host_sync_ = false;
 	bool up_to_date_ = false;

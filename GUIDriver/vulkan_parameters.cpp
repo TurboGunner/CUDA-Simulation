@@ -36,12 +36,6 @@ VkResult VulkanParameters::InitVulkan() {
 	return vulkan_status;
 }
 
-VkResult VulkanParameters::InitVulkanStage2() {
-	VkResult vulkan_status = vkDeviceWaitIdle(device_);
-
-	return vulkan_status;
-}
-
 void VulkanParameters::SwapchainInit() {
 	swap_chain_helper_ = SwapChainProperties(device_, physical_device_, surface_, queue_, size_);
 	swap_chain_ = swap_chain_helper_.Initialize();
@@ -214,4 +208,8 @@ void VulkanParameters::DrawVerticesCall() {
 	else {
 		ProgramLog::OutputLine("Warning: Incompatible states in the VertexData and contained MeshContainer detected. SyncMode must not have index buffering enabled!");
 	}
+}
+
+VkResult VulkanParameters::RebuildSwapchain() {
+	return swap_chain_helper_.RecreateSwapChain(render_pass_, command_pool_);
 }

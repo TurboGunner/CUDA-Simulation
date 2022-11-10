@@ -40,8 +40,6 @@ public:
 
 	VkResult InitVulkan();
 
-	VkResult InitVulkanStage2();
-
 	VkSemaphore& InFlightImageSemaphore();
 
 	VkSemaphore& InFlightRenderSemaphore();
@@ -76,6 +74,28 @@ public:
 
 	void DrawVerticesCall();
 
+	VkResult RebuildSwapchain();
+
+	void ManipulateCamera() {
+		mesh_viewport_.ManipulateCamera();
+	}
+
+	const vector<const char*>& InteropDeviceExtensions() const {
+		return interop_handler_.interop_device_extensions_;
+	}
+
+	const vector<const char*>& InteropExtensions() const {
+		return interop_handler_.interop_extensions_;
+	}
+
+	const size_t SwapchainImagesSize() const {
+		return swap_chain_helper_.swapchain_images_.size();
+	}
+
+	void BindMeshPipeline() {
+		mesh_data_.BindPipeline(InFlightCommandBuffer(), command_pool_);
+	}
+
 	VkDevice device_;
 	VkPhysicalDevice physical_device_;
 
@@ -83,7 +103,6 @@ public:
 	VkSurfaceFormatKHR surface_format_;
 
 	VkSwapchainKHR swap_chain_;
-	bool swap_chain_rebuilding_ = false;
 
 	VkRenderPass render_pass_;
 
@@ -91,14 +110,14 @@ public:
 
 	VkCommandPool command_pool_;
 	VkDescriptorPoolCreateInfo pool_info_ = {};
-	VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;
+	VkDescriptorPool descriptor_pool_ = nullptr;
 
-	VkPipeline render_pipeline_;
-	VkPipelineCache pipeline_cache_ = VK_NULL_HANDLE;
-	VkPipelineLayout mesh_pipeline_layout_ = VK_NULL_HANDLE;
+	VkPipeline render_pipeline_ = nullptr;
+	VkPipelineCache pipeline_cache_ = nullptr;
+	VkPipelineLayout mesh_pipeline_layout_ = nullptr;
 
 	uint32_t queue_family_ = (uint32_t) - 1;
-	VkQueue queue_ = VK_NULL_HANDLE;
+	VkQueue queue_ = nullptr;
 
 	vector<VkSemaphore> image_semaphores_, render_semaphores_;
 	vector<VkFence> render_fences_;
@@ -117,16 +136,19 @@ public:
 
 	uint2 size_;
 
+	Grid* grid_;
+
+	bool swap_chain_rebuilding_ = false;
+
+	SyncStruct sync_struct_;
+
+private:
 	VertexData mesh_data_;
 	ShaderLoader shader_handler_;
 	SwapChainProperties swap_chain_helper_;
 	MeshViewport mesh_viewport_;
-	SyncStruct sync_struct_;
 	CudaInterop interop_handler_;
 
-	Grid* grid_;
-
-private:
 	void SwapchainInit();
 	void SwapchainInitStage2();
 

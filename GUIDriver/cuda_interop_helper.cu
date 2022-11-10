@@ -50,7 +50,7 @@ cudaError_t CudaInterop::InitializeCudaInterop(VkSemaphore& wait_semaphore, VkSe
 
     VkDeviceSize alloc_size = InteropMemoryHandler::CrossMemoryHandles()[0].TotalAllocationSize();
     auto mem_handle_type = GetPlatformMemoryHandle();
-    void* mem_handle = (void*) (uintptr_t)InteropMemoryHandler::CrossMemoryHandles()[0].shareable_handle;
+    void* mem_handle = (void*) (uintptr_t) InteropMemoryHandler::CrossMemoryHandles()[0].shareable_handle;
 
     vulkan_status = ImportExternalBuffer(mem_handle, mem_handle_type, alloc_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, InteropMemoryHandler::CrossMemoryHandles()[0].buffer, InteropMemoryHandler::CrossMemoryHandles()[0].buffer_memory);
 

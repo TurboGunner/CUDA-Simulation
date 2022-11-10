@@ -19,33 +19,30 @@ void VulkanGUIDriver::RunGUI() {
         return;
     }
 
-    screen_width = display_mode.w;
-    screen_height = display_mode.h * 0.95f;
+    size_.x = display_mode.w;
+    size_.y = display_mode.h * 0.95f;
 
     // Setup window
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow(program_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen_width, screen_height, window_flags);
+    window = SDL_CreateWindow(program_name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, size_.x, size_.y, window_flags);
 
-    s_stream << "Created a window with size " << screen_width << " X " << screen_height << ".";
+    s_stream << "Created a window with size " << size_.x << " X " << size_.y << ".";
     ProgramLog::OutputLine(s_stream);
 
     InitializeVulkan();
 
-    size_.x = screen_width;
-    size_.y = screen_height;
-
     // Create Window Surface
-    VkSurfaceKHR surface;
-    if (SDL_Vulkan_CreateSurface(window, instance_, &surface) == 0) {
+    if (SDL_Vulkan_CreateSurface(window, instance_, &surface_) == 0) {
         ProgramLog::OutputLine("Error: Failed to create Vulkan surface.");
         return;
     }
 
     ProgramLog::OutputLine("Successfully created Vulkan surface for window!");
-    surface_ = surface;
 
-    int width, height;
-    CreateGUIWindow(width, height, surface);
+    //int width = 0, height = 0;
+
+    //SDL_GetWindowSize(window, &width, &height);
+    SetupVulkanWindow();
 
     bool exit_condition = false;
 
@@ -62,12 +59,14 @@ void VulkanGUIDriver::GUISetup() {
     vulkan_parameters_.InitVulkan();
     IMGUIRenderLogic();
 
-    vulkan_status = vulkan_parameters_.InitVulkanStage2();
+    VkResult vulkan_status = vkDeviceWaitIdle(device_);
 
     //Font Renderer
     VkCommandBuffer command_buffer = vulkan_parameters_.BeginSingleTimeCommands();
+
     ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
     vulkan_parameters_.EndSingleTimeCommands(command_buffer);
+
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
@@ -85,8 +84,6 @@ void VulkanGUIDriver::IMGUIRenderLogic() {
 
     s_stream << "\n\nAddress for Vulkan Render Pass: " << vulkan_parameters_.render_pass_ << ".\n";
     ProgramLog::OutputLine(s_stream);
-
-    //texture_handler_ = TextureLoader(device_, physical_device_, command_pool_, queue_family_);
 }
 
 void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
@@ -117,10 +114,11 @@ void VulkanGUIDriver::GUIPollLogic(bool& exit_condition) {
     MinimizeRenderCondition(draw_data, in_flight_command_buffer);
 }
 
-void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
+VkResult VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer) {
+    VkResult vulkan_status = VK_SUCCESS;
     const bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
     if (is_minimized) {
-        return;
+        return vulkan_status;
     }
 
     vulkan_parameters_.clear_values_[0].color.float32[0] = clear_color_.x * clear_color_.w;
@@ -128,11 +126,12 @@ void VulkanGUIDriver::MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBu
     vulkan_parameters_.clear_values_[0].color.float32[2] = clear_color_.z * clear_color_.w;
     vulkan_parameters_.clear_values_[0].color.float32[3] = clear_color_.w;
 
-    FrameRender(draw_data);
-    FramePresent();
+    RenderFrame(draw_data);
+    PresentFrame();
 
     cudaError_t cuda_status = vulkan_parameters_.InteropDrawFrame();
-    VkResult vulkan_status = vkDeviceWaitIdle(device_);
+    vulkan_status = vkDeviceWaitIdle(device_);
+    return vulkan_status;
 }
 
 void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebuffer& frame_buffer) {
@@ -156,14 +155,14 @@ void VulkanGUIDriver::StartRenderPass(VkCommandBuffer& command_buffer, VkFramebu
     //uint32_t uniform_offset = BufferHelpers::PadUniformBufferSize(device_properties_, frame_index_);
     vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan_parameters_.mesh_pipeline_layout_, 0, 1, &vulkan_parameters_.CurrentDescriptorSet(), 0, nullptr);
 
-    vulkan_parameters_.mesh_data_.BindPipeline(command_buffer, vulkan_parameters_.command_pool_);
+    vulkan_parameters_.BindMeshPipeline();
 }
 
 void VulkanGUIDriver::EndRenderPass() {
     VkCommandBuffer in_flight_command_buffer = vulkan_parameters_.InFlightCommandBuffer();
     vkCmdEndRenderPass(in_flight_command_buffer);
 
-    vulkan_status = vkEndCommandBuffer(in_flight_command_buffer);
+    VkResult vulkan_status = vkEndCommandBuffer(in_flight_command_buffer);
     VulkanErrorHandler(vulkan_status);
 
     //WIP!
@@ -187,9 +186,7 @@ void VulkanGUIDriver::EndRenderPass() {
     //WIP
 }
 
-void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
-    VkResult vulkan_status;
-
+void VulkanGUIDriver::RenderFrame(ImDrawData* draw_data) {
     VkSemaphore in_flight_image_semaphore = vulkan_parameters_.InFlightImageSemaphore();
     VkSemaphore in_flight_render_semaphore = vulkan_parameters_.InFlightRenderSemaphore();
 
@@ -199,10 +196,10 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     vulkan_parameters_.sync_struct_.ClearInteropSynchronization();
 
-    vulkan_status = vkAcquireNextImageKHR(device_, vulkan_parameters_.swap_chain_, UINT64_MAX, in_flight_image_semaphore, VK_NULL_HANDLE, &vulkan_parameters_.image_index_);
+    VkResult vulkan_status = vkAcquireNextImageKHR(device_, vulkan_parameters_.swap_chain_, UINT64_MAX, in_flight_image_semaphore, VK_NULL_HANDLE, &vulkan_parameters_.image_index_);
 
     if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
-        vulkan_parameters_.swap_chain_rebuilding_ = true;
+        vulkan_status = vulkan_parameters_.RebuildSwapchain();
         return;
     }
 
@@ -227,7 +224,12 @@ void VulkanGUIDriver::FrameRender(ImDrawData* draw_data) {
 
     VkCommandBuffer in_flight_command_buffer = vulkan_parameters_.InFlightCommandBuffer();
 
-    ManageCommandBuffer(vulkan_parameters_.command_pool_, in_flight_command_buffer);
+    VkCommandBufferBeginInfo command_buffer_begin_info = {};
+    command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    command_buffer_begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vulkan_status = vkBeginCommandBuffer(in_flight_command_buffer, &command_buffer_begin_info);
+    VulkanErrorHandler(vulkan_status);
 
     StartRenderPass(in_flight_command_buffer, current_swapchain_buffer);
 

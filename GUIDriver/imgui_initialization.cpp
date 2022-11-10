@@ -13,7 +13,7 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
     init_info.DescriptorPool = descriptor_pool_;
 
     init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT_;
-    init_info.ImageCount = vulkan_parameters_.swap_chain_helper_.swapchain_images_.size();
+    init_info.ImageCount = vulkan_parameters_.SwapchainImagesSize();
 
     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -21,12 +21,7 @@ void VulkanGUIDriver::LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_inf
     init_info.CheckVkResultFn = VulkanErrorHandler;
 }
 
-void VulkanGUIDriver::CreateGUIWindow(int& width, int& height, VkSurfaceKHR& surface) {
-    SDL_GetWindowSize(window, &width, &height);
-    SetupVulkanWindow(surface, width, height);
-}
-
-void VulkanGUIDriver::FramePresent() {
+void VulkanGUIDriver::PresentFrame() {
     if (vulkan_parameters_.swap_chain_rebuilding_) {
         return;
     }
@@ -43,7 +38,7 @@ void VulkanGUIDriver::FramePresent() {
     info.pSwapchains = &vulkan_parameters_.swap_chain_;
     info.pImageIndices = &vulkan_parameters_.image_index_;
 
-    vulkan_status = vkQueuePresentKHR(vulkan_parameters_.queue_, &info);
+    VkResult vulkan_status = vkQueuePresentKHR(vulkan_parameters_.queue_, &info);
     if (vulkan_status == VK_ERROR_OUT_OF_DATE_KHR || vulkan_status == VK_SUBOPTIMAL_KHR) {
         vulkan_parameters_.swap_chain_rebuilding_ = true;
         return;
@@ -64,26 +59,14 @@ void VulkanGUIDriver::SwapChainCondition() {
         vulkan_parameters_.swap_chain_rebuilding_ = false;
     }
 
-    vulkan_parameters_.swap_chain_helper_.RecreateSwapChain(vulkan_parameters_.render_pass_, vulkan_parameters_.command_pool_);
-}
-
-void VulkanGUIDriver::ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer) {
-    //vulkan_status = vkResetCommandPool(device_, command_pool, 0);
-    VulkanErrorHandler(vulkan_status);
-
-    VkCommandBufferBeginInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vulkan_status = vkBeginCommandBuffer(command_buffer, &info);
-    VulkanErrorHandler(vulkan_status);
+    vulkan_parameters_.RebuildSwapchain();
 }
 
 void VulkanGUIDriver::InitializeVulkan() {
     uint32_t ext_count = 0;
     SDL_Vulkan_GetInstanceExtensions(window, &ext_count, nullptr);
 
-    auto& interop_extensions = vulkan_parameters_.interop_handler_.interop_extensions_;
+    auto& interop_extensions = vulkan_parameters_.InteropExtensions();
 
     ext_count += interop_extensions.size();
 

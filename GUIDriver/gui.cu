@@ -19,7 +19,6 @@ using std::function;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow) {
     cudaError_t cuda_status = cudaSuccess;
-
     function<cudaError_t()> set_device_func = []() { return cudaSetDevice(0); };
     cuda_status = WrapperFunction(set_device_func, "cudaSetDevice failed!", "main",
         cuda_status, "Do you have a CUDA-capable GPU installed?");

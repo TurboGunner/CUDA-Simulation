@@ -1,5 +1,5 @@
 Created a window with size 2560 X 1026.
-Vulkan Physical Device Extension Count: 7
+Vulkan Physical Device Extension Count: 14
 Extension Name: VK_KHR_device_group_creation
 Extension Name: VK_KHR_external_fence_capabilities
 Extension Name: VK_KHR_external_memory_capabilities
@@ -15,13 +15,13 @@ Extension Name: VK_EXT_swapchain_colorspace
 Extension Name: VK_NV_external_memory_capabilities
 Extension Name: VK_KHR_portability_enumeration
 
-Address for Vulkan debug callback: 00007FF88DC8FAF0. Debug callback successful!
+Address for Vulkan debug callback: 00007FF850FFFAF0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
 GPU Device Name: NVIDIA GeForce RTX 3070 Laptop GPU
 GPU Device #0 has been selected for Vulkan Rendering successfully!
-No errors detected while selecting Vulkan queue family. 
+No errors detected while selecting Vulkan queue family.
 Vulkan Device Extension Count: 5
 Vulkan instance successfully created!
 Successfully created Vulkan surface for window!
@@ -134,12 +134,12 @@ BREAK
 
 0 0 0
 
-Host Test: 2.8
+Host Test: 2.021e+34
 
 [vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x293535663e0, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x1fd2a3a36d0, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 
@@ -149,41 +149,4 @@ BREAK
 
 
 0 0 0
-
-0 0 0
-
-0 0 0
-
-0 0 0
-
-0 0 0
-
-Host Test: -7.56352e+10
-
-[vulkan] Debug report from ObjectType: 4
-Message: 
-
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x293535663e0, type = VK_OBJECT_TYPE_QUEUE; 
- MessageID = 0xc7aabc16 
- vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
-
-
-
-BREAK
-
-
-0 0 0
-
-0 0 0
-
-0 0 0
-
-0 0 0
-
-0 0 0
-
-Host Test: 0
-
-Error Stacktrace: device-side assert triggered
-
 

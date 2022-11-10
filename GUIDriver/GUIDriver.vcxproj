@@ -99,16 +99,11 @@
     </CudaLink>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="..\CUDATest\index_pair_cuda.cu" />
     <CudaCompile Include="..\Meshing\advect_particles.cu" />
     <CudaCompile Include="..\Meshing\cell_momentum.cu" />
     <CudaCompile Include="..\Meshing\gradient_solve.cu" />
-    <CudaCompile Include="..\Meshing\matrix.cu" />
-    <CudaCompile Include="..\Meshing\matrix_kernel.cu" />
-    <CudaCompile Include="..\Meshing\matrix_math.cu" />
     <CudaCompile Include="..\Meshing\mpm.cu" />
     <CudaCompile Include="..\Meshing\simulation_helpers.cu" />
-    <CudaCompile Include="..\Meshing\vector_cross.cu" />
     <CudaCompile Include="cross_memory_handle.cu" />
     <CudaCompile Include="cuda_interop_helper.cu" />
     <CudaCompile Include="cuda_interop_kernel.cu" />

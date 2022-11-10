@@ -9,10 +9,6 @@ SwapChainProperties::SwapChainProperties(VkDevice& device_in, VkPhysicalDevice& 
     size_ = size_in;
 }
 
-uint32_t SwapChainProperties::ClampNum(const uint32_t& value, const uint32_t& min, const uint32_t& max) {
-    return std::max(min, std::min(max, value));
-}
-
 VkSwapchainKHR SwapChainProperties::Initialize() {
     InitializeSurfaceCapabilities(surface_);
     surface_format_ = ChooseSwapSurfaceFormat();
@@ -69,12 +65,12 @@ void SwapChainProperties::CreateSwapchainFrameBuffers(VkRenderPass& render_pass,
         frame_buffer_info.attachmentCount = attachments.size();
         frame_buffer_info.pAttachments = attachments.data();
 
-        vulkan_status = vkCreateFramebuffer(device_, &frame_buffer_info, nullptr, &frame_buffers_[i]);
+        VkResult vulkan_status = vkCreateFramebuffer(device_, &frame_buffer_info, nullptr, &frame_buffers_[i]);
     }
 }
 
-void SwapChainProperties::RecreateSwapChain(VkRenderPass& render_pass, VkCommandPool& command_pool) {
-    vkDeviceWaitIdle(device_);
+VkResult SwapChainProperties::RecreateSwapChain(VkRenderPass& render_pass, VkCommandPool& command_pool) {
+    VkResult vulkan_status = vkDeviceWaitIdle(device_);
 
     Clean();
 
@@ -82,6 +78,8 @@ void SwapChainProperties::RecreateSwapChain(VkRenderPass& render_pass, VkCommand
     CreateImageViews();
     CreateSwapchainFrameBuffers(render_pass, swapchain_image_views_, depth_image_view_);
     InitializeDepthPass(command_pool);
+
+    return vulkan_status;
 }
 
 void SwapChainProperties::Clean() {

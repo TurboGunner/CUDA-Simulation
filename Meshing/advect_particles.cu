@@ -17,31 +17,20 @@ __global__ void AdvectParticles(Grid* grid) {
 
 	Vector3D cell_difference = (position - cell_idx) - 0.5f;
 
-	//Vector3D* weights = GetWeights(cell_difference);
-
 	Vector3D weights[3] {}; //Array of weights, testing a different method here
 
 	weights[0] = (cell_difference.Negative() + 0.5f).Squared() * 0.5f;
 	weights[1] = cell_difference.Squared().Negative() + 0.75f;
 	weights[2] = (cell_difference + 0.5f).Squared() * 0.5f;
 
-
-	int x_weight_idx = 0,
-		y_weight_idx = 0,
-		z_weight_idx = 0;
-
 	const size_t traversal_length = 3;
 
-	printf("Data1: %f\n", grid->GetMomentum(incident)[0]);
+	Matrix<3, 3> B_term = {};
+	Matrix<3, 3> weighted_term = {};
 
-	//Matrix::MultiplyScalarOnPointer(B_term, 0);
-
-	Matrix B_term(3, 3, true, false);
-	Matrix weighted_term(3, 3, true, false);
-
-	for (x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
-		for (y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
-			for (z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
+	for (int x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
+		for (int y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
+			for (int z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
 
 				float weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
 
@@ -52,16 +41,19 @@ __global__ void AdvectParticles(Grid* grid) {
 				IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
 
 				Vector3D dist = (cell_position - position) + 0.5f;
+				if (fabs(cell_position.x()) > grid->side_size_ || fabs(cell_position.y()) > grid->side_size_ || fabs(cell_position.z()) > grid->side_size_) {
+					printf("bruh\n");
+				}
 				Vector3D weighted_velocity = grid->GetCellVelocity(cell_incident) * weight;
 
 				Vector3D weighted_x = weighted_velocity * dist.x(),
 					weighted_y = weighted_velocity * dist.y(),
 					weighted_z = weighted_velocity * dist.z();
 
-				for (size_t j = 0; j < 3; j++) { //Full array assignment to weighting terms
-					weighted_term.Get(0, j) = weighted_x.dim[j];
-					weighted_term.Get(1, j) = weighted_y.dim[j];
-					weighted_term.Get(2, j) = weighted_z.dim[j];
+				for (size_t j = 0; j < 3; ++j) { //Full array assignment to weighting terms
+					weighted_term.Set(weighted_x.dim[j], 0, j);
+					weighted_term.Set(weighted_y.dim[j], 1, j);
+					weighted_term.Set(weighted_z.dim[j], 2, j);
 				}
 
 				B_term += weighted_term;
@@ -76,7 +68,7 @@ __global__ void AdvectParticles(Grid* grid) {
 
 	grid->GetPosition(incident) += grid->GetVelocity(incident) * grid->dt;
 
-	grid->GetPosition(incident) = grid->GetPosition(incident).Clamp(1, grid->side_size_ - 2); //Clamp enforces particles not exiting simulation domain in this instance
+	grid->GetPosition(incident) = grid->GetPosition(incident).Clamp(1.0f, grid->side_size_ - 2); //Clamp enforces particles not exiting simulation domain in this instance
 
 	//Boundaries
 	Vector3D position_normalized = grid->GetPosition(incident) + grid->GetVelocity(incident);
@@ -89,7 +81,6 @@ __global__ void AdvectParticles(Grid* grid) {
 __device__ void MPMBoundaryConditions(Grid* grid, IndexPair incident, const Vector3D& position_normalized, const float wall_min, const float wall_max) {
 	if (position_normalized.x() < wall_min) {
 		grid->GetVelocity(incident).dim[0] += wall_min - position_normalized.x();
-		printf("Data: %f\n", position_normalized.x());
 	}
 	if (position_normalized.x() > wall_max) {
 		grid->GetVelocity(incident).dim[0] += wall_max - position_normalized.x();

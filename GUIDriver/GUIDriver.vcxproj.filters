@@ -40,15 +40,6 @@
     <CudaCompile Include="cross_memory_handle.cu">
       <Filter>cuda\interop</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\Meshing\matrix.cu">
-      <Filter>cuda\imported</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\Meshing\vector_cross.cu">
-      <Filter>cuda\imported</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\CUDATest\index_pair_cuda.cu">
-      <Filter>cuda\imported</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\Meshing\mpm.cu">
       <Filter>cuda\imported\mpm</Filter>
     </CudaCompile>
@@ -62,12 +53,6 @@
       <Filter>cuda\imported\mpm</Filter>
     </CudaCompile>
     <CudaCompile Include="..\Meshing\simulation_helpers.cu">
-      <Filter>cuda\imported\mpm</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\Meshing\matrix_math.cu">
-      <Filter>cuda\imported\mpm</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\Meshing\matrix_kernel.cu">
       <Filter>cuda\imported\mpm</Filter>
     </CudaCompile>
     <CudaCompile Include="interop_memory_allocator.cu">

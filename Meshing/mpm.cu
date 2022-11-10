@@ -31,11 +31,10 @@ __host__ Grid::Grid(const Vector3D& sim_size_in, const float resolution_in, cons
 	cuda_status = cudaMalloc(&particle_velocity_device_, GetParticleCount() * sizeof(Vector3D));
 	cuda_status = cudaMalloc(&particle_mass_device_, GetParticleCount() * sizeof(float));
 
-	cuda_status = cudaMalloc(&cell_velocity_device_, total_size_ * sizeof(Vector3D)); //NOTE
-	//cudaMallocHost(&cells_, sizeof(Cell));
-	cuda_status = cudaMalloc(&cell_mass_device_, total_size_ * sizeof(float));
+	cuda_status = cudaMalloc(&momentum_matrices_, GetParticleCount() * sizeof(Matrix<3, 3>));
 
-	momentum_matrices_ = Matrix::MatrixMassAllocation(GetParticleCount(), 3, 3);
+	cuda_status = cudaMalloc(&cell_velocity_device_, total_size_ * sizeof(Vector3D)); //NOTE
+	cuda_status = cudaMalloc(&cell_mass_device_, total_size_ * sizeof(float));
 
 	is_initialized_ = true;
 }
@@ -50,9 +49,6 @@ __host__ Grid::~Grid() {
 
 	if (host_sync_) {
 		cuda_status = cudaFreeHost(particle_position_);
-	}
-	for (size_t i = 0; i < GetParticleCount(); i++) {
-		momentum_matrices_[0].Destroy();
 	}
 }
 
@@ -137,12 +133,12 @@ __host__ __device__ Vector3D& Grid::GetPosition(IndexPair incident) {
 	return GetPosition(index);
 }
 
-__host__ __device__ Matrix& Grid::GetMomentum(const size_t index) { //NOTE: DEVICE ONLY!
+__host__ __device__ Matrix<3, 3>& Grid::GetMomentum(const size_t index) { //NOTE: DEVICE ONLY!
 	assert(index <= GetParticleCount());
 	return momentum_matrices_[index];
 }
 
-__host__ __device__ Matrix& Grid::GetMomentum(IndexPair incident) {
+__host__ __device__ Matrix<3, 3>& Grid::GetMomentum(IndexPair incident) {
 	size_t index = incident.IX(side_size_);
 	return GetMomentum(index);
 }

@@ -108,7 +108,6 @@
     <CudaCompile Include="boundary_conditions.cu" />
     <CudaCompile Include="cudamap.cu" />
     <CudaCompile Include="diagnostic_statistics.cu" />
-    <CudaCompile Include="index_pair_cuda.cu" />
     <CudaCompile Include="lbm_advect.cu" />
     <CudaCompile Include="lbm_streaming.cu" />
     <CudaCompile Include="linear_solver.cu" />

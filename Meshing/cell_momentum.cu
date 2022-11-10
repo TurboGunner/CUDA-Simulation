@@ -14,21 +14,19 @@ __global__ void UpdateCell(Grid* grid) {
 
 	Vector3D cell_difference = (position - cell_idx) - 0.5f;
 
-	Vector3D* weights = GetWeights(cell_difference);
+	Vector3D weights[3] {}; //Array of weights, testing a different method here
+
+	weights[0] = (cell_difference.Negative() + 0.5f).Squared() * 0.5f;
+	weights[1] = cell_difference.Squared().Negative() + 0.75f;
+	weights[2] = (cell_difference + 0.5f).Squared() * 0.5f;
 
 	const size_t traversal_length = 3;
 
-	int x_weight_idx = 0,
-		y_weight_idx = 0,
-		z_weight_idx = 0;
-
-	int i = 0, j = 0;
-
 	Vector3D Q = {};
 
-	for (x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
-		for (y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
-			for (z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
+	for (int x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
+		for (int y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
+			for (int z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
 
 				float weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
 
@@ -40,24 +38,17 @@ __global__ void UpdateCell(Grid* grid) {
 
 				Vector3D cell_dist = (cell_position - position) + 0.5f;
 
-				//Matrix::CopyMatrixOnPointer(momentum_matrix, grid->GetMomentum(incident));
-
-				Matrix& momentum_matrix = grid->GetMomentum(incident);
-				printf("%d\n", grid->GetMomentum(incident).rows);
+				Matrix<3, 3>& momentum_matrix = grid->GetMomentum(incident);
 
 				//Maybe separate this later, and split the UpdateCell into determined chunks?
 				//The idea is separating the matrix multiplication (without dynamic parallelism) will significantly increase perf
-				// CuBLAS with coalesced memory for strided or parallelized multiplication with tensor cores?
 
-					for (i = 0; j < grid->GetMomentum(incident).rows; ++i) {
-						//unsigned int idx = i * momentum->columns;
-						//if (y_bounds < momentum->rows && x_bounds < momentum->columns) {
-							float result = 0.0f;
-							for (j = 0; j < momentum_matrix.columns; ++j) {
-								//result += momentum_matrix.Get(i * momentum_matrix.columns + j) * cell_dist.dim[j];
-							}
-							Q.dim[i] = result; //See Gradient Solve MM portion for rationale
-						//}
+					for (int i = 0; i < grid->GetMomentum(incident).Rows(); ++i) { //GEMV
+						float result = 0.0f;
+						for (int j = 0; j < momentum_matrix.Columns(); ++j) {
+							result += grid->GetMomentum(incident).Get(i * momentum_matrix.Columns() + j) * cell_dist.dim[j];
+						}
+						Q.dim[i] = result; //See Gradient Solve MM portion for rationale
 					}
 
 				float mass_contribution = weight * grid->GetParticleMass(incident); //Fixed, this was grid mass

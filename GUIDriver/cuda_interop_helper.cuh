@@ -86,7 +86,7 @@ public:
 
 	__host__ cudaError_t TestMethod();
 
-	__host__ cudaError_t BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore, const size_t& size);
+	__host__ cudaError_t BulkInitializationTest(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore, const size_t size);
 
 	__host__ cudaError_t InteropDrawFrame(VkSemaphore& wait_semaphore, VkSemaphore& signal_semaphore);
 

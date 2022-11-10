@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Meshing/matrix_math_extensions.cuh
+/Meshing/weighted_least_squares.cuh
+*.cuh

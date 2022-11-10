@@ -27,113 +27,215 @@
 using std::string;
 using std::vector;
 
+template<size_t rows, size_t columns>
 class Matrix {
 public:
 	__host__ __device__ Matrix() = default;
 
-	__host__ __device__ Matrix(const size_t rows_in, const size_t columns_in, const bool local = false, const bool host_in = true);
+	__host__ __device__ size_t IX(const size_t row, const size_t column) const {
+		return column + (rows * row);
+	}
 
-	__host__ __device__ static Matrix* Create(const size_t rows, const size_t columns, const bool local = false, const bool host = false);
+	__host__ __device__ float Get(const int index) const {
+		assert(index < rows * columns && index >= 0);
+		return data[index];
+	}
 
-	__host__ cudaError_t Destroy();
+	__host__ __device__ float Get(const size_t row, const size_t column) const {
+		return Get(IX(row, column));
+	}
 
-	__host__ static void DeleteAllocations(const vector<Matrix*>& matrices);
+	__host__ __device__ float operator[](const int index) {
+		return Get(index);
+	}
 
-	__host__ static Matrix* MatrixMassAllocation(const size_t size, const size_t rows, const size_t columns);
+	__host__ __device__ void CopyMatrixOnPointer(Matrix* matrix, Matrix& copy) {
+		for (size_t i = 0; i < matrix->Rows(); i++) {
+			for (size_t j = 0; j < matrix->Columns(); j++) {
+				matrix->Set(copy.Get(j, i), j, i);
+			}
+		}
+	}
 
-	__host__ __device__ static void CopyMatrixOnPointer(Matrix* matrix, Matrix& copy);
+	__host__ __device__ Matrix Transpose() {
+		Matrix output;
+		for (size_t i = 0; i < columns; i++) {
+			for (size_t j = 0; j < rows; j++) {
+				output.Set(Get(j, i), i, j);
+			}
+		}
+		return output;
+	}
 
-	__host__ __device__ size_t IX(size_t row, size_t column) const;
+	__host__ __device__ Matrix AbsoluteValue() {
+		Matrix<rows, columns> output;
 
-	__host__ __device__ Matrix Transpose();
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				output.Set(abs(Get(i, j)), i, j);
+			}
+		}
 
-	__host__ __device__ static Matrix* TransposeGPU(Matrix* matrix);
-	__host__ __device__ static Matrix* MultiplyGPU(Matrix* matrix_A, Matrix* matrix_B);
+		return output;
+	}
 
-	__host__ __device__ Matrix operator*(const float scalar);
+	__host__ __device__ Matrix Reciprocal() {
+		Matrix<rows, columns> output;
 
-	__host__ __device__ Matrix& operator*=(const float scalar);
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				float value_idx = Get(i, j);
+				float evaluated = value_idx != 0 ? (1.0f / (value_idx)) : 0.0f;
+				output.Set(evaluated, i, j);
+			}
+		}
 
-	__host__ __device__ Matrix& operator+=(const Matrix& matrix);
+		return output;
+	}
 
-	__host__ __device__ float& Get(const int index) const;
-	__host__ __device__ float& Get(const size_t row, const size_t column) const;
+	__host__ __device__ Matrix operator*(const float scalar) {
+		Matrix<rows, columns> matrix;
 
-	__host__ __device__ float& operator[](const int index);
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				matrix.Set(Get(j, i) * scalar, j, i);
+			}
+		}
+		return matrix;
+	}
 
-	__host__ __device__ static Matrix* DiagonalMatrix(const float* points, const size_t row, const size_t column);
+	__host__ __device__ Matrix& operator*=(const float scalar) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				data[IX(j, i)] *= scalar;
+			}
+		}
+		return *this;
+	}
 
-	__host__ __device__ static void PopulateDiagonalMatrix(Matrix* matrix, const float* points, const size_t row, const size_t column);
+	__host__ __device__ Matrix& operator+=(const Matrix& matrix) {
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < columns; j++) {
+				data[IX(j, i)] += matrix.Get(j, i);
+			}
+		}
+		return *this;
+	}
 
-	__host__ __device__ float* Row(const size_t index);
+	__host__ __device__ Matrix DiagonalMatrix(const float* points, const size_t rows, const size_t columns) {
+		Matrix output;
+		for (int i = 0; i < rows; i++) {
+			output.Set(points[i], i, i);
+		}
 
-	__host__ __device__ float* Column(const size_t index);
+		return output;
+	}
 
-	__host__ __device__ void Set(const float value, const int index);
-	__host__ __device__ void Set(const float value, const size_t row, const size_t column);
+	__host__ __device__ static void PopulateDiagonalMatrix(Matrix matrix, const float points[], const size_t row, const size_t column) {
+		for (int i = 0; i < matrix.Rows(); i++) {
+			matrix.Set(points[i], i, i);
+		}
+	}
 
-    __host__ __device__  void GetCofactor(Matrix& output_matrix, int p, int q, int n);
+	__host__ __device__ float* Row(const size_t index) {
+		float* output = (float*) malloc(columns * sizeof(float)); //Maybe use memcpy later?
+		for (int i = 0; i < columns; i++) {
+			output[i] = Get(i, index);
+		}
+		return output;
+	}
 
-    __host__ __device__ static float Determinant(Matrix& matrix, size_t length);
+	__host__ __device__ float* Column(const size_t index) {
+		float* output = (float*) malloc(rows * sizeof(float)); //Maybe use memcpy later?
+		for (int i = 0; i < rows; i++) {
+			output[i] = Get(index, i);
+		}
+		return output;
+	}
 
-    __host__ __device__ static void Adjoint(Matrix& matrix, Matrix& adjoint);
+	__host__ __device__ void Set(const float value, const int index) {
+		assert(index < rows* columns && index >= 0);
+		data[index] = value;
+	}
 
-	__host__ __device__ static bool Inverse(Matrix& matrix, Matrix& inverse);
+	__host__ __device__ void Set(const float value, const size_t row, const size_t column) {
+		Set(value, IX(row, column));
+	}
 
-	__host__ static Matrix* GMatrixTerm(Matrix* matrix, Matrix* matrix_T, Matrix* weights);
 
-	__host__ static Matrix* Weights(Matrix* matrix);
+	__host__ string ToString(const char* label = nullptr) {
+		string output;
+		if (label) { // Nullptr default check
+			output += label;
+		}
+		else {
+			output += "\n\n";
+		}
+		for (size_t i = 0; i < rows; i++) {
+			output += "\n";
+			for (size_t j = 0; j < columns; j++) {
+				output += " " + std::to_string(Get(IX(j, i)));
+			}
+		}
+		return output;
+	}
 
-	__host__ static vector<Matrix*> WeightedLeastSquares(Matrix* matrix);
+	__host__ __device__ void PrintMatrix(const char* label = nullptr) {
+		if (label) { // Nullptr default check
+			printf("\n\n%s", label);
+		}
+		else {
+			printf("\n\n");
+		}
+		for (size_t i = 0; i < rows; i++) {
+			printf("\n");
+			for (size_t j = 0; j < columns; j++) {
+				printf("%f ", Get(IX(j, i)));
+			}
+		}
+	}
 
-	__host__ __device__ Matrix AbsoluteValue();
+	__host__ __device__ static void AddOnPointer(Matrix* matrix, Matrix add) {
+		*matrix += add;
+	}
 
-	__host__ __device__ Matrix Reciprocal();
+	__host__ __device__ static void MultiplyScalarOnPointer(Matrix* matrix, const float multi) {
+		*matrix *= multi; //NOTE
+	}
 
-	__host__ cudaError_t DeviceTransfer(Matrix* src);
+	__host__ __device__ const size_t Rows() const {
+		return rows;
+	}
 
-	__host__ cudaError_t HostTransfer();
+	__host__ __device__ const size_t Columns() const {
+		return columns;
+	}
 
-	__host__ string ToString(const char* label = nullptr);
-
-	__host__ __device__ void PrintMatrix(const char* label = nullptr);
-
-	__host__ static cudaError_t PopulateRandomHost(Matrix* matrix, const float min, const float max);
-
-	__host__ __device__ static void AddOnPointer(Matrix* matrix, Matrix add);
-
-	__host__ __device__ static void MultiplyScalarOnPointer(Matrix* matrix, const float multi);
+	__host__ __device__ const bool IsSquare() const {
+		return rows == columns;
+	}
 
 	__host__ __device__ void operator=(const Matrix& copy) {
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < columns; j++) {
-				Get(j, i) += copy.Get(j, i);
+				Set(copy.Get(j, i), j, i);
 			}
 		}
-
-		rows = copy.rows;
-		columns = copy.columns;
-	}
-
-    Matrix* device_alloc;
-
-	size_t rows, columns;
-
-	float* Data(bool device_mode = true) const {
-		if (device_mode) {
-			return data_device;
-		}
-		return data;
 	}
 
 private:
-	float* data, *data_device;
-
-    bool is_square = true;
-
-	bool device_allocated_status = false, local = false, host = false;
+	float data[rows * columns];
 };
 
-__global__ void TransposeKernel(Matrix* matrix, Matrix* output);
+template<size_t rows, size_t columns>
+__global__ inline void TransposeKernel(Matrix<rows, columns>* matrix, Matrix<rows, columns>* output) {
+	unsigned int y_bounds = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned int x_bounds = blockIdx.y * blockDim.y + threadIdx.y;
 
-__global__ void MultiplyKernel(Matrix* matrix_A, Matrix* matrix_B, Matrix* output);
+	if (x_bounds <= output->rows && y_bounds <= output->columns) {
+		output->Get(output->IX(threadIdx.y, threadIdx.x)) = matrix->Get(matrix->IX(threadIdx.x, threadIdx.y));
+	}
+}
+
+template<size_t rows, size_t columns>
+__global__ void MultiplyKernel(Matrix<rows, columns>* matrix_A, Matrix<rows, columns>* matrix_B, Matrix<rows, columns>* output);

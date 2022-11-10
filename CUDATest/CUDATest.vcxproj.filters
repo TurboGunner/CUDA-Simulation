@@ -106,9 +106,6 @@
     <CudaCompile Include="advect.cu">
       <Filter>cuda\navier_stokes_funcs</Filter>
     </CudaCompile>
-    <CudaCompile Include="index_pair_cuda.cu">
-      <Filter>cuda\data_structures</Filter>
-    </CudaCompile>
     <CudaCompile Include="diagnostic_statistics.cu">
       <Filter>cuda</Filter>
     </CudaCompile>

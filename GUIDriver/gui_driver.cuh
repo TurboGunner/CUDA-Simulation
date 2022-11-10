@@ -52,6 +52,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <system_error>
 #include <tuple>
 #include <vector>
 
@@ -65,7 +66,7 @@ using std::vector;
 #define IMGUI_VULKAN_DEBUG_REPORT
 #endif
 
-static inline vector<string> Split(string str, char seperator)
+static inline vector<string> Split(const string str, const char seperator)
 {
     vector<string> strings;
     int currIndex = 0, i = 0;
@@ -94,9 +95,6 @@ static void VulkanErrorHandler(VkResult vulkan_status) {
 VKAPI_ATTR static VkBool32 VKAPI_CALL DebugReport(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData) {
     (void)flags; (void)object; (void)location; (void)messageCode; (void)pUserData; (void)pLayerPrefix; // Unused arguments
     string message = pMessage;
-    //if (message.find("1000077824") != string::npos) { //Filter
-        //return VK_FALSE;
-    //}
     auto parts = Split(message, '|');
 
     s_stream << "[vulkan] Debug report from ObjectType: " << objectType << "\nMessage: \n\n";
@@ -105,7 +103,6 @@ VKAPI_ATTR static VkBool32 VKAPI_CALL DebugReport(VkDebugReportFlagsEXT flags, V
     }
     string output = s_stream.str();
     ProgramLog::OutputLine(s_stream);
-    //throw std::invalid_argument(s_stream.str());
     return VK_FALSE;
 }
 #endif
@@ -117,7 +114,7 @@ public:
 
     //Destructor
     ~VulkanGUIDriver() {
-        vulkan_status = vkDeviceWaitIdle(device_);
+        VkResult vulkan_status = vkDeviceWaitIdle(device_);
         VulkanErrorHandler(vulkan_status);
 
         ImGui_ImplVulkan_Shutdown();
@@ -130,41 +127,34 @@ public:
         SDL_Quit();
     }
 
-    void LoadInstanceProperties();
-
     void VulkanInstantiation();
 
-    void DebugOptionInitialization();
+    VkResult DebugOptionInitialization();
 
-    void PoolDescriptionInitialization();
-    void LoadPoolDescriptionProperties(VkDescriptorPoolCreateInfo& pool_info_, VkDescriptorPoolSize pool_sizes[]);
-    void LogicalDeviceInitialization();
+    VkResult PoolDescriptionInitialization();
+    VkResult LogicalDeviceInitialization();
 
     void SelectQueueFamily();
 
-    void DebugErrorCallback();
+    VkResult DebugErrorCallback();
 
-    void SelectGPU();
+    VkResult SelectGPU();
 
-    VkResult SetupVulkanWindow(VkSurfaceKHR& surface, int width, int height);
+    VkResult SetupVulkanWindow();
 
     void CleanupVulkan();
 
-    void FrameRender(ImDrawData* draw_data);
-
-    void ManageCommandBuffer(VkCommandPool& command_pool, VkCommandBuffer& command_buffer);
+    void RenderFrame(ImDrawData* draw_data);
 
     void StartRenderPass(VkCommandBuffer& command_buffer, VkFramebuffer& frame_buffer);
 
     void EndRenderPass();
 
-    void FramePresent();
+    void PresentFrame();
 
     void LoadInitializationInfo(ImGui_ImplVulkan_InitInfo& init_info);
 
-    void CreateGUIWindow(int& width, int& height, VkSurfaceKHR& surface);
-
-    void MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
+    VkResult MinimizeRenderCondition(ImDrawData* draw_data, VkCommandBuffer& command_buffer);
 
     void SwapChainCondition();
 
@@ -201,16 +191,24 @@ public:
 
     uint32_t min_image_count_ = 2;
 
+    uint32_t set_size_;
+
     const uint32_t MAX_FRAMES_IN_FLIGHT_ = 2;
     
-    VkSurfaceKHR surface_;
+    VkSurfaceKHR surface_ = VK_NULL_HANDLE;
     VkSurfaceFormatKHR surface_format_;
 
     VkPresentModeKHR present_mode_;
 
-    vector<const char*> phys_device_extensions_;
-
     uint2 size_;
+
+    vector<const char*> phys_device_extensions_ = {
+        VK_EXT_DEBUG_REPORT_EXTENSION_NAME
+    };
+
+    vector<const char*> device_extensions_ = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
 
     //Callbacks
     VkAllocationCallbacks* allocators_ = nullptr;
@@ -224,13 +222,6 @@ public:
 
     ImVec4 clear_color_ = ImVec4(0.075f, 0.0875f, 0.1f, 0.332f);
 
-    //Internal Booleans
-    bool show_demo_window_, show_another_window_;
-
-    //Error Management
-    VkResult vulkan_status;
-
     //IMGUI
     const string program_name = "CUDA CFD Simulator";
-    float screen_width, screen_height;
 };

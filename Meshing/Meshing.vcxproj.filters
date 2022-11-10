@@ -25,9 +25,6 @@
     <Filter Include="cuda\data_structures">
       <UniqueIdentifier>{97d1cdd2-fa73-4c30-96bf-33033adf36dd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cuda\data_structures\matrix">
-      <UniqueIdentifier>{0b1b43ae-62c4-485b-bdd2-3a2bb6ddf3ed}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp">
@@ -45,42 +42,27 @@
     <ClInclude Include="mpm.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="cuda_syncable.cuh">
+      <Filter>includes\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu">
       <Filter>cuda</Filter>
     </CudaCompile>
-    <CudaCompile Include="matrix_math.cu">
-      <Filter>cuda\data_structures\matrix</Filter>
-    </CudaCompile>
-    <CudaCompile Include="matrix.cu">
-      <Filter>cuda\data_structures\matrix</Filter>
-    </CudaCompile>
-    <CudaCompile Include="matrix_kernel.cu">
-      <Filter>cuda\data_structures\matrix</Filter>
-    </CudaCompile>
     <CudaCompile Include="mpm.cu">
       <Filter>cuda\mpm</Filter>
     </CudaCompile>
-    <CudaCompile Include="weighted_least_squares.cu">
-      <Filter>cuda\data_structures\matrix</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\CUDATest\index_pair_cuda.cu">
-      <Filter>cuda\data_structures</Filter>
-    </CudaCompile>
-    <CudaCompile Include="vector_cross.cu">
-      <Filter>cuda\data_structures</Filter>
-    </CudaCompile>
     <CudaCompile Include="simulation_helpers.cu">
-      <Filter>cuda\mpm</Filter>
-    </CudaCompile>
-    <CudaCompile Include="gradient_solve.cu">
       <Filter>cuda\mpm</Filter>
     </CudaCompile>
     <CudaCompile Include="cell_momentum.cu">
       <Filter>cuda\mpm</Filter>
     </CudaCompile>
     <CudaCompile Include="advect_particles.cu">
+      <Filter>cuda\mpm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="gradient_solve.cu">
       <Filter>cuda\mpm</Filter>
     </CudaCompile>
   </ItemGroup>

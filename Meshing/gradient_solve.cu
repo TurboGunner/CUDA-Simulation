@@ -14,38 +14,30 @@ __global__ void SimulateGrid(Grid* grid) { //Maybe no momentum matrix as well?
 
 	Vector3D cell_difference = (position - cell_idx) - 0.5f;
 
-	Vector3D* weights = GetWeights(cell_difference);
+	Vector3D weights[3] {}; //Array of weights, testing a different method here
+
+	weights[0] = (cell_difference.Negative() + 0.5f).Squared() * 0.5f;
+	weights[1] = cell_difference.Squared().Negative() + 0.75f;
+	weights[2] = (cell_difference + 0.5f).Squared() * 0.5f;
 
 	const size_t traversal_length = 3;
 
 	float density = 0.0f;
 
-	int x_weight_idx = 0,
-		y_weight_idx = 0,
-		z_weight_idx = 0;
-
 	float weight = 0.0f;
 
-	Vector3D cell_position = {};
-
-	IndexPair cell_incident = {};
-
-	Vector3D cell_dist = {};
-
-	int i = 0, j = 0;
-
 	//Estimation of particle volume by summing up the particle neighborhood weighted mass contribution
-	for (x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
-		for (y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
-			for (z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
+	for (int x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
+		for (int y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
+			for (int z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
 
 				weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
 
-				cell_position = Vector3D(cell_idx.x() + x_weight_idx - 1,
+				Vector3D cell_position = Vector3D(cell_idx.x() + x_weight_idx - 1,
 					cell_idx.y() + y_weight_idx - 1,
 					cell_idx.z() + z_weight_idx - 1);
 
-				cell_incident = IndexPair(cell_position.x(), cell_position.y(), cell_position.z());
+				IndexPair cell_incident = IndexPair(cell_position.x(), cell_position.y(), cell_position.z());
 
 				density += grid->GetCellMass(cell_incident) * weight;
 			}
@@ -54,61 +46,60 @@ __global__ void SimulateGrid(Grid* grid) { //Maybe no momentum matrix as well?
 
 	float volume = grid->GetParticleMass(incident) / density;
 	//Max constraints is to ensure particles do not absorb into each other due to negative pressures (divergence sink limiter)
-	float pressure = fmax(-0.1f, grid->eos_stiffness * (pow(density / grid->rest_density, grid->eos_power) - 1));
+	float pressure = fmax(-0.1f, grid->eos_stiffness * (powf(density / grid->rest_density, grid->eos_power) - 1));
 
 	/* Velocity gradient, or dudv
 	* Is specifically where the derivative of the quadratic polynomial is linear
 	*/
-	Matrix stress_matrix(3, 3, true, false);
-	Matrix strain_matrix(3, 3, true, false);
+	Matrix<3, 3> stress_matrix = {};
+	Matrix<3, 3> strain_matrix = {};
+
+	stress_matrix.Set(-pressure, 0, 0);
+	stress_matrix.Set(-pressure, 1, 1);
+	stress_matrix.Set(-pressure, 2, 2);
 
 	strain_matrix = grid->GetMomentum(incident);
 
-	//Matrix::CopyMatrixOnPointer(strain_matrix, grid->GetMomentum(incident));
+	float trace = strain_matrix.Get(0, 0) + strain_matrix.Get(1, 1) + strain_matrix.Get(2, 2);
 
-	float trace = strain_matrix.Get(2, 0) + strain_matrix.Get(1, 1) + strain_matrix.Get(0, 2);
-
-	size_t reverse_idx = 0;
-	for (size_t i = 0; i < strain_matrix.rows; i++) {
-		reverse_idx = strain_matrix.rows - i - 1;
-		strain_matrix.Get(i, reverse_idx) = trace;
-		stress_matrix.Set(-pressure, i, reverse_idx);
-	}
+	strain_matrix.Set(trace, 0, 0);
+	strain_matrix.Set(trace, 1, 1);
+	strain_matrix.Set(trace, 2, 2);
 
 	strain_matrix *= grid->dynamic_viscosity;
 	stress_matrix += strain_matrix;
-	//Matrix::AddOnPointer(stress_matrix, *strain_matrix);
 
-	//Matrix::MultiplyScalarOnPointer(stress_matrix, -volume * 4 * grid->dt); //Final Constitutive Equation for Isotropic Fluid
 	stress_matrix *= (-volume * 4.0f * grid->dt);
 
-	Vector3D constitutive_vector = {};
+	Vector3D constitutive_vector = {}; //Final Constitutive Equation for Isotropic Fluid
 
-	for (x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
-		for (y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
-			for (z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
+	for (int x_weight_idx = 0; x_weight_idx < traversal_length; ++x_weight_idx) {
+		for (int y_weight_idx = 0; y_weight_idx < traversal_length; ++y_weight_idx) {
+			for (int z_weight_idx = 0; z_weight_idx < traversal_length; ++z_weight_idx) {
 
 				weight = weights[x_weight_idx].x() * weights[y_weight_idx].y() * weights[z_weight_idx].z();
 
-				cell_position = Vector3D(cell_idx.x() + x_weight_idx - 1,
+				Vector3D cell_position = Vector3D(cell_idx.x() + x_weight_idx - 1,
 					cell_idx.y() + y_weight_idx - 1,
 					cell_idx.z() + z_weight_idx - 1);
 
-				cell_incident = IndexPair(cell_position.x(), cell_position.y(), cell_position.z());
+				IndexPair cell_incident = IndexPair(cell_position.x(), cell_position.y(), cell_position.z());
 
-				cell_dist = (cell_position - position) + 0.5f;
+				Vector3D cell_dist = (cell_position - position) + 0.5f;
 
-				for (i = 0; i < grid->GetMomentum(incident).rows; ++i) {
-					//if (y_bounds < 3 && x_bounds < 1) {
-						float p_value = 0.0f;
-						for (j = 0; j < stress_matrix.columns; ++j) {
-							p_value += (stress_matrix.Get(i * stress_matrix.columns + j) * weight) * cell_dist.dim[j];
-						}
-						constitutive_vector.dim[i] = p_value; //Number of columns is always 1, so this can be disregarded, idx can just be i
-					//}
+				for (int i = 0; i < grid->GetMomentum(incident).Rows(); ++i) {
+					float p_value = 0.0f;
+					for (int j = 0; j < stress_matrix.Columns(); ++j) {
+						p_value += (stress_matrix.Get(i * stress_matrix.Columns() + j) * weight) * cell_dist.dim[j];
+					}
+					constitutive_vector.dim[i] = p_value; //Number of columns is always 1, so this can be disregarded, idx can just be i
 				}
 
 				grid->GetCellVelocity(cell_incident) += constitutive_vector;
+
+				if (x_weight_idx * y_weight_idx * z_weight_idx == 8 && fabs(grid->GetCellVelocity(cell_incident).x()) > grid->side_size_) {
+					//printf("%f\n", grid->GetCellVelocity(cell_incident).x());
+				}
 			}
 		}
 	}

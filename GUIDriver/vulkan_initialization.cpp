@@ -1,16 +1,6 @@
 #include "gui_driver.cuh"
 
-#include <fstream>
-
-void VulkanGUIDriver::LoadInstanceProperties() {
-    instance_info_.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instance_info_.enabledExtensionCount = phys_device_extensions_.size();
-    instance_info_.ppEnabledExtensionNames = phys_device_extensions_.data();
-}
-
 void VulkanGUIDriver::VulkanInstantiation() {
-    //LoadInstanceProperties();
-
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
     DebugOptionInitialization();
 #else
@@ -30,36 +20,45 @@ void VulkanGUIDriver::VulkanInstantiation() {
 
 void VulkanGUIDriver::SelectQueueFamily() {
     uint32_t count;
-    vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &count, NULL);
+    vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &count, nullptr);
 
-    auto* queues = (VkQueueFamilyProperties*)malloc(sizeof(VkQueueFamilyProperties) * count);
+    auto* queues = new VkQueueFamilyProperties[count];
     vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &count, queues);
 
-    for (uint32_t i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++) {
         if (queues[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             queue_family_ = i;
             break;
         }
+    }
 
-    free(queues);
-    IM_ASSERT(queue_family_ != (uint32_t) - 1);
-    ProgramLog::OutputLine("No errors detected while selecting Vulkan queue family. ");
+    delete[] queues;
+
+    if (queue_family_ == (uint32_t) - 1) {
+        ProgramLog::OutputLine("Error: No valid queue family was found!");
+        throw std::system_error(ENXIO, std::generic_category(), "No valid queue family.");
+    }
+
+    ProgramLog::OutputLine("No errors detected while selecting Vulkan queue family.");
 }
 
-void VulkanGUIDriver::SelectGPU() {
+VkResult VulkanGUIDriver::SelectGPU() {
     uint32_t gpu_count;
 
-    vulkan_status = vkEnumeratePhysicalDevices(instance_, &gpu_count, NULL);
+    VkResult vulkan_status = vkEnumeratePhysicalDevices(instance_, &gpu_count, nullptr);
     VulkanErrorHandler(vulkan_status);
 
-    IM_ASSERT(gpu_count > 0);
+    if (gpu_count == 0) {
+        ProgramLog::OutputLine("Error: No GPU was selected!");
+        throw std::system_error(ENXIO, std::generic_category(), "No GPUs were detected");
+    }
 
-    VkPhysicalDevice* gpus = (VkPhysicalDevice*) malloc(sizeof(VkPhysicalDevice) * gpu_count);
-    vulkan_status = vkEnumeratePhysicalDevices(instance_, &gpu_count, gpus);
+    vector<VkPhysicalDevice> gpus(gpu_count);
 
+    vulkan_status = vkEnumeratePhysicalDevices(instance_, &gpu_count, gpus.data());
     VulkanErrorHandler(vulkan_status);
 
-    int use_gpu = 0;
+    size_t use_gpu = 0;
     for (size_t i = 0; i < gpu_count; i++) {
         vkGetPhysicalDeviceProperties(gpus[i], &device_properties_);
         if (device_properties_.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -74,11 +73,12 @@ void VulkanGUIDriver::SelectGPU() {
     physical_device_ = gpus[use_gpu];
     s_stream << "GPU Device #" << use_gpu << " has been selected for Vulkan Rendering successfully!";
     ProgramLog::OutputLine(s_stream);
-    free(gpus);
+
+    return vulkan_status;
 }
 
-void VulkanGUIDriver::PoolDescriptionInitialization() {
-    VkDescriptorPoolSize pool_sizes[] = {
+VkResult VulkanGUIDriver::PoolDescriptionInitialization() {
+    const vector<VkDescriptorPoolSize> pool_sizes = {
         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
         { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
@@ -92,53 +92,51 @@ void VulkanGUIDriver::PoolDescriptionInitialization() {
         { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 },
     };
 
-    LoadPoolDescriptionProperties(pool_info_, pool_sizes);
-
-    vulkan_status = vkCreateDescriptorPool(device_, &pool_info_, allocators_, &descriptor_pool_);
-    VulkanErrorHandler(vulkan_status);
-}
-
-void VulkanGUIDriver::LoadPoolDescriptionProperties(VkDescriptorPoolCreateInfo& pool_info_, VkDescriptorPoolSize pool_sizes[]) {
-    //Type Properties
     pool_info_.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     pool_info_.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
     //Size Properties
-    pool_info_.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
-    pool_info_.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
-    pool_info_.pPoolSizes = pool_sizes;
+
+    size_t descriptor_size = pool_sizes.size();
+
+    pool_info_.maxSets = 1000 * descriptor_size;
+    pool_info_.poolSizeCount = descriptor_size;
+    pool_info_.pPoolSizes = pool_sizes.data();
+
+    VkResult vulkan_status = vkCreateDescriptorPool(device_, &pool_info_, allocators_, &descriptor_pool_);
+    VulkanErrorHandler(vulkan_status);
+
+    return vulkan_status;
 }
 
-void VulkanGUIDriver::LogicalDeviceInitialization() {
+VkResult VulkanGUIDriver::LogicalDeviceInitialization() {
+    vector<const char*> interop_device_extensions = vulkan_parameters_.InteropDeviceExtensions();
 
-    vector<const char*> device_extensions;
-    vector<const char*>& interop_device_extensions = vulkan_parameters_.interop_handler_.interop_device_extensions_;
+    device_extensions_.insert(device_extensions_.begin(), interop_device_extensions.begin(), interop_device_extensions.end());
 
-    device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    ProgramLog::OutputLine("Vulkan Device Extension Count: " + std::to_string(device_extensions_.size()));
 
-    device_extensions.insert(device_extensions.begin(), interop_device_extensions.begin(), interop_device_extensions.end());
+    const float queue_priority = 1.0f;
 
-    ProgramLog::OutputLine("Vulkan Device Extension Count: " + std::to_string(device_extensions.size()));
+    VkDeviceQueueCreateInfo queue_info = {};
 
-    const float queue_priority[] = { 1.0f };
+    queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_info.queueFamilyIndex = queue_family_;
+    queue_info.queueCount = 1;
+    queue_info.pQueuePriorities = &queue_priority;
 
-    VkDeviceQueueCreateInfo queue_info[1] = {};
+    VkDeviceCreateInfo device_info = {};
 
-    queue_info[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queue_info[0].queueFamilyIndex = queue_family_;
-    queue_info[0].queueCount = 1;
-    queue_info[0].pQueuePriorities = queue_priority;
+    device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    device_info.queueCreateInfoCount = 1;
+    device_info.pQueueCreateInfos = &queue_info;
+    device_info.enabledExtensionCount = device_extensions_.size();
+    device_info.ppEnabledExtensionNames = device_extensions_.data();
 
-    VkDeviceCreateInfo instance_info_ = {};
-
-    instance_info_.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    instance_info_.queueCreateInfoCount = sizeof(queue_info) / sizeof(queue_info[0]);
-    instance_info_.pQueueCreateInfos = queue_info;
-    instance_info_.enabledExtensionCount = device_extensions.size();
-    instance_info_.ppEnabledExtensionNames = device_extensions.data();
-
-    vulkan_status = vkCreateDevice(physical_device_, &instance_info_, allocators_, &device_);
+    VkResult vulkan_status = vkCreateDevice(physical_device_, &device_info, allocators_, &device_);
 
     VulkanErrorHandler(vulkan_status);
     vkGetDeviceQueue(device_, queue_family_, 0, &queue_);
+
+    return vulkan_status;
 }
