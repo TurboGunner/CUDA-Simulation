@@ -363,4 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Meshing/matrix_math_extensions.cuh
 /Meshing/weighted_least_squares.cuh
-*.cuh
+/Meshing/cuda_syncable.cuh
