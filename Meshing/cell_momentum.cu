@@ -43,10 +43,10 @@ __global__ void UpdateCell(Grid* grid) {
 				//Maybe separate this later, and split the UpdateCell into determined chunks?
 				//The idea is separating the matrix multiplication (without dynamic parallelism) will significantly increase perf
 
-					for (int i = 0; i < grid->GetMomentum(incident).Rows(); ++i) { //GEMV
+					for (int i = 0; i < momentum_matrix.Rows(); ++i) { //GEMV
 						float result = 0.0f;
 						for (int j = 0; j < momentum_matrix.Columns(); ++j) {
-							result += grid->GetMomentum(incident).Get(i * momentum_matrix.Columns() + j) * cell_dist.dim[j];
+							result += momentum_matrix.Get(i, j) * cell_dist.dim[j];
 						}
 						Q.dim[i] = result; //See Gradient Solve MM portion for rationale
 					}

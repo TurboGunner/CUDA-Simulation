@@ -40,9 +40,6 @@
     <CudaCompile Include="cross_memory_handle.cu">
       <Filter>cuda\interop</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\Meshing\mpm.cu">
-      <Filter>cuda\imported\mpm</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\Meshing\advect_particles.cu">
       <Filter>cuda\imported\mpm</Filter>
     </CudaCompile>

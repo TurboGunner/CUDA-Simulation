@@ -35,42 +35,14 @@ public:
 		return dim[2];
 	}
 
+	//Addition
+
 	__host__ __device__ Vector3D operator+(const float t) {
 		Vector3D output(dim[0], dim[1], dim[2]);
 
 		output.dim[0] += t;
 		output.dim[1] += t;
 		output.dim[2] += t;
-
-		return output;
-	}
-
-	__host__ __device__ Vector3D operator-(const float t) {
-		Vector3D output(dim[0], dim[1], dim[2]);
-
-		output.dim[0] -= t;
-		output.dim[1] -= t;
-		output.dim[2] -= t;
-
-		return output;
-	}
-
-	__host__ __device__ Vector3D operator*(const float t) {
-		Vector3D output(dim[0], dim[1], dim[2]);
-
-		output.dim[0] *= t;
-		output.dim[1] *= t;
-		output.dim[2] *= t;
-
-		return output;
-	}
-
-	__host__ __device__ Vector3D operator/(const float t) {
-		Vector3D output(dim[0], dim[1], dim[2]);
-
-		output.dim[0] /= t;
-		output.dim[1] /= t;
-		output.dim[2] /= t;
 
 		return output;
 	}
@@ -85,6 +57,35 @@ public:
 		return output;
 	}
 
+	__host__ __device__ Vector3D& operator+=(const Vector3D& vector) {
+		dim[0] += vector.dim[0];
+		dim[1] += vector.dim[1];
+		dim[2] += vector.dim[2];
+
+		return *this;
+	}
+
+	__host__ __device__ Vector3D& operator+=(const float t) {
+		dim[0] += t;
+		dim[1] += t;
+		dim[2] += t;
+
+		return *this;
+	}
+
+
+	//Subtraction
+
+	__host__ __device__ Vector3D operator-(const float t) {
+		Vector3D output(dim[0], dim[1], dim[2]);
+
+		output.dim[0] -= t;
+		output.dim[1] -= t;
+		output.dim[2] -= t;
+
+		return output;
+	}
+
 	__host__ __device__ Vector3D operator-(const Vector3D& vector) {
 		Vector3D output(dim[0], dim[1], dim[2]);
 
@@ -94,6 +95,24 @@ public:
 
 		return output;
 	}
+
+	__host__ __device__ Vector3D& operator-=(const Vector3D& vector) {
+		dim[0] -= vector.dim[0];
+		dim[1] -= vector.dim[1];
+		dim[2] -= vector.dim[2];
+
+		return *this;
+	}
+
+	__host__ __device__ Vector3D& operator-=(const float t) {
+		dim[0] -= t;
+		dim[1] -= t;
+		dim[2] -= t;
+
+		return *this;
+	}
+
+	//Multiplication
 
 	__host__ __device__ Vector3D operator*(const Vector3D& vector) {
 		Vector3D output(dim[0], dim[1], dim[2]);
@@ -105,6 +124,24 @@ public:
 		return output;
 	}
 
+	__host__ __device__ Vector3D operator*(const float t) {
+		Vector3D output(dim[0], dim[1], dim[2]);
+
+		output.dim[0] *= t;
+		output.dim[1] *= t;
+		output.dim[2] *= t;
+
+		return output;
+	}
+
+	__host__ __device__ Vector3D& operator*=(const Vector3D& vector) {
+		dim[0] *= vector.dim[0];
+		dim[1] *= vector.dim[1];
+		dim[2] *= vector.dim[2];
+
+		return *this;
+	}
+
 	__host__ __device__ Vector3D& operator*=(const float t) {
 		dim[0] *= t;
 		dim[1] *= t;
@@ -112,6 +149,8 @@ public:
 
 		return *this;
 	}
+
+	//Division
 
 	__host__ __device__ Vector3D operator/(const Vector3D& vector) {
 		Vector3D output(dim[0], dim[1], dim[2]);
@@ -123,12 +162,14 @@ public:
 		return output;
 	}
 
-	__host__ __device__ Vector3D& operator+=(const Vector3D& vector) {
-		dim[0] += vector.dim[0];
-		dim[1] += vector.dim[1];
-		dim[2] += vector.dim[2];
+	__host__ __device__ Vector3D operator/(const float t) {
+		Vector3D output(dim[0], dim[1], dim[2]);
 
-		return *this;
+		output.dim[0] /= t;
+		output.dim[1] /= t;
+		output.dim[2] /= t;
+
+		return output;
 	}
 
 	__host__ __device__ Vector3D& operator/=(const Vector3D& vector) {
@@ -203,11 +244,11 @@ public:
 	}
 
 	__host__ __device__ Vector3D Clamp(const float min, const float max) {
-		Vector3D output(dim[0], dim[1], dim[2]);
+		Vector3D output = {};
 
-		for (size_t i = 0; i < 3; i++) {
-			output.dim[i] = dim[i] < min ? min : dim[i];
-			output.dim[i] = dim[i] > max ? max : dim[i];
+		for (size_t i = 0; i < 3; ++i) {
+			const float temp = dim[i] < min ? min : dim[i];
+			output.dim[i] = temp > max ? max : temp;
 		}
 		return output;
 	}

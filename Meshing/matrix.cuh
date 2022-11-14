@@ -6,16 +6,6 @@
 #include "../CUDATest/handler_classes.hpp"
 #include "../CUDATest/handler_methods.hpp"
 
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-
-#include <thrust/iterator/counting_iterator.h>
-
-#include <thrust/copy.h>
-#include <thrust/fill.h>
-#include <thrust/sequence.h>
-#include <thrust/transform.h>
-
 #include <assert.h>
 #include <stdio.h>
 

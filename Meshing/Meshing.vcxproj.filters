@@ -42,16 +42,10 @@
     <ClInclude Include="mpm.cuh">
       <Filter>includes\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="cuda_syncable.cuh">
-      <Filter>includes\cuda</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu">
       <Filter>cuda</Filter>
-    </CudaCompile>
-    <CudaCompile Include="mpm.cu">
-      <Filter>cuda\mpm</Filter>
     </CudaCompile>
     <CudaCompile Include="simulation_helpers.cu">
       <Filter>cuda\mpm</Filter>

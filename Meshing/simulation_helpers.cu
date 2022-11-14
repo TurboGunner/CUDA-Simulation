@@ -56,11 +56,11 @@ __global__ void SetValue(Grid* grid) {
 	Vector3D vector_pos((float) x_bounds / grid->GetResolution(), y_bounds, z_bounds);
 
 	for (int i = 0; i < 3; i++) { //NOTE
-		if (vector_pos.dim[i] > grid->side_size_ - 3) {
-			vector_pos.dim[i] -= 3;
+		if (vector_pos.dim[i] >= grid->side_size_ - 3) {
+			vector_pos.dim[i] -= 3.125f;
 		}
 		if (vector_pos.dim[i] <= 3) {
-			vector_pos.dim[i] += 3;
+			vector_pos.dim[i] += 3.125f;
 		}
 		grid->GetMomentum(incident).Set(0.0f, i);
 		grid->GetMomentum(incident).Set(0.0f, i, 1);
@@ -69,12 +69,14 @@ __global__ void SetValue(Grid* grid) {
 
 	grid->GetVelocity(incident).Reset();
 
-	grid->GetParticleMass(incident) = fminf(grid->GetParticleMass(incident) * 10.0f, 1.0f);
+	grid->GetParticleMass(incident) = fminf(grid->GetParticleMass(incident), .5f);
 
 	grid->GetPosition(incident) = vector_pos;
 	assert(vector_pos.dim[0] <= grid->side_size_ && vector_pos.dim[0] >= 0.0f);
 	assert(vector_pos.dim[1] <= grid->side_size_ && vector_pos.dim[1] >= 0.0f);
 	assert(vector_pos.dim[2] <= grid->side_size_ && vector_pos.dim[2] >= 0.0f);
+
+	//printf("%f\n", grid->GetParticleMass(incident));
 }
 
 __host__ void Grid::CalculateBounds() {
@@ -90,11 +92,15 @@ __host__ void Grid::CalculateBounds() {
 	particle_threads = dim3(threads_per_dim, threads_per_dim, threads_per_dim);
 	particle_blocks = dim3(block_count * GetResolution(), block_count, block_count);
 
-	size_t thread_count = pow(block_count, 3) * pow(threads_per_dim, 3);
+	size_t thread_count = pow(block_count, 2) * (block_count * resolution_) * pow(threads_per_dim, 3);
+
+	ProgramLog::OutputLine("Blocks (Total): " + std::to_string(pow(block_count, 3)));
 
 	ProgramLog::OutputLine("Threads (Total): " + std::to_string(thread_count));
 
 	ProgramLog::OutputLine("Cells (Total): " + std::to_string(total_size_));
+
+	ProgramLog::OutputLine("Particles (Total): " + std::to_string(GetParticleCount()));
 }
 
 __host__ void GenerateRandomParticles(Grid* grid) {
@@ -127,7 +133,7 @@ __host__ static cudaError_t DebugGPU(Grid* grid, cudaStream_t& cuda_stream) {
 
 	s_stream << host_test->x() << " " << host_test->y() << " " << host_test->z() << std::endl; //WIP, DEBUG!
 	ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
-	assert(host_test->x() != NAN);
+
 	cuda_status = cudaStreamSynchronize(cuda_stream);
 	delete host_test;
 
@@ -148,11 +154,14 @@ __device__ Vector3D* GetWeights(Vector3D cell_difference) { //Returns weights sh
 __host__ cudaError_t Grid::SimulateGPU(Grid* grid, cudaStream_t& cuda_stream) {
 	cudaError_t cuda_status = cudaSuccess;
 
+	if (!grid->up_to_date_) {
+		grid->CalculateBounds();
+	}
+
 	dim3& blocks = grid->cell_blocks, &threads = grid->cell_threads;
 	dim3& blocks2 = grid->particle_blocks, &threads2 = grid->particle_threads;
 
 	if (!grid->up_to_date_) {
-		grid->CalculateBounds();
 		grid->DeviceTransfer(grid);
 
 		GenerateRandomParticles(grid);

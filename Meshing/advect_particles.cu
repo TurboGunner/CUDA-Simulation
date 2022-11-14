@@ -38,12 +38,11 @@ __global__ void AdvectParticles(Grid* grid) {
 					cell_idx.y() + y_weight_idx - 1,
 					cell_idx.z() + z_weight_idx - 1);
 
+				cell_position = cell_position.Clamp(0.0f, grid->side_size_ - 1); //NOTE: DIRTY FIX
+
 				IndexPair cell_incident(cell_position.x(), cell_position.y(), cell_position.z());
 
 				Vector3D dist = (cell_position - position) + 0.5f;
-				if (fabs(cell_position.x()) > grid->side_size_ || fabs(cell_position.y()) > grid->side_size_ || fabs(cell_position.z()) > grid->side_size_) {
-					printf("bruh\n");
-				}
 				Vector3D weighted_velocity = grid->GetCellVelocity(cell_incident) * weight;
 
 				Vector3D weighted_x = weighted_velocity * dist.x(),

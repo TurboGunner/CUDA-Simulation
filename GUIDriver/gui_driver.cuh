@@ -4,7 +4,6 @@
 #include <cuda_runtime_api.h>
 #include "device_launch_parameters.h"
 
-//#include "texture_loader.cuh"
 #include "shader_loader.cuh"
 #include "swap_chain_manager.cuh"
 #include "cuda_interop_helper.cuh"

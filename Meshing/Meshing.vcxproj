@@ -62,6 +62,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CodeGeneration>compute_86,sm_86</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -84,6 +85,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CodeGeneration>compute_86,sm_86</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -91,7 +93,6 @@
     <CudaCompile Include="cell_momentum.cu" />
     <CudaCompile Include="gradient_solve.cu" />
     <CudaCompile Include="kernel.cu" />
-    <CudaCompile Include="mpm.cu" />
     <CudaCompile Include="simulation_helpers.cu" />
   </ItemGroup>
   <ItemGroup>
@@ -101,7 +102,6 @@
   <ItemGroup>
     <ClInclude Include="..\CUDATest\handler_methods.hpp" />
     <ClInclude Include="..\CUDATest\index_pair_cuda.cuh" />
-    <ClInclude Include="cuda_syncable.cuh" />
     <ClInclude Include="matrix.cuh" />
     <ClInclude Include="mpm.cuh" />
     <ClInclude Include="vector_cross.cuh" />

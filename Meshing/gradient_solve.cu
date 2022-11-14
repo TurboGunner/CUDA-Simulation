@@ -54,14 +54,16 @@ __global__ void SimulateGrid(Grid* grid) { //Maybe no momentum matrix as well?
 	Matrix<3, 3> stress_matrix = {};
 	Matrix<3, 3> strain_matrix = {};
 
+	//Initial assignment to the stress matrix, diagonal matrix
 	stress_matrix.Set(-pressure, 0, 0);
 	stress_matrix.Set(-pressure, 1, 1);
 	stress_matrix.Set(-pressure, 2, 2);
 
 	strain_matrix = grid->GetMomentum(incident);
 
-	float trace = strain_matrix.Get(0, 0) + strain_matrix.Get(1, 1) + strain_matrix.Get(2, 2);
+	float trace = strain_matrix.Get(0, 0) + strain_matrix.Get(1, 1) + strain_matrix.Get(2, 2); //Trace of the strain tensor
 
+	//Diagonal assignments to the strain matrix
 	strain_matrix.Set(trace, 0, 0);
 	strain_matrix.Set(trace, 1, 1);
 	strain_matrix.Set(trace, 2, 2);
@@ -87,19 +89,15 @@ __global__ void SimulateGrid(Grid* grid) { //Maybe no momentum matrix as well?
 
 				Vector3D cell_dist = (cell_position - position) + 0.5f;
 
-				for (int i = 0; i < grid->GetMomentum(incident).Rows(); ++i) {
+				for (int i = 0; i < stress_matrix.Rows(); ++i) {
 					float p_value = 0.0f;
 					for (int j = 0; j < stress_matrix.Columns(); ++j) {
-						p_value += (stress_matrix.Get(i * stress_matrix.Columns() + j) * weight) * cell_dist.dim[j];
+						p_value += (stress_matrix.Get(i, j) * weight) * cell_dist.dim[j];
 					}
 					constitutive_vector.dim[i] = p_value; //Number of columns is always 1, so this can be disregarded, idx can just be i
 				}
 
 				grid->GetCellVelocity(cell_incident) += constitutive_vector;
-
-				if (x_weight_idx * y_weight_idx * z_weight_idx == 8 && fabs(grid->GetCellVelocity(cell_incident).x()) > grid->side_size_) {
-					//printf("%f\n", grid->GetCellVelocity(cell_incident).x());
-				}
 			}
 		}
 	}

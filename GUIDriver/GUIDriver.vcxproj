@@ -64,6 +64,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CodeGeneration>compute_86,sm_86</CodeGeneration>
     </CudaCompile>
     <CudaLink>
       <AdditionalDependencies>
@@ -92,6 +93,7 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CodeGeneration>compute_86,sm_86</CodeGeneration>
     </CudaCompile>
     <CudaLink>
       <AdditionalDependencies>
@@ -102,7 +104,6 @@
     <CudaCompile Include="..\Meshing\advect_particles.cu" />
     <CudaCompile Include="..\Meshing\cell_momentum.cu" />
     <CudaCompile Include="..\Meshing\gradient_solve.cu" />
-    <CudaCompile Include="..\Meshing\mpm.cu" />
     <CudaCompile Include="..\Meshing\simulation_helpers.cu" />
     <CudaCompile Include="cross_memory_handle.cu" />
     <CudaCompile Include="cuda_interop_helper.cu" />
