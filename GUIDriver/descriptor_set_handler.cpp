@@ -1,6 +1,6 @@
 #include "descriptor_set_handler.hpp"
 
-DescriptorSetHandler::DescriptorSetHandler(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in, VkCommandPool& command_pool_in, VkDescriptorPool& descriptor_pool_in, const size_t& max_frames_const_in) {
+DescriptorSetHandler::DescriptorSetHandler(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in, VkCommandPool& command_pool_in, VkDescriptorPool& descriptor_pool_in, const size_t max_frames_const_in) {
     device_ = device_in;
     physical_device_ = phys_device_in;
 
@@ -20,7 +20,7 @@ VkResult DescriptorSetHandler::DescriptorSets() {
     auto global_set_info = CreateDescriptorSetInfo(bindings.data(), bindings.size());
     vulkan_status = vkCreateDescriptorSetLayout(device_, &global_set_info, nullptr, &global_set_layout_);
 
-    auto binding_info = CreateBindingSetInfo(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0);
+    VkDescriptorSetLayoutBinding binding_info = CreateBindingSetInfo(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0);
     auto object_set_info = CreateDescriptorSetInfo(&binding_info);
 
     vulkan_status = vkCreateDescriptorSetLayout(device_, &object_set_info, nullptr, &object_set_layout_);
@@ -110,7 +110,7 @@ void DescriptorSetHandler::Clean() {
     vkDestroyDescriptorSetLayout(device_, object_set_layout_, nullptr);
 }
 
-VkDescriptorSetLayoutCreateInfo DescriptorSetHandler::CreateDescriptorSetInfo(const VkDescriptorSetLayoutBinding* bindings, const size_t& size) {
+VkDescriptorSetLayoutCreateInfo DescriptorSetHandler::CreateDescriptorSetInfo(const VkDescriptorSetLayoutBinding* bindings, const size_t size) {
     VkDescriptorSetLayoutCreateInfo set_info = {};
 
     set_info.bindingCount = size;
@@ -142,7 +142,7 @@ array<VkDescriptorSetLayoutBinding, 2> DescriptorSetHandler::GlobalLayoutBinding
     return { uniform_layout_binding, sampler_layout_binding };
 }
 
-VkDescriptorSetLayoutBinding DescriptorSetHandler::CreateBindingSetInfo(const VkDescriptorType& type, const VkShaderStageFlags& stage_flags, const uint32_t& binding) {
+VkDescriptorSetLayoutBinding DescriptorSetHandler::CreateBindingSetInfo(const VkDescriptorType type, const VkShaderStageFlags stage_flags, const uint32_t binding) {
     VkDescriptorSetLayoutBinding object_bind_info = {};
 
     object_bind_info.binding = binding;

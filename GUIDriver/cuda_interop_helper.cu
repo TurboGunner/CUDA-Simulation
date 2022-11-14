@@ -9,6 +9,8 @@
 CudaInterop::CudaInterop(VkDevice& device_in, VkPhysicalDevice& phys_device_in) {
     device_ = device_in;
     phys_device_ = phys_device_in;
+    os_ = InteropMemoryHandler::GetOperatingSystem();
+
 }
 
 cudaError_t CudaInterop::CreateStream(const unsigned int flags) {

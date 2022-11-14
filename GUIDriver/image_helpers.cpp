@@ -1,7 +1,7 @@
 #include "image_helpers.hpp"
 
 void ImageHelper::InitializeImage(VkDevice& device, VkPhysicalDevice& physical_device, VkDeviceMemory& texture_image_memory, VkImage& image, uint2& size,
-	const VkFormat& image_format, const VkImageUsageFlags& usage_flags, const VkMemoryPropertyFlags& properties, const VkImageType& image_type) {
+	const VkFormat image_format, const VkImageUsageFlags usage_flags, const VkMemoryPropertyFlags properties, const VkImageType image_type) {
 	VkImageCreateInfo image_info = {};
 
 	image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -35,7 +35,7 @@ void ImageHelper::InitializeImage(VkDevice& device, VkPhysicalDevice& physical_d
 	vkBindImageMemory(device, image, texture_image_memory, 0);
 }
 
-VkImageView ImageHelper::CreateImageView(VkDevice& device, VkImage& image, const VkFormat& format, const VkImageAspectFlags& flags, const VkImageViewType& type) {
+VkImageView ImageHelper::CreateImageView(VkDevice& device, VkImage& image, const VkFormat format, const VkImageAspectFlags flags, const VkImageViewType type) {
 	VkImageView image_view = {};
 
 	VkImageViewCreateInfo create_info = {};
@@ -63,7 +63,7 @@ VkFormat ImageHelper::FindDepthFormat(VkPhysicalDevice& physical_device) {
 		VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
-VkFormat ImageHelper::FindSupportedFormat(VkPhysicalDevice& physical_device, const vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+VkFormat ImageHelper::FindSupportedFormat(VkPhysicalDevice& physical_device, const vector<VkFormat>& candidates, const VkImageTiling tiling, const VkFormatFeatureFlags features) {
 	for (VkFormat format : candidates) {
 		VkFormatProperties props;
 		vkGetPhysicalDeviceFormatProperties(physical_device, format, &props);
@@ -77,7 +77,7 @@ VkFormat ImageHelper::FindSupportedFormat(VkPhysicalDevice& physical_device, con
 	}
 }
 
-void ImageHelper::TransitionImageLayout(VkDevice& device, VkCommandPool& command_pool, VkQueue& queue, VkImage image, const VkFormat& format, const VkImageLayout& old_layout, const VkImageLayout& new_layout) {
+void ImageHelper::TransitionImageLayout(VkDevice& device, VkCommandPool& command_pool, VkQueue& queue, VkImage image, const VkFormat format, const VkImageLayout old_layout, const VkImageLayout new_layout) {
 	VkCommandBuffer command_buffer = VulkanHelper::BeginSingleTimeCommands(device, command_pool);
 
 	VkImageMemoryBarrier barrier = CreateImageMemoryBarrier(image, old_layout, new_layout);
@@ -127,7 +127,7 @@ void ImageHelper::TransitionImageLayout(VkDevice& device, VkCommandPool& command
 	VulkanHelper::EndSingleTimeCommands(command_buffer, device, command_pool, queue);
 }
 
-VkImageMemoryBarrier ImageHelper::CreateImageMemoryBarrier(VkImage image, const VkImageLayout& old_layout, const VkImageLayout& new_layout) {
+VkImageMemoryBarrier ImageHelper::CreateImageMemoryBarrier(VkImage image, const VkImageLayout old_layout, const VkImageLayout new_layout) {
 	VkImageMemoryBarrier barrier = {};
 
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

@@ -60,7 +60,7 @@ public:
 private:
     VkResult AllocateImages(uint32_t image_count);
 
-    VkSwapchainCreateInfoKHR SwapChainInfo(VkSurfaceKHR& surface, uint32_t image_count);
+    VkSwapchainCreateInfoKHR SwapChainInfo(VkSurfaceKHR& surface, const uint32_t image_count);
 
     VkResult InitializeSurfaceCapabilities(VkSurfaceKHR& surface);
 

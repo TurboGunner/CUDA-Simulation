@@ -32,11 +32,17 @@ public:
 		return instance_;
 	}
 
-	static CUresult CreateNewAllocation();
+	static CUresult CreateNewAllocation() {
+		return Get().CreateNewAllocationMember();
+	}
 
-	static CUresult MapExistingPointer(void* ptr, const size_t size, const size_t type_size);
+	static CUresult MapExistingPointer(void* ptr, const size_t size, const size_t type_size) {
+		return Get().MapExistingPointerMember(ptr, size, type_size);
+	}
 
-	static CUresult Clean();
+	static CUresult Clean() {
+		return Get().CleanMember();
+	}
 
 	static inline vector<CrossMemoryHandle>& CrossMemoryHandles() {
 		return Get().cross_memory_handles_;
@@ -56,8 +62,19 @@ public:
 
 	static void DebugGPU(CUdeviceptr& va_ptr, CrossMemoryHandle& memory_handle, const unsigned int index);
 
+	static const OperatingSystem GetOperatingSystem() {
+		return Get().os_;
+	}
+
 private:
 	InteropMemoryHandler();
+
+	CUresult MapExistingPointerMember(void* ptr, const size_t size, const size_t type_size);
+
+	CUresult CreateNewAllocationMember();
+
+	CUresult CleanMember();
+
 	CUresult GetAllocationGranularity(const CUmemAllocationGranularity_flags flags = CU_MEM_ALLOC_GRANULARITY_RECOMMENDED);
 
 	void GetDefaultSecurityDescriptor(CUmemAllocationProp* prop);
@@ -68,7 +85,7 @@ private:
 		return ((size + granularity - 1) / granularity) * granularity;
 	}
 
-	static CUresult AllocateMMAP(CUdeviceptr& va_position, CrossMemoryHandle& memory_handle);
+	CUresult AllocateMMAP(CUdeviceptr& va_position, CrossMemoryHandle& memory_handle);
 
 	int cuda_device_ = -1, device_count_ = 0;
 

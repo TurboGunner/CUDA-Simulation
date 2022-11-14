@@ -5,10 +5,10 @@
 #endif
 
 VkExternalMemoryHandleTypeFlagBits CudaInterop::GetPlatformMemoryHandle() {
-	return memory_handle_map[os_];
+	return memory_handle_map.at(os_);
 }
 
-VkResult CudaInterop::CreateExternalBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkExternalMemoryHandleTypeFlagsKHR& external_mem_handle_type, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
+VkResult CudaInterop::CreateExternalBuffer(const VkDeviceSize size, const VkBufferUsageFlags usage, const VkMemoryPropertyFlags properties, const VkExternalMemoryHandleTypeFlagsKHR external_mem_handle_type, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
 	VkResult vulkan_status = VK_SUCCESS;
 
 	VkBufferCreateInfo buffer_info = BufferHelpers::CreateBufferInfo(size, usage);
@@ -22,14 +22,22 @@ VkResult CudaInterop::CreateExternalBuffer(const VkDeviceSize& size, const VkBuf
 		ProgramLog::OutputLine("Error: Failed to properly create buffer!");
 	}
 
+	WindowsSecurityAttributes win_security_attributes;
+	if (os_ != OperatingSystem::LINUX) {
+		auto export_memory_win32_handle = ExportMemoryHandleWin32();
+		export_memory_win32_handle.pAttributes = &win_security_attributes;
+		external_buffer_info.pNext = &export_memory_win32_handle;
+	}
+	else {
+		external_buffer_info.pNext = nullptr;
+	}
+
 	VkMemoryRequirements mem_requirements;
 
 	vkGetBufferMemoryRequirements(device_, buffer, &mem_requirements);
 
 	VkExportMemoryAllocateInfoKHR vulkan_export_memory_allocate_info = {};
 	vulkan_export_memory_allocate_info.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR;
-
-	ExportMemoryAllocationSettings(vulkan_export_memory_allocate_info, external_mem_handle_type);
 
 	VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(phys_device_, mem_requirements, properties, true); //NOTE
 	alloc_info.pNext = &vulkan_export_memory_allocate_info;
@@ -51,36 +59,18 @@ VkResult CudaInterop::CreateExternalBuffer(const VkDeviceSize& size, const VkBuf
 }
 
 VkExportMemoryWin32HandleInfoKHR CudaInterop::ExportMemoryHandleWin32() {
-	WindowsSecurityAttributes win_security_attributes;
-
 	VkExportMemoryWin32HandleInfoKHR vulkan_export_memory_win32_info = {};
 
 	vulkan_export_memory_win32_info.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_KHR;
 	vulkan_export_memory_win32_info.pNext = nullptr;
 
-	vulkan_export_memory_win32_info.pAttributes = &win_security_attributes;
 	vulkan_export_memory_win32_info.dwAccess = DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE;
 	vulkan_export_memory_win32_info.name = (LPCWSTR) nullptr;
 
 	return vulkan_export_memory_win32_info;
 }
 
-void CudaInterop::ExportMemoryAllocationSettings(VkExportMemoryAllocateInfoKHR& vulkan_export_memory_allocate_info, const VkExternalMemoryHandleTypeFlagsKHR& external_mem_handle_type) {
-	VkExportMemoryWin32HandleInfoKHR vulkan_export_memory_win32_info = {};
-
-	if (os_ != LINUX) {
-		vulkan_export_memory_win32_info = ExportMemoryHandleWin32();
-
-		vulkan_export_memory_allocate_info.pNext = external_mem_handle_type & VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR ? &vulkan_export_memory_win32_info : nullptr;
-		vulkan_export_memory_allocate_info.handleTypes = external_mem_handle_type;
-		return;
-	}
-
-	vulkan_export_memory_allocate_info.pNext = nullptr;
-	vulkan_export_memory_allocate_info.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-}
-
-VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryHandleTypeFlagBits& handle_type, const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
+VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryHandleTypeFlagBits handle_type, const VkDeviceSize size, const VkBufferUsageFlags usage, const VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
 	VkResult vulkan_status = VK_SUCCESS;
 
 	VkBufferCreateInfo buffer_info = BufferHelpers::CreateBufferInfo(size, usage);
@@ -117,14 +107,7 @@ VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryH
 		handle_info.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 #endif
 
-	//VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(phys_device_, mem_requirements, properties, true);
-
-	VkMemoryAllocateInfo alloc_info = {};
-
-	alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	alloc_info.pNext = &handle_info;
-	alloc_info.allocationSize = mem_requirements.size;
-	alloc_info.memoryTypeIndex = VulkanHelper::FindMemoryType(phys_device_, mem_requirements.memoryTypeBits, properties, false);
+	VkMemoryAllocateInfo alloc_info = VulkanHelper::CreateAllocationInfo(phys_device_, mem_requirements, properties, true); //NOTE
 
 	ProgramLog::OutputLine("Mem Allocation Size for Imported Interop Memory: " + std::to_string(alloc_info.allocationSize));
 
@@ -140,8 +123,8 @@ VkResult CudaInterop::ImportExternalBuffer(void* handle, const VkExternalMemoryH
 	return vulkan_status;
 }
 
-void* CudaInterop::GetMemoryHandle(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits& handle_type) {
-	if (os_ != LINUX) {
+void* CudaInterop::GetMemoryHandle(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits handle_type) {
+	if (os_ != OperatingSystem::LINUX) {
 		return GetMemoryHandleWin32(memory, handle_type);
 	}
 	else {
@@ -149,7 +132,7 @@ void* CudaInterop::GetMemoryHandle(VkDeviceMemory& memory, const VkExternalMemor
 	}
 }
 
-void* CudaInterop::GetMemoryHandleWin32(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits& handle_type) {
+void* CudaInterop::GetMemoryHandleWin32(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits handle_type) {
 	HANDLE handle = 0;
 
 	VkMemoryGetWin32HandleInfoKHR vk_memory_get_win32_handle_info = {};
@@ -170,7 +153,7 @@ void* CudaInterop::GetMemoryHandleWin32(VkDeviceMemory& memory, const VkExternal
 	return (void*) handle;
 }
 
-void* CudaInterop::GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits& handle_type) {
+void* CudaInterop::GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits handle_type) {
 	int fd = -1;
 
 	VkMemoryGetFdInfoKHR memory_get_fd_info = {};
@@ -190,7 +173,7 @@ void* CudaInterop::GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternal
 	return (void*)(uintptr_t) fd;
 }
 
-cudaError_t CudaInterop::ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize& size, const VkExternalMemoryHandleTypeFlagBits& handle_type) {
+cudaError_t CudaInterop::ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize size, const VkExternalMemoryHandleTypeFlagBits handle_type) {
 	cudaError_t cuda_status = cudaSuccess;
 	VkResult vulkan_status = VK_SUCCESS;
 
@@ -211,7 +194,7 @@ cudaError_t CudaInterop::ImportCudaExternalMemory(void** cuda_ptr, cudaExternalM
 
 	external_memory_handle_desc.size = size;
 
-	if (os_ != LINUX) {
+	if (os_ != OperatingSystem::LINUX) {
 		external_memory_handle_desc.handle.win32.handle = (HANDLE) GetMemoryHandle(buffer_memory, handle_type);
 	}
 	else {

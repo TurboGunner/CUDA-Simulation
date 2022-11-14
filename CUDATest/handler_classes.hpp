@@ -20,17 +20,21 @@ public:
 
 	static ProgramLog& Get();
 
-	static void OutputLine(string line, bool is_separate = true);
+	static void OutputLine(const string& line, const bool is_separate = true);
 
-	static void OutputLine(std::stringstream& line, bool is_separate = true);
+	static void OutputLine(stringstream& line, const bool is_separate = true);
 
 	static void Close();
 
 private:
 	ProgramLog() = default;
 
+	void OutputLineString(const string& line, bool is_separate = true);
+
+	void OutputLineStream(stringstream& line, const bool is_separate = true);
+
 	ofstream file_log;
-	const std::string file_name = "example.txt";
+	const string file_name = "example.txt";
 	unsigned int line_count = 0;
 };
 

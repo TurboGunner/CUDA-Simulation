@@ -30,6 +30,18 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
+static const unordered_map<OperatingSystem, VkExternalSemaphoreHandleTypeFlagBits> semaphore_handle_map = {
+	{ OperatingSystem::WINDOWS_MODERN, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT },
+	{ OperatingSystem::WINDOWS_OLD, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
+	{ OperatingSystem::LINUX, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT }
+};
+
+static const unordered_map<OperatingSystem, VkExternalMemoryHandleTypeFlagBits> memory_handle_map = {
+	{ OperatingSystem::WINDOWS_MODERN, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT },
+	{ OperatingSystem::WINDOWS_OLD, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
+	{ OperatingSystem::LINUX, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT }
+};
+
 class CudaInterop {
 public:
 	CudaInterop() = default;
@@ -39,35 +51,31 @@ public:
 	VkExternalSemaphoreHandleTypeFlagBits GetPlatformSemaphoreHandle();
 	VkExternalMemoryHandleTypeFlagBits GetPlatformMemoryHandle();
 
-	VkResult CreateExternalSemaphore(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
+	VkResult CreateExternalSemaphore(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits handle_type);
 
-	VkExportSemaphoreWin32HandleInfoKHR ExportSemaphoreHandleWin32(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
+	VkExportSemaphoreWin32HandleInfoKHR ExportSemaphoreHandleWin32();
 
-	void ExportSemaphoreCreationSettings(VkExportSemaphoreCreateInfoKHR& export_semaphore_create_info, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
-
-	VkResult CreateExternalBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkExternalMemoryHandleTypeFlagsKHR& external_mem_handle_type, VkBuffer& buffer, VkDeviceMemory& buffer_memory);
+	VkResult CreateExternalBuffer(const VkDeviceSize size, const VkBufferUsageFlags usage, const VkMemoryPropertyFlags properties, const VkExternalMemoryHandleTypeFlagsKHR external_mem_handle_type, VkBuffer& buffer, VkDeviceMemory& buffer_memory);
 
 	VkExportMemoryWin32HandleInfoKHR ExportMemoryHandleWin32();
 
-	void ExportMemoryAllocationSettings(VkExportMemoryAllocateInfoKHR& vulkan_export_memory_allocate_info, const VkExternalMemoryHandleTypeFlagsKHR& external_mem_handle_type);
+	VkResult ImportExternalBuffer(void* handle, const VkExternalMemoryHandleTypeFlagBits handle_type, const VkDeviceSize size, const VkBufferUsageFlags usage, const VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& buffer_memory);
 
-	VkResult ImportExternalBuffer(void* handle, const VkExternalMemoryHandleTypeFlagBits& handle_type, const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, VkBuffer& buffer, VkDeviceMemory& buffer_memory);
+	void* GetMemoryHandle(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits handle_type);
 
-	void* GetMemoryHandle(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits& handle_type);
+	void* GetMemoryHandleWin32(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits handle_type);
 
-	void* GetMemoryHandleWin32(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits& handle_type);
+	void* GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits handle_type);
 
-	void* GetMemoryHandlePOSIX(VkDeviceMemory& memory, const VkExternalMemoryHandleTypeFlagBits& handle_type);
+	void* GetSemaphoreHandle(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits handle_type);
 
-	void* GetSemaphoreHandle(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
+	void* GetSemaphoreHandleWin32(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits handle_type);
 
-	void* GetSemaphoreHandleWin32(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
+	void* GetSemaphoreHandlePOSIX(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits handle_type);
 
-	void* GetSemaphoreHandlePOSIX(VkSemaphore& semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
+	cudaError_t ImportCudaExternalSemaphore(cudaExternalSemaphore_t& cuda_semaphore, VkSemaphore& vk_semaphore, const VkExternalSemaphoreHandleTypeFlagBits handle_type);
 
-	cudaError_t ImportCudaExternalSemaphore(cudaExternalSemaphore_t& cuda_semaphore, VkSemaphore& vk_semaphore, const VkExternalSemaphoreHandleTypeFlagBits& handle_type);
-
-	cudaError_t ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize& size, const VkExternalMemoryHandleTypeFlagBits& handle_type);
+	cudaError_t ImportCudaExternalMemory(void** cuda_ptr, cudaExternalMemory_t& cuda_memory, VkDeviceMemory& buffer_memory, const VkDeviceSize size, const VkExternalMemoryHandleTypeFlagBits handle_type);
 
 	cudaError_t CreateStream(const unsigned int flags = cudaStreamNonBlocking);
 
@@ -123,17 +131,5 @@ private:
 	int cuda_device_ = -1, device_count_ = 0;
 	uint8_t vk_device_uuid_[VK_UUID_SIZE];
 
-	OperatingSystem os_;
-
-	unordered_map<OperatingSystem, VkExternalSemaphoreHandleTypeFlagBits> semaphore_handle_map = {
-		{ WINDOWS_MODERN, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT },
-		{ WINDOWS_OLD, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
-		{ LINUX, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT }
-	};
-
-	unordered_map<OperatingSystem, VkExternalMemoryHandleTypeFlagBits> memory_handle_map = {
-		{ WINDOWS_MODERN, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT },
-		{ WINDOWS_OLD, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT },
-		{ LINUX, VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT }
-	};
+	OperatingSystem os_ = OperatingSystem::WINDOWS_MODERN;
 };

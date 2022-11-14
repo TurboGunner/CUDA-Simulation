@@ -8,7 +8,7 @@ VkResult SwapChainProperties::AllocateImages(uint32_t image_count) {
     return vulkan_status;
 }
 
-VkSwapchainCreateInfoKHR SwapChainProperties::SwapChainInfo(VkSurfaceKHR& surface, uint32_t image_count) {
+VkSwapchainCreateInfoKHR SwapChainProperties::SwapChainInfo(VkSurfaceKHR& surface, const uint32_t image_count) {
     VkSwapchainCreateInfoKHR create_info = {};
 
     create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;

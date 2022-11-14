@@ -25,7 +25,7 @@ class DescriptorSetHandler {
 public:
 	DescriptorSetHandler() = default;
 	
-    DescriptorSetHandler(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in, VkCommandPool& command_pool_in, VkDescriptorPool& descriptor_pool_in, const size_t& max_frames_const_in);
+    DescriptorSetHandler(VkDevice& device_in, VkPhysicalDevice& phys_device_in, VkQueue& queue_in, VkCommandPool& command_pool_in, VkDescriptorPool& descriptor_pool_in, const size_t max_frames_const_in);
 
     VkResult DescriptorSets();
 
@@ -46,11 +46,11 @@ public:
     vector<VkDeviceMemory> camera_buffer_memory_;
 
 private:
-    VkDescriptorSetLayoutCreateInfo CreateDescriptorSetInfo(const VkDescriptorSetLayoutBinding* bindings, const size_t& size = 1);
+    VkDescriptorSetLayoutCreateInfo CreateDescriptorSetInfo(const VkDescriptorSetLayoutBinding* bindings, const size_t size = 1);
 
     array<VkDescriptorSetLayoutBinding, 2> GlobalLayoutBindings();
 
-    VkDescriptorSetLayoutBinding CreateBindingSetInfo(const VkDescriptorType& type, const VkShaderStageFlags& stage_flags, const uint32_t& binding);
+    VkDescriptorSetLayoutBinding CreateBindingSetInfo(const VkDescriptorType type, const VkShaderStageFlags stage_flags, const uint32_t binding);
 
 	VkDevice device_;
     VkPhysicalDevice physical_device_;

@@ -17,13 +17,13 @@ typedef HANDLE ShareableHandle;
 typedef int ShareableHandle;
 #endif
 
-enum OperatingSystem { WINDOWS_MODERN, WINDOWS_OLD, LINUX };
+enum class OperatingSystem { WINDOWS_MODERN, WINDOWS_OLD, LINUX };
 
 class CrossMemoryHandle {
 public:
 	CrossMemoryHandle() = default;
 
-	CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in, const bool& host_inclusive_in = true);
+	CrossMemoryHandle(const size_t size_in, const size_t type_size_in, const bool host_inclusive_in = true);
 
 	CrossMemoryHandle& operator=(const CrossMemoryHandle& src_handle);
 

@@ -1,6 +1,6 @@
 #include "cross_memory_handle.cuh"
 
-CrossMemoryHandle::CrossMemoryHandle(const size_t& size_in, const size_t& type_size_in, const bool& host_inclusive_in) {
+CrossMemoryHandle::CrossMemoryHandle(const size_t size_in, const size_t type_size_in, const bool host_inclusive_in) {
 	size = size_in;
 	type_size = type_size_in;
 	host_inclusive = host_inclusive_in;

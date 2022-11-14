@@ -27,6 +27,8 @@ __host__ cudaError_t CudaInterop::BulkInitializationTest(VkSemaphore& wait_semap
 	ProgramLog::OutputLine("Creating CUDA async stream!\n");
 
 	InteropMemoryHandler::AddMemoryHandle(grid_->GetParticleCount(), sizeof(Vector3D), true);
+	ProgramLog::OutputLine("Grid Particle Count: " + std::to_string(grid_->GetParticleCount()));
+
 	CUresult cuda_result = InteropMemoryHandler::CreateNewAllocation();
 	grid_->particle_position_device_ = (Vector3D*) InteropMemoryHandler::CrossMemoryHandles()[0].cuda_device_ptr;
 

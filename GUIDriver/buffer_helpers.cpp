@@ -1,6 +1,6 @@
 #include "buffer_helpers.hpp"
 
-void* BufferHelpers::MapMemory(VkDevice& device, const void* arr, const VkDeviceSize& size, VkDeviceMemory& device_memory) {
+void* BufferHelpers::MapMemory(VkDevice& device, const void* arr, const VkDeviceSize size, VkDeviceMemory& device_memory) {
     void* data;
 
     vkMapMemory(device, device_memory, 0, size, 0, &data);
@@ -10,7 +10,7 @@ void* BufferHelpers::MapMemory(VkDevice& device, const void* arr, const VkDevice
     return data;
 }
 
-VkResult BufferHelpers::CopyBuffer(VkDevice& device, VkQueue& queue, VkCommandPool& command_pool, VkBuffer& src_buffer, VkBuffer& dst_buffer, const VkDeviceSize& size) {
+VkResult BufferHelpers::CopyBuffer(VkDevice& device, VkQueue& queue, VkCommandPool& command_pool, VkBuffer& src_buffer, VkBuffer& dst_buffer, const VkDeviceSize size) {
     VkResult vulkan_status = VK_SUCCESS;
     VkCommandBuffer command_buffer = VulkanHelper::BeginSingleTimeCommands(device, command_pool, false);
 
@@ -22,19 +22,19 @@ VkResult BufferHelpers::CopyBuffer(VkDevice& device, VkQueue& queue, VkCommandPo
     return vulkan_status;
 }
 
-VkBufferCreateInfo BufferHelpers::CreateBufferInfo(const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkSharingMode& sharing_mode) {
+VkBufferCreateInfo BufferHelpers::CreateBufferInfo(const VkDeviceSize size, const VkBufferUsageFlags usage, const VkSharingMode sharing_mode) {
     VkBufferCreateInfo buffer_info = {};
 
     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     buffer_info.size = size;
     buffer_info.usage = usage;
-    buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    buffer_info.sharingMode = sharing_mode;
     buffer_info.pQueueFamilyIndices = nullptr;
 
     return buffer_info;
 }
 
-VkBuffer BufferHelpers::AllocateBuffer(VkDevice& device, const VkDeviceSize& size, const VkBufferUsageFlags& usage) {
+VkBuffer BufferHelpers::AllocateBuffer(VkDevice& device, const VkDeviceSize size, const VkBufferUsageFlags usage) {
     VkBuffer buffer;
     VkBufferCreateInfo buffer_info = CreateBufferInfo(size, usage);
 
@@ -44,7 +44,7 @@ VkBuffer BufferHelpers::AllocateBuffer(VkDevice& device, const VkDeviceSize& siz
     return buffer;
 }
 
-VkResult BufferHelpers::CreateBuffer(VkDevice& device, VkPhysicalDevice& physical_device, const VkBufferUsageFlags& usage, const VkMemoryPropertyFlags& properties, const VkDeviceSize& size, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
+VkResult BufferHelpers::CreateBuffer(VkDevice& device, VkPhysicalDevice& physical_device, const VkBufferUsageFlags usage, const VkMemoryPropertyFlags properties, const VkDeviceSize size, VkBuffer& buffer, VkDeviceMemory& buffer_memory) {
     buffer = AllocateBuffer(device, size, usage);
 
     VkMemoryRequirements mem_requirements;
@@ -59,7 +59,7 @@ VkResult BufferHelpers::CreateBuffer(VkDevice& device, VkPhysicalDevice& physica
     return vkBindBufferMemory(device, buffer, buffer_memory, 0);
 }
 
-VkWriteDescriptorSet BufferHelpers::WriteDescriptorSetInfo(VkDescriptorSet& descriptor_set, VkBuffer& buffer, const VkDescriptorType& descriptor_type, const size_t& range_size, const int& offset) {
+VkWriteDescriptorSet BufferHelpers::WriteDescriptorSetInfo(VkDescriptorSet& descriptor_set, VkBuffer& buffer, const VkDescriptorType& descriptor_type, const size_t range_size, const int offset) {
     VkDescriptorBufferInfo buffer_info = {};
 
     buffer_info.buffer = buffer;
@@ -81,7 +81,7 @@ VkWriteDescriptorSet BufferHelpers::WriteDescriptorSetInfo(VkDescriptorSet& desc
     return descriptor_write_info;
 }
 
-size_t BufferHelpers::PadUniformBufferSize(VkPhysicalDeviceProperties& properties, const size_t& original_size) {
+size_t BufferHelpers::PadUniformBufferSize(VkPhysicalDeviceProperties& properties, const size_t original_size) {
     size_t minUboAlignment = properties.limits.minUniformBufferOffsetAlignment;
     size_t alignedSize = original_size;
     if (minUboAlignment > 0) {
@@ -90,7 +90,7 @@ size_t BufferHelpers::PadUniformBufferSize(VkPhysicalDeviceProperties& propertie
     return alignedSize;
 }
 
-VkResult BufferHelpers::CreateBufferCross(VkDevice& device, VkPhysicalDevice& physical_device, VkQueue& queue, VkCommandPool& command_pool, const void* ptr, VkBuffer& buffer, VkDeviceMemory& buffer_memory, const VkBufferUsageFlags& usage_flags, const size_t& size) {
+VkResult BufferHelpers::CreateBufferCross(VkDevice& device, VkPhysicalDevice& physical_device, VkQueue& queue, VkCommandPool& command_pool, const void* ptr, VkBuffer& buffer, VkDeviceMemory& buffer_memory, const VkBufferUsageFlags usage_flags, const size_t size) {
     VkResult vulkan_status = VK_SUCCESS;
 
     VkBuffer staging_buffer;
