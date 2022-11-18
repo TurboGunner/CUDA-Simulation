@@ -3,6 +3,8 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+//#include "vector_cross.cuh"
+
 #include "../CUDATest/handler_classes.hpp"
 #include "../CUDATest/handler_methods.hpp"
 
@@ -37,6 +39,15 @@ public:
 
 	__host__ __device__ float operator[](const int index) {
 		return Get(index);
+	}
+
+	__host__ __device__ void Set(const float value, const int index) {
+		assert(index < rows* columns&& index >= 0);
+		data[index] = value;
+	}
+
+	__host__ __device__ void Set(const float value, const size_t row, const size_t column) {
+		Set(value, IX(row, column));
 	}
 
 	__host__ __device__ void CopyMatrixOnPointer(Matrix* matrix, Matrix& copy) {
@@ -112,6 +123,30 @@ public:
 		return *this;
 	}
 
+	//Unrolled (Tensor Contracted) Operations
+
+	__forceinline__ __host__ __device__ Matrix UnrolledFixedCopy() {
+		static_assert(rows == 3 && columns == 3, "");
+		Matrix<3, 3> output = {};
+
+		output.Set(Get(0), 0); output.Set(Get(1), 1); output.Set (Get(2), 2);
+		output.Set(Get(3), 3); output.Set(Get(4), 4); output.Set (Get(5), 5);
+		output.Set(Get(6), 6); output.Set(Get(7), 7); output.Set (Get(8), 8);
+
+		return output;
+	}
+
+	__forceinline__ __host__ __device__ Matrix UnrolledFixedMultiplyScalar(const float scalar) {
+		static_assert(rows == 3 && columns == 3, "");
+		Matrix<3, 3> output = {};
+
+		output.Set(Get(0) * scalar, 0); output.Set(Get(1) * scalar, 1); output.Set(Get(2) * scalar, 2);
+		output.Set(Get(3) * scalar, 3); output.Set(Get(4) * scalar, 4); output.Set(Get(5) * scalar, 5);
+		output.Set(Get(6) * scalar, 6); output.Set(Get(7) * scalar, 7); output.Set(Get(8) * scalar, 8);
+
+		return output;
+	}
+
 	__host__ __device__ Matrix DiagonalMatrix(const float* points, const size_t rows, const size_t columns) {
 		Matrix output;
 		for (int i = 0; i < rows; i++) {
@@ -128,7 +163,7 @@ public:
 	}
 
 	__host__ __device__ float* Row(const size_t index) {
-		float* output = (float*) malloc(columns * sizeof(float)); //Maybe use memcpy later?
+		float output[rows] = {};
 		for (int i = 0; i < columns; i++) {
 			output[i] = Get(i, index);
 		}
@@ -136,20 +171,11 @@ public:
 	}
 
 	__host__ __device__ float* Column(const size_t index) {
-		float* output = (float*) malloc(rows * sizeof(float)); //Maybe use memcpy later?
+		float output[columns] = {};
 		for (int i = 0; i < rows; i++) {
 			output[i] = Get(index, i);
 		}
 		return output;
-	}
-
-	__host__ __device__ void Set(const float value, const int index) {
-		assert(index < rows* columns && index >= 0);
-		data[index] = value;
-	}
-
-	__host__ __device__ void Set(const float value, const size_t row, const size_t column) {
-		Set(value, IX(row, column));
 	}
 
 
@@ -201,7 +227,7 @@ public:
 		return columns;
 	}
 
-	__host__ __device__ const bool IsSquare() const {
+	__host__ __device__ constexpr bool IsSquare() const {
 		return rows == columns;
 	}
 

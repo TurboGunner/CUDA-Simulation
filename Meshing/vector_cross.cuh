@@ -225,16 +225,18 @@ public:
 
 	__host__ __device__ Matrix<1, 3> ToMatrix() {
 		Matrix<1, 3> matrix;
-		for (size_t i = 0; i < 3; i++) {
-			matrix.Set(dim[i], i);
-		}
+
+		matrix.Set(dim[0], 0);
+		matrix.Set(dim[0], 1);
+		matrix.Set(dim[0], 2);
+
 		return matrix;
 	}
 
 	__host__ __device__ void ToMatrix(Matrix<1, 3>* matrix) {
-		for (size_t i = 0; i < 3; i++) {
-			matrix->Set(dim[i], i);
-		}
+		matrix->Set(dim[0], 0);
+		matrix->Set(dim[0], 1);
+		matrix->Set(dim[0], 2);
 	}
 
 	__host__ __device__ void Reset() {
@@ -245,6 +247,15 @@ public:
 
 	__host__ __device__ Vector3D Clamp(const float min, const float max) {
 		Vector3D output = {};
+
+		const float min_step_x = dim[0] < min ? min : dim[0];
+		output.dim[0] = min_step_x > max ? max : min_step_x;
+
+		const float min_step_y = dim[1] < min ? min : dim[1];
+		output.dim[1] = min_step_y > max ? max : min_step_y;
+
+		const float min_step_z = dim[2] < min ? min : dim[2];
+		output.dim[2] = min_step_z > max ? max : min_step_z;
 
 		for (size_t i = 0; i < 3; ++i) {
 			const float temp = dim[i] < min ? min : dim[i];

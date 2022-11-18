@@ -105,7 +105,7 @@ void VulkanParameters::InFlightObjectsInit() {
 }
 
 void VulkanParameters::SimulationInit() {
-	const float side_size = 16.0f;
+	const float side_size = 64.0f;
 
 	grid_ = new Grid(Vector3D(side_size, side_size, side_size));
 

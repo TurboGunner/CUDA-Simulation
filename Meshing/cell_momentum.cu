@@ -40,16 +40,7 @@ __global__ void UpdateCell(Grid* grid) {
 
 				Matrix<3, 3>& momentum_matrix = grid->GetMomentum(incident);
 
-				//Maybe separate this later, and split the UpdateCell into determined chunks?
-				//The idea is separating the matrix multiplication (without dynamic parallelism) will significantly increase perf
-
-					for (int i = 0; i < momentum_matrix.Rows(); ++i) { //GEMV
-						float result = 0.0f;
-						for (int j = 0; j < momentum_matrix.Columns(); ++j) {
-							result += momentum_matrix.Get(i, j) * cell_dist.dim[j];
-						}
-						Q.dim[i] = result; //See Gradient Solve MM portion for rationale
-					}
+				Q = UnrolledFixedMV(momentum_matrix, cell_dist);
 
 				float mass_contribution = weight * grid->GetParticleMass(incident); //Fixed, this was grid mass
 

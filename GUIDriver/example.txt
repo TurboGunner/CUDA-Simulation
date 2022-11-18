@@ -15,7 +15,7 @@ Extension Name: VK_EXT_swapchain_colorspace
 Extension Name: VK_NV_external_memory_capabilities
 Extension Name: VK_KHR_portability_enumeration
 
-Address for Vulkan debug callback: 00007FF850FFFAF0. Debug callback successful!
+Address for Vulkan debug callback: 00007FFCA40CFAF0. Debug callback successful!
 
 Shout out to Bidoof on the beat!
 
@@ -83,8 +83,8 @@ Device Pointer on First CrossMemoryHandle: 12962496512
 CUDA Driver API Error Status for SetMemoryAccess: CUDA_SUCCESS | CUDA Driver Error String: no error
 
 Setting up simulation interop allocations!
-Mem Allocation Size for Imported Interop Memory: 196608
-Buffer Memory Size: 196608
+Mem Allocation Size for Imported Interop Memory: 12582912
+Buffer Memory Size: 12582912
 External Semaphore Enum: 2
 Successfully read shader file Shaders/shader_vert_test.spv!
 
@@ -117,29 +117,31 @@ Ended command recording!
 Successfully submitted item to queue!
 
 Resolution: 4.000000
-Threads (Total): 4096
-Cells (Total): 4096
+Blocks (Total): 512.000000
+Threads (Total): 1048576
+Cells (Total): 262144
+Particles (Total): 1048576
 
 
 BREAK
 
 
-0 0 0
+50.75 60 3.125
 
-0 0 0
+50.75 60 3.125
 
-0 0 0
+50.75 60 3.125
 
-0 0 0
+50.75 60 3.125
 
-0 0 0
+50.744 60.0051 3.08394
 
-Host Test: 2.021e+34
+Host Test: 40.7515
 
 [vulkan] Debug report from ObjectType: 4
 Message: 
 
-Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x1fd2a3a36d0, type = VK_OBJECT_TYPE_QUEUE; 
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x25e00555aa0, type = VK_OBJECT_TYPE_QUEUE; 
  MessageID = 0xc7aabc16 
  vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
 
@@ -148,5 +150,575 @@ Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle
 BREAK
 
 
-0 0 0
+50.744 60.0051 3.08394
+
+50.744 60.0051 3.08394
+
+50.744 60.0051 3.08394
+
+50.744 60.0051 3.08394
+
+50.7535 60.0982 2.91269
+
+Host Test: 40.753
+
+[vulkan] Debug report from ObjectType: 4
+Message: 
+
+Validation Error: [ VUID-VkPresentInfoKHR-pImageIndices-01296 ] Object 0: handle = 0x25e00555aa0, type = VK_OBJECT_TYPE_QUEUE; 
+ MessageID = 0xc7aabc16 
+ vkQueuePresentKHR(): pSwapchains[0] images passed to present must be in layout VK_IMAGE_LAYOUT_PRESENT_SRC_KHR or VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR but is in VK_IMAGE_LAYOUT_UNDEFINED. The Vulkan spec states: Each element of pImageIndices must be the index of a presentable image acquired from the swapchain specified by the corresponding element of the pSwapchains array, and the presented image subresource must be in the VK_IMAGE_LAYOUT_PRESENT_SRC_KHR layout at the time the operation is executed on a VkDevice (https://github.com/KhronosGroup/Vulkan-Docs/search?q=)VUID-VkPresentInfoKHR-pImageIndices-01296)
+
+
+
+BREAK
+
+
+50.7535 60.0982 2.91269
+
+50.7535 60.0982 2.91269
+
+50.7535 60.0982 2.91269
+
+50.7535 60.0982 2.91269
+
+50.774 60.0616 2.88105
+
+Host Test: 40.754
+
+
+
+BREAK
+
+
+50.774 60.0616 2.88105
+
+50.774 60.0616 2.88105
+
+50.774 60.0616 2.88105
+
+50.774 60.0616 2.88105
+
+50.8055 60.0235 2.87379
+
+Host Test: 40.7545
+
+
+
+BREAK
+
+
+50.8055 60.0235 2.87379
+
+50.8055 60.0235 2.87379
+
+50.8055 60.0235 2.87379
+
+50.8055 60.0235 2.87379
+
+50.8424 59.9878 2.91019
+
+Host Test: 40.7546
+
+
+
+BREAK
+
+
+50.8424 59.9878 2.91019
+
+50.8424 59.9878 2.91019
+
+50.8424 59.9878 2.91019
+
+50.8424 59.9878 2.91019
+
+50.8662 59.9701 2.93441
+
+Host Test: 40.7539
+
+
+
+BREAK
+
+
+50.8662 59.9701 2.93441
+
+50.8662 59.9701 2.93441
+
+50.8662 59.9701 2.93441
+
+50.8662 59.9701 2.93441
+
+50.8619 59.9724 2.94518
+
+Host Test: 40.7528
+
+
+
+BREAK
+
+
+50.8619 59.9724 2.94518
+
+50.8619 59.9724 2.94518
+
+50.8619 59.9724 2.94518
+
+50.8619 59.9724 2.94518
+
+50.7717 60.0993 2.8373
+
+Host Test: 40.7507
+
+
+
+BREAK
+
+
+50.7717 60.0993 2.8373
+
+50.7717 60.0993 2.8373
+
+50.7717 60.0993 2.8373
+
+50.7717 60.0993 2.8373
+
+50.6566 60.1625 2.78147
+
+Host Test: 40.7481
+
+
+
+BREAK
+
+
+50.6566 60.1625 2.78147
+
+50.6566 60.1625 2.78147
+
+50.6566 60.1625 2.78147
+
+50.6566 60.1625 2.78147
+
+50.6529 61.0687 2.20802
+
+Host Test: 40.7453
+
+
+
+BREAK
+
+
+50.6529 61.0687 2.20802
+
+50.6529 61.0687 2.20802
+
+50.6529 61.0687 2.20802
+
+50.6529 61.0687 2.20802
+
+50.7563 60.8788 2.4833
+
+Host Test: 40.7422
+
+
+
+BREAK
+
+
+50.7563 60.8788 2.4833
+
+50.7563 60.8788 2.4833
+
+50.7563 60.8788 2.4833
+
+50.7563 60.8788 2.4833
+
+51.6517 62 4.2289
+
+Host Test: 40.7387
+
+
+
+BREAK
+
+
+51.6517 62 4.2289
+
+51.6517 62 4.2289
+
+51.6517 62 4.2289
+
+51.6517 62 4.2289
+
+53.8046 59.5094 2.18274
+
+Host Test: 40.7436
+
+
+
+BREAK
+
+
+53.8046 59.5094 2.18274
+
+53.8046 59.5094 2.18274
+
+53.8046 59.5094 2.18274
+
+53.8046 59.5094 2.18274
+
+54.6256 59.3393 4.15489
+
+Host Test: 40.7016
+
+
+
+BREAK
+
+
+54.6256 59.3393 4.15489
+
+54.6256 59.3393 4.15489
+
+54.6256 59.3393 4.15489
+
+54.6256 59.3393 4.15489
+
+57.1173 56.6251 3.89247
+
+Host Test: 40.4917
+
+
+
+BREAK
+
+
+57.1173 56.6251 3.89247
+
+57.1173 56.6251 3.89247
+
+57.1173 56.6251 3.89247
+
+57.1173 56.6251 3.89247
+
+61.8704 49.3293 11.3713
+
+Host Test: 40.0567
+
+
+
+BREAK
+
+
+61.8704 49.3293 11.3713
+
+61.8704 49.3293 11.3713
+
+61.8704 49.3293 11.3713
+
+61.8704 49.3293 11.3713
+
+61.4876 45.7356 14.5216
+
+Host Test: 39.4495
+
+
+
+BREAK
+
+
+61.4876 45.7356 14.5216
+
+61.4876 45.7356 14.5216
+
+61.4876 45.7356 14.5216
+
+61.4876 45.7356 14.5216
+
+60.311 40.6405 16.1839
+
+Host Test: 38.4821
+
+
+
+BREAK
+
+
+60.311 40.6405 16.1839
+
+60.311 40.6405 16.1839
+
+60.311 40.6405 16.1839
+
+60.311 40.6405 16.1839
+
+60.0417 36.4497 16.4298
+
+Host Test: 37.5129
+
+
+
+BREAK
+
+
+60.0417 36.4497 16.4298
+
+60.0417 36.4497 16.4298
+
+60.0417 36.4497 16.4298
+
+60.0417 36.4497 16.4298
+
+60.163 30.9803 16.0004
+
+Host Test: 36.309
+
+
+
+BREAK
+
+
+60.163 30.9803 16.0004
+
+60.163 30.9803 16.0004
+
+60.163 30.9803 16.0004
+
+60.163 30.9803 16.0004
+
+59.7918 26.71 16.3596
+
+Host Test: 34.9424
+
+
+
+BREAK
+
+
+59.7918 26.71 16.3596
+
+59.7918 26.71 16.3596
+
+59.7918 26.71 16.3596
+
+59.7918 26.71 16.3596
+
+62 23.76 16.1579
+
+Host Test: 33.791
+
+
+
+BREAK
+
+
+62 23.76 16.1579
+
+62 23.76 16.1579
+
+62 23.76 16.1579
+
+62 23.76 16.1579
+
+61.255 22.6364 17.7079
+
+Host Test: 32.5742
+
+
+
+BREAK
+
+
+61.255 22.6364 17.7079
+
+61.255 22.6364 17.7079
+
+61.255 22.6364 17.7079
+
+61.255 22.6364 17.7079
+
+60.208 19.3496 18.5976
+
+Host Test: 31.2048
+
+
+
+BREAK
+
+
+60.208 19.3496 18.5976
+
+60.208 19.3496 18.5976
+
+60.208 19.3496 18.5976
+
+60.208 19.3496 18.5976
+
+59.5851 14.5415 19.9874
+
+Host Test: 29.6053
+
+
+
+BREAK
+
+
+59.5851 14.5415 19.9874
+
+59.5851 14.5415 19.9874
+
+59.5851 14.5415 19.9874
+
+59.5851 14.5415 19.9874
+
+58.7843 10.0434 24.806
+
+Host Test: 28.1591
+
+
+
+BREAK
+
+
+58.7843 10.0434 24.806
+
+58.7843 10.0434 24.806
+
+58.7843 10.0434 24.806
+
+58.7843 10.0434 24.806
+
+59.5142 6.46951 31.6379
+
+Host Test: 26.5477
+
+
+
+BREAK
+
+
+59.5142 6.46951 31.6379
+
+59.5142 6.46951 31.6379
+
+59.5142 6.46951 31.6379
+
+59.5142 6.46951 31.6379
+
+59.5863 6.2816 41.5938
+
+Host Test: 24.4823
+
+
+
+BREAK
+
+
+59.5863 6.2816 41.5938
+
+59.5863 6.2816 41.5938
+
+59.5863 6.2816 41.5938
+
+59.5863 6.2816 41.5938
+
+60.3914 5.66294 49.1414
+
+Host Test: 22.2885
+
+
+
+BREAK
+
+
+60.3914 5.66294 49.1414
+
+60.3914 5.66294 49.1414
+
+60.3914 5.66294 49.1414
+
+60.3914 5.66294 49.1414
+
+59.8648 10.0413 53.0405
+
+Host Test: 20.1389
+
+
+
+BREAK
+
+
+59.8648 10.0413 53.0405
+
+59.8648 10.0413 53.0405
+
+59.8648 10.0413 53.0405
+
+59.8648 10.0413 53.0405
+
+59.6353 14.6046 53.9636
+
+Host Test: 18.0701
+
+
+
+BREAK
+
+
+59.6353 14.6046 53.9636
+
+59.6353 14.6046 53.9636
+
+59.6353 14.6046 53.9636
+
+59.6353 14.6046 53.9636
+
+57.7135 17.117 54.6863
+
+Host Test: 16.0088
+
+
+
+BREAK
+
+
+57.7135 17.117 54.6863
+
+57.7135 17.117 54.6863
+
+57.7135 17.117 54.6863
+
+57.7135 17.117 54.6863
+
+55.6731 16.9961 54.2853
+
+Host Test: 14.7383
+
+
+
+BREAK
+
+
+55.6731 16.9961 54.2853
+
+55.6731 16.9961 54.2853
+
+55.6731 16.9961 54.2853
+
+55.6731 16.9961 54.2853
+
+53.8691 18.0709 52.8008
+
+Host Test: 15.0245
+
+
+
+BREAK
+
+
+53.8691 18.0709 52.8008
+
+53.8691 18.0709 52.8008
 

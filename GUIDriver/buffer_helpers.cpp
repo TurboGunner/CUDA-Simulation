@@ -20,7 +20,7 @@ VkResult BufferHelpers::CopyBuffer(VkDevice& device, VkQueue& queue, VkCommandPo
 
     vulkan_status = VulkanHelper::EndSingleTimeCommands(command_buffer, device, command_pool, queue, false);
     return vulkan_status;
-}
+} 
 
 VkBufferCreateInfo BufferHelpers::CreateBufferInfo(const VkDeviceSize& size, const VkBufferUsageFlags& usage, const VkSharingMode& sharing_mode) {
     VkBufferCreateInfo buffer_info = {};

@@ -11,7 +11,7 @@ __global__ void SimulateGrid(Grid* grid) { //Maybe no momentum matrix as well?
 	//Current particle variables
 	Vector3D position = grid->GetPosition(incident);
 	Vector3D cell_idx = position.Truncate();
-
+	 
 	Vector3D cell_difference = (position - cell_idx) - 0.5f;
 
 	Vector3D weights[3] {}; //Array of weights, testing a different method here
@@ -87,15 +87,11 @@ __global__ void SimulateGrid(Grid* grid) { //Maybe no momentum matrix as well?
 
 				IndexPair cell_incident = IndexPair(cell_position.x(), cell_position.y(), cell_position.z());
 
+				Matrix<3, 3> weighted_stress_matrix = stress_matrix.UnrolledFixedMultiplyScalar(weight);
+
 				Vector3D cell_dist = (cell_position - position) + 0.5f;
 
-				for (int i = 0; i < stress_matrix.Rows(); ++i) {
-					float p_value = 0.0f;
-					for (int j = 0; j < stress_matrix.Columns(); ++j) {
-						p_value += (stress_matrix.Get(i, j) * weight) * cell_dist.dim[j];
-					}
-					constitutive_vector.dim[i] = p_value; //Number of columns is always 1, so this can be disregarded, idx can just be i
-				}
+				constitutive_vector = UnrolledFixedMV(weighted_stress_matrix, cell_dist);
 
 				grid->GetCellVelocity(cell_incident) += constitutive_vector;
 			}

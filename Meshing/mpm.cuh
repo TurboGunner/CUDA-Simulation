@@ -30,12 +30,18 @@ public:
 	__host__ Grid(const Vector3D& sim_size_in, const float resolution_in = 4.0f, const bool late_init_in = true) {
 		sim_size_ = sim_size_in;
 
+		sim_size_ = Vector3D(truncf(sim_size_.x()), truncf(sim_size_.y()), truncf(sim_size_.z()));
+
+		for (int i = 0; i < 3; i++) {
+			assert(sim_size_.dim[i] >= 1.0f);
+		}
+
 		side_size_ = sim_size_.x();
 
 		total_size_ = sim_size_.x() * sim_size_.y() * sim_size_.z();
 
 		if (resolution_in <= 0.0f) {
-			std::cout << "\n\nWarning! The resolution parameter should be a positive greater than 0.0. Set to default of 4 to prevent segfault." << std::endl;
+			std::cout << "\n\nWarning! The resolution parameter should be a positive number greater than zero. Set to default of 4 to prevent segfault." << std::endl;
 			resolution_ = 4.0f;
 		}
 		else {
@@ -48,9 +54,9 @@ public:
 
 		if (!late_init_) {
 			cuda_status = cudaMalloc(&particle_position_device_, GetParticleCount() * sizeof(Vector3D));
-			if (host_sync_) {
-				cuda_status = cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
-			}
+		}
+		if (host_sync_) {
+			cuda_status = cudaMallocHost(&particle_position_, GetParticleCount() * sizeof(Vector3D));
 		}
 
 		cuda_status = cudaMalloc(&particle_velocity_device_, GetParticleCount() * sizeof(Vector3D));
@@ -282,3 +288,21 @@ __global__ void SetValue(Grid* grid);
 __device__ Vector3D* GetWeights(Vector3D cell_difference);
 
 __host__ static void GenerateRandomParticles(Grid* grid);
+
+__forceinline__ __device__ Vector3D UnrolledFixedMV(const Matrix<3, 3>& matrix, const Vector3D& vector) {
+	Vector3D output = {};
+
+	output.dim[0] = matrix.Get(0) * vector.dim[0];
+	output.dim[0] += matrix.Get(1) * vector.dim[1];
+	output.dim[0] += matrix.Get(2) * vector.dim[2];
+
+	output.dim[1] = matrix.Get(3) * vector.dim[0];
+	output.dim[1] += matrix.Get(4) * vector.dim[1];
+	output.dim[1] += matrix.Get(5) * vector.dim[2];
+
+	output.dim[2] = matrix.Get(6) * vector.dim[0];
+	output.dim[2] += matrix.Get(7) * vector.dim[1];
+	output.dim[2] += matrix.Get(8) * vector.dim[2];
+
+	return output;
+}
