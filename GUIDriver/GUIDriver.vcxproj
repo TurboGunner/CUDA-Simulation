@@ -65,6 +65,7 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <CodeGeneration>compute_86,sm_86</CodeGeneration>
+      <FastMath>true</FastMath>
     </CudaCompile>
     <CudaLink>
       <AdditionalDependencies>
@@ -94,6 +95,7 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <CodeGeneration>compute_86,sm_86</CodeGeneration>
+      <FastMath>true</FastMath>
     </CudaCompile>
     <CudaLink>
       <AdditionalDependencies>

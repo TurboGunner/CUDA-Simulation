@@ -8,14 +8,14 @@ __host__ cudaError_t CudaInterop::TestMethod() {
 	Grid::SimulateGPU(grid_, cuda_stream_); //WIP
 	cuda_status = PostExecutionChecks(cuda_status, "MPMKernel");
 
-	float* host_test = new float();
+	//float* host_test = new float();
 
-	cuda_status = cudaMemcpyAsync(host_test, &((Vector3D*)test.cuda_device_ptr)[163].dim[0], sizeof(float), cudaMemcpyDeviceToHost, cuda_stream_);
+	//cuda_status = cudaMemcpyAsync(host_test, &((Vector3D*)test.cuda_device_ptr)[163].dim[0], sizeof(float), cudaMemcpyDeviceToHost, cuda_stream_);
 
-	s_stream << "Host Test: " << *host_test << std::endl; //WIP, DEBUG!
-	ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
+	//s_stream << "Host Test: " << *host_test << std::endl; //WIP, DEBUG!
+	//ProgramLog::OutputLine(s_stream); //WIP, DEBUG!
 
-	delete host_test;
+	//delete host_test;
 
 	return cuda_status;
 }

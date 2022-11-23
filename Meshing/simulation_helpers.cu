@@ -179,37 +179,37 @@ __host__ cudaError_t Grid::SimulateGPU(Grid* grid, cudaStream_t& cuda_stream) {
 	cuda_status = PostExecutionChecks(cuda_status, "ClearGrid", false);
 	CudaExceptionHandler(cuda_status, "ClearGrid failed!");
 
-	DebugGPU(grid, cuda_stream);
+	//DebugGPU(grid, cuda_stream);
 
 	UpdateCell<<<blocks2, threads2, 0, cuda_stream>>> (grid);
 	cuda_status = PostExecutionChecks(cuda_status, "CellMomentum", false);
 	CudaExceptionHandler(cuda_status, "CellMomentum failed!");
 
-	DebugGPU(grid, cuda_stream);
+	//DebugGPU(grid, cuda_stream);
 
 	SimulateGrid<<<blocks2, threads2, 0, cuda_stream>>> (grid); //NOTE
 	cuda_status = PostExecutionChecks(cuda_status, "VelocityGradientSolve", false);
 	CudaExceptionHandler(cuda_status, "SimulateGrid failed!");
 
-	DebugGPU(grid, cuda_stream);
+	//DebugGPU(grid, cuda_stream);
 
-	cudaStreamSynchronize(cuda_stream);
+	//cudaStreamSynchronize(cuda_stream);
 
 	UpdateGrid<<<blocks, threads, 0, cuda_stream>>> (grid);
 	cuda_status = PostExecutionChecks(cuda_status, "UpdateGrid", false);
 	CudaExceptionHandler(cuda_status, "UpdateGrid failed!");
 
-	DebugGPU(grid, cuda_stream);
+	//DebugGPU(grid, cuda_stream);
 
-	cudaStreamSynchronize(cuda_stream);
+	//cudaStreamSynchronize(cuda_stream);
 
 	AdvectParticles<<<blocks2, threads2, 0, cuda_stream>>> (grid);
 	cuda_status = PostExecutionChecks(cuda_status, "AdvectParticles", false);
 	CudaExceptionHandler(cuda_status, "AdvectParticles failed!");
 
-	cudaStreamSynchronize(cuda_stream);
+	//cudaStreamSynchronize(cuda_stream);
 
-	DebugGPU(grid, cuda_stream);
+	//DebugGPU(grid, cuda_stream);
 
 	return cuda_status;
 }

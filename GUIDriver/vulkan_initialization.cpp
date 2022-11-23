@@ -1,10 +1,22 @@
 #include "gui_driver.cuh"
 
 void VulkanGUIDriver::VulkanInstantiation() {
+    VkApplicationInfo app_info = {}; //NOTE: REDUNDANT
+
+    app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    app_info.pApplicationName = "CUDA + Vulkan Simulator";
+    app_info.applicationVersion = VK_MAKE_VERSION(1, 3, 2);
+    app_info.pEngineName = "BloodFlow";
+    app_info.engineVersion = VK_MAKE_VERSION(1, 3, 2);
+    app_info.apiVersion = VK_MAKE_API_VERSION(0, 1, 3, 205);
+
+    instance_info_.enabledExtensionCount = phys_device_extensions_.size();
+    instance_info_.ppEnabledExtensionNames = phys_device_extensions_.data();
+    instance_info_.pApplicationInfo = &app_info;
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
     DebugOptionInitialization();
 #else
-    vulkan_status = vkCreateInstance(&instance_info_, allocators_, &instance_);
+    VkResult vulkan_status = vkCreateInstance(&instance_info_, allocators_, &instance_);
     VulkanErrorHandler(vulkan_status);
     IM_UNUSED(debug_report_callback_);
 #endif

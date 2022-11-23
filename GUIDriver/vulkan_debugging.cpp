@@ -1,11 +1,13 @@
 #include "gui_driver.cuh"
 
 VkResult VulkanGUIDriver::DebugErrorCallback() {
+#ifdef IMGUI_VULKAN_DEBUG_REPORT
     debug_info_callback_.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
     debug_info_callback_.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
 
     debug_info_callback_.pfnCallback = DebugReport;
     debug_info_callback_.pUserData = nullptr;
+#endif
 
     VkResult vulkan_status = InstanceDebugCallbackEXT(instance_, &debug_info_callback_, allocators_, &debug_report_callback_);
     VulkanErrorHandler(vulkan_status);
@@ -21,21 +23,10 @@ VkResult VulkanGUIDriver::DebugOptionInitialization() {
 
     VkApplicationInfo app_info = {};
 
-    app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    app_info.pApplicationName = "CUDA + Vulkan Simulator";
-    app_info.applicationVersion = VK_MAKE_VERSION(1, 3, 2);
-    app_info.pEngineName = "BloodFlow";
-    app_info.engineVersion = VK_MAKE_VERSION(1, 3, 2);
-    app_info.apiVersion = VK_MAKE_API_VERSION(0, 1, 3, 205);
-
     vector<const char*> layers = { "VK_LAYER_KHRONOS_validation" };
     instance_info_.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_info_.enabledLayerCount = 1;
     instance_info_.ppEnabledLayerNames = layers.data();
-
-    instance_info_.enabledExtensionCount = phys_device_extensions_.size();
-    instance_info_.ppEnabledExtensionNames = phys_device_extensions_.data();
-    instance_info_.pApplicationInfo = &app_info;
 
     uint32_t count;
     vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr); //get number of extensions
